@@ -1,0 +1,78 @@
+# ComplianceCore — full local production-like stack.
+#
+#   docker compose up --build
+#
+# Brings up Postgres 16, Redis 7, the API (runs migrations then starts), and
+# the nginx-served frontend. Copy .env.docker.example -> .env and fill secrets.
+
+services:
+  postgres:
+    # pgvector image = Postgres 16 + contrib + the `vector` extension the
+    # evidence module uses. Plain postgres:16 lacks pgvector.
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-compliancecore}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-compliancecore}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-compliancecore}?schema=global
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "3002:3002"
+    # Apply raw-SQL migrations, then boot the API.
+    command: ["sh", "-c", "node scripts/migrate.mjs && node dist/server.js"]
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3002}
+        VITE_APP_ENV: production
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
+  redisdata:

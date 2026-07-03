@@ -1,0 +1,67 @@
+name: Deploy
+
+# Deploys on every push to the default branch, after CI passes.
+# Backend  -> Railway (persistent container; runs SQL migrations on boot)
+# Frontend -> Vercel  (static Vite SPA)
+#
+# Required repository secrets:
+#   RAILWAY_TOKEN          Railway project token (Project Settings -> Tokens)
+#   VERCEL_TOKEN           Vercel account token
+#   VERCEL_ORG_ID          Vercel org id   (from `vercel link` / .vercel/project.json)
+#   VERCEL_PROJECT_ID      Vercel project id
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy-backend:
+    name: Backend -> Railway
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+      - name: Deploy
+        # Railway builds from backend/Dockerfile and runs the migrate+start
+        # command from railway.json. --detach so the job doesn't hang on logs.
+        run: railway up --service compliancecore-api --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-frontend:
+    name: Frontend -> Vercel
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Vercel CLI
+        run: npm i -g vercel
+      - name: Pull Vercel env
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      - name: Build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      - name: Deploy
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

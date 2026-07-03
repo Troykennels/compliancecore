@@ -1,0 +1,117 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { PATHS } from '@/routes/paths';
+import { useLogin } from '../hooks/use-login';
+import { LoginForm } from '../components/login-form';
+import { MfaChallenge } from '../components/mfa-challenge';
+
+export function LoginPage(): JSX.Element {
+  const { login, isLoading } = useLogin();
+  const [mfaState, setMfaState] = useState<{
+    token: string;
+    email: string;
+  } | null>(null);
+
+  const [pendingEmail, setPendingEmail] = useState('');
+
+  const handleLoginSubmit = async (values: { email: string; password: string }) => {
+    setPendingEmail(values.email);
+    return login(values);
+  };
+
+  const handleLoginSuccess = (result: { requiresMfa: boolean; mfaChallengeToken?: string }) => {
+    if (result.requiresMfa && result.mfaChallengeToken) {
+      setMfaState({ token: result.mfaChallengeToken, email: pendingEmail });
+    }
+  };
+
+  return (
+    <AuthShell
+      heading={mfaState ? 'Two-factor verification' : 'Sign in to your account'}
+      subheading={
+        mfaState ? undefined : (
+          <>
+            Don&apos;t have an account?{' '}
+            <Link to={PATHS.REGISTER} className="text-indigo-600 hover:underline font-medium">
+              Start your free trial
+            </Link>
+          </>
+        )
+      }
+    >
+      {mfaState ? (
+        <MfaChallenge mfaChallengeToken={mfaState.token} email={mfaState.email} />
+      ) : (
+        <>
+          <LoginForm
+            isLoading={isLoading}
+            onSubmit={handleLoginSubmit}
+            onSuccess={handleLoginSuccess}
+          />
+
+          <div className="relative my-5">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-white px-3 text-slate-400">or</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 transition-colors"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2a10 10 0 100 20A10 10 0 0012 2z" fill="currentColor" opacity=".2" />
+              <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+            Continue with SSO
+          </button>
+        </>
+      )}
+    </AuthShell>
+  );
+}
+
+function AuthShell({
+  heading,
+  subheading,
+  children,
+}: {
+  heading: string;
+  subheading?: React.ReactNode;
+  children: React.ReactNode;
+}): JSX.Element {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-md space-y-8">
+        {/* Logo */}
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2">
+            <div className="h-8 w-8 rounded-md bg-indigo-600 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">CC</span>
+            </div>
+            <span className="text-xl font-bold text-slate-900">ComplianceCore</span>
+          </div>
+          <p className="mt-1 text-xs text-slate-400">by ORION SOFT LIMITED</p>
+        </div>
+
+        {/* Card */}
+        <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+          <h1 className="mb-1 text-xl font-semibold text-slate-900">{heading}</h1>
+          {subheading && (
+            <p className="mb-6 text-sm text-slate-500">{subheading}</p>
+          )}
+          {children}
+        </div>
+
+        <p className="text-center text-xs text-slate-400">
+          © {new Date().getFullYear()} ORION SOFT LIMITED ·{' '}
+          <a href="#" className="hover:underline">Privacy</a> ·{' '}
+          <a href="#" className="hover:underline">Terms</a>
+        </p>
+      </div>
+    </div>
+  );
+}

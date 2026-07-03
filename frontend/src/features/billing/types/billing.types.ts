@@ -1,0 +1,210 @@
+export type PlanSlug = 'starter' | 'professional' | 'enterprise' | 'msp';
+export type BillingCycle = 'monthly' | 'yearly';
+export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled' | 'paused';
+export type InvoiceStatus = 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
+export type DiscountType = 'percentage' | 'fixed';
+export type PaymentMethodType = 'card' | 'bank_transfer' | 'wire';
+export type UsageMetric = 'users' | 'frameworks' | 'evidence_gb' | 'branches' | 'departments';
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  slug: PlanSlug;
+  description: string;
+  priceMonthly: number;
+  priceYearly: number;
+  currency: string;
+  maxUsers: number | null;
+  maxFrameworks: number | null;
+  maxEvidenceGb: number | null;
+  maxBranches: number | null;
+  maxDepartments: number | null;
+  features: string[];
+  isActive: boolean;
+  isPublic: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Coupon {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  discountType: DiscountType;
+  discountValue: number;
+  currency: string;
+  maxUses: number | null;
+  usesCount: number;
+  minAmount: number;
+  applicablePlanSlugs: string[];
+  expiresAt: string | null;
+  isActive: boolean;
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CouponValidation {
+  valid: boolean;
+  coupon: Coupon | null;
+  discountedAmount: number | null;
+  message: string;
+}
+
+export interface Subscription {
+  id: string;
+  tenantId: string;
+  planId: string;
+  planName: string;
+  planSlug: PlanSlug;
+  status: SubscriptionStatus;
+  billingCycle: BillingCycle;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  trialEndsAt: string | null;
+  cancelledAt: string | null;
+  cancelAtPeriodEnd: boolean;
+  couponId: string | null;
+  couponCode: string | null;
+  discountPercent: number;
+  discountFixed: number;
+  nextInvoiceAmount: number;
+  currency: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaymentMethod {
+  id: string;
+  tenantId: string;
+  type: PaymentMethodType;
+  label: string;
+  last4: string | null;
+  brand: string | null;
+  expMonth: number | null;
+  expYear: number | null;
+  bankName: string | null;
+  bankAccountLast4: string | null;
+  isDefault: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InvoiceLineItem {
+  description: string;
+  quantity: number;
+  unitAmount: number;
+  amount: number;
+}
+
+export interface Invoice {
+  id: string;
+  tenantId: string;
+  tenantName?: string;
+  subscriptionId: string | null;
+  number: string;
+  status: InvoiceStatus;
+  amountDue: number;
+  amountPaid: number;
+  currency: string;
+  billingPeriodStart: string;
+  billingPeriodEnd: string;
+  dueDate: string;
+  paidAt: string | null;
+  lineItems: InvoiceLineItem[];
+  metadata: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UsageSummary {
+  metric: UsageMetric;
+  label: string;
+  currentValue: number;
+  limitValue: number | null;
+  usagePercent: number | null;
+  isOverLimit: boolean;
+}
+
+export interface BillingOverview {
+  subscription: Subscription | null;
+  plan: SubscriptionPlan | null;
+  paymentMethods: PaymentMethod[];
+  recentInvoices: Invoice[];
+  usage: UsageSummary[];
+}
+
+export interface TenantBillingRow {
+  tenantId: string;
+  tenantName: string;
+  tenantSlug: string;
+  planName: string | null;
+  planSlug: string | null;
+  subscriptionStatus: SubscriptionStatus | null;
+  billingCycle: BillingCycle | null;
+  currentPeriodEnd: string | null;
+  nextInvoiceAmount: number | null;
+  totalInvoiced: number;
+  totalPaid: number;
+  currency: string;
+}
+
+// DTOs
+export interface CreateSubscriptionDto {
+  planId: string;
+  billingCycle?: BillingCycle;
+  couponCode?: string;
+  trialDays?: number;
+}
+
+export interface UpdateSubscriptionDto {
+  planId?: string;
+  billingCycle?: BillingCycle;
+  cancelAtPeriodEnd?: boolean;
+  status?: SubscriptionStatus;
+}
+
+export interface AddPaymentMethodDto {
+  type: PaymentMethodType;
+  label: string;
+  last4?: string;
+  brand?: string;
+  expMonth?: number;
+  expYear?: number;
+  bankName?: string;
+  bankAccountLast4?: string;
+  setAsDefault?: boolean;
+}
+
+export interface CreateCouponDto {
+  code: string;
+  name: string;
+  description?: string;
+  discountType: DiscountType;
+  discountValue: number;
+  currency?: string;
+  maxUses?: number | null;
+  minAmount?: number;
+  applicablePlanSlugs?: string[];
+  expiresAt?: string | null;
+}
+
+export interface CreatePlanDto {
+  name: string;
+  slug: PlanSlug;
+  description?: string;
+  priceMonthly: number;
+  priceYearly: number;
+  currency?: string;
+  maxUsers?: number | null;
+  maxFrameworks?: number | null;
+  maxEvidenceGb?: number | null;
+  maxBranches?: number | null;
+  maxDepartments?: number | null;
+  features?: string[];
+  isPublic?: boolean;
+  sortOrder?: number;
+}

@@ -1,0 +1,58 @@
+name: Database Backup
+
+# Nightly logical backup to S3. This is a belt-and-braces layer ON TOP of
+# Railway's own managed Postgres backups — keep both.
+#
+# Required repository secrets:
+#   DATABASE_URL            production connection string
+#   BACKUP_AWS_ACCESS_KEY_ID / BACKUP_AWS_SECRET_ACCESS_KEY
+#   BACKUP_S3_BUCKET        e.g. compliancecore-backups
+#   BACKUP_AWS_REGION       e.g. eu-west-1
+
+on:
+  schedule:
+    - cron: "0 2 * * *"   # 02:00 UTC daily
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PostgreSQL 16 client
+        run: |
+          sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/pgdg.gpg
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+
+      - name: Dump and upload to S3
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.BACKUP_AWS_REGION }}
+          BACKUP_S3_URI: s3://${{ secrets.BACKUP_S3_BUCKET }}/postgres
+        run: |
+          STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+          FILE="compliancecore-${STAMP}.dump"
+          echo "Dumping -> $FILE"
+          pg_dump "$DATABASE_URL" -Fc --no-owner --no-acl -f "$FILE"
+          ls -lh "$FILE"
+          aws s3 cp "$FILE" "${BACKUP_S3_URI}/${FILE}"
+          echo "Uploaded to ${BACKUP_S3_URI}/${FILE}"
+
+      - name: Prune S3 backups older than 30 days
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.BACKUP_AWS_REGION }}
+          BACKUP_S3_BUCKET: ${{ secrets.BACKUP_S3_BUCKET }}
+        run: |
+          CUTOFF="$(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+          aws s3api list-objects-v2 --bucket "$BACKUP_S3_BUCKET" --prefix "postgres/" \
+            --query "Contents[?LastModified<='${CUTOFF}'].Key" --output text | tr '\t' '\n' | \
+          while read -r key; do
+            [ -n "$key" ] && echo "Deleting $key" && aws s3api delete-object --bucket "$BACKUP_S3_BUCKET" --key "$key"
+          done

@@ -1,0 +1,41 @@
+# ─── Dependencies ────────────────────────────────────────────────────────────
+node_modules/
+**/node_modules/
+
+# ─── Build output ────────────────────────────────────────────────────────────
+dist/
+**/dist/
+build/
+*.tsbuildinfo
+
+# ─── Secrets / env (examples are tracked) ────────────────────────────────────
+.env
+.env.*
+!.env.example
+!.env.production.example
+!.env.docker.example
+
+# RSA keys / certs — never commit
+*.key
+*.pem
+private.key
+public.key
+
+# ─── Database backups ────────────────────────────────────────────────────────
+backups/
+*.dump
+*.sql.gz
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+
+# ─── Editor / OS ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ─── Prisma generated client ─────────────────────────────────────────────────
+backend/node_modules/.prisma/
