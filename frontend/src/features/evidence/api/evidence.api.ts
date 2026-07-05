@@ -109,7 +109,7 @@ export const evidenceApi = {
 
   // Public shared access (no auth)
   accessSharedEvidence(token: string, tenantId: string, password?: string) {
-    return apiClient.post<ApiResponse<{ share: EvidenceShare; evidence: Evidence; currentVersion: EvidenceVersion | null }>>(
+    return apiClient.post<ApiResponse<{ share: EvidenceShare; evidence: Evidence; currentVersion: EvidenceVersion | null; downloadUrl: string | null }>>(
       `/evidence/shared/${token}?tenant=tenant_${tenantId.replace(/-/g, '')}`,
       { password },
     );

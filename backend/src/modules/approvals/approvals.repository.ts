@@ -1,4 +1,6 @@
 import { withTenantSchema } from '../../lib/tenant';
+import { AppError } from '../../lib/errors';
+import { generateSignatureHash } from '../signatures/signatures.repository';
 import type {
   ApprovalWorkflow, ApprovalWorkflowStep,
   ApprovalRequest, ApprovalRequestStep,
@@ -230,6 +232,151 @@ export async function updateStepDecision(
           digital_signature_id = $6, decided_at = NOW()
       WHERE id = $1
     `, stepId, decision, decidedBy, decision, comments, signatureId);
+  });
+}
+
+// ── Atomic decision ───────────────────────────────────────────
+// Records an approval/rejection and advances the request in ONE row-locked
+// transaction. This is the correctness-critical path: without the lock +
+// conditional update, two concurrent deciders (double-click, parallel
+// approvers, or a decision racing the deadline job) could both pass a "still
+// pending" check and corrupt the approval chain (request left both approved and
+// rejected, or a step decided twice).
+
+export interface DecideSignatureInput {
+  documentHash:   string;
+  signatureImage: string | null;
+  ipAddress:      string;
+  userAgent:      string;
+}
+
+export interface DecideOutcome {
+  requestStatus:     'approved' | 'rejected' | 'changes_requested' | 'pending';
+  signatureId:       string | null;
+  activatedNextStep: boolean;
+  nextStepAssignees: Array<{ userId: string; stepName: string }>;
+}
+
+export async function decideRequestTx(
+  schemaName: string,
+  requestId: string,
+  decidingUserId: string,
+  decision: 'approved' | 'rejected' | 'changes_requested' | 'abstained',
+  comments: string | null,
+  signature: DecideSignatureInput | null,
+): Promise<DecideOutcome> {
+  return withTenantSchema(schemaName, async (tx) => {
+    // 1. Lock the request row for the duration of the transaction. Any other
+    //    concurrent decision on the same request blocks here until we commit.
+    const lockRows = await tx.$queryRawUnsafe<any[]>(`
+      SELECT id, status FROM approval_requests
+      WHERE id = $1 AND deleted_at IS NULL
+      FOR UPDATE
+    `, requestId);
+    if (!lockRows.length) throw new AppError('Approval request not found', 404);
+    if (lockRows[0].status !== 'pending') {
+      throw new AppError('Request is no longer pending', 409);
+    }
+
+    // 2. Find THIS user's active step (direct assignment or role/manager step).
+    const [activeStep] = await tx.$queryRawUnsafe<any[]>(`
+      SELECT id, step_order FROM approval_request_steps
+      WHERE request_id = $1 AND status = 'active'
+        AND (assigned_to = $2 OR approver_type IN ('role', 'manager'))
+      ORDER BY step_order
+      LIMIT 1
+    `, requestId, decidingUserId);
+    if (!activeStep) throw new AppError('No active approval step found for you', 403);
+
+    // 3. Optional digital signature — created inside the SAME transaction so the
+    //    signature and the decision commit atomically (no orphan signatures).
+    let signatureId: string | null = null;
+    if (signature) {
+      const signedAt = new Date().toISOString();
+      const signatureHash = generateSignatureHash(
+        'approval_step', activeStep.id, signature.documentHash, decidingUserId, signedAt,
+      );
+      const [u] = await tx.$queryRawUnsafe<any[]>(
+        `SELECT first_name, last_name, email FROM global.users WHERE id = $1`, decidingUserId,
+      );
+      const certificateData = {
+        version: '1.0', algorithm: 'HMAC-SHA256',
+        signerName: u ? `${u.first_name ?? ''} ${u.last_name ?? ''}`.trim() : null,
+        signerEmail: u?.email ?? null, signedAt,
+        ipAddress: signature.ipAddress, userAgent: signature.userAgent,
+        documentType: 'approval_step', documentId: activeStep.id,
+      };
+      const [sig] = await tx.$queryRawUnsafe<any[]>(`
+        INSERT INTO digital_signatures(
+          user_id, document_type, document_id, document_hash,
+          signature_hash, signature_image, certificate_data, ip_address, user_agent, signed_at
+        ) VALUES($1,'approval_step',$2,$3,$4,$5,$6,$7,$8,$9)
+        RETURNING id
+      `,
+        decidingUserId, activeStep.id, signature.documentHash, signatureHash,
+        signature.signatureImage, JSON.stringify(certificateData),
+        signature.ipAddress || null, signature.userAgent || null, signedAt,
+      );
+      signatureId = sig.id as string;
+    }
+
+    // 4. Conditional step update — only an 'active' step can be decided. A
+    //    0-row result means it was already decided by a concurrent request.
+    const stepStatus = decision; // approved | rejected | changes_requested | abstained
+    const updated = await tx.$executeRawUnsafe(`
+      UPDATE approval_request_steps
+      SET status = $2, decided_by = $3, decision = $4, comments = $5,
+          digital_signature_id = $6, decided_at = NOW()
+      WHERE id = $1 AND status = 'active'
+    `, activeStep.id, stepStatus, decidingUserId, decision, comments, signatureId);
+    if (updated === 0) throw new AppError('This step has already been decided', 409);
+
+    // 5. Terminal decisions end the whole request immediately.
+    if (decision === 'rejected' || decision === 'changes_requested') {
+      await tx.$executeRawUnsafe(`
+        UPDATE approval_requests
+        SET status = $2, rejection_reason = $3, completed_at = NOW(), updated_at = NOW()
+        WHERE id = $1
+      `, requestId, decision, comments);
+      return { requestStatus: decision, signatureId, activatedNextStep: false, nextStepAssignees: [] };
+    }
+
+    // 6. Approval: has the whole current step-order group been decided?
+    const steps = await tx.$queryRawUnsafe<any[]>(`
+      SELECT id, step_order, status, assigned_to, name
+      FROM approval_request_steps WHERE request_id = $1 ORDER BY step_order
+    `, requestId);
+    const group = steps.filter((s) => s.step_order === activeStep.step_order);
+    const groupDone = group.every((s) => ['approved', 'abstained', 'skipped'].includes(s.status));
+    if (!groupDone) {
+      return { requestStatus: 'pending', signatureId, activatedNextStep: false, nextStepAssignees: [] };
+    }
+
+    // 7. Advance to the next step group, or finalise as approved.
+    const orders = [...new Set(steps.map((s) => s.step_order as number))].sort((a, b) => a - b);
+    const nextOrder = orders[orders.indexOf(activeStep.step_order) + 1];
+    if (nextOrder === undefined) {
+      await tx.$executeRawUnsafe(`
+        UPDATE approval_requests
+        SET status = 'approved', completed_at = NOW(), updated_at = NOW()
+        WHERE id = $1
+      `, requestId);
+      return { requestStatus: 'approved', signatureId, activatedNextStep: false, nextStepAssignees: [] };
+    }
+
+    await tx.$executeRawUnsafe(`
+      UPDATE approval_request_steps
+      SET status = 'active', activated_at = NOW()
+      WHERE request_id = $1 AND step_order = $2 AND status = 'pending'
+    `, requestId, nextOrder);
+    await tx.$executeRawUnsafe(`
+      UPDATE approval_requests SET current_step = $2, updated_at = NOW() WHERE id = $1
+    `, requestId, nextOrder);
+
+    const nextStepAssignees = steps
+      .filter((s) => s.step_order === nextOrder && s.assigned_to)
+      .map((s) => ({ userId: s.assigned_to as string, stepName: s.name as string }));
+    return { requestStatus: 'pending', signatureId, activatedNextStep: true, nextStepAssignees };
   });
 }
 

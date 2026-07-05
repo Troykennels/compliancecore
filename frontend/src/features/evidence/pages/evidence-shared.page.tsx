@@ -7,6 +7,7 @@ import type { Evidence, EvidenceVersion } from '../types/evidence.types';
 interface SharedPayload {
   evidence: Evidence;
   currentVersion: EvidenceVersion | null;
+  downloadUrl: string | null;
 }
 
 export function EvidenceSharedPage() {
@@ -31,6 +32,7 @@ export function EvidenceSharedPage() {
       setPayload({
         evidence: res.data.data!.evidence,
         currentVersion: res.data.data!.currentVersion,
+        downloadUrl: res.data.data!.downloadUrl ?? null,
       });
     } catch (err: unknown) {
       const status = (err as { response?: { status: number; data?: { error?: { message?: string } } } })?.response?.status;
@@ -57,15 +59,11 @@ export function EvidenceSharedPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const handleDownload = async () => {
-    if (!payload?.currentVersion) return;
-    try {
-      // Request the download URL with the share token for authentication
-      // In production, the public endpoint returns a presigned URL
-      window.location.href = payload.currentVersion.fileKey; // simplified — real impl would call API
-    } catch {
-      // noop
-    }
+  const handleDownload = () => {
+    // The backend returns a short-lived presigned S3 URL (attachment) with the
+    // validated share access — never the raw object key. Open it directly.
+    if (!payload?.downloadUrl) return;
+    window.open(payload.downloadUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (

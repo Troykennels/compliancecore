@@ -15,9 +15,13 @@ CREATE TABLE IF NOT EXISTS {{SCHEMA}}.evidence_categories (
   sort_order    INTEGER      NOT NULL DEFAULT 0,
   created_by    UUID,
   created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-  deleted_at    TIMESTAMPTZ,
-  UNIQUE (name) WHERE deleted_at IS NULL
+  deleted_at    TIMESTAMPTZ
 );
+
+-- Partial unique index: category names must be unique among non-deleted rows.
+-- (A table-level UNIQUE constraint cannot carry a WHERE clause in Postgres.)
+CREATE UNIQUE INDEX IF NOT EXISTS uq_evidence_categories_name
+  ON {{SCHEMA}}.evidence_categories (name) WHERE deleted_at IS NULL;
 
 -- Seed system categories
 INSERT INTO {{SCHEMA}}.evidence_categories

@@ -131,6 +131,11 @@ CREATE INDEX idx_signatures_user_id     ON digital_signatures(user_id);
 CREATE INDEX idx_signatures_signed_at   ON digital_signatures(signed_at DESC);
 CREATE INDEX idx_signatures_valid       ON digital_signatures(is_valid) WHERE is_valid = TRUE;
 
+-- At most one *valid* signature per (document, signer). Backstops the
+-- application-level duplicate guard against races/double-submits.
+CREATE UNIQUE INDEX uq_signatures_valid_per_signer
+  ON digital_signatures(document_type, document_id, user_id) WHERE is_valid = TRUE;
+
 -- Back-reference: add FK from approval_request_steps to digital_signatures
 ALTER TABLE approval_request_steps
     ADD CONSTRAINT fk_step_signature FOREIGN KEY (digital_signature_id) REFERENCES digital_signatures(id);

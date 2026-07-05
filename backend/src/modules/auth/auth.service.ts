@@ -31,6 +31,7 @@ import {
   ValidationError,
 } from '../../lib/errors';
 import { getPermissionsForRole } from '../../middleware/rbac.middleware';
+import { logger } from '../../lib/logger';
 import * as repo from './auth.repository';
 import type { LoginResult, MfaSetupResult, SessionInfo, UserPublic } from './auth.types';
 import type { RegisterInput, LoginInput, ResetPasswordInput, ChangePasswordInput } from './auth.schema';
@@ -230,11 +231,15 @@ export async function refreshAccessToken(
   const stored = await repo.findRefreshToken(tokenHash);
 
   if (!stored) {
-    // Token reuse detection: if we can find the token but it's already used/revoked,
-    // it may indicate theft. Revoke all tokens for this user.
-    const { hashRefreshToken } = await resolveUser(rawRefreshToken);
-    if (hashRefreshToken) {
-      await repo.revokeAllUserRefreshTokens(hashRefreshToken);
+    // Token reuse detection: the token is not currently valid. If it nonetheless
+    // exists in the table, it was already rotated/revoked and is now being
+    // replayed — a strong signal the token was stolen. Revoke the whole family
+    // (all of that user's refresh tokens) so neither the attacker nor the
+    // legitimate client can keep using the compromised session.
+    const prior = await repo.findRefreshTokenAnyState(tokenHash);
+    if (prior) {
+      await repo.revokeAllUserRefreshTokens(prior.userId);
+      logger.warn({ userId: prior.userId }, 'Refresh token reuse detected — revoked all sessions for user');
     }
     throw new UnauthorizedError('Refresh token is invalid or expired');
   }
@@ -522,9 +527,4 @@ async function issueTokensAndBuildResult(
     // Store raw token on session object so controller can read it
     ...(session as unknown as { _rawRefreshToken: string }),
   } as LoginResult & { _rawRefreshToken: string };
-}
-
-// Needed for reuse detection in refreshAccessToken
-async function resolveUser(rawToken: string): Promise<{ hashRefreshToken: string | null }> {
-  return { hashRefreshToken: null }; // Placeholder — full reuse detection requires a revoked token lookup
 }

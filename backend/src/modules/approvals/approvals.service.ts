@@ -1,5 +1,4 @@
 import * as repo from './approvals.repository';
-import * as sigRepo from '../signatures/signatures.repository';
 import { notificationService } from '../notifications/notification.service';
 import { sendEmail, emailTemplates } from '../../lib/email.service';
 import type {
@@ -117,89 +116,44 @@ export async function decideRequest(
   ipAddress: string,
   userAgent: string,
 ) {
+  // Read for the 404 / requester details used by post-commit notifications.
   const request = await repo.findRequestById(schemaName, requestId);
   if (!request) throw new AppError('Approval request not found', 404);
-  if (request.status !== 'pending') throw new AppError('Request is no longer pending', 400);
+  if (request.status !== 'pending') throw new AppError('Request is no longer pending', 409);
 
-  // Find the active step assigned to this user (or their role)
-  const activeStep = request.steps?.find(
-    (s) => s.status === 'active' && (
-      s.assignedTo === decidingUserId ||
-      s.approverType === 'role' ||
-      s.approverType === 'manager'
-    ),
-  );
-  if (!activeStep) throw new AppError('No active approval step found for you', 403);
-
-  // Create digital signature if requested
-  let signatureId: string | null = null;
-  if (dto.signatureImageBase64 && dto.documentHash) {
-    signatureId = await sigRepo.createSignature(schemaName, {
-      userId:         decidingUserId,
-      documentType:   'approval_step',
-      documentId:     activeStep.id,
-      documentHash:   dto.documentHash,
-      signatureImage: dto.signatureImageBase64,
-      ipAddress,
-      userAgent,
-    });
-  }
-
-  await repo.updateStepDecision(
-    schemaName, activeStep.id, decidingUserId,
-    dto.decision, dto.comments ?? null, signatureId,
-  );
-
-  // Evaluate request outcome
-  const updatedSteps = await repo.getStepsForRequest(schemaName, requestId);
-  const currentStepOrder = activeStep.stepOrder;
-  const currentGroupSteps = updatedSteps.filter((s: any) => s.step_order === currentStepOrder);
-
-  if (dto.decision === 'rejected') {
-    await repo.finaliseRequest(schemaName, requestId, 'rejected', dto.comments ?? null);
-    await _notifyRequester(schemaName, request, 'rejected', decidingUserName, dto.comments);
-    return;
-  }
-
-  if (dto.decision === 'changes_requested') {
-    await repo.finaliseRequest(schemaName, requestId, 'changes_requested', dto.comments ?? null);
-    await _notifyRequester(schemaName, request, 'changes_requested', decidingUserName, dto.comments);
-    return;
-  }
-
-  // Check if all steps in this step_order group are now approved
-  const allGroupDecided = currentGroupSteps.every(
-    (s: any) => ['approved', 'abstained', 'skipped'].includes(s.status) || s.id === activeStep.id,
-  );
-
-  if (!allGroupDecided) return; // Still waiting for other parallel approvers
-
-  // Find next step group
-  const allStepOrders = [...new Set(updatedSteps.map((s: any) => s.step_order as number))].sort((a, b) => a - b);
-  const currentIdx = allStepOrders.indexOf(currentStepOrder);
-  const nextStepOrder = allStepOrders[currentIdx + 1];
-
-  if (!nextStepOrder) {
-    // All steps complete — approve the request
-    await repo.finaliseRequest(schemaName, requestId, 'approved', null);
-    await _notifyRequester(schemaName, request, 'approved', decidingUserName, dto.comments);
-  } else {
-    // Activate next step group
-    await repo.activateNextStepGroup(schemaName, requestId, nextStepOrder);
-    const nextSteps = updatedSteps.filter((s: any) => s.step_order === nextStepOrder);
-    for (const step of nextSteps) {
-      if (step.assigned_to) {
-        await notificationService.createForUser(schemaName, {
-          userId:           step.assigned_to,
-          title:            `Approval needed: ${request.title}`,
-          body:          `Step ${step.name} — your approval is required.`,
-          notificationType: 'approval_requested',
-          priority:         request.priority,
-          referenceType:    'approval_request',
-          referenceId:      requestId,
-          actionUrl:        `/approvals/${requestId}`,
-        });
+  const signature = (dto.signatureImageBase64 && dto.documentHash)
+    ? {
+        documentHash:   dto.documentHash,
+        signatureImage: dto.signatureImageBase64,
+        ipAddress,
+        userAgent,
       }
+    : null;
+
+  // The entire decision (lock, validate, sign, update, advance) runs atomically
+  // in one row-locked transaction inside the repository.
+  const outcome = await repo.decideRequestTx(
+    schemaName, requestId, decidingUserId, dto.decision, dto.comments ?? null, signature,
+  );
+
+  // Notifications / emails run AFTER commit — they are side effects, not part of
+  // the state transition, and must not hold the row lock or roll it back.
+  if (outcome.requestStatus === 'approved'
+      || outcome.requestStatus === 'rejected'
+      || outcome.requestStatus === 'changes_requested') {
+    await _notifyRequester(schemaName, request, outcome.requestStatus, decidingUserName, dto.comments);
+  } else if (outcome.activatedNextStep) {
+    for (const assignee of outcome.nextStepAssignees) {
+      await notificationService.createForUser(schemaName, {
+        userId:           assignee.userId,
+        title:            `Approval needed: ${request.title}`,
+        body:             `Step ${assignee.stepName} — your approval is required.`,
+        notificationType: 'approval_requested',
+        priority:         request.priority,
+        referenceType:    'approval_request',
+        referenceId:      requestId,
+        actionUrl:        `/approvals/${requestId}`,
+      });
     }
   }
 }

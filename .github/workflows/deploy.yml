@@ -10,9 +10,14 @@ name: Deploy
 #   VERCEL_ORG_ID          Vercel org id   (from `vercel link` / .vercel/project.json)
 #   VERCEL_PROJECT_ID      Vercel project id
 
+# Deploy ONLY after the CI workflow succeeds on main. `workflow_run` fires when
+# CI finishes; the per-job `if` gate ensures a red CI (failed type-check / lint /
+# build / docker) never reaches production. Manual dispatch is still allowed.
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
     branches: [main]
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -23,8 +28,14 @@ jobs:
   deploy-backend:
     name: Backend -> Railway
     runs-on: ubuntu-latest
+    # Only deploy when CI concluded successfully (or when manually dispatched).
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Deploy the exact commit CI validated (workflow_run checks out the
+          # default branch by default, which may have moved on).
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -40,11 +51,14 @@ jobs:
   deploy-frontend:
     name: Frontend -> Vercel
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     defaults:
       run:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20

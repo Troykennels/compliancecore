@@ -1,5 +1,6 @@
 import Groq from 'groq-sdk';
 import { withTenantSchema } from '../../lib/prisma';
+import { env } from '../../config/env';
 import { AppError, NotFoundError, ValidationError } from '../../lib/errors';
 import type {
   SummarizeContractDto, SummarizeContractResult,
@@ -10,7 +11,13 @@ import type {
   AiSearchDto, AiSearchResult,
 } from './ai.types';
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// Bounded upstream: a hung Groq request must not tie up a Node connection
+// indefinitely. 30s per attempt, at most 1 retry.
+const groq = new Groq({
+  apiKey: env.GROQ_API_KEY,
+  timeout: 30_000,
+  maxRetries: 1,
+});
 
 const MODEL = 'llama-3.3-70b-versatile';
 const MAX_TOKENS = 4096;

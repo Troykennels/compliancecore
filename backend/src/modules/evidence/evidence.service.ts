@@ -322,7 +322,7 @@ export const evidenceService = {
     const downloadUrl = await generateDownloadUrl(fileKey, fileName, 'attachment', 3600);
 
     if (PREVIEW_MIME_TYPES.has(mimeType)) {
-      const url = await generateDownloadUrl(fileKey, fileName, 'inline', 3600);
+      const url = await generateDownloadUrl(fileKey, fileName, 'inline', 3600, mimeType);
       const previewType = mimeType.startsWith('image/')
         ? 'image'
         : mimeType === 'application/pdf'
@@ -332,7 +332,7 @@ export const evidenceService = {
     }
 
     if (OFFICE_PREVIEW_MIME_TYPES.has(mimeType)) {
-      const directUrl = await generateDownloadUrl(fileKey, fileName, 'inline', 3600);
+      const directUrl = await generateDownloadUrl(fileKey, fileName, 'inline', 3600, mimeType);
       const officePreviewUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(directUrl)}`;
       return { url: null, officePreviewUrl, previewType: 'office', downloadUrl };
     }
@@ -522,11 +522,16 @@ export const evidenceService = {
         metadata: { shareToken, accessCount: share.accessedCount + 1 },
       });
 
-      // Find version file key for download URL
+      // Find current version and mint a short-lived presigned download URL.
+      // The recipient never sees the raw S3 key; the link is an attachment
+      // (never inline) and expires in 5 minutes.
       const versions = await evidenceRepository.listVersions(tx, share.evidenceId);
       const current = versions.find((v) => v.id === ev.currentVersionId);
+      const downloadUrl = current
+        ? await generateDownloadUrl(current.fileKey, current.fileName, 'attachment', 300)
+        : null;
 
-      return { share, evidence: ev, currentVersion: current ?? null };
+      return { share, evidence: ev, currentVersion: current ?? null, downloadUrl };
     });
   },
 

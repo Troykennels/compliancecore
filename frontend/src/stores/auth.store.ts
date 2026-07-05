@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { setAccessToken, clearAccessToken } from '@/lib/api-client';
+import { queryClient } from '@/lib/query-client';
 
 export type UserRole =
   | 'owner'
@@ -61,6 +62,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   clearAuth: () => {
     clearAccessToken();
+    // Drop every cached query so the next user on this device can't see the
+    // previous session's data (dashboard, evidence, billing, …).
+    queryClient.clear();
     set({ user: null, activeTenant: null, allTenants: [], isAuthenticated: false, isInitialising: false });
   },
 
@@ -70,6 +74,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   switchTenant: (tenantId) => {
     const tenant = get().allTenants.find((t) => t.id === tenantId) ?? null;
+    // Tenant-scoped data must not carry over — clear the cache so every query
+    // refetches under the new tenant instead of showing stale wrong-tenant data.
+    queryClient.clear();
     set({ activeTenant: tenant });
   },
 }));

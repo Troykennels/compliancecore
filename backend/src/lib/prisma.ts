@@ -1,14 +1,25 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 import { logger } from './logger';
 
-// Singleton Prisma client
-const prisma = new PrismaClient({
-  log: [
-    { level: 'query', emit: 'event' },
-    { level: 'error', emit: 'event' },
-    { level: 'warn',  emit: 'event' },
-  ],
-});
+// Singleton Prisma client. The globalThis guard prevents `tsx watch` hot
+// reloads from opening a fresh connection pool on every code change in dev.
+// The factory return type preserves the event-emitter ($on) typing from `log`.
+const makePrismaClient = () =>
+  new PrismaClient({
+    log: [
+      { level: 'query', emit: 'event' },
+      { level: 'error', emit: 'event' },
+      { level: 'warn',  emit: 'event' },
+    ],
+  });
+
+const globalForPrisma = globalThis as unknown as { prisma?: ReturnType<typeof makePrismaClient> };
+
+const prisma = globalForPrisma.prisma ?? makePrismaClient();
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+}
 
 prisma.$on('error', (e) => {
   logger.error({ err: e }, 'Prisma error');

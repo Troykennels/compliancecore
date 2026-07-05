@@ -24,6 +24,11 @@ const schema = z.object({
 
   COOKIE_SECRET: z.string().min(32),
 
+  // Server-only HMAC key for digital-signature certificates. MUST be set and
+  // secret — there is deliberately no default. Signatures are only tamper-proof
+  // (non-repudiation) if this key never leaves the server.
+  SIGNATURE_SECRET: z.string().min(32, 'SIGNATURE_SECRET must be at least 32 characters'),
+
   // AWS / S3 (required for evidence upload and OCR)
   AWS_ACCESS_KEY_ID:     z.string().min(1),
   AWS_SECRET_ACCESS_KEY: z.string().min(1),

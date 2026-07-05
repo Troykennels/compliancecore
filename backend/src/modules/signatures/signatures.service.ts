@@ -45,6 +45,8 @@ export async function verifySignature(schemaName: string, id: string) {
 
   const isHashValid = verifySignatureHash(
     sig.signatureHash,
+    sig.documentType,
+    sig.documentId,
     sig.documentHash,
     sig.userId,
     sig.signedAt,

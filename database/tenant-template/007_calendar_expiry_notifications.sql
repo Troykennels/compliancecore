@@ -91,9 +91,10 @@ CREATE INDEX IF NOT EXISTS idx_calendar_events_assigned
   ON {{SCHEMA}}.compliance_calendar_events (assigned_to)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX IF NOT EXISTS idx_calendar_events_month
-  ON {{SCHEMA}}.compliance_calendar_events (DATE_TRUNC('month', start_date))
-  WHERE deleted_at IS NULL;
+-- (Removed idx_calendar_events_month: DATE_TRUNC('month', timestamptz) is only
+-- STABLE, not IMMUTABLE, so it is illegal in an index expression and aborted
+-- tenant provisioning. Month-range queries are served by idx_calendar_events_start
+-- on start_date.)
 
 -- ── Expiry Items ───────────────────────────────────────────────────────────────
 

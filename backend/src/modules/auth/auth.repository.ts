@@ -163,6 +163,12 @@ export async function findRefreshToken(tokenHash: string): Promise<RefreshToken 
   });
 }
 
+// Look up a refresh token by hash in ANY state (used/revoked/expired). Used for
+// reuse detection: a superseded token being replayed signals possible theft.
+export async function findRefreshTokenAnyState(tokenHash: string): Promise<RefreshToken | null> {
+  return prisma.refreshToken.findFirst({ where: { tokenHash } });
+}
+
 // Refresh token rotation: revoke old token, create new one in same session.
 export async function rotateRefreshToken(
   oldTokenId: string,

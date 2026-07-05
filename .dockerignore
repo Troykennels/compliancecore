@@ -1,0 +1,45 @@
+# =============================================================================
+# ROOT .dockerignore — this is the ONLY .dockerignore Docker honours, because
+# both images build with the repository root as the build context
+# (see backend/Dockerfile & frontend/Dockerfile). The per-package
+# backend/.dockerignore and frontend/.dockerignore are NOT consulted for a
+# root-context build, so all exclusions must live here.
+#
+# Primary purpose: keep real secrets (.env), the .git history, and heavy docs
+# OUT of the build context so they can never be COPYed into an image layer.
+# =============================================================================
+
+# Secrets — never ship real env files into the build context.
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.docker.example
+
+# VCS & tooling
+.git
+.gitignore
+.github
+.vscode
+.claude
+.idea
+
+# Dependencies & build output (images run `npm ci` / build fresh)
+**/node_modules
+**/dist
+**/build
+**/coverage
+
+# Docs (not needed at runtime; ~500 KB of markdown)
+*.md
+backend/*.md
+frontend/*.md
+
+# Logs & OS cruft
+**/npm-debug.log*
+**/*.log
+**/.DS_Store
+Thumbs.db
+
+# Local compose/runtime artifacts
+docker-compose*.yml

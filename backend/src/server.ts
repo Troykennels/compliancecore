@@ -1,6 +1,7 @@
+import type { Worker } from 'bullmq';
 import { createApp } from './app';
 import { prisma } from './config/database';
-import { redis } from './config/redis';
+import { redis, redisForQueues } from './config/redis';
 import { logger } from './lib/logger';
 import { env } from './config/env';
 import { startOcrWorker } from './jobs/ocr.job';
@@ -20,31 +21,35 @@ async function bootstrap(): Promise<void> {
   await redis.connect();
   logger.info('Redis connected');
 
-  startOcrWorker();
+  // Collect worker handles so they can be drained on shutdown (finish the
+  // in-flight job, stop taking new ones) instead of being killed mid-processing.
+  const workers: Worker[] = [];
+
+  workers.push(startOcrWorker());
   logger.info('OCR worker started');
 
-  startReminderWorker();
+  workers.push(startReminderWorker());
   await scheduleReminderJob();
   logger.info('Reminder worker started');
 
-  startScoreSnapshotWorker();
+  workers.push(startScoreSnapshotWorker());
   await scheduleScoreSnapshotJob();
   logger.info('Score snapshot worker started');
 
-  startEscalationWorker();
+  workers.push(startEscalationWorker());
   await scheduleEscalationJob();
   logger.info('Escalation worker started');
 
-  startApprovalDeadlineWorker();
+  workers.push(startApprovalDeadlineWorker());
   await scheduleApprovalDeadlineJob();
   logger.info('Approval deadline worker started');
 
-  startScheduledReportsWorker();
+  workers.push(startScheduledReportsWorker());
   await scheduleReportsJob();
   logger.info('Scheduled reports worker started');
 
   await initBillingTables();
-  startBillingRenewalWorker();
+  workers.push(startBillingRenewalWorker());
   await scheduleBillingRenewalJob();
   logger.info('Billing renewal worker started');
 
@@ -60,8 +65,13 @@ async function bootstrap(): Promise<void> {
 
     server.close(async () => {
       logger.info('HTTP server closed');
+      // Drain BullMQ workers: let each finish its in-flight job and stop pulling
+      // new ones, so a deploy never kills a job mid-processing.
+      await Promise.allSettled(workers.map((w) => w.close()));
+      logger.info('Workers drained');
       await prisma.$disconnect();
       await redis.quit();
+      await redisForQueues.quit();
       logger.info('Connections closed. Exiting.');
       process.exit(0);
     });

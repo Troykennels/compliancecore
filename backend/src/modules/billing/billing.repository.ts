@@ -1,5 +1,6 @@
 import { prisma } from '../../config/database';
 import { logger } from '../../lib/logger';
+import { AppError } from '../../lib/errors';
 import type {
   SubscriptionPlan, CreatePlanDto, UpdatePlanDto,
   Coupon, CreateCouponDto, UpdateCouponDto,
@@ -513,12 +514,26 @@ export async function createSubscription(dto: CreateSubscriptionDto & {
   return mapSubscription({ ...(sub as object), plan_name: plan?.name, plan_slug: plan?.slug, coupon_code: null });
 }
 
+// Columns a subscription update is allowed to touch. Any other key (e.g. an
+// attacker-supplied `next_invoice_amount = (SELECT ...)` sub-select via the
+// admin endpoint's raw req.body) is rejected before it reaches the SQL, so the
+// column name can never be attacker-controlled.
+const UPDATABLE_SUBSCRIPTION_COLUMNS = new Set([
+  'plan_id', 'status', 'billing_cycle', 'current_period_start', 'current_period_end',
+  'trial_ends_at', 'cancelled_at', 'cancel_at_period_end', 'coupon_id',
+  'discount_percent', 'discount_fixed', 'next_invoice_amount', 'currency',
+]);
+
 export async function updateSubscription(id: string, fields: Record<string, unknown>): Promise<Subscription | null> {
   const setClauses: string[] = ['updated_at = NOW()'];
   const values: unknown[] = [];
   let idx = 1;
 
   for (const [key, val] of Object.entries(fields)) {
+    if (!UPDATABLE_SUBSCRIPTION_COLUMNS.has(key)) {
+      throw new AppError(`Invalid subscription field: ${key}`, 400, 'INVALID_FIELD');
+    }
+    // key is validated against the allowlist above → safe to interpolate.
     setClauses.push(`${key} = $${idx++}`);
     values.push(val);
   }

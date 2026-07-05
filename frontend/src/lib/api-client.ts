@@ -34,13 +34,22 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     // Never attempt a silent refresh for auth endpoints themselves (login,
-    // register, refresh, mfa, forgot/reset password). A 401 there is a real
-    // credential/session error that the calling page must surface inline —
-    // refreshing (and hard-redirecting to /login) would mask it and would
-    // also bounce logged-out visitors off public pages.
-    const isAuthEndpoint = originalRequest.url?.includes('/auth/');
+    // register, refresh, mfa, forgot/reset password) or for public endpoints
+    // like the shared-evidence link — there a 401 is meaningful (e.g. "password
+    // required") and the calling page must surface it inline.
+    const url = originalRequest.url ?? '';
+    const isPublicEndpoint = url.includes('/auth/') || url.includes('/evidence/shared/');
 
-    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+    // Only try to refresh when there is actually a (now-expired) session to
+    // refresh. A logged-out visitor has no access token, so a 401 must simply
+    // propagate — otherwise the refresh fails and hard-redirects public/share
+    // pages to /login.
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isPublicEndpoint &&
+      getAccessToken()
+    ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({

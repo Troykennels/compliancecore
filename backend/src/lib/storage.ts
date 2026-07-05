@@ -61,11 +61,14 @@ export const OCR_SUPPORTED_MIME_TYPES = new Set([
   'image/bmp',
 ]);
 
-// MIME types that can be previewed in-browser
+// MIME types that can be previewed in-browser.
+// NOTE: image/svg+xml is deliberately EXCLUDED. SVG is an XML document that can
+// carry <script>, so serving it inline is a stored-XSS vector. SVGs are still
+// accepted as evidence but are only ever downloaded as an attachment.
 export const PREVIEW_MIME_TYPES = new Set([
   'application/pdf',
   'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-  'image/svg+xml', 'image/tiff', 'image/bmp',
+  'image/tiff', 'image/bmp',
   'text/plain', 'text/csv',
 ]);
 
@@ -109,12 +112,20 @@ export async function generateDownloadUrl(
   fileName: string,
   disposition: 'inline' | 'attachment' = 'inline',
   expiresInSeconds = 3600,
+  contentType?: string,
 ): Promise<string> {
   const encodedName = encodeURIComponent(fileName);
+  // Force the response Content-Type so the browser never sniffs the bytes into
+  // an executable type. Attachments are always served as an opaque octet-stream
+  // (so e.g. a mislabelled HTML/SVG payload can't render); inline previews get
+  // the specific, known-safe type the caller vetted (pdf/image/text).
+  const responseContentType =
+    disposition === 'attachment' ? 'application/octet-stream' : contentType;
   const command = new GetObjectCommand({
     Bucket:                     BUCKET,
     Key:                        fileKey,
     ResponseContentDisposition: `${disposition}; filename="${encodedName}"`,
+    ...(responseContentType && { ResponseContentType: responseContentType }),
   });
 
   return getSignedUrl(s3, command, { expiresIn: expiresInSeconds });

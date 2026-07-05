@@ -11,7 +11,14 @@ const QUEUE_NAME = 'escalation-evaluation';
 
 export const escalationQueue = new Queue(QUEUE_NAME, {
   connection: redisForQueues,
-  defaultJobOptions: { removeOnComplete: 50, removeOnFail: 100 },
+  // Retry on transient DB/Redis blips so a single failed tick doesn't silently
+  // drop that hour's escalation sweep until the next cron fire.
+  defaultJobOptions: {
+    removeOnComplete: 50,
+    removeOnFail: 100,
+    attempts: 3,
+    backoff: { type: 'exponential', delay: 5000 },
+  },
 });
 
 async function getActiveTenants() {

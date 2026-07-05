@@ -21,7 +21,6 @@
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import pg from 'pg';
 
@@ -29,8 +28,14 @@ const { Client } = pg;
 
 const migrationsDir = fileURLToPath(new URL('../../database/migrations', import.meta.url));
 const seedsDir = fileURLToPath(new URL('../../database/seeds', import.meta.url));
-const backendDir = fileURLToPath(new URL('..', import.meta.url));
-const prismaSchema = fileURLToPath(new URL('../prisma/schema.prisma', import.meta.url));
+// Prisma-generated baseline DDL for the global app tables. Applied through the
+// same tracked runner as every other migration (NOT via `prisma db push` /
+// `migrate deploy`), so Prisma's migration engine never reconciles or drops the
+// raw-SQL global tables (billing, schema_migrations, framework_data).
+const prismaBaseline = fileURLToPath(
+  new URL('../prisma/migrations/00000000000000_init/migration.sql', import.meta.url),
+);
+const PRISMA_BASELINE_VERSION = '001b_prisma_global';
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
@@ -43,6 +48,24 @@ const client = new Client({ connectionString: DATABASE_URL });
 // Version is the numeric filename prefix, e.g. "001_global_schema.sql" -> "001".
 const versionOf = (file) => file.split('_')[0];
 
+// Apply an SQL string atomically and record it in the migration ledger. A
+// migration and its ledger insert commit (or roll back) together.
+async function applySql(version, description, sql) {
+  try {
+    await client.query('BEGIN');
+    await client.query(sql);
+    await client.query(
+      'INSERT INTO global.schema_migrations (version, description) VALUES ($1, $2) ON CONFLICT (version) DO NOTHING',
+      [version, description],
+    );
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error(`[migrate] FAILED ${description}: ${err.message}`);
+    throw err;
+  }
+}
+
 async function applyFile(file) {
   const full = path.join(migrationsDir, file);
   const sql = await readFile(full, 'utf8');
@@ -52,29 +75,14 @@ async function applyFile(file) {
     return false;
   }
   console.log(`[migrate] apply  ${file}`);
-  try {
-    await client.query('BEGIN');
-    await client.query(sql);
-    await client.query(
-      'INSERT INTO global.schema_migrations (version, description) VALUES ($1, $2) ON CONFLICT (version) DO NOTHING',
-      [versionOf(file), file],
-    );
-    await client.query('COMMIT');
-    return true;
-  } catch (err) {
-    await client.query('ROLLBACK');
-    console.error(`[migrate] FAILED ${file}: ${err.message}`);
-    throw err;
-  }
+  await applySql(versionOf(file), file, sql);
+  return true;
 }
 
-function prismaDbPush() {
-  console.log('[migrate] prisma db push — syncing global Prisma tables');
-  execFileSync(
-    process.platform === 'win32' ? 'npx.cmd' : 'npx',
-    ['prisma', 'db', 'push', '--skip-generate', `--schema=${prismaSchema}`],
-    { cwd: backendDir, stdio: 'inherit', env: process.env },
-  );
+async function applyPrismaBaseline() {
+  console.log('[migrate] apply  prisma baseline (global app tables)');
+  const sql = await readFile(prismaBaseline, 'utf8');
+  await applySql(PRISMA_BASELINE_VERSION, 'Prisma global baseline (generated from schema.prisma)', sql);
 }
 
 async function main() {
@@ -98,15 +106,21 @@ async function main() {
 
   let count = 0;
 
-  // 1. Bootstrap (schemas/extensions/roles) must exist before Prisma push.
+  // 1. Bootstrap (schemas/extensions/roles) must exist before anything else.
   if (bootstrap && !applied.has('001')) {
     if (await applyFile(bootstrap)) count++;
   } else if (bootstrap) {
     console.log(`[migrate] skip   ${bootstrap}`);
   }
 
-  // 2. Prisma owns the global tables — create/sync them. Idempotent.
-  prismaDbPush();
+  // 2. Prisma-owned global app tables (users, tenants, sessions, …). Applied
+  //    from the generated baseline through the tracked runner exactly once.
+  if (!applied.has(PRISMA_BASELINE_VERSION)) {
+    await applyPrismaBaseline();
+    count++;
+  } else {
+    console.log('[migrate] skip   prisma baseline (global app tables)');
+  }
 
   // 3. Remaining global deltas (indexes, added columns) in filename order.
   for (const file of rest) {

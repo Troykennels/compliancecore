@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { useAuthStore } from './stores/auth.store';
 import { setAccessToken } from './lib/api-client';
+import { queryClient } from './lib/query-client';
+import { ErrorBoundary } from './components/error-boundary';
 import { authApi } from './features/auth/api/auth.api';
 import { ProtectedRoute, PublicOnlyRoute } from './routes/protected.routes';
 import { AppShell } from './components/app-shell';
@@ -46,16 +48,6 @@ import { BillingInvoicesPage } from './features/billing/pages/billing-invoices.p
 import { BillingPaymentMethodsPage } from './features/billing/pages/billing-payment-methods.page';
 import { BillingAdminPage } from './features/billing/pages/billing-admin.page';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 30_000,
-      retry: 1,
-      refetchOnWindowFocus: true,
-    },
-  },
-});
-
 // Attempt a silent token refresh on every app load.
 // If the httpOnly refresh cookie is present and valid, restores auth state.
 function AuthInitialiser({ children }: { children: React.ReactNode }): JSX.Element {
@@ -97,6 +89,7 @@ function AuthInitialiser({ children }: { children: React.ReactNode }): JSX.Eleme
 
 export default function App(): JSX.Element {
   return (
+    <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthInitialiser>
@@ -183,6 +176,7 @@ export default function App(): JSX.Element {
 
       <Toaster position="top-right" richColors closeButton />
     </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

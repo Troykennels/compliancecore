@@ -6,7 +6,11 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["global", "framework_data"]
+  // Prisma manages ONLY the `global` schema (its models below). `framework_data`
+  // and the raw-SQL global tables (billing, schema_migrations) are owned by
+  // hand-written migrations — they are deliberately NOT listed here so that
+  // `prisma migrate` never treats them as drift and drops them.
+  schemas  = ["global"]
 }
 
 // ─── Enums ────────────────────────────────────────────────────────────────────

@@ -120,7 +120,8 @@ VALUES
         'SAMA CSF', '2017', 'Saudi Arabia', 'Saudi Arabian Monetary Authority (SAMA)',
         'Mandatory cybersecurity framework for all financial institutions regulated by SAMA in Saudi Arabia.',
         TRUE, '2017-05-01'
-    );
+    )
+ON CONFLICT (code) DO NOTHING;
 
 -- =============================================================================
 -- SOC 2 CATEGORIES (Trust Service Criteria)
@@ -156,7 +157,8 @@ FROM soc2, (VALUES
      'System processing is complete, valid, accurate, timely, and authorized.', 12),
     ('P1',  'Privacy',
      'Personal information is collected, used, retained, disclosed, and disposed of as committed.', 13)
-) AS cats(code, name, description, sort_order);
+) AS cats(code, name, description, sort_order)
+ON CONFLICT (framework_id, code) DO NOTHING;
 
 -- =============================================================================
 -- ISO 27001:2022 CATEGORIES (Themes/Clauses)
@@ -174,7 +176,8 @@ FROM iso, (VALUES
      '14 controls for physical and environmental security.', 3),
     ('8',  'Technological Controls',
      '34 controls covering technical security measures and tools.', 4)
-) AS cats(code, name, description, sort_order);
+) AS cats(code, name, description, sort_order)
+ON CONFLICT (framework_id, code) DO NOTHING;
 
 -- =============================================================================
 -- NDPR CATEGORIES
@@ -200,7 +203,8 @@ FROM ndpr, (VALUES
      'DPO appointment and responsibilities under NDPR.', 7),
     ('SP-8',  'Audit & Compliance',
      'Data Protection Audit obligations (DPCO/DPA accreditation).', 8)
-) AS cats(code, name, description, sort_order);
+) AS cats(code, name, description, sort_order)
+ON CONFLICT (framework_id, code) DO NOTHING;
 
 -- =============================================================================
 -- Note: Full control sets (SOC 2 CC criteria, ISO 27001 Annex A controls,

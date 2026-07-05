@@ -1,5 +1,7 @@
 import crypto from 'crypto';
 import { withTenantSchema } from '../../lib/tenant';
+import { env } from '../../config/env';
+import { AppError } from '../../lib/errors';
 
 export interface CreateSignatureInput {
   userId:         string;
@@ -32,27 +34,41 @@ export interface DigitalSignature {
   createdAt:       string;
 }
 
-const SIGNATURE_SECRET = process.env.SIGNATURE_SECRET ?? process.env.JWT_SECRET ?? 'changeme';
+// Server-only key from the validated env. There is NO fallback: a missing
+// SIGNATURE_SECRET fails startup (see config/env.ts), which is what makes the
+// HMAC certificate impossible to forge offline.
+const SIGNATURE_SECRET = env.SIGNATURE_SECRET;
 
+// The certificate binds every identifying field of the signing act. `signedAt`
+// is server-generated at signing time (never client-supplied), so a signature
+// can neither be forged (secret is server-only) nor back-dated via the API.
 export function generateSignatureHash(
+  documentType: string,
+  documentId: string,
   documentHash: string,
   userId: string,
   signedAt: string,
 ): string {
   return crypto
     .createHmac('sha256', SIGNATURE_SECRET)
-    .update(`${documentHash}:${userId}:${signedAt}`)
+    .update(`${documentType}:${documentId}:${documentHash}:${userId}:${signedAt}`)
     .digest('hex');
 }
 
 export function verifySignatureHash(
   signatureHash: string,
+  documentType: string,
+  documentId: string,
   documentHash: string,
   userId: string,
   signedAt: string,
 ): boolean {
-  const expected = generateSignatureHash(documentHash, userId, signedAt);
-  return crypto.timingSafeEqual(Buffer.from(signatureHash, 'hex'), Buffer.from(expected, 'hex'));
+  const expected = generateSignatureHash(documentType, documentId, documentHash, userId, signedAt);
+  const a = Buffer.from(signatureHash, 'hex');
+  const b = Buffer.from(expected, 'hex');
+  // timingSafeEqual throws on length mismatch — guard so a malformed/foreign
+  // hash returns false instead of crashing the request.
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 export async function createSignature(
@@ -61,7 +77,22 @@ export async function createSignature(
 ): Promise<string> {
   return withTenantSchema(schemaName, async (prisma) => {
     const signedAt = new Date().toISOString();
-    const signatureHash = generateSignatureHash(input.documentHash, input.userId, signedAt);
+    const signatureHash = generateSignatureHash(
+      input.documentType, input.documentId, input.documentHash, input.userId, signedAt,
+    );
+
+    // Idempotency / non-repudiation guard: one valid signature per
+    // (document, signer). Prevents duplicate legally-meaningful signatures from
+    // a double-submit or replay.
+    const [existing] = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT id FROM digital_signatures
+        WHERE document_type = $1 AND document_id = $2 AND user_id = $3 AND is_valid = TRUE
+        LIMIT 1`,
+      input.documentType, input.documentId, input.userId,
+    );
+    if (existing) {
+      throw new AppError('You have already signed this document', 409);
+    }
 
     const [user] = await prisma.$queryRawUnsafe<any[]>(
       `SELECT first_name, last_name, email FROM global.users WHERE id = $1`, input.userId,
@@ -177,11 +208,17 @@ export async function revokeSignature(
   reason: string,
 ): Promise<void> {
   return withTenantSchema(schemaName, async (prisma) => {
-    await prisma.$executeRawUnsafe(`
+    // State-conditional: only revoke a currently-valid signature. A 0-row
+    // result means it was already revoked (or never existed) — treat as a
+    // conflict rather than a silent no-op "success".
+    const affected = await prisma.$executeRawUnsafe(`
       UPDATE digital_signatures
       SET is_valid = FALSE, revoked_at = NOW(), revoked_by = $2, revocation_reason = $3
-      WHERE id = $1
+      WHERE id = $1 AND is_valid = TRUE
     `, id, revokedBy, reason);
+    if (affected === 0) {
+      throw new AppError('Signature not found or already revoked', 409);
+    }
   });
 }
 

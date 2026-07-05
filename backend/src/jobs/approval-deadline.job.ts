@@ -9,7 +9,13 @@ const QUEUE_NAME = 'approval-deadlines';
 
 export const approvalDeadlineQueue = new Queue(QUEUE_NAME, {
   connection: redisForQueues,
-  defaultJobOptions: { removeOnComplete: 50, removeOnFail: 100 },
+  // Retry transient failures so a blip doesn't skip a deadline sweep.
+  defaultJobOptions: {
+    removeOnComplete: 50,
+    removeOnFail: 100,
+    attempts: 3,
+    backoff: { type: 'exponential', delay: 5000 },
+  },
 });
 
 async function processJob(_job: Job) {
