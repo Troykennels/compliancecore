@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import rateLimit from 'express-rate-limit';
+import { makeRateLimiter } from '../../lib/rate-limit';
 import { authenticate } from '../../middleware/auth.middleware';
 import { resolveTenant } from '../../middleware/tenant.middleware';
 import { requirePermission } from '../../middleware/rbac.middleware';
@@ -14,11 +14,9 @@ router.use(authenticate(), resolveTenant);
 // unbounded spend or exhaust connections on a hung upstream. Limit per-user
 // (falls back to IP for safety). Keyed on the JWT subject so it can't be evaded
 // by rotating IPs.
-const aiLimiter = rateLimit({
+const aiLimiter = makeRateLimiter({
   windowMs: 60 * 1000, // 1 minute
   max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
   keyGenerator: (req) => req.user?.id ?? req.ip ?? 'anonymous',
   message: { data: null, error: { code: 'TOO_MANY_REQUESTS', message: 'AI request limit reached. Please slow down and try again shortly.' } },
 });

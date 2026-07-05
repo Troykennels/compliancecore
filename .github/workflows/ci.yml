@@ -12,11 +12,27 @@ concurrency:
 
 jobs:
   backend:
-    name: Backend · typecheck & build
+    name: Backend · typecheck, build & test
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
+    # Postgres with pgvector (the migration bootstrap installs the `vector`
+    # extension) for the integration tests.
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: compliancecore
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d compliancecore"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/compliancecore?schema=global
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,6 +47,8 @@ jobs:
         run: npm run type-check
       - name: Build
         run: npm run build
+      - name: Test (unit + integration)
+        run: npm test
 
   frontend:
     name: Frontend · lint, typecheck & build

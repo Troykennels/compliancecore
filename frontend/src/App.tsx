@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import { useAuthStore } from './stores/auth.store';
 import { setAccessToken } from './lib/api-client';
 import { queryClient } from './lib/query-client';
@@ -10,43 +11,52 @@ import { authApi } from './features/auth/api/auth.api';
 import { ProtectedRoute, PublicOnlyRoute } from './routes/protected.routes';
 import { AppShell } from './components/app-shell';
 import { PATHS } from './routes/paths';
-import { LoginPage } from './features/auth/pages/login.page';
-import { RegisterPage } from './features/auth/pages/register.page';
-import { ForgotPasswordPage } from './features/auth/pages/forgot-password.page';
-import { ResetPasswordPage } from './features/auth/pages/reset-password.page';
-import { OnboardingPage } from './features/organizations/pages/onboarding.page';
-import { EmailVerificationPage } from './features/auth/pages/email-verification.page';
-import { BranchesPage } from './features/branches/pages/branches.page';
-import { DepartmentsPage } from './features/departments/pages/departments.page';
-import { SettingsOrgPage } from './features/settings/pages/settings-org.page';
-import { SettingsTeamPage } from './features/settings/pages/settings-team.page';
-import { SettingsSecurityPage } from './features/settings/pages/settings-security.page';
-import { SettingsSsoPage } from './features/settings/pages/settings-sso.page';
-import { SettingsApiKeysPage } from './features/settings/pages/settings-api-keys.page';
-import { SettingsWebhooksPage } from './features/settings/pages/settings-webhooks.page';
-import { SettingsNotificationsPage } from './features/settings/pages/settings-notifications.page';
-import { SettingsBillingPage } from './features/settings/pages/settings-billing.page';
-import { EvidencePage } from './features/evidence/pages/evidence.page';
-import { EvidenceDetailPage } from './features/evidence/pages/evidence-detail.page';
-import { EvidenceSharedPage } from './features/evidence/pages/evidence-shared.page';
-import { CalendarPage } from './features/calendar/pages/calendar.page';
-import { ExpiryPage } from './features/expiry/pages/expiry.page';
-import { NotificationsPage } from './features/notifications/pages/notifications.page';
-import { ScorePage } from './features/compliance-score/pages/score.page';
-import { DashboardPage } from './features/dashboard/pages/dashboard.page';
-import { ApprovalsPage } from './features/approvals/pages/approvals.page';
-import { ApprovalDetailPage } from './features/approvals/pages/approval-detail.page';
-import { SignaturesPage } from './features/signatures/pages/signatures.page';
-import { TasksPage } from './features/tasks/pages/tasks.page';
-import { TaskDetailPage } from './features/tasks/pages/task-detail.page';
-import { EscalationsPage } from './features/escalations/pages/escalations.page';
-import { AiToolsPage } from './features/ai/pages/ai-tools.page';
-import { ExecutiveDashboardPage } from './features/reports/pages/executive-dashboard.page';
-import { BillingOverviewPage } from './features/billing/pages/billing-overview.page';
-import { BillingPlansPage } from './features/billing/pages/billing-plans.page';
-import { BillingInvoicesPage } from './features/billing/pages/billing-invoices.page';
-import { BillingPaymentMethodsPage } from './features/billing/pages/billing-payment-methods.page';
-import { BillingAdminPage } from './features/billing/pages/billing-admin.page';
+
+// Route-level code-splitting: each page is its own lazy chunk so the initial
+// bundle (login) no longer pulls in the entire app + recharts. Pages are named
+// exports, so map them to a default for React.lazy.
+const lazyPage = <T extends Record<string, React.ComponentType<unknown>>>(
+  loader: () => Promise<T>,
+  name: keyof T,
+) => lazy(() => loader().then((m) => ({ default: m[name] })));
+
+const LoginPage = lazyPage(() => import('./features/auth/pages/login.page'), 'LoginPage');
+const RegisterPage = lazyPage(() => import('./features/auth/pages/register.page'), 'RegisterPage');
+const ForgotPasswordPage = lazyPage(() => import('./features/auth/pages/forgot-password.page'), 'ForgotPasswordPage');
+const ResetPasswordPage = lazyPage(() => import('./features/auth/pages/reset-password.page'), 'ResetPasswordPage');
+const OnboardingPage = lazyPage(() => import('./features/organizations/pages/onboarding.page'), 'OnboardingPage');
+const EmailVerificationPage = lazyPage(() => import('./features/auth/pages/email-verification.page'), 'EmailVerificationPage');
+const BranchesPage = lazyPage(() => import('./features/branches/pages/branches.page'), 'BranchesPage');
+const DepartmentsPage = lazyPage(() => import('./features/departments/pages/departments.page'), 'DepartmentsPage');
+const SettingsOrgPage = lazyPage(() => import('./features/settings/pages/settings-org.page'), 'SettingsOrgPage');
+const SettingsTeamPage = lazyPage(() => import('./features/settings/pages/settings-team.page'), 'SettingsTeamPage');
+const SettingsSecurityPage = lazyPage(() => import('./features/settings/pages/settings-security.page'), 'SettingsSecurityPage');
+const SettingsSsoPage = lazyPage(() => import('./features/settings/pages/settings-sso.page'), 'SettingsSsoPage');
+const SettingsApiKeysPage = lazyPage(() => import('./features/settings/pages/settings-api-keys.page'), 'SettingsApiKeysPage');
+const SettingsWebhooksPage = lazyPage(() => import('./features/settings/pages/settings-webhooks.page'), 'SettingsWebhooksPage');
+const SettingsNotificationsPage = lazyPage(() => import('./features/settings/pages/settings-notifications.page'), 'SettingsNotificationsPage');
+const SettingsBillingPage = lazyPage(() => import('./features/settings/pages/settings-billing.page'), 'SettingsBillingPage');
+const EvidencePage = lazyPage(() => import('./features/evidence/pages/evidence.page'), 'EvidencePage');
+const EvidenceDetailPage = lazyPage(() => import('./features/evidence/pages/evidence-detail.page'), 'EvidenceDetailPage');
+const EvidenceSharedPage = lazyPage(() => import('./features/evidence/pages/evidence-shared.page'), 'EvidenceSharedPage');
+const CalendarPage = lazyPage(() => import('./features/calendar/pages/calendar.page'), 'CalendarPage');
+const ExpiryPage = lazyPage(() => import('./features/expiry/pages/expiry.page'), 'ExpiryPage');
+const NotificationsPage = lazyPage(() => import('./features/notifications/pages/notifications.page'), 'NotificationsPage');
+const ScorePage = lazyPage(() => import('./features/compliance-score/pages/score.page'), 'ScorePage');
+const DashboardPage = lazyPage(() => import('./features/dashboard/pages/dashboard.page'), 'DashboardPage');
+const ApprovalsPage = lazyPage(() => import('./features/approvals/pages/approvals.page'), 'ApprovalsPage');
+const ApprovalDetailPage = lazyPage(() => import('./features/approvals/pages/approval-detail.page'), 'ApprovalDetailPage');
+const SignaturesPage = lazyPage(() => import('./features/signatures/pages/signatures.page'), 'SignaturesPage');
+const TasksPage = lazyPage(() => import('./features/tasks/pages/tasks.page'), 'TasksPage');
+const TaskDetailPage = lazyPage(() => import('./features/tasks/pages/task-detail.page'), 'TaskDetailPage');
+const EscalationsPage = lazyPage(() => import('./features/escalations/pages/escalations.page'), 'EscalationsPage');
+const AiToolsPage = lazyPage(() => import('./features/ai/pages/ai-tools.page'), 'AiToolsPage');
+const ExecutiveDashboardPage = lazyPage(() => import('./features/reports/pages/executive-dashboard.page'), 'ExecutiveDashboardPage');
+const BillingOverviewPage = lazyPage(() => import('./features/billing/pages/billing-overview.page'), 'BillingOverviewPage');
+const BillingPlansPage = lazyPage(() => import('./features/billing/pages/billing-plans.page'), 'BillingPlansPage');
+const BillingInvoicesPage = lazyPage(() => import('./features/billing/pages/billing-invoices.page'), 'BillingInvoicesPage');
+const BillingPaymentMethodsPage = lazyPage(() => import('./features/billing/pages/billing-payment-methods.page'), 'BillingPaymentMethodsPage');
+const BillingAdminPage = lazyPage(() => import('./features/billing/pages/billing-admin.page'), 'BillingAdminPage');
 
 // Attempt a silent token refresh on every app load.
 // If the httpOnly refresh cookie is present and valid, restores auth state.
@@ -93,6 +103,7 @@ export default function App(): JSX.Element {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthInitialiser>
+          <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* Public-only: redirect to dashboard if already logged in */}
             <Route element={<PublicOnlyRoute />}>
@@ -171,12 +182,22 @@ export default function App(): JSX.Element {
             <Route path="/" element={<Navigate to={PATHS.DASHBOARD} replace />} />
             <Route path="*" element={<Navigate to={PATHS.DASHBOARD} replace />} />
           </Routes>
+          </Suspense>
         </AuthInitialiser>
       </BrowserRouter>
 
       <Toaster position="top-right" richColors closeButton />
     </QueryClientProvider>
     </ErrorBoundary>
+  );
+}
+
+// Shown while a lazily-loaded route chunk is being fetched.
+function RouteFallback(): JSX.Element {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+    </div>
   );
 }
 

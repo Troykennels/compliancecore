@@ -73,6 +73,7 @@ CREATE INDEX idx_approval_requests_status      ON approval_requests(status)     
 CREATE INDEX idx_approval_requests_requested_by ON approval_requests(requested_by) WHERE deleted_at IS NULL;
 CREATE INDEX idx_approval_requests_entity       ON approval_requests(entity_type, entity_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_approval_requests_created_at  ON approval_requests(created_at DESC) WHERE deleted_at IS NULL;
+CREATE INDEX idx_approval_requests_workflow    ON approval_requests(workflow_id);
 
 -- Step instances for each approval request
 CREATE TABLE approval_request_steps (
@@ -102,6 +103,8 @@ CREATE TABLE approval_request_steps (
 CREATE INDEX idx_request_steps_request_id  ON approval_request_steps(request_id);
 CREATE INDEX idx_request_steps_assigned_to ON approval_request_steps(assigned_to) WHERE status = 'active';
 CREATE INDEX idx_request_steps_status      ON approval_request_steps(status);
+CREATE INDEX idx_request_steps_workflow_step ON approval_request_steps(workflow_step_id);
+CREATE INDEX idx_request_steps_signature     ON approval_request_steps(digital_signature_id);
 
 -- ============================================================
 -- DIGITAL SIGNATURES
@@ -201,6 +204,8 @@ CREATE TABLE task_attachments (
     created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE INDEX idx_task_attachments_task ON task_attachments(task_id);
+
 -- ============================================================
 -- ESCALATION RULES + EVENTS
 -- ============================================================
@@ -246,6 +251,7 @@ CREATE TABLE escalation_events (
 CREATE INDEX idx_escalation_events_status          ON escalation_events(status);
 CREATE INDEX idx_escalation_events_next_at         ON escalation_events(next_escalation_at) WHERE status = 'active';
 CREATE INDEX idx_escalation_events_entity          ON escalation_events(entity_type, entity_id);
+CREATE INDEX idx_escalation_events_rule            ON escalation_events(rule_id);
 
 -- ============================================================
 -- NOTIFICATION EXTENSIONS

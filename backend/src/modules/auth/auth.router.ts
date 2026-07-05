@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import rateLimit from 'express-rate-limit';
+import { makeRateLimiter } from '../../lib/rate-limit';
 import { validate } from '../../middleware/validate.middleware';
 import { authenticate } from '../../middleware/auth.middleware';
 import * as schema from './auth.schema';
@@ -7,30 +7,28 @@ import * as controller from './auth.controller';
 
 const router = Router();
 
-// ─── Rate Limiters ────────────────────────────────────────────────────────────
+// ─── Rate Limiters (Redis-backed — consistent across instances/restarts) ─────
 
-const loginLimiter = rateLimit({
+const loginLimiter = makeRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5,
   message: { data: null, error: { code: 'TOO_MANY_REQUESTS', message: 'Too many login attempts. Try again in 15 minutes.' } },
-  standardHeaders: true,
-  legacyHeaders: false,
   skipSuccessfulRequests: true,
 });
 
-const registerLimiter = rateLimit({
+const registerLimiter = makeRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 3,
   message: { data: null, error: { code: 'TOO_MANY_REQUESTS', message: 'Too many registration attempts.' } },
 });
 
-const passwordLimiter = rateLimit({
+const passwordLimiter = makeRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 3,
   message: { data: null, error: { code: 'TOO_MANY_REQUESTS', message: 'Too many password reset requests.' } },
 });
 
-const mfaLimiter = rateLimit({
+const mfaLimiter = makeRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 5,
   message: { data: null, error: { code: 'TOO_MANY_REQUESTS', message: 'Too many MFA attempts.' } },
