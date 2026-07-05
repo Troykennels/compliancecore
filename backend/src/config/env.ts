@@ -34,6 +34,11 @@ const schema = z.object({
   AWS_SECRET_ACCESS_KEY: z.string().min(1),
   AWS_REGION:            z.string().default('eu-west-1'),
   AWS_S3_BUCKET:         z.string().min(1),
+  // Optional custom S3 endpoint for S3-compatible providers (e.g. Cloudflare R2,
+  // MinIO, Backblaze B2). Leave unset to use AWS S3. For R2: set this to
+  // https://<accountid>.r2.cloudflarestorage.com, AWS_REGION=auto.
+  AWS_S3_ENDPOINT:       z.string().url().optional(),
+  AWS_S3_FORCE_PATH_STYLE: z.string().transform((v) => v === 'true').default('false'),
 
   // OCR — if OCR_PROVIDER=textract (default) uses AWS Textract,
   // if OCR_PROVIDER=none disables OCR entirely

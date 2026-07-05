@@ -1,0 +1,68 @@
+# Render blueprint (https://render.com) — one deploy for the ComplianceCore API.
+# In Render: New → Blueprint → point at this repo. Then fill the `sync: false`
+# secrets in the dashboard (DATABASE_URL, REDIS_URL, keys, SMTP, S3, GROQ).
+#
+# NOTE: the free web service SPINS DOWN after 15 min idle, which pauses the
+# BullMQ cron workers. Keep it awake with a free pinger (UptimeRobot /
+# cron-job.org) hitting /health every 10 min, or use an always-on host (Koyeb).
+services:
+  - type: web
+    name: compliancecore-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    # The Dockerfile only starts the server; migrate first (as railway.json did).
+    dockerCommand: sh -c "node scripts/migrate.mjs && node dist/server.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3002
+      # Secrets — set these in the Render dashboard (never commit them).
+      - key: DATABASE_URL            # Neon: postgresql://...neon.tech/db?sslmode=require&schema=global
+        sync: false
+      - key: REDIS_URL               # Upstash: rediss://:pass@host:port
+        sync: false
+      - key: FRONTEND_URL            # https://<project>.pages.dev
+        sync: false
+      - key: JWT_PRIVATE_KEY_BASE64
+        sync: false
+      - key: JWT_PUBLIC_KEY_BASE64
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: COOKIE_SECRET
+        sync: false
+      - key: SIGNATURE_SECRET
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: AWS_ACCESS_KEY_ID       # R2 access key (or AWS)
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION              # 'auto' for Cloudflare R2
+        value: auto
+      - key: AWS_S3_BUCKET
+        sync: false
+      - key: AWS_S3_ENDPOINT         # R2: https://<accountid>.r2.cloudflarestorage.com
+        sync: false
+      - key: AWS_S3_FORCE_PATH_STYLE
+        value: "true"
+      - key: OCR_PROVIDER            # 'none' — AWS Textract is not free
+        value: none
+      - key: GROQ_API_KEY
+        sync: false

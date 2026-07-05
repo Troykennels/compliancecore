@@ -39,3 +39,7 @@ Thumbs.db
 
 # ─── Prisma generated client ─────────────────────────────────────────────────
 backend/node_modules/.prisma/
+
+# Local generated deploy secrets
+deploy-secrets.local.env
+*.local.env

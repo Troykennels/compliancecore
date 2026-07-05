@@ -10,6 +10,10 @@ import { env } from '../config/env';
 
 const s3 = new S3Client({
   region: env.AWS_REGION,
+  // Custom endpoint + path-style addressing for S3-compatible stores such as
+  // Cloudflare R2 (free, no expiry). Unset → default AWS S3 behaviour.
+  ...(env.AWS_S3_ENDPOINT && { endpoint: env.AWS_S3_ENDPOINT }),
+  forcePathStyle: env.AWS_S3_FORCE_PATH_STYLE,
   credentials: {
     accessKeyId:     env.AWS_ACCESS_KEY_ID,
     secretAccessKey: env.AWS_SECRET_ACCESS_KEY,

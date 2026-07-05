@@ -4,10 +4,16 @@ import * as service from './auth.service';
 
 const REFRESH_COOKIE = 'cc_refresh_token';
 
+const isProd = env.NODE_ENV === 'production';
+
 const cookieOptions = {
   httpOnly: true,
-  secure: env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  secure: isProd,
+  // Cross-site deploys (SPA and API on different domains — e.g. Cloudflare Pages
+  // + Koyeb/Render) need SameSite=None, or the browser drops the refresh cookie
+  // on the cross-site /auth/refresh request and users get logged out on reload.
+  // None requires Secure, which is on in production (HTTPS). Dev stays Lax.
+  sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
   path: '/api/auth',
 };
 
