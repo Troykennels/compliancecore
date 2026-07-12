@@ -24,6 +24,7 @@ import { aiRouter } from './modules/ai/ai.router';
 import { reportsRouter } from './modules/reports/reports.router';
 import { billingRouter } from './modules/billing/billing.router';
 import { healthRouter } from './modules/health/health.router';
+import { installOrionGate } from './orionLicense';
 import { env } from './config/env';
 
 export function createApp(): Express {
@@ -60,6 +61,16 @@ export function createApp(): Express {
   });
   // Liveness (/health/live) + readiness (/health/ready, checks DB + Redis)
   app.use('/health', healthRouter);
+
+  // ─── Orion licensing gate ────────────────────────────────────────────────
+  // Baked product config; a deployment is licensed by setting ORION_LICENSE_KEY.
+  // COMPLETELY OFF unless that variable is set, and fails open on any error, so
+  // it can never take a running deployment down.
+  try {
+    installOrionGate(app);
+  } catch {
+    /* never let licensing break startup */
+  }
 
   // ─── API Routes ──────────────────────────────────────────────────────────
   app.use('/api/auth',         authRouter);
