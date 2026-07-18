@@ -64,6 +64,7 @@ function assertSafeSchemaName(name: string): void {
 export async function withTenantSchema<T>(
   schemaName: string,
   fn: (tx: Prisma.TransactionClient) => Promise<T>,
+  options?: { timeout?: number; maxWait?: number },
 ): Promise<T> {
   assertSafeSchemaName(schemaName);
 
@@ -72,7 +73,7 @@ export async function withTenantSchema<T>(
     // here because we have already validated the schema name above.
     await tx.$executeRaw`SET LOCAL search_path = ${Prisma.raw(schemaName)}, framework_data, global, public`;
     return fn(tx);
-  });
+  }, options);
 }
 
 // Derives the schema name from a tenant UUID (strips hyphens).

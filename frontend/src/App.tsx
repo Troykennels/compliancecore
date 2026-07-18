@@ -33,6 +33,9 @@ const RisksPage = lazyPage(() => import('./features/risks/pages/risks.page'), 'R
 const VendorsPage = lazyPage(() => import('./features/vendors/pages/vendors.page'), 'VendorsPage');
 const AuditsPage = lazyPage(() => import('./features/audits/pages/audits.page'), 'AuditsPage');
 const TrainingPage = lazyPage(() => import('./features/training/pages/training.page'), 'TrainingPage');
+const FrameworksPage = lazyPage(() => import('./features/frameworks/pages/frameworks.page'), 'FrameworksPage');
+const AnalyticsPage = lazyPage(() => import('./features/analytics/pages/analytics.page'), 'AnalyticsPage');
+const IntegrationsPage = lazyPage(() => import('./features/integrations/pages/integrations.page'), 'IntegrationsPage');
 const DepartmentsPage = lazyPage(() => import('./features/departments/pages/departments.page'), 'DepartmentsPage');
 const SettingsOrgPage = lazyPage(() => import('./features/settings/pages/settings-org.page'), 'SettingsOrgPage');
 const SettingsTeamPage = lazyPage(() => import('./features/settings/pages/settings-team.page'), 'SettingsTeamPage');
@@ -131,7 +134,7 @@ export default function App(): JSX.Element {
               <Route element={<AppShell />}>
                 <Route path={PATHS.DASHBOARD}    element={<DashboardPage />} />
                 <Route path={PATHS.CONTROLS}     element={<ControlsPage />} />
-                <Route path={PATHS.FRAMEWORKS}   element={<PlaceholderPage title="Frameworks" />} />
+                <Route path={PATHS.FRAMEWORKS}   element={<FrameworksPage />} />
                 <Route path={PATHS.EVIDENCE}     element={<EvidencePage />} />
                 <Route path="/evidence/:id"      element={<EvidenceDetailPage />} />
                 <Route path={PATHS.POLICIES}     element={<PoliciesPage />} />
@@ -140,7 +143,7 @@ export default function App(): JSX.Element {
                 <Route path={PATHS.AUDITS}       element={<AuditsPage />} />
                 <Route path={PATHS.TRAINING}     element={<TrainingPage />} />
                 <Route path={PATHS.INCIDENTS}    element={<PlaceholderPage title="Incidents" />} />
-                <Route path={PATHS.ANALYTICS}    element={<PlaceholderPage title="Analytics" />} />
+                <Route path={PATHS.ANALYTICS}    element={<AnalyticsPage />} />
                 <Route path={PATHS.REPORTS}      element={<ExecutiveDashboardPage />} />
 
                 {/* Billing (Phase 13) */}
@@ -149,7 +152,7 @@ export default function App(): JSX.Element {
                 <Route path={PATHS.BILLING_INVOICES}         element={<BillingInvoicesPage />} />
                 <Route path={PATHS.BILLING_PAYMENT_METHODS}  element={<BillingPaymentMethodsPage />} />
                 <Route path={PATHS.BILLING_ADMIN}            element={<BillingAdminPage />} />
-                <Route path={PATHS.INTEGRATIONS} element={<PlaceholderPage title="Integrations" />} />
+                <Route path={PATHS.INTEGRATIONS} element={<IntegrationsPage />} />
 
                 {/* Phase 9 modules */}
                 <Route path={PATHS.CALENDAR}         element={<CalendarPage />} />

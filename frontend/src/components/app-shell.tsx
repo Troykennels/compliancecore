@@ -6,6 +6,7 @@ import {
   ChevronDown, Building2, GitBranch, Calendar, Clock, ChevronsLeft,
   ChevronsRight, FileArchive, CheckSquare, ShieldAlert, ListChecks, Sparkles, PieChart,
   CreditCard, Loader2, ScrollText, Flame, Store, ClipboardCheck, GraduationCap,
+  Library, TrendingUp, Plug,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
 import { authApi } from '@/features/auth/api/auth.api';
@@ -40,6 +41,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     heading: 'Governance',
     items: [
+      { label: 'Frameworks',        to: PATHS.FRAMEWORKS,         icon: <Library className="h-4 w-4" /> },
       { label: 'Controls',          to: PATHS.CONTROLS,           icon: <ShieldCheck className="h-4 w-4" /> },
       { label: 'Policies',          to: PATHS.POLICIES,           icon: <ScrollText className="h-4 w-4" /> },
       { label: 'Risk Register',     to: PATHS.RISKS,              icon: <Flame className="h-4 w-4" /> },
@@ -80,6 +82,13 @@ const NAV_GROUPS: NavGroup[] = [
     heading: 'Reports',
     items: [
       { label: 'Executive Dashboard', to: PATHS.REPORTS,      icon: <PieChart className="h-4 w-4" /> },
+      { label: 'Analytics',           to: PATHS.ANALYTICS,    icon: <TrendingUp className="h-4 w-4" /> },
+    ],
+  },
+  {
+    heading: 'Platform',
+    items: [
+      { label: 'Integrations',        to: PATHS.INTEGRATIONS, icon: <Plug className="h-4 w-4" /> },
     ],
   },
   {

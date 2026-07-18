@@ -16,6 +16,8 @@ import risksRouter from './modules/risks/risks.router';
 import vendorsRouter from './modules/vendors/vendors.router';
 import auditsRouter from './modules/audits/audits.router';
 import trainingRouter from './modules/training/training.router';
+import frameworksRouter from './modules/frameworks/frameworks.router';
+import analyticsRouter from './modules/analytics/analytics.router';
 import calendarRouter from './modules/calendar/calendar.router';
 import expiryRouter from './modules/expiry/expiry.router';
 import notificationsRouter from './modules/notifications/notification.router';
@@ -90,6 +92,8 @@ export function createApp(): Express {
   app.use('/api/vendors',        vendorsRouter);
   app.use('/api/audits',         auditsRouter);
   app.use('/api/training',       trainingRouter);
+  app.use('/api/frameworks',     frameworksRouter);
+  app.use('/api/analytics',      analyticsRouter);
   app.use('/api/calendar',       calendarRouter);
   app.use('/api/expiry',         expiryRouter);
   app.use('/api/notifications',  notificationsRouter);
