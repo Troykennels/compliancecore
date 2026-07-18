@@ -5,7 +5,7 @@ import {
   BarChart2, Settings, LogOut,
   ChevronDown, Building2, GitBranch, Calendar, Clock, ChevronsLeft,
   ChevronsRight, FileArchive, CheckSquare, ShieldAlert, ListChecks, Sparkles, PieChart,
-  CreditCard, Loader2, ScrollText, Flame, Store,
+  CreditCard, Loader2, ScrollText, Flame, Store, ClipboardCheck, GraduationCap,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
 import { authApi } from '@/features/auth/api/auth.api';
@@ -52,6 +52,13 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Branches',          to: PATHS.BRANCHES,           icon: <GitBranch className="h-4 w-4" /> },
       { label: 'Departments',       to: PATHS.DEPARTMENTS,        icon: <Building2 className="h-4 w-4" /> },
+    ],
+  },
+  {
+    heading: 'Assurance',
+    items: [
+      { label: 'Audits',            to: PATHS.AUDITS,             icon: <ClipboardCheck className="h-4 w-4" /> },
+      { label: 'Training',          to: PATHS.TRAINING,           icon: <GraduationCap className="h-4 w-4" /> },
     ],
   },
   {

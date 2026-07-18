@@ -31,6 +31,8 @@ const ControlsPage = lazyPage(() => import('./features/controls/pages/controls.p
 const PoliciesPage = lazyPage(() => import('./features/policies/pages/policies.page'), 'PoliciesPage');
 const RisksPage = lazyPage(() => import('./features/risks/pages/risks.page'), 'RisksPage');
 const VendorsPage = lazyPage(() => import('./features/vendors/pages/vendors.page'), 'VendorsPage');
+const AuditsPage = lazyPage(() => import('./features/audits/pages/audits.page'), 'AuditsPage');
+const TrainingPage = lazyPage(() => import('./features/training/pages/training.page'), 'TrainingPage');
 const DepartmentsPage = lazyPage(() => import('./features/departments/pages/departments.page'), 'DepartmentsPage');
 const SettingsOrgPage = lazyPage(() => import('./features/settings/pages/settings-org.page'), 'SettingsOrgPage');
 const SettingsTeamPage = lazyPage(() => import('./features/settings/pages/settings-team.page'), 'SettingsTeamPage');
@@ -135,8 +137,8 @@ export default function App(): JSX.Element {
                 <Route path={PATHS.POLICIES}     element={<PoliciesPage />} />
                 <Route path={PATHS.RISKS}        element={<RisksPage />} />
                 <Route path={PATHS.VENDORS}      element={<VendorsPage />} />
-                <Route path={PATHS.AUDITS}       element={<PlaceholderPage title="Audits" />} />
-                <Route path={PATHS.TRAINING}     element={<PlaceholderPage title="Training" />} />
+                <Route path={PATHS.AUDITS}       element={<AuditsPage />} />
+                <Route path={PATHS.TRAINING}     element={<TrainingPage />} />
                 <Route path={PATHS.INCIDENTS}    element={<PlaceholderPage title="Incidents" />} />
                 <Route path={PATHS.ANALYTICS}    element={<PlaceholderPage title="Analytics" />} />
                 <Route path={PATHS.REPORTS}      element={<ExecutiveDashboardPage />} />

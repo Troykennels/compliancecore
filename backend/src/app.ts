@@ -14,6 +14,8 @@ import controlsRouter from './modules/controls/controls.router';
 import policiesRouter from './modules/policies/policies.router';
 import risksRouter from './modules/risks/risks.router';
 import vendorsRouter from './modules/vendors/vendors.router';
+import auditsRouter from './modules/audits/audits.router';
+import trainingRouter from './modules/training/training.router';
 import calendarRouter from './modules/calendar/calendar.router';
 import expiryRouter from './modules/expiry/expiry.router';
 import notificationsRouter from './modules/notifications/notification.router';
@@ -86,6 +88,8 @@ export function createApp(): Express {
   app.use('/api/policies',       policiesRouter);
   app.use('/api/risks',          risksRouter);
   app.use('/api/vendors',        vendorsRouter);
+  app.use('/api/audits',         auditsRouter);
+  app.use('/api/training',       trainingRouter);
   app.use('/api/calendar',       calendarRouter);
   app.use('/api/expiry',         expiryRouter);
   app.use('/api/notifications',  notificationsRouter);
