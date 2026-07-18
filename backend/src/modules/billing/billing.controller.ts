@@ -84,8 +84,8 @@ export async function getInvoice(req: Request, res: Response) {
 
 export async function downloadInvoicePdf(req: Request, res: Response) {
   const { id } = req.params;
-  const buffer = await service.downloadInvoicePdf(tid(req), id);
   const inv = await service.getInvoice(tid(req), id);
+  const buffer = await service.generateInvoicePdf(inv);
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="invoice-${inv.number}.pdf"`);
   res.setHeader('Content-Length', buffer.length);

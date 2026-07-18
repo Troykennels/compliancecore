@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { resolveTenant } from '../../middleware/tenant.middleware';
 import { requirePermission } from '../../middleware/rbac.middleware';
+import { validateUuidParam } from '../../middleware/validate-params.middleware';
 import { asyncHandler } from '../../lib/asyncHandler';
 import * as ctrl from './reports.controller';
 
@@ -18,7 +19,7 @@ router.get('/export/excel',     requirePermission('reports:read'),  asyncHandler
 // Scheduled reports CRUD
 router.get('/scheduled',        requirePermission('reports:read'),  asyncHandler(ctrl.listScheduledReports));
 router.post('/scheduled',       requirePermission('reports:write'), asyncHandler(ctrl.createScheduledReport));
-router.patch('/scheduled/:id',  requirePermission('reports:write'), asyncHandler(ctrl.updateScheduledReport));
-router.delete('/scheduled/:id', requirePermission('reports:write'), asyncHandler(ctrl.deleteScheduledReport));
+router.patch('/scheduled/:id',  requirePermission('reports:write'), validateUuidParam('id'), asyncHandler(ctrl.updateScheduledReport));
+router.delete('/scheduled/:id', requirePermission('reports:write'), validateUuidParam('id'), asyncHandler(ctrl.deleteScheduledReport));
 
 export { router as reportsRouter };

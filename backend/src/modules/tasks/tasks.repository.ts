@@ -7,7 +7,7 @@ export async function findTasks(
   schemaName: string,
   filters: TaskFilters,
   currentUserId: string,
-): Promise<{ tasks: Task[]; total: number }> {
+): Promise<{ items: Task[]; total: number; page: number; limit: number }> {
   return withTenantSchema(schemaName, async (prisma) => {
     const conditions: string[] = ['t.deleted_at IS NULL'];
     const params: any[] = [];
@@ -54,7 +54,7 @@ export async function findTasks(
       LIMIT $${p++} OFFSET $${p++}
     `, ...params, limit, offset);
 
-    return { tasks: rows.map(mapTask), total: countRow.total };
+    return { items: rows.map(mapTask), total: countRow.total, page: filters.page ?? 1, limit };
   });
 }
 
@@ -99,13 +99,13 @@ export async function createTask(schemaName: string, dto: CreateTaskDto, userId:
   return withTenantSchema(schemaName, async (prisma) => {
     const [row] = await prisma.$queryRawUnsafe<any[]>(`
       INSERT INTO tasks(title,description,assigned_to,assigned_by,due_date,priority,entity_type,entity_id,framework_id,parent_task_id,estimated_hours,tags,is_recurring,recurrence_rule,created_by)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::text[],$13,$14,$15) RETURNING id
     `,
       dto.title, dto.description ?? null, dto.assignedTo ?? null, userId,
       dto.dueDate ?? null, dto.priority ?? 'medium',
       dto.entityType ?? null, dto.entityId ?? null, dto.frameworkId ?? null,
       dto.parentTaskId ?? null, dto.estimatedHours ?? null,
-      dto.tags ? `{${dto.tags.map((t) => `"${t}"`).join(',')}}` : '{}',
+      dto.tags ?? [],
       dto.isRecurring ?? false, dto.recurrenceRule ?? null, userId,
     );
     return row.id as string;
@@ -114,12 +114,19 @@ export async function createTask(schemaName: string, dto: CreateTaskDto, userId:
 
 export async function updateTask(schemaName: string, id: string, dto: UpdateTaskDto): Promise<void> {
   return withTenantSchema(schemaName, async (prisma) => {
-    const completedAt = dto.status === 'completed' ? 'NOW()' : 'completed_at';
+    // completed_at: set NOW() when completing, clear when moving to any other
+    // explicit status (e.g. reopening), otherwise leave untouched.
+    const completedAt =
+      dto.status === 'completed' ? 'NOW()'
+        : dto.status !== undefined ? 'NULL'
+          : 'completed_at';
+    // assigned_to: use a presence flag ($9) so an explicit null un-assigns the
+    // task, while an omitted field leaves the current assignee unchanged.
     await prisma.$executeRawUnsafe(`
       UPDATE tasks SET
         title           = COALESCE($2, title),
         description     = CASE WHEN $3::text IS NOT NULL THEN $3 ELSE description END,
-        assigned_to     = CASE WHEN $4::uuid IS NOT NULL THEN $4 ELSE assigned_to END,
+        assigned_to     = CASE WHEN $9::boolean THEN $4::uuid ELSE assigned_to END,
         due_date        = CASE WHEN $5::timestamptz IS NOT NULL THEN $5 ELSE due_date END,
         priority        = COALESCE($6, priority),
         status          = COALESCE($7, status),
@@ -129,11 +136,12 @@ export async function updateTask(schemaName: string, id: string, dto: UpdateTask
       WHERE id = $1 AND deleted_at IS NULL
     `, id, dto.title ?? null, dto.description ?? null, dto.assignedTo ?? null,
       dto.dueDate ?? null, dto.priority ?? null, dto.status ?? null, dto.actualHours ?? null,
+      dto.assignedTo !== undefined,
     );
     if (dto.tags) {
       await prisma.$executeRawUnsafe(
-        `UPDATE tasks SET tags = $2 WHERE id = $1`,
-        id, `{${dto.tags.map((t) => `"${t}"`).join(',')}}`,
+        `UPDATE tasks SET tags = $2::text[] WHERE id = $1`,
+        id, dto.tags,
       );
     }
   });
@@ -186,9 +194,23 @@ export async function addComment(schemaName: string, taskId: string, userId: str
   });
 }
 
-export async function deleteComment(schemaName: string, id: string): Promise<void> {
+export async function deleteComment(
+  schemaName: string,
+  taskId: string,
+  commentId: string,
+  userId: string,
+  canModerate: boolean,
+): Promise<boolean> {
   return withTenantSchema(schemaName, async (prisma) => {
-    await prisma.$executeRawUnsafe(`UPDATE task_comments SET deleted_at=NOW() WHERE id=$1`, id);
+    // Scope the delete to the task in the URL and to the comment author, unless
+    // the actor has an elevated (moderator) role.
+    const affected = await prisma.$executeRawUnsafe(
+      `UPDATE task_comments SET deleted_at = NOW()
+       WHERE id = $1 AND task_id = $2 AND deleted_at IS NULL
+         AND ($4::boolean OR user_id = $3)`,
+      commentId, taskId, userId, canModerate,
+    );
+    return affected === 1;
   });
 }
 

@@ -15,9 +15,10 @@ import {
   CreateWebhookInput,
   UpdateWebhookInput,
   UpdateNotificationInput,
+  AcceptInvitationInput,
 } from './settings.schema';
 import { email as emailClient } from '../../lib/email';
-import { generateSecureToken } from '../../lib/crypto';
+import { generateSecureToken, sha256 } from '../../lib/crypto';
 
 type Actor = { id: string; email: string; role: string | null; tenantId: string | null };
 
@@ -44,11 +45,20 @@ const teamService = {
       }
     }
 
-    // Generate a one-time invite token (same pattern as email verification)
-    const { raw: inviteToken } = generateSecureToken();
+    // Generate a one-time invite token (same pattern as email verification):
+    // the raw token goes in the email, only its hash is persisted.
+    const { raw: inviteToken, hash: tokenHash } = generateSecureToken();
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-    // In a full implementation, create a pending_invites record and send
-    // an email with the invite link.
+    await settingsRepository.createInvitation({
+      tenantId,
+      email: input.email,
+      role: input.role,
+      tokenHash,
+      invitedBy: actor.id,
+      expiresAt,
+    });
+
     await emailClient.sendTeamInvitation({
       to: input.email,
       inviterName: actor.email,
@@ -58,6 +68,29 @@ const teamService = {
     });
 
     return { message: 'Invitation sent.' };
+  },
+
+  async acceptInvitation(input: AcceptInvitationInput, actor: Actor) {
+    const tokenHash = sha256(input.token);
+    const invitation = await settingsRepository.findPendingInvitationByTokenHash(tokenHash);
+    if (!invitation) {
+      throw new ValidationError('This invitation is invalid or has expired.');
+    }
+
+    // The invite is bound to the email it was sent to.
+    if (invitation.email.toLowerCase() !== actor.email.toLowerCase()) {
+      throw new ForbiddenError('This invitation was issued for a different email address.');
+    }
+
+    await settingsRepository.activateMembership(
+      invitation.tenantId,
+      actor.id,
+      invitation.role,
+      null,
+    );
+    await settingsRepository.markInvitationAccepted(invitation.id);
+
+    return { message: 'Invitation accepted.', tenantId: invitation.tenantId };
   },
 
   async updateMemberRole(

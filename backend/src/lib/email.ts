@@ -105,6 +105,29 @@ export async function sendTeamInvitationEmail(
   );
 }
 
+export async function sendExpiryReminderEmail(
+  to: string,
+  ownerName: string,
+  itemName: string,
+  daysUntil: number,
+  expiryDate: string,
+): Promise<void> {
+  const link = `${env.FRONTEND_URL}/expiry`;
+  const when = daysUntil <= 0
+    ? 'today'
+    : `in ${daysUntil} day${daysUntil === 1 ? '' : 's'}`;
+  await send(
+    to,
+    `Reminder: ${itemName} expires ${when}`,
+    `
+    <p>Hi ${ownerName || 'there'},</p>
+    <p><strong>${itemName}</strong> is due to expire ${when} (${expiryDate}).</p>
+    <p><a href="${link}" style="background:#4F46E5;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;">View Expiry Tracker</a></p>
+    <p>Please renew or update this item before it expires to stay compliant.</p>
+    `,
+  );
+}
+
 export async function sendRawEmail(opts: {
   to: string;
   subject: string;
@@ -141,5 +164,12 @@ export const email = {
     inviteToken: string;
     tenantId: string;
   }) => sendTeamInvitationEmail(params.to, params.inviterName, params.role, params.inviteToken, params.tenantId),
+  sendExpiryReminder: (params: {
+    to: string;
+    ownerName: string;
+    itemName: string;
+    daysUntil: number;
+    expiryDate: string;
+  }) => sendExpiryReminderEmail(params.to, params.ownerName, params.itemName, params.daysUntil, params.expiryDate),
   sendRawEmail,
 };

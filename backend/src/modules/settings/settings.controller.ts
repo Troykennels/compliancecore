@@ -27,6 +27,15 @@ export const settingsController = {
     }
   },
 
+  async acceptInvitation(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await settingsService.team.acceptInvitation(req.body, req.user!);
+      ok(res, req, result);
+    } catch (err) {
+      next(err);
+    }
+  },
+
   async updateMemberRole(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       await settingsService.team.updateMemberRole(

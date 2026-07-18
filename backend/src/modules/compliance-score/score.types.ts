@@ -1,26 +1,26 @@
-export interface FrameworkScore {
-  frameworkId: string | null;
-  frameworkName: string | null;
-  score: number | null;
-  total: number;
+export interface FrameworkControlCounts {
   implemented: number;
   partiallyImplemented: number;
   notImplemented: number;
   notApplicable: number;
   planned: number;
+  total: number;
+}
+
+export interface FrameworkScore {
+  frameworkId: string | null;
+  frameworkName: string | null;
+  score: number | null;
+  controlCounts: FrameworkControlCounts;
 }
 
 export interface ComplianceScore {
   overall: number | null;
-  byFramework: FrameworkScore[];
-  controlCounts: {
-    total: number;
-    implemented: number;
-    partiallyImplemented: number;
-    notImplemented: number;
-    notApplicable: number;
-    planned: number;
-  };
+  // Per-framework breakdown. Matches the frontend `OverallScore.frameworks`
+  // shape (counts nested under `controlCounts`).
+  frameworks: FrameworkScore[];
+  // Aggregate counts across all frameworks — persisted with each snapshot.
+  controlCounts: FrameworkControlCounts;
   calculatedAt: Date;
 }
 

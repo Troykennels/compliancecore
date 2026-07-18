@@ -132,8 +132,19 @@ export async function addComment(
   return comments.find((c) => c.id === id)!;
 }
 
-export async function deleteComment(schemaName: string, commentId: string, userId: string) {
-  await repo.deleteComment(schemaName, commentId);
+// Roles allowed to delete any comment on a task (not just their own).
+const COMMENT_MODERATOR_ROLES = new Set(['owner', 'admin', 'compliance_manager']);
+
+export async function deleteComment(
+  schemaName: string,
+  taskId: string,
+  commentId: string,
+  userId: string,
+  role: string | null,
+) {
+  const canModerate = role ? COMMENT_MODERATOR_ROLES.has(role) : false;
+  const deleted = await repo.deleteComment(schemaName, taskId, commentId, userId, canModerate);
+  if (!deleted) throw new AppError('Comment not found', 404);
 }
 
 // ── Helpers ───────────────────────────────────────────────────

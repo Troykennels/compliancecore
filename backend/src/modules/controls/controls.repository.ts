@@ -78,9 +78,10 @@ export const controlsRepository = {
           c.due_date AS "dueDate", c.review_frequency_days AS "reviewFrequencyDays",
           c.last_reviewed_at AS "lastReviewedAt", c.reviewed_by AS "reviewedBy",
           c.created_by AS "createdBy", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
-          NULL AS "frameworkName"
+          f.name AS "frameworkName"
         FROM controls c
         LEFT JOIN global.users u ON u.id = c.owner_id
+        LEFT JOIN framework_data.frameworks f ON f.id = c.framework_id
         WHERE ${where}
         ORDER BY ${orderCol} ${dir} NULLS LAST
         LIMIT ${limit ?? 50} OFFSET ${offset}
@@ -112,9 +113,10 @@ export const controlsRepository = {
         c.due_date AS "dueDate", c.review_frequency_days AS "reviewFrequencyDays",
         c.last_reviewed_at AS "lastReviewedAt", c.reviewed_by AS "reviewedBy",
         c.created_by AS "createdBy", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
-        NULL AS "frameworkName"
+        f.name AS "frameworkName"
       FROM controls c
       LEFT JOIN global.users u ON u.id = c.owner_id
+      LEFT JOIN framework_data.frameworks f ON f.id = c.framework_id
       WHERE c.id = ${id}::uuid AND c.deleted_at IS NULL
     `;
     return rows[0] ? mapRow(rows[0]) : null;
@@ -222,12 +224,12 @@ export const controlsRepository = {
         u.first_name || ' ' || u.last_name AS "ownerName",
         u.email AS "ownerEmail",
         c.due_date AS "dueDate",
-        c.created_by AS "createdBy", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
-        NULL AS "frameworkName", NULL AS "guidance", NULL AS "implementationNotes",
+        f.name AS "frameworkName", NULL AS "guidance", NULL AS "implementationNotes",
         NULL AS "testingNotes", NULL AS "reviewedBy", NULL AS "lastReviewedAt",
         365 AS "reviewFrequencyDays"
       FROM controls c
       LEFT JOIN global.users u ON u.id = c.owner_id
+      LEFT JOIN framework_data.frameworks f ON f.id = c.framework_id
       WHERE c.deleted_at IS NULL
         AND c.due_date < NOW()::date
         AND c.implementation_status NOT IN ('implemented', 'not_applicable')

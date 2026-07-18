@@ -55,11 +55,15 @@ export async function createRequest(req: Request, res: Response) {
 
 export async function decideRequest(req: Request, res: Response) {
   const dto = validate(decideApprovalSchema, req.body);
+  const decidingUserName = await service.resolveUserName(
+    req.tenant!.schemaName, req.user!.id, req.user!.email,
+  );
   await service.decideRequest(
     req.tenant!.schemaName,
     req.params.id,
     req.user!.id,
-    req.user!.email,
+    req.user!.role ?? null,
+    decidingUserName,
     req.user!.email,
     dto,
     req.ip ?? '',

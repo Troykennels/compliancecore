@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import * as service from './ai.service';
+import { validate } from '../../lib/validate';
 
 const summarizeSchema = z.object({
   evidenceId:  z.string().uuid(),
@@ -38,15 +39,6 @@ const searchSchema = z.object({
   query: z.string().min(2).max(500),
   limit: z.coerce.number().int().min(1).max(10).optional(),
 });
-
-function validate<T>(schema: z.ZodSchema<T>, data: unknown): T {
-  const result = schema.safeParse(data);
-  if (!result.success) {
-    const msgs = result.error.issues.map((i) => i.message).join(', ');
-    throw Object.assign(new Error(msgs), { statusCode: 422 });
-  }
-  return result.data;
-}
 
 export async function summarizeContract(req: Request, res: Response) {
   const dto = validate(summarizeSchema, req.body);

@@ -27,8 +27,7 @@ export async function scheduleScoreSnapshotJob(): Promise<void> {
 async function getAllActiveTenants(): Promise<{ id: string; schema_name: string }[]> {
   return prisma.$queryRaw<{ id: string; schema_name: string }[]>`
     SELECT id, schema_name FROM global.tenants
-    WHERE deleted_at IS NULL
-      AND subscription_status IS DISTINCT FROM 'cancelled'
+    WHERE is_active = TRUE AND deleted_at IS NULL
   `;
 }
 

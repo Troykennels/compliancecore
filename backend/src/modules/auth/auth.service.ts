@@ -250,9 +250,17 @@ export async function refreshAccessToken(
   }
 
   const memberships = await repo.findUserMemberships(user.id);
+
+  // Preserve the session's active tenant across refresh. If that tenant is no
+  // longer a valid membership (e.g. the user was removed), fall back to the
+  // first available membership.
+  const session = stored.sessionId ? await repo.findSessionById(stored.sessionId) : null;
+  const stillMember = memberships.some((m) => m.tenant.id === session?.tenantId);
+  const activeTenantId = stillMember ? session!.tenantId : (memberships[0]?.tenant.id ?? null);
+
   const { accessToken, rawRefreshToken: newRawToken, refreshExpiresAt } = buildTokens(
     user,
-    stored.sessionId ? { tenantId: null, memberships } : { tenantId: null, memberships },
+    { tenantId: activeTenantId, memberships },
   );
 
   await repo.rotateRefreshToken(stored.id, { tokenHash: sha256(newRawToken), expiresAt: refreshExpiresAt });
@@ -430,8 +438,9 @@ export async function revokeSession(
   if (!session) throw new NotFoundError('Session');
 
   await repo.revokeSession(sessionId);
-  // Revoke all refresh tokens for that session
-  await repo.revokeAllUserRefreshTokens(userId); // Simplified: revoke all
+  // Revoke only the refresh tokens for this session so the user's other
+  // sessions remain active.
+  await repo.revokeRefreshTokensBySession(sessionId);
   return { message: 'Session revoked.' };
 }
 

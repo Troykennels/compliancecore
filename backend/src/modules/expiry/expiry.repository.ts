@@ -163,6 +163,7 @@ export const expiryRepository = {
       expiringSoon: m.expiring_soon ?? 0,
       expired:      m.expired       ?? 0,
       renewed:      m.renewed       ?? 0,
+      cancelled:    m.cancelled     ?? 0,
       total:        Object.values(m).reduce((a, b) => a + b, 0),
     };
   },

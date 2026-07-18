@@ -5,6 +5,7 @@ import { validate } from '../../middleware/validate.middleware';
 import { settingsController } from './settings.controller';
 import {
   inviteMemberSchema,
+  acceptInvitationSchema,
   updateMemberRoleSchema,
   createApiKeySchema,
   createWebhookSchema,
@@ -24,6 +25,14 @@ router.post(
   requirePermission('team:write'),
   validate(inviteMemberSchema),
   settingsController.inviteMember,
+);
+
+// The invited user accepts their own invitation — no tenant permission is
+// required (they are not yet a member), only a valid session.
+router.post(
+  '/team/members/accept-invite',
+  validate(acceptInvitationSchema),
+  settingsController.acceptInvitation,
 );
 
 router.patch(
@@ -85,10 +94,15 @@ router.post(
 );
 
 // ── Notifications ─────────────────────────────────────────────────────────────
-router.get('/notifications', settingsController.getNotificationSettings);
+router.get(
+  '/notifications',
+  requirePermission('settings:read'),
+  settingsController.getNotificationSettings,
+);
 
 router.patch(
   '/notifications',
+  requirePermission('settings:write'),
   validate(updateNotificationSettingsSchema),
   settingsController.updateNotificationSettings,
 );

@@ -6,7 +6,7 @@ const status   = z.enum(['todo','in_progress','in_review','completed','cancelled
 export const createTaskSchema = z.object({
   title:          z.string().min(1).max(1000),
   description:    z.string().max(10000).optional(),
-  assignedTo:     z.string().uuid().optional(),
+  assignedTo:     z.string().uuid().optional().nullable(),
   dueDate:        z.string().datetime().optional(),
   priority,
   entityType:     z.string().max(100).optional(),

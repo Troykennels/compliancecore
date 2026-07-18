@@ -41,6 +41,8 @@ export async function listEvents(schemaName: string, status?: string) {
   return repo.findEvents(schemaName, status);
 }
 
-export async function resolveEvent(schemaName: string, eventId: string) {
-  await repo.resolveEvent(schemaName, eventId);
+export async function resolveEvent(schemaName: string, eventId: string, resolutionNote?: string) {
+  const event = await repo.resolveEvent(schemaName, eventId, resolutionNote);
+  if (!event) throw new AppError('Escalation event not found', 404);
+  return event;
 }

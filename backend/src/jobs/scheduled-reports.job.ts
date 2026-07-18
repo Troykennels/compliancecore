@@ -36,8 +36,7 @@ async function getAllActiveTenants(): Promise<TenantRow[]> {
   return prisma.$queryRaw<TenantRow[]>`
     SELECT id, schema_name, name
     FROM global.tenants
-    WHERE deleted_at IS NULL
-      AND subscription_status IS DISTINCT FROM 'cancelled'
+    WHERE is_active = TRUE AND deleted_at IS NULL
   `;
 }
 

@@ -40,13 +40,22 @@ const WEBHOOK_EVENTS = [
   'user.removed',
 ] as const;
 
+// Roles that can be assigned when changing an existing member's role. Unlike
+// invitations, this includes 'owner' so ownership can be transferred — the
+// service still guards it (only an owner may assign 'owner', last-owner check).
+const ASSIGNABLE_ROLES = ['owner', ...MEMBER_ROLES] as const;
+
 export const inviteMemberSchema = z.object({
   email: z.string().email('Must be a valid email address').max(255),
   role: z.enum(MEMBER_ROLES, { errorMap: () => ({ message: 'Invalid role' }) }),
 });
 
 export const updateMemberRoleSchema = z.object({
-  role: z.enum(MEMBER_ROLES, { errorMap: () => ({ message: 'Invalid role' }) }),
+  role: z.enum(ASSIGNABLE_ROLES, { errorMap: () => ({ message: 'Invalid role' }) }),
+});
+
+export const acceptInvitationSchema = z.object({
+  token: z.string().min(1, 'Invitation token is required'),
 });
 
 export const createApiKeySchema = z.object({
@@ -96,6 +105,7 @@ export const updateNotificationSettingsSchema = z.object({
 
 export type InviteMemberInput       = z.infer<typeof inviteMemberSchema>;
 export type UpdateMemberRoleInput   = z.infer<typeof updateMemberRoleSchema>;
+export type AcceptInvitationInput   = z.infer<typeof acceptInvitationSchema>;
 export type CreateApiKeyInput       = z.infer<typeof createApiKeySchema>;
 export type CreateWebhookInput      = z.infer<typeof createWebhookSchema>;
 export type UpdateWebhookInput      = z.infer<typeof updateWebhookSchema>;

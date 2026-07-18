@@ -17,6 +17,13 @@ on:
 jobs:
   backup:
     runs-on: ubuntu-latest
+    # Disabled until the database is deployed and backup secrets exist. Without
+    # this gate the nightly run fails (no DATABASE_URL) and emails a failure
+    # every morning. To enable: add the secrets listed above, then create a
+    # repository variable BACKUPS_ENABLED = true (Settings → Secrets and
+    # variables → Actions → Variables). A skipped job does NOT send a failure
+    # email; a failed one does. `workflow_dispatch` runs still honour this gate.
+    if: ${{ vars.BACKUPS_ENABLED == 'true' }}
     steps:
       - uses: actions/checkout@v4
 

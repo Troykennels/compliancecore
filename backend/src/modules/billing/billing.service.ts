@@ -1,7 +1,7 @@
 import PDFDocument from 'pdfkit';
 import { withTenantSchema } from '../../lib/prisma';
 import { prisma } from '../../config/database';
-import { NotFoundError, AppError } from '../../lib/errors';
+import { NotFoundError, AppError, ConflictError } from '../../lib/errors';
 import * as repo from './billing.repository';
 import type {
   SubscriptionPlan, Subscription, BillingOverview, UsageSummary,
@@ -103,6 +103,12 @@ export async function getSubscription(tenantId: string): Promise<Subscription | 
 }
 
 export async function createSubscription(tenantId: string, dto: CreateSubscriptionDto): Promise<Subscription> {
+  // Guard against double-charging: a tenant may only hold one subscription.
+  const existing = await repo.findSubscriptionByTenant(tenantId);
+  if (existing) {
+    throw new ConflictError('This organisation already has a subscription. Update it instead.');
+  }
+
   const plan = await repo.findPlanById(dto.planId);
   if (!plan) throw new NotFoundError('Plan', dto.planId);
 

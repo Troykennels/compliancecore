@@ -51,13 +51,15 @@ function buildFrameworkScore(
   return {
     frameworkId,
     frameworkName,
-    score:                maxPoints === 0 ? null : Math.round((points / maxPoints) * 10000) / 100,
-    total:                counts.total,
-    implemented:          counts.implemented,
-    partiallyImplemented: counts.partiallyImplemented,
-    notImplemented:       counts.notImplemented,
-    notApplicable:        counts.notApplicable,
-    planned:              counts.planned,
+    score: maxPoints === 0 ? null : Math.round((points / maxPoints) * 10000) / 100,
+    controlCounts: {
+      implemented:          counts.implemented,
+      partiallyImplemented: counts.partiallyImplemented,
+      notImplemented:       counts.notImplemented,
+      notApplicable:        counts.notApplicable,
+      planned:              counts.planned,
+      total:                counts.total,
+    },
   };
 }
 
@@ -65,6 +67,12 @@ export const scoreService = {
   async calculateCurrentScore(schemaName: string): Promise<ComplianceScore> {
     return withTenantSchema(schemaName, async (tx) => {
       const allStats = await controlsRepository.getStatusCountsByFramework(tx);
+
+      // Real framework names, keyed by id, from the shared reference catalogue.
+      const nameRows = await tx.$queryRaw<{ id: string; name: string }[]>`
+        SELECT id, name FROM framework_data.frameworks WHERE deleted_at IS NULL
+      `;
+      const nameById = new Map(nameRows.map((r) => [r.id, r.name]));
 
       // Group by frameworkId
       const byFramework = new Map<string | null, typeof allStats>();
@@ -74,25 +82,18 @@ export const scoreService = {
         byFramework.get(key)!.push(stat);
       }
 
-      const frameworkScores: FrameworkScore[] = [];
+      const frameworks: FrameworkScore[] = [];
       for (const [frameworkId, stats] of byFramework) {
-        frameworkScores.push(buildFrameworkScore(stats, frameworkId, null));
+        const frameworkName = frameworkId ? nameById.get(frameworkId) ?? null : null;
+        frameworks.push(buildFrameworkScore(stats, frameworkId, frameworkName));
       }
 
       // Overall: aggregate across all controls regardless of framework
       const overallFrame = buildFrameworkScore(allStats, null, 'All Frameworks');
       const overall = overallFrame.score;
+      const controlCounts = overallFrame.controlCounts;
 
-      const controlCounts = {
-        total:                overallFrame.total,
-        implemented:          overallFrame.implemented,
-        partiallyImplemented: overallFrame.partiallyImplemented,
-        notImplemented:       overallFrame.notImplemented,
-        notApplicable:        overallFrame.notApplicable,
-        planned:              overallFrame.planned,
-      };
-
-      return { overall, byFramework: frameworkScores, controlCounts, calculatedAt: new Date() };
+      return { overall, frameworks, controlCounts, calculatedAt: new Date() };
     });
   },
 
@@ -109,7 +110,7 @@ export const scoreService = {
     const score = await scoreService.calculateCurrentScore(schemaName);
 
     const frameworkScoresMap: Record<string, unknown> = {};
-    for (const fs of score.byFramework) {
+    for (const fs of score.frameworks) {
       frameworkScoresMap[fs.frameworkId ?? 'ungrouped'] = fs;
     }
 
@@ -118,7 +119,7 @@ export const scoreService = {
         snapshotDate:    new Date(),
         overallScore:    score.overall,
         frameworkScores: frameworkScoresMap,
-        controlCounts:   score.controlCounts as Record<string, number>,
+        controlCounts:   score.controlCounts as unknown as Record<string, number>,
       }),
     );
   },

@@ -222,6 +222,16 @@ export async function revokeSignature(
   });
 }
 
+// Postgres TIMESTAMPTZ comes back from the pg driver as a JS Date. The HMAC was
+// computed over the ISO-8601 STRING at signing time (createSignature stores
+// `new Date().toISOString()`), so verification must hash the identical ISO
+// string — not the Date's `toString()` form. Normalise every timestamp back to
+// ISO here so verifySignatureHash reproduces the signed value byte-for-byte.
+export function toIso(v: unknown): string | null {
+  if (v == null) return null;
+  return v instanceof Date ? v.toISOString() : String(v);
+}
+
 function mapSignature(r: any): DigitalSignature {
   return {
     id: r.id, userId: r.user_id, signerName: r.signer_name ?? null,
@@ -229,8 +239,8 @@ function mapSignature(r: any): DigitalSignature {
     documentId: r.document_id, documentHash: r.document_hash,
     signatureHash: r.signature_hash, signatureImage: r.signature_image,
     certificateData: r.certificate_data ?? {}, ipAddress: r.ip_address,
-    userAgent: r.user_agent, signedAt: r.signed_at, isValid: r.is_valid,
-    revokedAt: r.revoked_at, revokedBy: r.revoked_by,
-    revocationReason: r.revocation_reason, createdAt: r.created_at,
+    userAgent: r.user_agent, signedAt: toIso(r.signed_at) ?? '', isValid: r.is_valid,
+    revokedAt: toIso(r.revoked_at), revokedBy: r.revoked_by,
+    revocationReason: r.revocation_reason, createdAt: toIso(r.created_at) ?? '',
   };
 }

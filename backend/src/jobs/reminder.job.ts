@@ -41,8 +41,7 @@ async function getAllActiveTenants(): Promise<TenantRow[]> {
     SELECT id, schema_name,
            (SELECT notification_settings FROM global.tenants t2 WHERE t2.id = t.id) AS notification_settings
     FROM global.tenants t
-    WHERE deleted_at IS NULL
-      AND subscription_status IS DISTINCT FROM 'cancelled'
+    WHERE is_active = TRUE AND deleted_at IS NULL
   `;
 }
 
@@ -58,46 +57,50 @@ async function processExpiryReminders(schemaName: string, tenantId: string): Pro
     for (const item of items) {
       const daysUntil = item.daysUntilExpiry;
 
-      for (const threshold of item.reminderDays) {
-        if (daysUntil > threshold) continue;
+      // Fire only the tightest reached threshold this run (smallest threshold
+      // still >= daysUntil), and mark every larger reached threshold as sent so
+      // we never emit a burst of duplicate alerts when an item is first seen.
+      const reached = item.reminderDays
+        .filter((threshold) => daysUntil <= threshold)
+        .sort((a, b) => a - b);
+      if (reached.length === 0) continue;
 
-        const alreadySent = await expiryRepository.hasReminderBeenSent(
-          tx, 'expiry_item', item.id, 'expiry_warning', threshold, 'in_app',
-        );
-        if (alreadySent) continue;
+      const tightest = reached[0];
 
-        if (item.ownerId) {
-          notificationsToCreate.push({
-            userId:           item.ownerId,
-            title:            `${item.name} expires in ${daysUntil} day${daysUntil === 1 ? '' : 's'}`,
-            body:             `Entity: ${item.entityType}. Expiry: ${item.expiryDate.toLocaleDateString()}.`,
-            notificationType: 'expiry_warning' as const,
-            priority:         daysUntil <= 7 ? 'critical' as const : daysUntil <= 30 ? 'high' as const : 'medium' as const,
-            referenceType:    'expiry_item',
-            referenceId:      item.id,
-            actionUrl:        `${env.FRONTEND_URL}/expiry`,
+      const alreadySent = await expiryRepository.hasReminderBeenSent(
+        tx, 'expiry_item', item.id, 'expiry_warning', tightest, 'in_app',
+      );
+
+      if (!alreadySent && item.ownerId) {
+        notificationsToCreate.push({
+          userId:           item.ownerId,
+          title:            `${item.name} expires in ${daysUntil} day${daysUntil === 1 ? '' : 's'}`,
+          body:             `Entity: ${item.entityType}. Expiry: ${item.expiryDate.toLocaleDateString()}.`,
+          notificationType: 'expiry_warning' as const,
+          priority:         daysUntil <= 7 ? 'critical' as const : daysUntil <= 30 ? 'high' as const : 'medium' as const,
+          referenceType:    'expiry_item',
+          referenceId:      item.id,
+          actionUrl:        `${env.FRONTEND_URL}/expiry`,
+        });
+
+        // Send email if owner email is available. Fire-and-forget; failures
+        // must not block notification creation.
+        if (item.ownerEmail) {
+          await emailClient.sendExpiryReminder({
+            to:         item.ownerEmail,
+            ownerName:  item.ownerName ?? '',
+            itemName:   item.name,
+            daysUntil,
+            expiryDate: item.expiryDate.toLocaleDateString(),
+          }).catch(() => {
+            // noop — sendExpiryReminderEmail already swallows transport errors
           });
-
-          // Send email if owner email is available
-          if (item.ownerEmail) {
-            try {
-              // Email is fire-and-forget; failures don't block notification creation
-              await emailClient.sendTeamInvitation({
-                to: item.ownerEmail,
-                inviterName: 'ComplianceCore',
-                role: 'system',
-                inviteToken: '',
-                tenantId,
-              }).catch(() => {
-                // sendTeamInvitationEmail is the wrong template but email.ts exists —
-                // a proper sendExpiryReminderEmail would be added in the email module
-              });
-            } catch {
-              // noop
-            }
-          }
         }
+      }
 
+      // Mark the tightest and every larger reached threshold as sent so future
+      // runs only fire when a newer, tighter window is reached.
+      for (const threshold of reached) {
         await expiryRepository.logReminderSent(
           tx, 'expiry_item', item.id, 'expiry_warning', threshold, 'in_app',
         );
@@ -123,16 +126,22 @@ async function processCalendarReminders(schemaName: string): Promise<void> {
         (event.startDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
       );
 
-      for (const threshold of event.reminderDays) {
-        if (daysUntil > threshold) continue;
+      if (!event.assignedTo) continue;
 
-        if (!event.assignedTo) continue;
+      // Fire only the tightest reached threshold this run; mark larger reached
+      // thresholds sent so an event entering the window doesn't alert repeatedly.
+      const reached = event.reminderDays
+        .filter((threshold) => daysUntil <= threshold)
+        .sort((a, b) => a - b);
+      if (reached.length === 0) continue;
 
-        const alreadySent = await expiryRepository.hasReminderBeenSent(
-          tx, 'calendar_event', event.id, 'calendar_reminder', threshold, 'in_app',
-        );
-        if (alreadySent) continue;
+      const tightest = reached[0];
 
+      const alreadySent = await expiryRepository.hasReminderBeenSent(
+        tx, 'calendar_event', event.id, 'calendar_reminder', tightest, 'in_app',
+      );
+
+      if (!alreadySent) {
         notificationsToCreate.push({
           userId:           event.assignedTo,
           title:            `Upcoming: ${event.title} in ${daysUntil} day${daysUntil === 1 ? '' : 's'}`,
@@ -143,7 +152,9 @@ async function processCalendarReminders(schemaName: string): Promise<void> {
           referenceId:      event.id,
           actionUrl:        `${env.FRONTEND_URL}/calendar`,
         });
+      }
 
+      for (const threshold of reached) {
         await expiryRepository.logReminderSent(
           tx, 'calendar_event', event.id, 'calendar_reminder', threshold, 'in_app',
         );

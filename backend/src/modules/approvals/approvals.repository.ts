@@ -1,5 +1,5 @@
 import { withTenantSchema } from '../../lib/tenant';
-import { AppError } from '../../lib/errors';
+import { AppError, ValidationError } from '../../lib/errors';
 import { generateSignatureHash } from '../signatures/signatures.repository';
 import type {
   ApprovalWorkflow, ApprovalWorkflowStep,
@@ -180,6 +180,7 @@ export async function createRequest(
   stepsInput: Array<{
     stepOrder: number; name: string; approverType: string;
     assignedTo: string | null; assignedRole: string | null;
+    approverUserList: string[]; minApprovals: number; allowSelfApproval: boolean;
     requireSignature: boolean; instructions: string | null;
     deadlineHours: number | null;
   }>,
@@ -205,11 +206,13 @@ export async function createRequest(
         deadline = `NOW() + INTERVAL '${step.deadlineHours} hours'`;
       }
       await prisma.$executeRawUnsafe(`
-        INSERT INTO approval_request_steps(request_id,step_order,name,status,approver_type,assigned_to,assigned_role,require_signature,instructions,activated_at,deadline)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,${activatedAt},${deadline})
+        INSERT INTO approval_request_steps(request_id,step_order,name,status,approver_type,assigned_to,assigned_role,approver_user_list,min_approvals,allow_self_approval,require_signature,instructions,activated_at,deadline)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,${activatedAt},${deadline})
       `,
         reqId, step.stepOrder, step.name, status, step.approverType,
         step.assignedTo, step.assignedRole,
+        `{${(step.approverUserList ?? []).join(',')}}`,
+        step.minApprovals, step.allowSelfApproval,
         step.requireSignature, step.instructions,
       );
     }
@@ -261,6 +264,7 @@ export async function decideRequestTx(
   schemaName: string,
   requestId: string,
   decidingUserId: string,
+  decidingUserRole: string | null,
   decision: 'approved' | 'rejected' | 'changes_requested' | 'abstained',
   comments: string | null,
   signature: DecideSignatureInput | null,
@@ -269,7 +273,7 @@ export async function decideRequestTx(
     // 1. Lock the request row for the duration of the transaction. Any other
     //    concurrent decision on the same request blocks here until we commit.
     const lockRows = await tx.$queryRawUnsafe<any[]>(`
-      SELECT id, status FROM approval_requests
+      SELECT id, status, requested_by FROM approval_requests
       WHERE id = $1 AND deleted_at IS NULL
       FOR UPDATE
     `, requestId);
@@ -278,15 +282,36 @@ export async function decideRequestTx(
       throw new AppError('Request is no longer pending', 409);
     }
 
-    // 2. Find THIS user's active step (direct assignment or role/manager step).
+    // 2. Find THIS user's active step. Authorisation is enforced per approver
+    //    type: a direct assignee, a role step whose assigned_role matches the
+    //    decider's role, or an any_from_list step whose candidate list contains
+    //    the decider. A role step must never be decidable by someone whose role
+    //    differs from assigned_role. (Manager steps have no manager model here,
+    //    so they fall back to the direct-assignment clause.)
     const [activeStep] = await tx.$queryRawUnsafe<any[]>(`
-      SELECT id, step_order FROM approval_request_steps
+      SELECT id, step_order, require_signature, allow_self_approval
+      FROM approval_request_steps
       WHERE request_id = $1 AND status = 'active'
-        AND (assigned_to = $2 OR approver_type IN ('role', 'manager'))
+        AND (
+          assigned_to = $2
+          OR (approver_type = 'role' AND assigned_role = $3)
+          OR (approver_type = 'any_from_list' AND $2 = ANY(approver_user_list))
+        )
       ORDER BY step_order
       LIMIT 1
-    `, requestId, decidingUserId);
+    `, requestId, decidingUserId, decidingUserRole);
     if (!activeStep) throw new AppError('No active approval step found for you', 403);
+
+    // 2a. Separation of duties: the requester may not decide their own step
+    //     unless the step explicitly allows self-approval.
+    if (!activeStep.allow_self_approval && lockRows[0].requested_by === decidingUserId) {
+      throw new AppError('You cannot decide your own approval request', 403);
+    }
+
+    // 2b. Steps flagged require_signature cannot be approved without a signature.
+    if (activeStep.require_signature && decision === 'approved' && !signature) {
+      throw new ValidationError('This approval step requires a digital signature.');
+    }
 
     // 3. Optional digital signature — created inside the SAME transaction so the
     //    signature and the decision commit atomically (no orphan signatures).
@@ -341,13 +366,19 @@ export async function decideRequestTx(
       return { requestStatus: decision, signatureId, activatedNextStep: false, nextStepAssignees: [] };
     }
 
-    // 6. Approval: has the whole current step-order group been decided?
+    // 6. Approval: has the whole current step-order group been decided AND has it
+    //    collected the required number of ACTUAL 'approved' decisions? Abstained
+    //    or skipped steps count as "decided" but never as approvals, so a step
+    //    that only abstains can never satisfy its minApprovals threshold.
     const steps = await tx.$queryRawUnsafe<any[]>(`
-      SELECT id, step_order, status, assigned_to, name
+      SELECT id, step_order, status, assigned_to, name, min_approvals
       FROM approval_request_steps WHERE request_id = $1 ORDER BY step_order
     `, requestId);
     const group = steps.filter((s) => s.step_order === activeStep.step_order);
-    const groupDone = group.every((s) => ['approved', 'abstained', 'skipped'].includes(s.status));
+    const allDecided    = group.every((s) => ['approved', 'abstained', 'skipped'].includes(s.status));
+    const approvedCount = group.filter((s) => s.status === 'approved').length;
+    const minApprovals  = Math.max(1, ...group.map((s) => Number(s.min_approvals) || 1));
+    const groupDone = allDecided && approvedCount >= minApprovals;
     if (!groupDone) {
       return { requestStatus: 'pending', signatureId, activatedNextStep: false, nextStepAssignees: [] };
     }
@@ -426,6 +457,19 @@ export async function getStepsForRequest(schemaName: string, requestId: string):
   });
 }
 
+// Resolve a user's display name ("First Last") from the global users table,
+// falling back to null when the user or both name parts are missing.
+export async function getUserDisplayName(schemaName: string, userId: string): Promise<string | null> {
+  return withTenantSchema(schemaName, async (prisma) => {
+    const [u] = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT first_name, last_name FROM global.users WHERE id = $1`, userId,
+    );
+    if (!u) return null;
+    const name = `${u.first_name ?? ''} ${u.last_name ?? ''}`.trim();
+    return name || null;
+  });
+}
+
 export async function getMyPendingRequests(schemaName: string, userId: string, userRole: string): Promise<ApprovalRequest[]> {
   return withTenantSchema(schemaName, async (prisma) => {
     const rows = await prisma.$queryRawUnsafe<any[]>(`
@@ -439,7 +483,8 @@ export async function getMyPendingRequests(schemaName: string, userId: string, u
         AND ars.status = 'active'
         AND (
           ars.assigned_to = $1
-          OR ars.assigned_role = $2
+          OR (ars.approver_type = 'role' AND ars.assigned_role = $2)
+          OR (ars.approver_type = 'any_from_list' AND $1 = ANY(ars.approver_user_list))
           OR ars.approver_type = 'manager'
         )
       ORDER BY ar.created_at DESC

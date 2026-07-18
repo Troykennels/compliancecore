@@ -56,7 +56,7 @@ export async function toggleRule(req: Request, res: Response) {
 
 export async function deleteRule(req: Request, res: Response) {
   await service.deleteRule(req.tenant!.schemaName, req.params.id);
-  res.json({ success: true, data: null });
+  res.json({ success: true, data: { message: 'Escalation rule deleted.' } });
 }
 
 export async function listEvents(req: Request, res: Response) {
@@ -65,7 +65,12 @@ export async function listEvents(req: Request, res: Response) {
   res.json({ success: true, data: { items: events, total: events.length } });
 }
 
+const resolveEventSchema = z.object({
+  resolutionNote: z.string().max(2000).optional(),
+});
+
 export async function resolveEvent(req: Request, res: Response) {
-  await service.resolveEvent(req.tenant!.schemaName, req.params.id);
-  res.json({ success: true, data: null });
+  const { resolutionNote } = validate(resolveEventSchema, req.body ?? {});
+  const event = await service.resolveEvent(req.tenant!.schemaName, req.params.id, resolutionNote);
+  res.json({ success: true, data: event });
 }

@@ -1,5 +1,6 @@
 import { withTenantSchema } from '../../lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
+import { NotFoundError } from '../../lib/errors';
 import type {
   ComplianceKpis, ScoreTrendPoint, ControlsBreakdown, ControlsByCriticality,
   FrameworkCoverage, TasksBreakdown, EvidenceBreakdown, ExpiryOverview,
@@ -379,7 +380,7 @@ export async function updateScheduledReport(
     const [current] = await p.$queryRawUnsafe<any[]>(
       `SELECT * FROM scheduled_reports WHERE id = $1`, id,
     );
-    if (!current) throw Object.assign(new Error('Scheduled report not found'), { statusCode: 404 });
+    if (!current) throw new NotFoundError('Scheduled report', id);
 
     const freq      = dto.frequency  ?? current.frequency;
     const hour      = dto.hour       ?? current.hour;

@@ -12,6 +12,9 @@ export interface Notification {
   userId: string;
   title: string;
   body: string | null;
+  // Alias of `body` — the frontend renders `n.message`. Kept in sync in the
+  // repository mapper so notification content actually shows.
+  message: string | null;
   notificationType: NotificationType;
   priority: NotificationPriority;
   referenceType: string | null;

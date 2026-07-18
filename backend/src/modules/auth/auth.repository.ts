@@ -135,6 +135,10 @@ export async function revokeAllUserSessions(userId: string): Promise<void> {
   });
 }
 
+export async function findSessionById(sessionId: string): Promise<Session | null> {
+  return prisma.session.findUnique({ where: { id: sessionId } });
+}
+
 export async function findActiveSessions(userId: string): Promise<Session[]> {
   return prisma.session.findMany({
     where: { userId, revokedAt: null, expiresAt: { gt: new Date() } },
@@ -203,6 +207,15 @@ export async function revokeRefreshToken(tokenHash: string): Promise<void> {
 export async function revokeAllUserRefreshTokens(userId: string): Promise<void> {
   await prisma.refreshToken.updateMany({
     where: { userId, revokedAt: null },
+    data: { revokedAt: new Date() },
+  });
+}
+
+// Revoke only the refresh tokens belonging to a single session (used when
+// revoking one session so other sessions of the same user stay logged in).
+export async function revokeRefreshTokensBySession(sessionId: string): Promise<void> {
+  await prisma.refreshToken.updateMany({
+    where: { sessionId, revokedAt: null },
     data: { revokedAt: new Date() },
   });
 }

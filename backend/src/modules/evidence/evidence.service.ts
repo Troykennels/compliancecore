@@ -462,7 +462,9 @@ export const evidenceService = {
       return created;
     });
 
-    const shareUrl = `${env.FRONTEND_URL}/evidence/shared/${shareToken}`;
+    // The public share endpoint requires the tenant schema as a query param.
+    // schemaName is the resolved tenant schema (e.g. "tenant_<uuid>").
+    const shareUrl = `${env.FRONTEND_URL}/evidence/shared/${shareToken}?tenant=${schemaName}`;
 
     // Send email invite if share type is email
     if (input.shareType === 'email' && input.recipientEmail) {
@@ -531,7 +533,17 @@ export const evidenceService = {
         ? await generateDownloadUrl(current.fileKey, current.fileName, 'attachment', 300)
         : null;
 
-      return { share, evidence: ev, currentVersion: current ?? null, downloadUrl };
+      // Public (unauthenticated) response: never leak the bcrypt password hash
+      // or the raw S3 file key. Expose only hasPassword and the presigned URL.
+      const { passwordHash: _passwordHash, ...shareSafe } = share;
+      const currentVersionSafe = current
+        ? (() => {
+            const { fileKey: _fileKey, ...rest } = current;
+            return rest;
+          })()
+        : null;
+
+      return { share: shareSafe, evidence: ev, currentVersion: currentVersionSafe, downloadUrl };
     });
   },
 

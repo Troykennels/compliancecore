@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 export function ok<T>(res: Response, req: Request, data: T, statusCode = 200): void {
   res.status(statusCode).json({
     success: true,
-    requestId: (req as Request & { id?: string }).id,
+    requestId: req.requestId,
     data,
   });
 }

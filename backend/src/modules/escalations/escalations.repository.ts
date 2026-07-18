@@ -135,11 +135,35 @@ export async function advanceEvent(schemaName: string, eventId: string, nextStep
   });
 }
 
-export async function resolveEvent(schemaName: string, eventId: string): Promise<void> {
+export async function resolveEvent(
+  schemaName: string,
+  eventId: string,
+  resolutionNote?: string,
+): Promise<EscalationEvent | null> {
   return withTenantSchema(schemaName, async (prisma) => {
-    await prisma.$executeRawUnsafe(`
-      UPDATE escalation_events SET status='resolved', resolved_at=NOW() WHERE id=$1
+    // The table has no dedicated note column, so the resolution note is kept in
+    // the metadata JSONB blob.
+    const rows = await prisma.$queryRawUnsafe<any[]>(`
+      UPDATE escalation_events ee SET
+        status = 'resolved',
+        resolved_at = NOW(),
+        metadata = CASE
+          WHEN $2::text IS NOT NULL
+          THEN COALESCE(ee.metadata, '{}'::jsonb) || jsonb_build_object('resolutionNote', $2::text)
+          ELSE ee.metadata
+        END
+      WHERE ee.id = $1
+      RETURNING ee.*
+    `, eventId, resolutionNote ?? null);
+    if (!rows.length) return null;
+
+    const [withName] = await prisma.$queryRawUnsafe<any[]>(`
+      SELECT ee.*, er.name AS rule_name
+      FROM escalation_events ee
+      JOIN escalation_rules er ON er.id = ee.rule_id
+      WHERE ee.id = $1
     `, eventId);
+    return mapEvent(withName ?? rows[0]);
   });
 }
 

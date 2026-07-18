@@ -45,4 +45,8 @@ export const expiryService = {
   async getStatusCounts(schemaName: string) {
     return withTenantSchema(schemaName, (tx) => expiryRepository.countByStatus(tx));
   },
+
+  async expiringSoon(schemaName: string, daysAhead: number) {
+    return withTenantSchema(schemaName, (tx) => expiryRepository.findExpiringSoon(tx, daysAhead));
+  },
 };

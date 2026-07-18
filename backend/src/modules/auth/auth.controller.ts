@@ -174,7 +174,7 @@ export async function logout(req: Request, res: Response, next: NextFunction): P
   try {
     const rawToken = req.cookies[REFRESH_COOKIE];
     if (rawToken) {
-      await service.logout(rawToken, req.user.jti, 0); // exp=0 means "use token's own exp"
+      await service.logout(rawToken, req.user.jti, req.user.exp);
     }
     clearRefreshCookie(res);
     ok(res, req, { message: 'Logged out successfully' });
@@ -186,7 +186,7 @@ export async function logout(req: Request, res: Response, next: NextFunction): P
 
 export async function logoutAll(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    await service.logoutAllSessions(req.user.id, req.user.jti, 0);
+    await service.logoutAllSessions(req.user.id, req.user.jti, req.user.exp);
     clearRefreshCookie(res);
     ok(res, req, { message: 'All sessions terminated' });
   } catch (err) {

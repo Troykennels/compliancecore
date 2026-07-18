@@ -31,7 +31,9 @@ export const listBranchesSchema = z.object({
   page: z.coerce.number().int().min(1).optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
   search: z.string().max(100).optional(),
-  isActive: z.coerce.boolean().optional(),
+  // z.coerce.boolean() treats any non-empty string as true, so "?isActive=false"
+  // would wrongly coerce to true. Parse the literal string instead.
+  isActive: z.enum(['true', 'false']).transform((v) => v === 'true').optional(),
 });
 
 export type CreateBranchInput = z.infer<typeof createBranchSchema>;

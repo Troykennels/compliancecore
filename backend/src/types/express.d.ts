@@ -11,6 +11,7 @@ declare global {
         tenantId: string | null;
         permissions: string[];
         jti: string;
+        exp: number;
         requiresOnboarding: boolean;
       };
       // tenant is set by resolveTenant() middleware (tenant.middleware.ts)

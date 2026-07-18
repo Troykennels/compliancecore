@@ -62,6 +62,79 @@ export const settingsRepository = {
     });
   },
 
+  // Accept an invitation: create the membership, or re-activate a previously
+  // removed one (the (tenant_id, user_id) pair is unique).
+  async activateMembership(
+    tenantId: string,
+    userId: string,
+    role: string,
+    invitedBy: string | null,
+  ) {
+    return prisma.tenantMembership.upsert({
+      where: { tenantId_userId: { tenantId, userId } },
+      create: {
+        tenantId,
+        userId,
+        role: role as never,
+        invitedBy,
+        isActive: true,
+        joinedAt: new Date(),
+      },
+      update: {
+        role: role as never,
+        isActive: true,
+        joinedAt: new Date(),
+        deletedAt: null,
+      },
+    });
+  },
+
+  // ── Team Invitations ──────────────────────────────────────────────────────
+
+  async createInvitation(data: {
+    tenantId: string;
+    email: string;
+    role: string;
+    tokenHash: string;
+    invitedBy: string | null;
+    expiresAt: Date;
+  }) {
+    await prisma.$executeRaw`
+      INSERT INTO global.team_invitations
+        (tenant_id, email, role, token_hash, invited_by, expires_at)
+      VALUES (
+        ${data.tenantId}::uuid,
+        ${data.email},
+        ${data.role},
+        ${data.tokenHash},
+        ${data.invitedBy}::uuid,
+        ${data.expiresAt}
+      )
+    `;
+  },
+
+  async findPendingInvitationByTokenHash(tokenHash: string) {
+    const rows = await prisma.$queryRaw<
+      { id: string; tenantId: string; email: string; role: string }[]
+    >`
+      SELECT id, tenant_id as "tenantId", email, role
+      FROM global.team_invitations
+      WHERE token_hash = ${tokenHash}
+        AND status = 'pending'
+        AND expires_at > NOW()
+      LIMIT 1
+    `;
+    return rows[0] ?? null;
+  },
+
+  async markInvitationAccepted(id: string) {
+    await prisma.$executeRaw`
+      UPDATE global.team_invitations
+      SET status = 'accepted', accepted_at = NOW()
+      WHERE id = ${id}::uuid
+    `;
+  },
+
   async updateMemberRole(membershipId: string, role: string) {
     return prisma.tenantMembership.update({
       where: { id: membershipId },

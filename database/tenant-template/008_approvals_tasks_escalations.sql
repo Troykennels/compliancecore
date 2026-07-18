@@ -87,6 +87,9 @@ CREATE TABLE approval_request_steps (
     approver_type        VARCHAR(50)  NOT NULL DEFAULT 'user',
     assigned_to          UUID         REFERENCES global.users(id),
     assigned_role        VARCHAR(100),
+    approver_user_list   UUID[]       DEFAULT '{}',   -- candidate approvers for approver_type = 'any_from_list'
+    min_approvals        INTEGER      DEFAULT 1,       -- number of 'approved' decisions required to satisfy this step group
+    allow_self_approval  BOOLEAN      DEFAULT FALSE,   -- if FALSE, the requester may not decide their own step
     decided_by           UUID         REFERENCES global.users(id),
     -- decision: 'approved' | 'rejected' | 'changes_requested' | 'abstained'
     decision             VARCHAR(50),

@@ -68,6 +68,8 @@ export async function addComment(req: Request, res: Response) {
 }
 
 export async function deleteComment(req: Request, res: Response) {
-  await service.deleteComment(req.tenant!.schemaName, req.params.commentId, req.user!.id);
+  await service.deleteComment(
+    req.tenant!.schemaName, req.params.id, req.params.commentId, req.user!.id, req.user!.role ?? null,
+  );
   res.json({ success: true, data: null });
 }

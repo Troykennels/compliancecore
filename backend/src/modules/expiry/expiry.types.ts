@@ -38,5 +38,6 @@ export interface ExpiryStatusCounts {
   expiringSoon: number;
   expired: number;
   renewed: number;
+  cancelled: number;
   total: number;
 }

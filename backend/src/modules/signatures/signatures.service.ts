@@ -1,6 +1,9 @@
 import * as repo from './signatures.repository';
 import { verifySignatureHash } from './signatures.repository';
-import { AppError } from '../../lib/errors';
+import { AppError, ValidationError } from '../../lib/errors';
+
+// A SHA-256 digest rendered as lowercase/uppercase hex is exactly 64 hex chars.
+const SHA256_HEX = /^[0-9a-fA-F]{64}$/;
 
 export async function listSignatures(
   schemaName: string,
@@ -31,6 +34,20 @@ export async function createSignature(
     userAgent:      string;
   },
 ) {
+  // The document hash is currently client-supplied. We cannot yet recompute it
+  // server-side because the referenced document content is not addressable in a
+  // uniform way across every documentType ('policy' | 'contract' | 'report' |
+  // 'evidence' | 'approval_step'). Until each document source exposes a canonical
+  // byte stream, enforce the minimum integrity guarantee: the hash MUST be a
+  // well-formed 64-char hex SHA-256 digest, so a malformed/placeholder value can
+  // never be bound into a legally-meaningful signature certificate.
+  // TODO: recompute documentHash server-side from the referenced document
+  //       (by documentType/documentId) and reject a mismatch, once a document
+  //       content resolver exists for every documentType.
+  if (!SHA256_HEX.test(input.documentHash)) {
+    throw new ValidationError('documentHash must be a 64-character hex SHA-256 digest.');
+  }
+
   const id = await repo.createSignature(schemaName, { ...input, userId });
   return repo.findSignatureById(schemaName, id);
 }

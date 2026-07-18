@@ -12,6 +12,7 @@ router.use(authenticate(), resolveTenant);
 
 router.get('/',        requirePermission('expiry:read'),  validateQuery(listExpiryItemsSchema), asyncHandler(ctrl.listExpiry));
 router.get('/stats',   requirePermission('expiry:read'),  asyncHandler(ctrl.getExpiryStatusCounts));
+router.get('/expiring-soon', requirePermission('expiry:read'), asyncHandler(ctrl.expiringSoon));
 router.get('/:id',     requirePermission('expiry:read'),  asyncHandler(ctrl.getExpiryItem));
 router.post('/',       requirePermission('expiry:write'), validate(createExpiryItemSchema), asyncHandler(ctrl.createExpiryItem));
 router.patch('/:id',   requirePermission('expiry:write'), validate(updateExpiryItemSchema), asyncHandler(ctrl.updateExpiryItem));

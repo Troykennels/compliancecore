@@ -32,6 +32,7 @@ export function authenticate(): RequestHandler {
       tenantId: payload.tenantId,
       permissions: payload.permissions,
       jti: payload.jti,
+      exp: payload.exp,
       requiresOnboarding: payload.requiresOnboarding ?? false,
     };
 

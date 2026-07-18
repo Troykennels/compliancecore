@@ -35,3 +35,10 @@ export async function getExpiryStatusCounts(req: Request, res: Response) {
   const data = await expiryService.getStatusCounts(req.tenant!.schemaName);
   ok(res, req, data);
 }
+
+export async function expiringSoon(req: Request, res: Response) {
+  const raw = Number(req.query.days);
+  const days = Number.isFinite(raw) && raw > 0 ? Math.min(Math.floor(raw), 365) : 30;
+  const data = await expiryService.expiringSoon(req.tenant!.schemaName, days);
+  ok(res, req, data);
+}

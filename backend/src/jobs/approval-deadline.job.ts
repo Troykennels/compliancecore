@@ -3,6 +3,7 @@ import { redisForQueues } from '../config/redis';
 import { prisma } from '../lib/prisma';
 import { withTenantSchema } from '../lib/tenant';
 import { notificationService } from '../modules/notifications/notification.service';
+import { notificationRepository } from '../modules/notifications/notification.repository';
 import { sendEmail, emailTemplates } from '../lib/email.service';
 
 const QUEUE_NAME = 'approval-deadlines';
@@ -20,7 +21,7 @@ export const approvalDeadlineQueue = new Queue(QUEUE_NAME, {
 
 async function processJob(_job: Job) {
   const tenants = await prisma.$queryRaw<{ id: string; schema_name: string }[]>`
-    SELECT id, schema_name FROM global.tenants WHERE is_active = TRUE
+    SELECT id, schema_name FROM global.tenants WHERE is_active = TRUE AND deleted_at IS NULL
   `;
 
   for (const tenant of tenants) {
@@ -91,15 +92,44 @@ async function checkTenantDeadlines(schemaName: string) {
     }
   }
 
-  // Mark overdue approvals as timed-out (escalate to rejected for hard deadlines)
-  await withTenantSchema(schemaName, (p) =>
-    p.$executeRawUnsafe(`
+  // Mark overdue approvals as timed-out (escalate to rejected for hard deadlines).
+  // Reject the request, cascade its still-open steps to a terminal state, and
+  // notify the requester — all in one transaction so the request is never left
+  // rejected with orphaned active/pending steps or a silent requester.
+  await withTenantSchema(schemaName, async (p) => {
+    const rejected = await p.$queryRawUnsafe<any[]>(`
       UPDATE approval_requests
       SET status = 'rejected', rejection_reason = 'Approval deadline exceeded', completed_at = NOW(), updated_at = NOW()
       WHERE deleted_at IS NULL AND status = 'pending'
         AND deadline IS NOT NULL AND deadline < NOW()
-    `),
-  );
+      RETURNING id, title, requested_by
+    `);
+
+    if (rejected.length === 0) return;
+
+    const rejectedIds = rejected.map((r) => r.id);
+
+    // Cascade any still-open steps to a terminal status so they don't linger active/pending.
+    await p.$executeRawUnsafe(`
+      UPDATE approval_request_steps
+      SET status = 'rejected', decided_at = COALESCE(decided_at, NOW())
+      WHERE request_id = ANY($1::uuid[]) AND status IN ('pending', 'active')
+    `, rejectedIds);
+
+    // Notify each requester that their request was auto-rejected.
+    for (const req of rejected) {
+      await notificationRepository.create(p, {
+        userId:           req.requested_by,
+        title:            `Approval request rejected: ${req.title}`,
+        body:             'This approval request was automatically rejected because its deadline passed.',
+        notificationType: 'approval_decided',
+        priority:         'high',
+        referenceType:    'approval_request',
+        referenceId:      req.id,
+        actionUrl:        `/approvals/${req.id}`,
+      });
+    }
+  });
 }
 
 export function startApprovalDeadlineWorker() {

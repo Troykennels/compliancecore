@@ -59,25 +59,31 @@ export async function createRequest(
     const wf = await repo.findWorkflowById(schemaName, dto.workflowId);
     if (!wf) throw new AppError('Workflow not found', 404);
     stepsInput = (wf.steps ?? []).map((s) => ({
-      stepOrder:        s.stepOrder,
-      name:             s.name,
-      approverType:     s.approverType,
-      assignedTo:       s.approverId ?? null,
-      assignedRole:     s.approverRole ?? null,
-      requireSignature: s.requireSignature,
-      instructions:     s.instructions ?? null,
-      deadlineHours:    s.deadlineHours ?? null,
+      stepOrder:         s.stepOrder,
+      name:              s.name,
+      approverType:      s.approverType,
+      assignedTo:        s.approverId ?? null,
+      assignedRole:      s.approverRole ?? null,
+      approverUserList:  s.approverUserList ?? [],
+      minApprovals:      s.minApprovals ?? 1,
+      allowSelfApproval: s.allowSelfApproval ?? false,
+      requireSignature:  s.requireSignature,
+      instructions:      s.instructions ?? null,
+      deadlineHours:     s.deadlineHours ?? null,
     }));
   } else if (dto.steps && dto.steps.length > 0) {
     stepsInput = dto.steps.map((s) => ({
-      stepOrder:        s.stepOrder,
-      name:             s.name,
-      approverType:     s.approverType,
-      assignedTo:       s.assignedTo ?? null,
-      assignedRole:     s.assignedRole ?? null,
-      requireSignature: s.requireSignature ?? false,
-      instructions:     s.instructions ?? null,
-      deadlineHours:    s.deadlineHours ?? null,
+      stepOrder:         s.stepOrder,
+      name:              s.name,
+      approverType:      s.approverType,
+      assignedTo:        s.assignedTo ?? null,
+      assignedRole:      s.assignedRole ?? null,
+      approverUserList:  [],
+      minApprovals:      1,
+      allowSelfApproval: false,
+      requireSignature:  s.requireSignature ?? false,
+      instructions:      s.instructions ?? null,
+      deadlineHours:     s.deadlineHours ?? null,
     }));
   } else {
     throw new AppError('Either workflowId or at least one step is required', 400);
@@ -110,6 +116,7 @@ export async function decideRequest(
   schemaName: string,
   requestId: string,
   decidingUserId: string,
+  decidingUserRole: string | null,
   decidingUserName: string,
   decidingUserEmail: string,
   dto: DecideApprovalDto,
@@ -133,7 +140,7 @@ export async function decideRequest(
   // The entire decision (lock, validate, sign, update, advance) runs atomically
   // in one row-locked transaction inside the repository.
   const outcome = await repo.decideRequestTx(
-    schemaName, requestId, decidingUserId, dto.decision, dto.comments ?? null, signature,
+    schemaName, requestId, decidingUserId, decidingUserRole, dto.decision, dto.comments ?? null, signature,
   );
 
   // Notifications / emails run AFTER commit — they are side effects, not part of
@@ -168,6 +175,13 @@ export async function cancelRequest(schemaName: string, requestId: string, userI
 
 export async function getMyPending(schemaName: string, userId: string, userRole: string) {
   return repo.getMyPendingRequests(schemaName, userId, userRole);
+}
+
+// Resolve a human-readable name for a user, falling back to their email when no
+// first/last name is on record.
+export async function resolveUserName(schemaName: string, userId: string, fallbackEmail: string) {
+  const name = await repo.getUserDisplayName(schemaName, userId);
+  return name ?? fallbackEmail;
 }
 
 // ── Internal helpers ──────────────────────────────────────────

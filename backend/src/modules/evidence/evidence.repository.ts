@@ -102,7 +102,7 @@ export const evidenceRepository = {
     tx: Prisma.TransactionClient,
     filters: ListEvidenceInput,
   ): Promise<{ evidence: Evidence[]; total: number }> {
-    const { page, limit, q, categoryId, status, uploadedBy, dateFrom, dateTo, sortBy, sortDir } = filters;
+    const { page, limit, q, categoryId, status, mimeType, ocrStatus, uploadedBy, dateFrom, dateTo, sortBy, sortDir } = filters;
     const offset = (page - 1) * limit;
     const tagIds = filters.tagIds ? filters.tagIds.split(',').filter(Boolean) : [];
 
@@ -121,6 +121,20 @@ export const evidenceRepository = {
     if (status) {
       conditions.push(`e.status = $${idx++}`);
       params.push(status);
+    }
+    if (ocrStatus) {
+      conditions.push(`e.ocr_status = $${idx++}`);
+      params.push(ocrStatus);
+    }
+    if (mimeType) {
+      // mime_type lives on the current version, not on evidence e. Use EXISTS so
+      // the clause is valid in both the main and the COUNT query (which only
+      // selects FROM evidence e).
+      conditions.push(`EXISTS (
+        SELECT 1 FROM evidence_versions mv
+        WHERE mv.id = e.current_version_id AND mv.mime_type = $${idx++}
+      )`);
+      params.push(mimeType);
     }
     if (uploadedBy) {
       conditions.push(`e.created_by = $${idx++}::uuid`);
@@ -145,7 +159,15 @@ export const evidenceRepository = {
     }
 
     const where = conditions.join(' AND ');
-    const orderClause = `e.${sortBy} ${sortDir.toUpperCase()}`;
+    // Allowlist sort columns. `file_size` is not a column on evidence e — it maps
+    // to the current version's file_size_bytes (the main query joins ev).
+    const SORT_COLUMNS: Record<string, string> = {
+      created_at: 'e.created_at',
+      updated_at: 'e.updated_at',
+      title:      'e.title',
+      file_size:  'ev.file_size_bytes',
+    };
+    const orderClause = `${SORT_COLUMNS[sortBy] ?? 'e.created_at'} ${sortDir.toUpperCase()}`;
 
     const [rows, countRows] = await Promise.all([
       tx.$queryRawUnsafe<Evidence[]>(

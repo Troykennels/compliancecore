@@ -24,8 +24,10 @@ export const listDepartmentsSchema = z.object({
   search: z.string().max(100).optional(),
   branchId: uuidSchema.optional(),
   parentDepartmentId: uuidSchema.optional(),
-  isActive: z.coerce.boolean().optional(),
-  tree: z.coerce.boolean().optional().default(false), // return hierarchy tree
+  // z.coerce.boolean() treats any non-empty string as true, so "?isActive=false"
+  // would wrongly coerce to true. Parse the literal string instead.
+  isActive: z.enum(['true', 'false']).transform((v) => v === 'true').optional(),
+  tree: z.enum(['true', 'false']).optional().default('false').transform((v) => v === 'true'), // return hierarchy tree
 });
 
 export type CreateDepartmentInput = z.infer<typeof createDepartmentSchema>;

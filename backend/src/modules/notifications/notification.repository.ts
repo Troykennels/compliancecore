@@ -9,6 +9,7 @@ function mapRow(row: Record<string, unknown>): Notification {
     userId:           row.userId as string,
     title:            row.title as string,
     body:             row.body as string | null,
+    message:          row.body as string | null,
     notificationType: row.notificationType as Notification['notificationType'],
     priority:         row.priority as Notification['priority'],
     referenceType:    row.referenceType as string | null,
