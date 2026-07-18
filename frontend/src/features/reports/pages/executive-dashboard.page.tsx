@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import {
   BarChart2, FileDown, FileSpreadsheet, Calendar, Clock,
-  Loader2, RefreshCw, TrendingUp, ShieldCheck, CheckSquare, X, Plus, Trash2, ToggleLeft, ToggleRight, Mail,
+  Loader2, RefreshCw, TrendingUp, ShieldCheck, CheckSquare, X, Plus, Trash2, ToggleLeft, ToggleRight, Mail, AlertTriangle,
 } from 'lucide-react';
 import {
   useExecutiveDashboard, useDownloadPdf, useDownloadExcel,
@@ -508,7 +508,7 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
 export function ExecutiveDashboardPage() {
   const [filter, setFilter] = useState<ReportFilter>({ days: 90 });
   const [showSchedule, setShowSchedule] = useState(false);
-  const { data, isLoading, refetch, isFetching } = useExecutiveDashboard(filter);
+  const { data, isLoading, isError, refetch, isFetching } = useExecutiveDashboard(filter);
   const pdf   = useDownloadPdf(filter);
   const excel = useDownloadExcel(filter);
 
@@ -530,7 +530,11 @@ export function ExecutiveDashboardPage() {
               <h1 className="text-xl font-bold text-slate-900">Executive Dashboard</h1>
             </div>
             <p className="text-sm text-slate-500 mt-0.5">
-              {data ? `Last updated ${new Date(data.generatedAt).toLocaleString()}` : 'Loading compliance overview…'}
+              {data
+                ? `Last updated ${new Date(data.generatedAt).toLocaleString()}`
+                : isError
+                ? 'Failed to load compliance overview'
+                : 'Loading compliance overview…'}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -559,6 +563,20 @@ export function ExecutiveDashboardPage() {
             </button>
           </div>
         </div>
+
+        {/* ── Error state ──────────────────────────────────────────────────── */}
+        {isError && !isLoading && (
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-center text-slate-500">
+            <AlertTriangle className="h-10 w-10 text-slate-300" />
+            <p className="text-sm">Failed to load the executive dashboard.</p>
+            <button
+              onClick={() => refetch()}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+            >
+              <RefreshCw className="h-3.5 w-3.5" /> Retry
+            </button>
+          </div>
+        )}
 
         {/* ── KPI Cards ────────────────────────────────────────────────────── */}
         {isLoading ? (
@@ -697,7 +715,9 @@ export function ExecutiveDashboardPage() {
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                       {data.expiryOverview.upcoming.map((item) => {
-                        const days = Math.ceil((new Date(item.expiryDate).getTime() - Date.now()) / 86400000);
+                        const expiryTs = new Date(item.expiryDate).getTime();
+                        const validDate = !Number.isNaN(expiryTs);
+                        const days = validDate ? Math.ceil((expiryTs - Date.now()) / 86400000) : null;
                         return (
                           <tr key={item.id} className="hover:bg-slate-50">
                             <td className="px-4 py-2.5">
@@ -705,10 +725,12 @@ export function ExecutiveDashboardPage() {
                               <p className="text-slate-400 text-[10px]">{item.entityType}</p>
                             </td>
                             <td className="px-4 py-2.5">
-                              <p className="text-slate-600">{item.expiryDate}</p>
-                              <p className={`text-[10px] font-medium ${days <= 7 ? 'text-red-600' : days <= 30 ? 'text-amber-600' : 'text-slate-400'}`}>
-                                {days <= 0 ? 'Expired' : `${days}d remaining`}
-                              </p>
+                              <p className="text-slate-600">{validDate ? item.expiryDate : '—'}</p>
+                              {days !== null && (
+                                <p className={`text-[10px] font-medium ${days <= 7 ? 'text-red-600' : days <= 30 ? 'text-amber-600' : 'text-slate-400'}`}>
+                                  {days <= 0 ? 'Expired' : `${days}d remaining`}
+                                </p>
+                              )}
                             </td>
                             <td className="px-4 py-2.5">
                               <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ${

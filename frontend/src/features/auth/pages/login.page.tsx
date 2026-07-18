@@ -42,33 +42,11 @@ export function LoginPage(): JSX.Element {
       {mfaState ? (
         <MfaChallenge mfaChallengeToken={mfaState.token} email={mfaState.email} />
       ) : (
-        <>
-          <LoginForm
-            isLoading={isLoading}
-            onSubmit={handleLoginSubmit}
-            onSuccess={handleLoginSuccess}
-          />
-
-          <div className="relative my-5">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-3 text-slate-400">or</span>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 transition-colors"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 2a10 10 0 100 20A10 10 0 0012 2z" fill="currentColor" opacity=".2" />
-              <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-            Continue with SSO
-          </button>
-        </>
+        <LoginForm
+          isLoading={isLoading}
+          onSubmit={handleLoginSubmit}
+          onSuccess={handleLoginSuccess}
+        />
       )}
     </AuthShell>
   );
@@ -107,9 +85,7 @@ function AuthShell({
         </div>
 
         <p className="text-center text-xs text-slate-400">
-          © {new Date().getFullYear()} ORION SOFT LIMITED ·{' '}
-          <a href="#" className="hover:underline">Privacy</a> ·{' '}
-          <a href="#" className="hover:underline">Terms</a>
+          © {new Date().getFullYear()} ORION SOFT LIMITED
         </p>
       </div>
     </div>

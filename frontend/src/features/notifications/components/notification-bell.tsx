@@ -50,6 +50,7 @@ function NotificationRow({ n, onRead, onDismiss }: {
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const ref             = useRef<HTMLDivElement>(null);
+  const navigate        = useNavigate();
   const { data: count } = useUnreadCount();
   const { data }        = useNotifications({ limit: 15 });
   const markRead        = useMarkRead();
@@ -117,9 +118,13 @@ export function NotificationBell() {
 
           {/* Footer */}
           <div className="border-t border-slate-100 px-4 py-2.5 text-center">
-            <a href="/notifications" className="flex items-center justify-center gap-1 text-xs text-blue-600 hover:text-blue-800">
+            <button
+              type="button"
+              onClick={() => { setOpen(false); navigate('/notifications'); }}
+              className="flex w-full items-center justify-center gap-1 text-xs text-blue-600 hover:text-blue-800"
+            >
               View all <ExternalLink className="h-3 w-3" />
-            </a>
+            </button>
           </div>
         </div>
       )}

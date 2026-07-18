@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CreditCard, AlertTriangle, CheckCircle2, Clock, XCircle, Pause,
-  ChevronRight, Download, Tag, X, Loader2, Plus, Trash2, Star,
+  ChevronRight, Download, Tag, X, Loader2, Plus, Trash2, Star, RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useBillingOverview, useApplyCoupon, useRemoveCoupon, useRemovePaymentMethod, useSetDefaultPaymentMethod } from '../hooks/use-billing';
@@ -188,9 +188,27 @@ function PmCard({ pm }: { pm: PaymentMethod }) {
   );
 }
 
+// ── Query error state ──────────────────────────────────────────────────────────
+function QueryError({ onRetry, message = 'Something went wrong while loading this page.' }: {
+  onRetry: () => void; message?: string;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center text-slate-500">
+      <AlertTriangle className="h-10 w-10 text-slate-300" />
+      <p className="text-sm">{message}</p>
+      <button
+        onClick={onRetry}
+        className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+      >
+        <RefreshCw className="h-3.5 w-3.5" /> Retry
+      </button>
+    </div>
+  );
+}
+
 // ── Main page ──────────────────────────────────────────────────────────────────
 export function BillingOverviewPage(): JSX.Element {
-  const { data: overview, isLoading } = useBillingOverview();
+  const { data: overview, isLoading, isError, refetch } = useBillingOverview();
   const [downloading, setDownloading] = useState<string | null>(null);
 
   async function handleDownload(id: string, number: string) {
@@ -212,7 +230,15 @@ export function BillingOverviewPage(): JSX.Element {
     );
   }
 
-  const { subscription: sub, plan, paymentMethods: pms, recentInvoices, usage } = overview ?? {};
+  if (isError || !overview) {
+    return (
+      <div className="mx-auto max-w-5xl p-6">
+        <QueryError onRetry={() => refetch()} message="Failed to load billing details." />
+      </div>
+    );
+  }
+
+  const { subscription: sub, plan, paymentMethods: pms, recentInvoices, usage } = overview;
 
   return (
     <div className="mx-auto max-w-5xl p-6 space-y-6">
@@ -249,7 +275,7 @@ export function BillingOverviewPage(): JSX.Element {
               </div>
               <div className="text-right shrink-0">
                 <p className="text-2xl font-bold text-slate-900">
-                  ${sub.nextInvoiceAmount.toFixed(2)}
+                  ${(sub.nextInvoiceAmount ?? 0).toFixed(2)}
                   <span className="text-sm font-normal text-slate-500">/{sub.billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                 </p>
                 {sub.discountPercent > 0 && (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
-import { ShieldCheck, ShieldX, RotateCcw } from 'lucide-react';
+import { ShieldCheck, ShieldX, RotateCcw, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useSignatures, useRevokeSignature } from '../hooks/use-signatures';
 
 export function SignaturesPage() {
@@ -16,7 +16,7 @@ export function SignaturesPage() {
     limit: 20,
   };
 
-  const { data, isLoading } = useSignatures(filters);
+  const { data, isLoading, isError, refetch } = useSignatures(filters);
   const revoke = useRevokeSignature();
 
   const items = data?.items ?? [];
@@ -50,6 +50,17 @@ export function SignaturesPage() {
 
       {isLoading ? (
         <div className="text-sm text-slate-500">Loading…</div>
+      ) : isError ? (
+        <div className="rounded-xl border border-dashed border-rose-300 py-16 text-center">
+          <AlertTriangle className="h-10 w-10 text-rose-400 mx-auto mb-2" />
+          <p className="text-sm text-slate-500">Couldn't load signatures.</p>
+          <button
+            onClick={() => refetch()}
+            className="mt-3 inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+          >
+            <RefreshCw className="h-4 w-4" /> Retry
+          </button>
+        </div>
       ) : items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 py-16 text-center">
           <ShieldCheck className="h-10 w-10 text-slate-300 mx-auto mb-2" />
@@ -90,10 +101,10 @@ export function SignaturesPage() {
                     {sig.signedAt ? format(parseISO(sig.signedAt), 'MMM d, yyyy h:mm a') : '—'}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="font-mono text-[11px] text-slate-500">{sig.documentHash.slice(0, 16)}…</span>
+                    <span className="font-mono text-[11px] text-slate-500">{sig.documentHash ? `${sig.documentHash.slice(0, 16)}…` : '—'}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="font-mono text-[11px] text-slate-500">{sig.signatureHash.slice(0, 16)}…</span>
+                    <span className="font-mono text-[11px] text-slate-500">{sig.signatureHash ? `${sig.signatureHash.slice(0, 16)}…` : '—'}</span>
                   </td>
                   <td className="px-4 py-3">
                     {sig.isValid && (

@@ -57,18 +57,21 @@ export function SettingsOrgPage(): JSX.Element {
               <div>
                 <p className="text-sm font-medium text-slate-900">Delete Organisation</p>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Permanently delete this organisation and all its data. This action is irreversible.
+                  Permanently deleting an organisation and all its data is handled manually to
+                  prevent accidental loss. Email{' '}
+                  <a href="mailto:support@orionsoft.com" className="text-indigo-600 hover:underline">
+                    support@orionsoft.com
+                  </a>{' '}
+                  to request deletion.
                 </p>
               </div>
               <button
                 type="button"
-                className="rounded-md border border-rose-300 px-4 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50"
-                onClick={() => {
-                  // Trigger a confirmation dialog — implemented when the offboarding flow is built
-                  alert('Contact support@orionsoft.com to delete your organisation.');
-                }}
+                disabled
+                title="Contact support@orionsoft.com to delete your organisation"
+                className="cursor-not-allowed rounded-md border border-slate-200 px-4 py-2 text-sm font-medium text-slate-400"
               >
-                Delete Organisation
+                Contact Support
               </button>
             </div>
           </section>

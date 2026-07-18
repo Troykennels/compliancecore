@@ -159,8 +159,8 @@ function ContractSummarizer() {
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-slate-800">Analysis Complete</h3>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">{data.wordCount.toLocaleString()} words</span>
-              <CopyButton text={[data.summary, '\n\nKey Terms:\n' + data.keyTerms.map((t) => '• ' + t).join('\n'), '\nObligations:\n' + data.obligations.map((o) => '• ' + o).join('\n'), '\nRisks:\n' + data.risks.map((r) => '• ' + r).join('\n')].join('')} />
+              <span className="text-xs text-slate-400">{(data.wordCount ?? 0).toLocaleString()} words</span>
+              <CopyButton text={[data.summary ?? '', '\n\nKey Terms:\n' + (data.keyTerms ?? []).map((t) => '• ' + t).join('\n'), '\nObligations:\n' + (data.obligations ?? []).map((o) => '• ' + o).join('\n'), '\nRisks:\n' + (data.risks ?? []).map((r) => '• ' + r).join('\n')].join('')} />
             </div>
           </div>
 
@@ -171,23 +171,23 @@ function ContractSummarizer() {
           <div className="grid grid-cols-2 gap-4">
             <ResultCard title="Key Terms">
               <ul className="space-y-1.5">
-                {data.keyTerms.map((t, i) => <BulletItem key={i}>{t}</BulletItem>)}
+                {(data.keyTerms ?? []).map((t, i) => <BulletItem key={i}>{t}</BulletItem>)}
               </ul>
             </ResultCard>
             <ResultCard title="Obligations">
               <ul className="space-y-1.5">
-                {data.obligations.map((o, i) => <BulletItem key={i}>{o}</BulletItem>)}
+                {(data.obligations ?? []).map((o, i) => <BulletItem key={i}>{o}</BulletItem>)}
               </ul>
             </ResultCard>
             <ResultCard title="Identified Risks" accent="red">
               <ul className="space-y-1.5">
-                {data.risks.map((r, i) => <BulletItem key={i} dot="red">{r}</BulletItem>)}
+                {(data.risks ?? []).map((r, i) => <BulletItem key={i} dot="red">{r}</BulletItem>)}
               </ul>
             </ResultCard>
             <ResultCard title="Dates & Deadlines" accent="amber">
-              {data.expiryDates.length ? (
+              {(data.expiryDates ?? []).length ? (
                 <ul className="space-y-1.5">
-                  {data.expiryDates.map((d, i) => <BulletItem key={i} dot="amber">{d}</BulletItem>)}
+                  {(data.expiryDates ?? []).map((d, i) => <BulletItem key={i} dot="amber">{d}</BulletItem>)}
                 </ul>
               ) : <p className="text-xs text-slate-400">No dates identified</p>}
             </ResultCard>
@@ -457,10 +457,10 @@ function ChecklistGenerator() {
     });
   };
 
-  const completionPct = data ? Math.round((checked.size / data.totalItems) * 100) : 0;
+  const completionPct = data && data.totalItems > 0 ? Math.round((checked.size / data.totalItems) * 100) : 0;
 
   const grouped = data
-    ? data.items.reduce<Record<string, ChecklistItem[]>>((acc, item) => {
+    ? (data.items ?? []).reduce<Record<string, ChecklistItem[]>>((acc, item) => {
         (acc[item.category] ??= []).push(item);
         return acc;
       }, {})
@@ -633,10 +633,10 @@ function DocumentQa() {
             <p className="text-sm leading-relaxed whitespace-pre-wrap">{data.answer}</p>
           </div>
 
-          {data.citations.length > 0 && (
+          {(data.citations?.length ?? 0) > 0 && (
             <ResultCard title="Supporting Citations">
               <ul className="space-y-2">
-                {data.citations.map((c, i) => (
+                {(data.citations ?? []).map((c, i) => (
                   <li key={i} className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-600 italic">
                     "{c}"
                   </li>
@@ -705,11 +705,11 @@ function AiSearchPanel() {
             <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{data.answer}</p>
           </ResultCard>
 
-          {data.relevantDocuments.length > 0 && (
+          {(data.relevantDocuments?.length ?? 0) > 0 && (
             <div>
               <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">Relevant Documents</h3>
               <div className="space-y-2">
-                {data.relevantDocuments.map((doc, i) => (
+                {(data.relevantDocuments ?? []).map((doc, i) => (
                   <div key={i} className="rounded-xl border border-slate-200 bg-white p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
@@ -720,7 +720,7 @@ function AiSearchPanel() {
                         <span className="text-xs font-semibold text-blue-700">
                           {Math.round(doc.relevanceScore * 100)}% match
                         </span>
-                        <p className="text-[10px] text-slate-400 mt-0.5 font-mono">{doc.evidenceId.slice(0, 8)}…</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5 font-mono">{(doc.evidenceId ?? '').slice(0, 8)}…</p>
                       </div>
                     </div>
                   </div>
@@ -729,11 +729,11 @@ function AiSearchPanel() {
             </div>
           )}
 
-          {data.suggestedQueries.length > 0 && (
+          {(data.suggestedQueries?.length ?? 0) > 0 && (
             <div>
               <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">Suggested Follow-up Searches</h3>
               <div className="flex flex-wrap gap-2">
-                {data.suggestedQueries.map((q, i) => (
+                {(data.suggestedQueries ?? []).map((q, i) => (
                   <button
                     key={i}
                     onClick={() => { setQuery(q); }}

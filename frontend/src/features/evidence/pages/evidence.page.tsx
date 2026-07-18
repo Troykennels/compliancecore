@@ -4,7 +4,7 @@ import {
   Search, Upload, FileText, Lock, ChevronLeft, ChevronRight,
   File, Image, FileArchive, AlertCircle, Loader2,
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { PATHS } from '@/routes/paths';
 import { useEvidence } from '../hooks/use-evidence';
 import { EvidenceFiltersPanel } from '../components/evidence-filters';
@@ -102,7 +102,7 @@ function EvidenceCard({ evidence }: { evidence: Evidence }) {
             </span>
           )}
           <span>·</span>
-          <span>{format(new Date(evidence.createdAt), 'dd MMM yyyy')}</span>
+          <span>{isValid(new Date(evidence.createdAt)) ? format(new Date(evidence.createdAt), 'dd MMM yyyy') : '—'}</span>
         </div>
       </div>
     </div>
@@ -116,7 +116,7 @@ export function EvidencePage() {
   const [searchInput, setSearchInput] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
 
-  const { data, isLoading } = useEvidence(filters);
+  const { data, isLoading, isError, refetch } = useEvidence(filters);
   const evidence = data?.evidence ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / (filters.limit ?? 20));
@@ -219,7 +219,21 @@ export function EvidencePage() {
             </div>
           )}
 
-          {!isLoading && evidence.length === 0 && (
+          {!isLoading && isError && (
+            <div className="flex h-64 flex-col items-center justify-center gap-3 text-slate-500">
+              <AlertCircle className="h-10 w-10 text-red-400" />
+              <p className="text-sm">Couldn't load evidence.</p>
+              <button
+                type="button"
+                onClick={() => refetch()}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {!isLoading && !isError && evidence.length === 0 && (
             <div className="flex h-64 flex-col items-center justify-center gap-3 text-slate-400">
               <AlertCircle className="h-10 w-10" />
               <p className="text-sm">No evidence found.</p>

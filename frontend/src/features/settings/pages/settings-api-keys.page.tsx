@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import {
-  Plus, X, Copy, Eye, EyeOff, Loader2, Key, Trash2, Check,
+  Plus, X, Copy, Eye, EyeOff, Loader2, Key, Trash2, Check, AlertTriangle, RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { settingsApi } from '../api/settings.api';
@@ -43,7 +43,7 @@ export function SettingsApiKeysPage(): JSX.Element {
 
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['settings', 'api-keys'],
     queryFn: () => settingsApi.listApiKeys().then((r) => r.data.data.apiKeys),
   });
@@ -105,6 +105,17 @@ export function SettingsApiKeysPage(): JSX.Element {
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+            </div>
+          ) : isError ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-12 text-center text-slate-500">
+              <AlertTriangle className="h-8 w-8 text-slate-300" />
+              <p className="text-sm">Failed to load API keys.</p>
+              <button
+                onClick={() => refetch()}
+                className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Retry
+              </button>
             </div>
           ) : !data?.length ? (
             <div className="flex flex-col items-center py-12 text-center">

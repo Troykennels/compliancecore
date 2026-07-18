@@ -177,14 +177,20 @@ export function EvidenceSharedPage() {
                       </p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleDownload}
-                    className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download File
-                  </button>
+                  {payload.downloadUrl ? (
+                    <button
+                      type="button"
+                      onClick={handleDownload}
+                      className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download File
+                    </button>
+                  ) : (
+                    <p className="text-center text-xs text-slate-400">
+                      This file is not available for download.
+                    </p>
+                  )}
                 </div>
               )}
 

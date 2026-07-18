@@ -16,7 +16,7 @@ export function TaskDetailPage() {
   const [showAddSubtask, setShowAddSubtask] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
-  const { data: task, isLoading } = useTask(id!);
+  const { data: task, isLoading, isError, refetch } = useTask(id!);
   const { data: subtasks = [] } = useSubtasks(id!);
   const { data: comments = [] } = useTaskComments(id!);
   const updateTask = useUpdateTask(id!);
@@ -28,6 +28,18 @@ export function TaskDetailPage() {
         <div className="animate-pulse space-y-4">
           <div className="h-6 w-48 bg-slate-200 rounded" />
           <div className="h-40 bg-slate-100 rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-sm text-slate-500">Couldn't load this task.</p>
+        <div className="mt-3 flex items-center justify-center gap-4">
+          <button onClick={() => refetch()} className="text-sm text-blue-600 hover:underline">Retry</button>
+          <Link to={PATHS.TASKS} className="text-sm text-slate-500 hover:underline">Back to Tasks</Link>
         </div>
       </div>
     );
@@ -216,11 +228,11 @@ export function TaskDetailPage() {
             </dl>
           </div>
 
-          {task.tags.length > 0 && (
+          {(task.tags?.length ?? 0) > 0 && (
             <div className="rounded-xl border border-slate-200 bg-white p-4">
               <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Tags</h3>
               <div className="flex flex-wrap gap-1.5">
-                {task.tags.map((tag) => (
+                {(task.tags ?? []).map((tag) => (
                   <span key={tag} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600">{tag}</span>
                 ))}
               </div>

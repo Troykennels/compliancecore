@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
-import { Plus, AlertTriangle, CheckCircle, Power, Trash2, ChevronRight } from 'lucide-react';
+import { Plus, AlertTriangle, CheckCircle, Power, Trash2, ChevronRight, RefreshCw } from 'lucide-react';
 import {
   useEscalationRules,
   useEscalationEvents,
@@ -21,6 +21,25 @@ const EVENT_STATUS_BADGE: Record<EscalationEventStatus, string> = {
   completed: 'bg-blue-50 text-blue-700',
 };
 
+const DEFAULT_STATUS_BADGE = 'bg-slate-100 text-slate-500';
+const DEFAULT_TRIGGER_CFG = { label: 'Unknown Trigger', color: 'text-slate-600' };
+const DEFAULT_ACTION_CFG = { label: 'Unknown Action', color: 'text-slate-600' };
+
+function ErrorBlock({ label, onRetry }: { label: string; onRetry: () => void }) {
+  return (
+    <div className="rounded-xl border border-dashed border-rose-300 py-16 text-center">
+      <AlertTriangle className="h-10 w-10 text-rose-400 mx-auto mb-2" />
+      <p className="text-sm text-slate-500">{label}</p>
+      <button
+        onClick={onRetry}
+        className="mt-3 inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+      >
+        <RefreshCw className="h-4 w-4" /> Retry
+      </button>
+    </div>
+  );
+}
+
 export function EscalationsPage() {
   const [tab, setTab] = useState<Tab>('rules');
   const [showForm, setShowForm] = useState(false);
@@ -28,8 +47,8 @@ export function EscalationsPage() {
   const [resolveTarget, setResolveTarget] = useState<string | null>(null);
   const [resolveNote, setResolveNote] = useState('');
 
-  const { data: rulesData, isLoading: rulesLoading } = useEscalationRules();
-  const { data: eventsData, isLoading: eventsLoading } = useEscalationEvents(
+  const { data: rulesData, isLoading: rulesLoading, isError: rulesError, refetch: refetchRules } = useEscalationRules();
+  const { data: eventsData, isLoading: eventsLoading, isError: eventsError, refetch: refetchEvents } = useEscalationEvents(
     eventStatusFilter ? { status: eventStatusFilter } : {}
   );
 
@@ -74,6 +93,8 @@ export function EscalationsPage() {
         <div>
           {rulesLoading ? (
             <div className="text-sm text-slate-400">Loading…</div>
+          ) : rulesError ? (
+            <ErrorBlock label="Couldn't load escalation rules." onRetry={() => refetchRules()} />
           ) : rules.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-300 py-16 text-center">
               <AlertTriangle className="h-10 w-10 text-slate-300 mx-auto mb-2" />
@@ -83,7 +104,9 @@ export function EscalationsPage() {
           ) : (
             <div className="space-y-3">
               {rules.map((rule) => {
-                const trigger = TRIGGER_CONFIG[rule.triggerType];
+                const trigger = TRIGGER_CONFIG[rule.triggerType] ?? DEFAULT_TRIGGER_CFG;
+                const conditions = rule.conditions ?? {};
+                const chain = rule.escalationChain ?? [];
                 return (
                   <div key={rule.id} className="rounded-xl border border-slate-200 bg-white p-4">
                     <div className="flex items-start gap-3">
@@ -122,31 +145,31 @@ export function EscalationsPage() {
                           <span className={`rounded-full bg-slate-100 px-2.5 py-0.5 font-medium ${trigger.color}`}>
                             {trigger.label}
                           </span>
-                          {rule.conditions.overdueHours && (
-                            <span className="text-slate-500">after {rule.conditions.overdueHours}h</span>
+                          {conditions.overdueHours && (
+                            <span className="text-slate-500">after {conditions.overdueHours}h</span>
                           )}
-                          {rule.conditions.pendingHours && (
-                            <span className="text-slate-500">after {rule.conditions.pendingHours}h pending</span>
+                          {conditions.pendingHours && (
+                            <span className="text-slate-500">after {conditions.pendingHours}h pending</span>
                           )}
-                          {rule.conditions.expiryDays && (
-                            <span className="text-slate-500">{rule.conditions.expiryDays}d before expiry</span>
+                          {conditions.expiryDays && (
+                            <span className="text-slate-500">{conditions.expiryDays}d before expiry</span>
                           )}
-                          {rule.conditions.priority && (
-                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500 capitalize">{rule.conditions.priority} priority</span>
+                          {conditions.priority && (
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500 capitalize">{conditions.priority} priority</span>
                           )}
                         </div>
 
                         {/* Chain steps */}
                         <div className="mt-3 flex items-center gap-2 overflow-x-auto">
-                          {rule.escalationChain.map((step, i) => {
-                            const actionCfg = ACTION_CONFIG[step.action];
+                          {chain.map((step, i) => {
+                            const actionCfg = ACTION_CONFIG[step.action] ?? DEFAULT_ACTION_CFG;
                             return (
                               <React.Fragment key={i}>
                                 <div className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-1.5 text-[11px] shrink-0">
                                   <p className={`font-semibold ${actionCfg.color}`}>{actionCfg.label}</p>
                                   <p className="text-slate-400">+{step.delayHours}h {step.targetRole ? `→ ${step.targetRole}` : ''}</p>
                                 </div>
-                                {i < rule.escalationChain.length - 1 && (
+                                {i < chain.length - 1 && (
                                   <ChevronRight className="h-4 w-4 text-slate-300 shrink-0" />
                                 )}
                               </React.Fragment>
@@ -183,6 +206,8 @@ export function EscalationsPage() {
 
           {eventsLoading ? (
             <div className="text-sm text-slate-400">Loading…</div>
+          ) : eventsError ? (
+            <ErrorBlock label="Couldn't load escalation events." onRetry={() => refetchEvents()} />
           ) : events.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-300 py-16 text-center">
               <CheckCircle className="h-10 w-10 text-green-300 mx-auto mb-2" />
@@ -210,7 +235,7 @@ export function EscalationsPage() {
                         <span className="capitalize">{ev.entityType}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ${EVENT_STATUS_BADGE[ev.status]}`}>
+                        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ${EVENT_STATUS_BADGE[ev.status] ?? DEFAULT_STATUS_BADGE}`}>
                           {ev.status}
                         </span>
                       </td>

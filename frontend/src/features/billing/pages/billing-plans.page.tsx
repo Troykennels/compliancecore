@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, Loader2, ArrowLeft, Tag, X } from 'lucide-react';
+import { CheckCircle2, Loader2, ArrowLeft, Tag, X, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePublicPlans, useSubscription, useCreateSubscription, useUpdateSubscription, useApplyCoupon, useRemoveCoupon } from '../hooks/use-billing';
 import { billingApi } from '../api/billing.api';
@@ -103,7 +103,7 @@ function PlanCard({
 }
 
 export function BillingPlansPage(): JSX.Element {
-  const { data: plans = [], isLoading: plansLoading } = usePublicPlans();
+  const { data: plans = [], isLoading: plansLoading, isError: plansError, refetch } = usePublicPlans();
   const { data: subscription } = useSubscription();
   const createSub = useCreateSubscription();
   const updateSub = useUpdateSubscription();
@@ -122,7 +122,16 @@ export function BillingPlansPage(): JSX.Element {
     if (!couponInput) return;
     setValidatingCoupon(true);
     try {
-      const res = await billingApi.validateCoupon(couponInput, 'professional', 99);
+      // Validate against the plan the user is (or would be) on, at the selected cycle's
+      // real price — not a hardcoded plan/amount.
+      const targetPlan =
+        plans.find((p) => p.id === subscription?.planId) ??
+        plans.find((p) => p.slug === 'professional') ??
+        plans[0];
+      const targetPrice = targetPlan
+        ? cycle === 'monthly' ? targetPlan.priceMonthly : targetPlan.priceYearly
+        : 0;
+      const res = await billingApi.validateCoupon(couponInput, targetPlan?.slug ?? 'professional', targetPrice);
       const v = res.data.data;
       setCouponValidation({
         valid: v.valid,
@@ -163,6 +172,21 @@ export function BillingPlansPage(): JSX.Element {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (plansError) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-24 text-center text-slate-500">
+        <AlertTriangle className="h-10 w-10 text-slate-300" />
+        <p className="text-sm">Failed to load plans.</p>
+        <button
+          onClick={() => refetch()}
+          className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+        >
+          <RefreshCw className="h-3.5 w-3.5" /> Retry
+        </button>
       </div>
     );
   }

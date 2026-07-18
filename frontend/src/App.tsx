@@ -27,6 +27,7 @@ const ResetPasswordPage = lazyPage(() => import('./features/auth/pages/reset-pas
 const OnboardingPage = lazyPage(() => import('./features/organizations/pages/onboarding.page'), 'OnboardingPage');
 const EmailVerificationPage = lazyPage(() => import('./features/auth/pages/email-verification.page'), 'EmailVerificationPage');
 const BranchesPage = lazyPage(() => import('./features/branches/pages/branches.page'), 'BranchesPage');
+const ControlsPage = lazyPage(() => import('./features/controls/pages/controls.page'), 'ControlsPage');
 const DepartmentsPage = lazyPage(() => import('./features/departments/pages/departments.page'), 'DepartmentsPage');
 const SettingsOrgPage = lazyPage(() => import('./features/settings/pages/settings-org.page'), 'SettingsOrgPage');
 const SettingsTeamPage = lazyPage(() => import('./features/settings/pages/settings-team.page'), 'SettingsTeamPage');
@@ -124,7 +125,7 @@ export default function App(): JSX.Element {
               {/* App shell wraps all authenticated pages (sidebar + topbar) */}
               <Route element={<AppShell />}>
                 <Route path={PATHS.DASHBOARD}    element={<DashboardPage />} />
-                <Route path={PATHS.CONTROLS}     element={<PlaceholderPage title="Controls" />} />
+                <Route path={PATHS.CONTROLS}     element={<ControlsPage />} />
                 <Route path={PATHS.FRAMEWORKS}   element={<PlaceholderPage title="Frameworks" />} />
                 <Route path={PATHS.EVIDENCE}     element={<EvidencePage />} />
                 <Route path="/evidence/:id"      element={<EvidenceDetailPage />} />

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Download, Search, Loader2, FileText } from 'lucide-react';
+import { ArrowLeft, Download, Search, Loader2, FileText, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useInvoices } from '../hooks/use-billing';
@@ -9,10 +9,11 @@ import type { InvoiceStatus } from '../types/billing.types';
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
   { value: '', label: 'All Statuses' },
+  { value: 'draft', label: 'Draft' },
   { value: 'open', label: 'Open' },
   { value: 'paid', label: 'Paid' },
-  { value: 'past_due', label: 'Past Due' },
   { value: 'void', label: 'Void' },
+  { value: 'uncollectible', label: 'Uncollectible' },
 ];
 
 const STATUS_COLORS: Record<InvoiceStatus, string> = {
@@ -28,7 +29,7 @@ export function BillingInvoicesPage(): JSX.Element {
   const [search, setSearch] = useState('');
   const [downloading, setDownloading] = useState<string | null>(null);
 
-  const { data: invoices = [], isLoading } = useInvoices({
+  const { data: invoices = [], isLoading, isError, refetch } = useInvoices({
     status: statusFilter || undefined,
     limit: 100,
   });
@@ -90,6 +91,17 @@ export function BillingInvoicesPage(): JSX.Element {
         {isLoading ? (
           <div className="flex items-center justify-center h-48">
             <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center gap-3 py-16 text-center text-slate-500">
+            <AlertTriangle className="h-8 w-8 text-slate-300" />
+            <p className="text-sm">Failed to load invoices.</p>
+            <button
+              onClick={() => refetch()}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+            >
+              <RefreshCw className="h-3.5 w-3.5" /> Retry
+            </button>
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-16 text-center">

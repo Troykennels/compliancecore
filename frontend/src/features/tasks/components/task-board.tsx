@@ -1,5 +1,5 @@
 import { format, parseISO, isPast } from 'date-fns';
-import { Calendar, User, AlertCircle } from 'lucide-react';
+import { Calendar, User, AlertCircle, Eye } from 'lucide-react';
 import type { Task, TaskStatus } from '../types/tasks.types';
 import { STATUS_CONFIG, PRIORITY_CONFIG } from '../types/tasks.types';
 
@@ -13,10 +13,11 @@ const BOARD_COLUMNS: { status: TaskStatus; label: string; headerColor: string }[
 interface TaskBoardProps {
   tasks:         Task[];
   onTaskClick:   (task: Task) => void;
+  onViewTask?:   (task: Task) => void;
   onCreateTask?: (status: TaskStatus) => void;
 }
 
-export function TaskBoard({ tasks, onTaskClick, onCreateTask }: TaskBoardProps) {
+export function TaskBoard({ tasks, onTaskClick, onViewTask, onCreateTask }: TaskBoardProps) {
   const grouped = BOARD_COLUMNS.reduce<Record<TaskStatus, Task[]>>((acc, col) => {
     acc[col.status] = tasks.filter((t) => t.status === col.status);
     return acc;
@@ -30,6 +31,7 @@ export function TaskBoard({ tasks, onTaskClick, onCreateTask }: TaskBoardProps) 
           col={col}
           tasks={grouped[col.status]}
           onTaskClick={onTaskClick}
+          onViewTask={onViewTask}
           onCreateTask={onCreateTask}
         />
       ))}
@@ -41,11 +43,13 @@ function BoardColumn({
   col,
   tasks,
   onTaskClick,
+  onViewTask,
   onCreateTask,
 }: {
   col: { status: TaskStatus; label: string; headerColor: string };
   tasks: Task[];
   onTaskClick: (task: Task) => void;
+  onViewTask?: (task: Task) => void;
   onCreateTask?: (status: TaskStatus) => void;
 }) {
   const cfg = STATUS_CONFIG[col.status];
@@ -75,7 +79,12 @@ function BoardColumn({
           </div>
         ) : (
           tasks.map((task) => (
-            <BoardCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+            <BoardCard
+              key={task.id}
+              task={task}
+              onClick={() => onTaskClick(task)}
+              onView={onViewTask ? () => onViewTask(task) : undefined}
+            />
           ))
         )}
       </div>
@@ -83,14 +92,15 @@ function BoardColumn({
   );
 }
 
-function BoardCard({ task, onClick }: { task: Task; onClick: () => void }) {
+function BoardCard({ task, onClick, onView }: { task: Task; onClick: () => void; onView?: () => void }) {
   const priCfg = PRIORITY_CONFIG[task.priority];
   const isOverdue = task.dueDate && isPast(parseISO(task.dueDate)) && task.status !== 'completed' && task.status !== 'cancelled';
+  const tags = task.tags ?? [];
 
   return (
     <div
       onClick={onClick}
-      className="rounded-xl bg-white border border-slate-200 p-3.5 cursor-pointer hover:shadow-sm hover:border-blue-200 transition-all"
+      className="group rounded-xl bg-white border border-slate-200 p-3.5 cursor-pointer hover:shadow-sm hover:border-blue-200 transition-all"
     >
       {/* Priority + tags */}
       <div className="flex items-start justify-between gap-1.5 mb-2">
@@ -98,22 +108,34 @@ function BoardCard({ task, onClick }: { task: Task; onClick: () => void }) {
           <div className={`h-2 w-2 rounded-full ${priCfg.dotColor}`} />
           <span className={`text-[10px] font-semibold uppercase tracking-wide ${priCfg.color}`}>{priCfg.label}</span>
         </div>
-        {isOverdue && (
-          <span className="flex items-center gap-0.5 text-[10px] font-bold text-red-600">
-            <AlertCircle className="h-3 w-3" /> Overdue
-          </span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {isOverdue && (
+            <span className="flex items-center gap-0.5 text-[10px] font-bold text-red-600">
+              <AlertCircle className="h-3 w-3" /> Overdue
+            </span>
+          )}
+          {onView && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onView(); }}
+              className="rounded p-0.5 text-slate-300 opacity-0 group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-600 transition-opacity"
+              title="View details"
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       <p className="text-sm font-semibold text-slate-900 line-clamp-2 mb-2">{task.title}</p>
 
-      {task.tags.length > 0 && (
+      {tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-2">
-          {task.tags.slice(0, 3).map((tag) => (
+          {tags.slice(0, 3).map((tag) => (
             <span key={tag} className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600">{tag}</span>
           ))}
-          {task.tags.length > 3 && (
-            <span className="text-[10px] text-slate-400">+{task.tags.length - 3}</span>
+          {tags.length > 3 && (
+            <span className="text-[10px] text-slate-400">+{tags.length - 3}</span>
           )}
         </div>
       )}

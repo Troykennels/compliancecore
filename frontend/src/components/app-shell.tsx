@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, ShieldCheck, BookOpen, FileText, AlertTriangle,
-  Users2, GraduationCap, Zap, BarChart2, Settings, LogOut,
+  LayoutDashboard, ShieldCheck, FileText, AlertTriangle,
+  BarChart2, Settings, LogOut,
   ChevronDown, Building2, GitBranch, Calendar, Clock, ChevronsLeft,
   ChevronsRight, FileArchive, CheckSquare, ShieldAlert, ListChecks, Sparkles, PieChart,
   CreditCard,
@@ -32,8 +32,6 @@ const NAV_GROUPS: NavGroup[] = [
   {
     heading: 'Compliance',
     items: [
-      { label: 'Frameworks',        to: PATHS.FRAMEWORKS,         icon: <BookOpen className="h-4 w-4" /> },
-      { label: 'Controls',          to: PATHS.CONTROLS,           icon: <ShieldCheck className="h-4 w-4" /> },
       { label: 'Compliance Score',  to: PATHS.COMPLIANCE_SCORE,   icon: <BarChart2 className="h-4 w-4" /> },
       { label: 'Calendar',          to: PATHS.CALENDAR,           icon: <Calendar className="h-4 w-4" /> },
       { label: 'Expiry Tracker',    to: PATHS.EXPIRY,             icon: <Clock className="h-4 w-4" /> },
@@ -42,11 +40,8 @@ const NAV_GROUPS: NavGroup[] = [
   {
     heading: 'Governance',
     items: [
+      { label: 'Controls',          to: PATHS.CONTROLS,           icon: <ShieldCheck className="h-4 w-4" /> },
       { label: 'Evidence Hub',      to: PATHS.EVIDENCE,           icon: <FileArchive className="h-4 w-4" /> },
-      { label: 'Policies',          to: PATHS.POLICIES,           icon: <FileText className="h-4 w-4" /> },
-      { label: 'Risk Register',     to: PATHS.RISKS,              icon: <AlertTriangle className="h-4 w-4" /> },
-      { label: 'Vendors',           to: PATHS.VENDORS,            icon: <Users2 className="h-4 w-4" /> },
-      { label: 'Audits',            to: PATHS.AUDITS,             icon: <BookOpen className="h-4 w-4" /> },
     ],
   },
   {
@@ -54,7 +49,6 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Branches',          to: PATHS.BRANCHES,           icon: <GitBranch className="h-4 w-4" /> },
       { label: 'Departments',       to: PATHS.DEPARTMENTS,        icon: <Building2 className="h-4 w-4" /> },
-      { label: 'Training',          to: PATHS.TRAINING,           icon: <GraduationCap className="h-4 w-4" /> },
     ],
   },
   {
@@ -76,13 +70,6 @@ const NAV_GROUPS: NavGroup[] = [
     heading: 'Reports',
     items: [
       { label: 'Executive Dashboard', to: PATHS.REPORTS,      icon: <PieChart className="h-4 w-4" /> },
-    ],
-  },
-  {
-    heading: 'Platform',
-    items: [
-      { label: 'Analytics',         to: PATHS.ANALYTICS,          icon: <BarChart2 className="h-4 w-4" /> },
-      { label: 'Integrations',      to: PATHS.INTEGRATIONS,       icon: <Zap className="h-4 w-4" /> },
     ],
   },
   {

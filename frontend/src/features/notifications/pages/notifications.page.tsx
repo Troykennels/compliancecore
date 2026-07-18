@@ -7,7 +7,7 @@ export function NotificationsPage() {
   const [page, setPage]             = useState(1);
   const LIMIT = 25;
 
-  const { data, isLoading } = useNotifications({ unreadOnly, page, limit: LIMIT });
+  const { data, isLoading, isError, refetch } = useNotifications({ unreadOnly, page, limit: LIMIT });
   const markAll = useMarkAllRead();
 
   const notifications = data?.notifications ?? [];
@@ -39,6 +39,16 @@ export function NotificationsPage() {
 
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center text-slate-400 text-sm">Loading…</div>
+      ) : isError ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-slate-500">
+          <p className="text-sm">Couldn't load notifications.</p>
+          <button
+            onClick={() => refetch()}
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+          >
+            Retry
+          </button>
+        </div>
       ) : (
         <div className="flex-1 overflow-y-auto">
           <NotificationPanel

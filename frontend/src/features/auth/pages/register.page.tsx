@@ -193,10 +193,7 @@ export function RegisterPage(): JSX.Element {
         </button>
 
         <p className="text-center text-xs text-slate-400">
-          By creating an account you agree to our{' '}
-          <a href="#" className="text-indigo-600 hover:underline">Terms of Service</a>{' '}
-          and{' '}
-          <a href="#" className="text-indigo-600 hover:underline">Privacy Policy</a>.
+          By creating an account you agree to our Terms of Service and Privacy Policy.
         </p>
       </form>
     </AuthShell>

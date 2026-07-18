@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { format, parseISO } from 'date-fns';
-import { Plus, Calendar, List, AlertCircle } from 'lucide-react';
+import { format, parseISO, isValid } from 'date-fns';
+import { Plus, Calendar, List, AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useCalendarEvents, useDeleteCalendarEvent } from '../hooks/use-calendar';
 import { CalendarGrid } from '../components/calendar-grid';
 import { CalendarEventModal } from '../components/calendar-event-modal';
@@ -17,6 +17,15 @@ const STATUS_BADGE: Record<CalendarEventStatus, string> = {
   overdue:     'bg-red-100 text-red-700',
 };
 
+const DEFAULT_BADGE = 'bg-slate-100 text-slate-500';
+const DEFAULT_EVENT_COLOR = '#64748B';
+
+function safeFormat(dateStr: string | null | undefined, fmt: string): string | null {
+  if (!dateStr) return null;
+  const parsed = parseISO(dateStr);
+  return isValid(parsed) ? format(parsed, fmt) : null;
+}
+
 export function CalendarPage() {
   const [view, setView]             = useState<ViewMode>('month');
   const [modalOpen, setModalOpen]   = useState(false);
@@ -25,7 +34,7 @@ export function CalendarPage() {
   const [filterType, setFilterType] = useState<CalendarEventType | ''>('');
   const [filterStatus, setFilterStatus] = useState<CalendarEventStatus | ''>('');
 
-  const { data, isLoading } = useCalendarEvents({
+  const { data, isLoading, isError, refetch } = useCalendarEvents({
     eventType: filterType || undefined,
     status:    filterStatus || undefined,
   });
@@ -45,9 +54,11 @@ export function CalendarPage() {
     setModalOpen(true);
   }
 
-  async function handleDelete(id: string) {
+  function handleDelete(id: string) {
+    // Fire-and-forget: the hook surfaces success/error toasts. Using mutate (not
+    // mutateAsync) avoids an unhandled promise rejection when the delete fails.
     if (confirm('Delete this event?')) {
-      await deleteEvent.mutateAsync(id);
+      deleteEvent.mutate(id);
     }
   }
 
@@ -116,6 +127,17 @@ export function CalendarPage() {
       {/* Body */}
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center text-slate-400 text-sm">Loading events…</div>
+      ) : isError ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-slate-500">
+          <AlertTriangle className="h-8 w-8 text-red-400" />
+          <p className="text-sm">Couldn't load calendar events.</p>
+          <button
+            onClick={() => refetch()}
+            className="flex items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+          >
+            <RefreshCw className="h-4 w-4" /> Retry
+          </button>
+        </div>
       ) : view === 'month' ? (
         <div className="flex-1 overflow-hidden">
           <CalendarGrid
@@ -133,28 +155,31 @@ export function CalendarPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {events.map((ev) => (
+              {events.map((ev) => {
+                const startLabel = safeFormat(ev.startDate, 'MMM d, yyyy h:mm a');
+                const endLabel = safeFormat(ev.endDate, 'MMM d, yyyy h:mm a');
+                return (
                 <div
                   key={ev.id}
                   className="flex items-start gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3 hover:shadow-sm transition-shadow"
                 >
                   <div
                     className="mt-1 h-3 w-3 rounded-full shrink-0"
-                    style={{ backgroundColor: ev.color || EVENT_TYPE_COLORS[ev.eventType] }}
+                    style={{ backgroundColor: ev.color || EVENT_TYPE_COLORS[ev.eventType] || DEFAULT_EVENT_COLOR }}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-slate-900 text-sm truncate">{ev.title}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${STATUS_BADGE[ev.status]}`}>
-                        {STATUS_LABELS[ev.status]}
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${STATUS_BADGE[ev.status] ?? DEFAULT_BADGE}`}>
+                        {STATUS_LABELS[ev.status] ?? ev.status}
                       </span>
                       <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-                        {EVENT_TYPE_LABELS[ev.eventType]}
+                        {EVENT_TYPE_LABELS[ev.eventType] ?? ev.eventType}
                       </span>
                     </div>
                     <p className="mt-0.5 text-xs text-slate-500">
-                      {format(parseISO(ev.startDate), 'MMM d, yyyy h:mm a')}
-                      {ev.endDate && ` – ${format(parseISO(ev.endDate), 'MMM d, yyyy h:mm a')}`}
+                      {startLabel ?? '—'}
+                      {endLabel && ` – ${endLabel}`}
                     </p>
                     {ev.description && (
                       <p className="mt-1 text-xs text-slate-400 line-clamp-2">{ev.description}</p>
@@ -175,7 +200,8 @@ export function CalendarPage() {
                     </button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

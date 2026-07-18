@@ -1,5 +1,6 @@
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { X, CheckCheck, Bell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useMarkRead, useDismissNotification } from '../hooks/use-notifications';
 import type { Notification, NotificationPriority } from '../api/notifications.api';
 
@@ -19,6 +20,7 @@ interface NotificationPanelProps {
 export function NotificationPanel({ notifications, unreadCount, onMarkAllRead }: NotificationPanelProps) {
   const markRead = useMarkRead();
   const dismiss  = useDismissNotification();
+  const navigate = useNavigate();
 
   if (notifications.length === 0) {
     return (
@@ -79,7 +81,13 @@ export function NotificationPanel({ notifications, unreadCount, onMarkAllRead }:
                   </button>
                 )}
                 {n.actionUrl && (
-                  <a href={n.actionUrl} className="text-[11px] text-blue-600 hover:text-blue-800 font-medium">View</a>
+                  <button
+                    type="button"
+                    onClick={() => navigate(n.actionUrl!)}
+                    className="text-[11px] text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    View
+                  </button>
                 )}
               </div>
             </div>

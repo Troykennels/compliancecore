@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format, parseISO, isPast } from 'date-fns';
-import { Plus, LayoutGrid, List, AlertCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Plus, LayoutGrid, List, AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { PATHS } from '@/routes/paths';
 import { useTasks, useTaskStats, useDeleteTask } from '../hooks/use-tasks';
 import { TaskBoard } from '../components/task-board';
@@ -20,8 +20,10 @@ export function TasksPage() {
   const [editTask, setEditTask] = useState<Task | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
   const { data: stats } = useTaskStats();
-  const { data: taskData, isLoading } = useTasks({
+  const { data: taskData, isLoading, isError, refetch } = useTasks({
     ...(statusFilter && { status: statusFilter }),
     ...(priorityFilter && { priority: priorityFilter }),
     limit: 100,
@@ -89,10 +91,22 @@ export function TasksPage() {
 
       {isLoading ? (
         <div className="text-sm text-slate-400">Loading…</div>
+      ) : isError ? (
+        <div className="flex flex-col items-center justify-center gap-3 py-16 text-slate-500">
+          <AlertTriangle className="h-8 w-8 text-red-400" />
+          <p className="text-sm">Couldn't load tasks.</p>
+          <button
+            onClick={() => refetch()}
+            className="flex items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+          >
+            <RefreshCw className="h-4 w-4" /> Retry
+          </button>
+        </div>
       ) : view === 'board' ? (
         <TaskBoard
           tasks={tasks}
           onTaskClick={(t) => setEditTask(t)}
+          onViewTask={(t) => navigate(PATHS.TASK_DETAIL(t.id))}
           onCreateTask={(status) => openCreate(status)}
         />
       ) : (
@@ -123,9 +137,9 @@ export function TasksPage() {
                       <Link to={PATHS.TASK_DETAIL(task.id)} className="font-medium text-slate-900 hover:text-blue-600 text-sm">
                         {task.title}
                       </Link>
-                      {task.tags.length > 0 && (
+                      {(task.tags?.length ?? 0) > 0 && (
                         <div className="flex gap-1 mt-0.5">
-                          {task.tags.slice(0, 3).map((t) => (
+                          {(task.tags ?? []).slice(0, 3).map((t) => (
                             <span key={t} className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{t}</span>
                           ))}
                         </div>

@@ -14,7 +14,7 @@ const TREND_OPTIONS: { label: string; days: number }[] = [
 
 export function ScorePage() {
   const [trendDays, setTrendDays] = useState(180);
-  const { data: scoreData, isLoading: scoreLoading } = useCurrentScore();
+  const { data: scoreData, isLoading: scoreLoading, isError: scoreError, refetch: refetchScore } = useCurrentScore();
   const { data: trendData = [], isLoading: trendLoading } = useScoreTrend(trendDays);
   const triggerSnapshot = useTriggerSnapshot();
 
@@ -40,6 +40,17 @@ export function ScorePage() {
 
       {scoreLoading ? (
         <div className="flex flex-1 items-center justify-center text-slate-400 text-sm">Calculating score…</div>
+      ) : scoreError ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-slate-500">
+          <RefreshCw className="h-8 w-8 text-red-400" />
+          <p className="text-sm">Couldn't load compliance score.</p>
+          <button
+            onClick={() => refetchScore()}
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+          >
+            Retry
+          </button>
+        </div>
       ) : (
         <>
           {/* Overall score + trend */}

@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Loader2, Mail, ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
 import { PATHS } from '@/routes/paths';
 import { authApi } from '../api/auth.api';
 import { cn } from '@/lib/utils';
@@ -30,6 +31,9 @@ export function ForgotPasswordPage(): JSX.Element {
     onSuccess: (_, variables) => {
       setSubmittedEmail(variables.email);
       setSubmitted(true);
+    },
+    onError: () => {
+      toast.error('Something went wrong sending the reset link. Please try again.');
     },
   });
 

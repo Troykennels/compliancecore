@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Users, MoreHorizontal, Pencil, Trash2, ChevronRight } from 'lucide-react';
+import { Plus, Search, Users, MoreHorizontal, Pencil, Trash2, ChevronRight, AlertTriangle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDepartments, useDeleteDepartment } from '../hooks/use-departments';
 import { DepartmentFormModal } from '../components/department-form-modal';
@@ -12,7 +12,7 @@ export function DepartmentsPage(): JSX.Element {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  const { data, isLoading } = useDepartments({ search: search || undefined });
+  const { data, isLoading, isError, refetch } = useDepartments({ search: search || undefined });
   const { mutate: deleteDepartment, isPending: isDeleting } = useDeleteDepartment();
 
   function openCreate() {
@@ -66,6 +66,8 @@ export function DepartmentsPage(): JSX.Element {
             <div className="flex items-center justify-center py-16">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
             </div>
+          ) : isError ? (
+            <ErrorState onRetry={() => refetch()} />
           ) : !data?.departments?.length ? (
             <EmptyState onAdd={openCreate} />
           ) : (
@@ -200,6 +202,26 @@ export function DepartmentsPage(): JSX.Element {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ErrorState({ onRetry }: { onRetry: () => void }): JSX.Element {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-rose-50">
+        <AlertTriangle className="h-7 w-7 text-rose-400" />
+      </div>
+      <h3 className="text-base font-semibold text-slate-900">Couldn't load departments</h3>
+      <p className="mt-1 text-sm text-slate-500">
+        Something went wrong while fetching departments.
+      </p>
+      <button
+        onClick={onRetry}
+        className="mt-4 inline-flex items-center gap-2 rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+      >
+        <RefreshCw className="h-4 w-4" /> Retry
+      </button>
     </div>
   );
 }

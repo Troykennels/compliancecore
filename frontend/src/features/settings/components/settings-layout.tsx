@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
-  Building2, Users, Shield, Key, Bell, CreditCard, Webhook, Lock,
+  Building2, Users, Shield, Key, Bell, Webhook, Lock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PATHS } from '@/routes/paths';
@@ -21,7 +21,6 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'API Keys',       path: PATHS.SETTINGS_API_KEYS,      icon: Key,     requiresRole: ['owner', 'admin'] },
   { label: 'Webhooks',       path: PATHS.SETTINGS_WEBHOOKS,      icon: Webhook, requiresRole: ['owner', 'admin'] },
   { label: 'Notifications',  path: PATHS.SETTINGS_NOTIFICATIONS, icon: Bell },
-  { label: 'Billing',        path: PATHS.SETTINGS_BILLING,       icon: CreditCard, requiresRole: ['owner'] },
 ];
 
 interface Props {

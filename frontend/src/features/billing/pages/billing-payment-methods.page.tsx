@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Plus, Star, Trash2, CreditCard, Loader2, Building2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Plus, Star, Trash2, CreditCard, Loader2, Building2, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   usePaymentMethods, useAddPaymentMethod, useSetDefaultPaymentMethod, useRemovePaymentMethod,
@@ -182,7 +182,7 @@ function AddPaymentMethodForm({ onCancel }: { onCancel: () => void }) {
 
 // ── Main page ──────────────────────────────────────────────────────────────────
 export function BillingPaymentMethodsPage(): JSX.Element {
-  const { data: pms = [], isLoading } = usePaymentMethods();
+  const { data: pms = [], isLoading, isError, refetch } = usePaymentMethods();
   const setDefault = useSetDefaultPaymentMethod();
   const remove = useRemovePaymentMethod();
   const [showForm, setShowForm] = useState(false);
@@ -214,6 +214,17 @@ export function BillingPaymentMethodsPage(): JSX.Element {
       {isLoading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+        </div>
+      ) : isError ? (
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 py-16 text-center text-slate-500">
+          <AlertTriangle className="h-8 w-8 text-slate-300" />
+          <p className="text-sm">Failed to load payment methods.</p>
+          <button
+            onClick={() => refetch()}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+          >
+            <RefreshCw className="h-3.5 w-3.5" /> Retry
+          </button>
         </div>
       ) : pms.length === 0 && !showForm ? (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 py-16 text-center">

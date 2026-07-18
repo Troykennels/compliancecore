@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
-import { Plus, GitBranch, Clock, CheckCircle, XCircle, AlertCircle, Trash2, Eye } from 'lucide-react';
+import { Plus, GitBranch, Clock, CheckCircle, XCircle, AlertCircle, Trash2, Eye, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PATHS } from '@/routes/paths';
 import {
@@ -50,11 +50,11 @@ export function ApprovalsPage() {
   const [showWorkflowBuilder, setShowWorkflowBuilder] = useState(false);
   const [cancelId, setCancelId] = useState<string | null>(null);
 
-  const { data: myPending = [], isLoading: pendingLoading } = useMyPendingApprovals();
-  const { data: allRequests, isLoading: allLoading } = useApprovalRequests(
+  const { data: myPending = [], isLoading: pendingLoading, isError: pendingError, refetch: refetchPending } = useMyPendingApprovals();
+  const { data: allRequests, isLoading: allLoading, isError: allError, refetch: refetchAll } = useApprovalRequests(
     statusFilter ? { status: statusFilter as ApprovalStatus } : {}
   );
-  const { data: workflows = [], isLoading: wfLoading } = useWorkflows();
+  const { data: workflows = [], isLoading: wfLoading, isError: wfError, refetch: refetchWf } = useWorkflows();
 
   const cancelMutation = useCancelApproval();
   const deleteWorkflow = useDeleteWorkflow();
@@ -121,6 +121,8 @@ export function ApprovalsPage() {
         <div>
           {pendingLoading ? (
             <div className="text-sm text-slate-500">Loading…</div>
+          ) : pendingError ? (
+            <ErrorBlock label="Couldn't load your pending approvals." onRetry={() => refetchPending()} />
           ) : myPending.length === 0 ? (
             <div className="rounded-xl border border-slate-200 bg-slate-50 py-16 text-center">
               <CheckCircle className="h-10 w-10 text-green-400 mx-auto mb-2" />
@@ -157,6 +159,8 @@ export function ApprovalsPage() {
 
           {allLoading ? (
             <div className="text-sm text-slate-500">Loading…</div>
+          ) : allError ? (
+            <ErrorBlock label="Couldn't load approval requests." onRetry={() => refetchAll()} />
           ) : !allRequests?.items?.length ? (
             <div className="rounded-xl border border-dashed border-slate-300 py-16 text-center">
               <p className="text-sm text-slate-500">No approval requests found</p>
@@ -176,6 +180,8 @@ export function ApprovalsPage() {
         <div>
           {wfLoading ? (
             <div className="text-sm text-slate-500">Loading…</div>
+          ) : wfError ? (
+            <ErrorBlock label="Couldn't load workflow templates." onRetry={() => refetchWf()} />
           ) : workflows.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-300 py-16 text-center">
               <GitBranch className="h-10 w-10 text-slate-300 mx-auto mb-2" />
@@ -251,6 +257,21 @@ export function ApprovalsPage() {
 
       <ApprovalRequestModal open={showRequestModal} onClose={() => setShowRequestModal(false)} />
       <WorkflowBuilder open={showWorkflowBuilder} onClose={() => setShowWorkflowBuilder(false)} />
+    </div>
+  );
+}
+
+function ErrorBlock({ label, onRetry }: { label: string; onRetry: () => void }) {
+  return (
+    <div className="rounded-xl border border-rose-200 bg-rose-50/50 py-16 text-center">
+      <AlertCircle className="h-10 w-10 text-rose-400 mx-auto mb-2" />
+      <p className="text-sm font-medium text-slate-700">{label}</p>
+      <button
+        onClick={onRetry}
+        className="mt-3 inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+      >
+        <RefreshCw className="h-4 w-4" /> Retry
+      </button>
     </div>
   );
 }

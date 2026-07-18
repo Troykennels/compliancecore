@@ -2,7 +2,7 @@ import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import {
   ShieldCheck, AlertTriangle, Calendar, Bell,
-  CheckCircle, BarChart2,
+  CheckCircle, BarChart2, RefreshCw,
 } from 'lucide-react';
 import { useDashboard } from '../hooks/use-dashboard';
 import { ScoreGauge } from '../../compliance-score/components/score-gauge';
@@ -24,7 +24,7 @@ const STATUS_BADGE: Record<string, string> = {
 
 export function DashboardPage() {
   const navigate = useNavigate();
-  const { data, isLoading } = useDashboard();
+  const { data, isLoading, isError, refetch } = useDashboard();
   const { data: scoreData } = useCurrentScore();
 
   if (isLoading) {
@@ -35,7 +35,20 @@ export function DashboardPage() {
     );
   }
 
-  if (!data) return null;
+  if (isError || !data) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-3 text-slate-500">
+        <AlertTriangle className="h-10 w-10 text-slate-300" />
+        <p className="text-sm">Failed to load your dashboard.</p>
+        <button
+          onClick={() => refetch()}
+          className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+        >
+          <RefreshCw className="h-3.5 w-3.5" /> Retry
+        </button>
+      </div>
+    );
+  }
 
   const { complianceScore, controls, expiry, calendar, notifications, recentActivity } = data;
   const frameworks = scoreData?.frameworks ?? [];

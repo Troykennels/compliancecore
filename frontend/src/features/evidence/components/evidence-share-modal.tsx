@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Link2, Mail, Clock, Lock, Copy, Check, AlertCircle, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useEvidenceShares, useCreateShare, useRevokeShare } from '../hooks/use-evidence';
+import { useActiveTenant } from '@/stores/auth.store';
 import type { CreateShareDto } from '../types/evidence.types';
 
 interface EvidenceShareModalProps {
@@ -15,6 +16,12 @@ export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }:
   const { data: shares = [], isLoading } = useEvidenceShares(evidenceId);
   const createShare = useCreateShare(evidenceId);
   const revokeShare = useRevokeShare(evidenceId);
+  const activeTenant = useActiveTenant();
+
+  // Build a full, externally-openable share URL. Recipients are outside the app,
+  // so the link must be absolute and carry the ?tenant=... param the shared page needs.
+  const buildShareUrl = (token: string) =>
+    `${window.location.origin}/evidence/shared/${token}${activeTenant ? `?tenant=${activeTenant.id}` : ''}`;
 
   const [form, setForm] = useState<CreateShareDto>({ shareType: 'link' });
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
@@ -188,7 +195,7 @@ export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }:
                     <div className="flex items-center gap-1 shrink-0">
                       <button
                         type="button"
-                        onClick={() => copy(`/evidence/shared/${share.shareToken}`, share.id)}
+                        onClick={() => copy(buildShareUrl(share.shareToken), share.id)}
                         className="rounded p-1.5 text-slate-400 hover:bg-slate-200"
                         title="Copy link"
                       >

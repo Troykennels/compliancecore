@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, MapPin, Building2, Star, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, MapPin, Building2, Star, MoreHorizontal, Pencil, Trash2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBranches, useDeleteBranch } from '../hooks/use-branches';
 import { BranchFormModal } from '../components/branch-form-modal';
@@ -12,7 +12,7 @@ export function BranchesPage(): JSX.Element {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  const { data, isLoading } = useBranches({ search: search || undefined });
+  const { data, isLoading, isError, refetch } = useBranches({ search: search || undefined });
   const { mutate: deleteBranch, isPending: isDeleting } = useDeleteBranch();
 
   function openCreate() {
@@ -67,7 +67,9 @@ export function BranchesPage(): JSX.Element {
             <div className="flex items-center justify-center py-16">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
             </div>
-          ) : !data?.branches.length ? (
+          ) : isError ? (
+            <ErrorState onRetry={() => refetch()} />
+          ) : !data?.branches?.length ? (
             <EmptyState onAdd={openCreate} />
           ) : (
             <table className="w-full text-sm">
@@ -210,6 +212,26 @@ export function BranchesPage(): JSX.Element {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ErrorState({ onRetry }: { onRetry: () => void }): JSX.Element {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-rose-50">
+        <AlertTriangle className="h-7 w-7 text-rose-400" />
+      </div>
+      <h3 className="text-base font-semibold text-slate-900">Couldn't load branches</h3>
+      <p className="mt-1 text-sm text-slate-500">
+        Something went wrong while fetching branches.
+      </p>
+      <button
+        onClick={onRetry}
+        className="mt-4 inline-flex items-center gap-2 rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+      >
+        <RefreshCw className="h-4 w-4" /> Retry
+      </button>
     </div>
   );
 }

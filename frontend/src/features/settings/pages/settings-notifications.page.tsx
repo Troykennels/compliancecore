@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, AlertTriangle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { settingsApi } from '../api/settings.api';
 import { SettingsLayout } from '../components/settings-layout';
@@ -28,7 +28,7 @@ const DIGEST_OPTIONS: { value: NotificationSettings['digestFrequency']; label: s
 export function SettingsNotificationsPage(): JSX.Element {
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['settings', 'notifications'],
     queryFn: () =>
       settingsApi.getNotificationSettings().then((r) => r.data.data.notificationSettings),
@@ -56,6 +56,19 @@ export function SettingsNotificationsPage(): JSX.Element {
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+          </div>
+        ) : isError || !data ? (
+          // Block the form when the fetch failed — otherwise the form holds blank
+          // defaults (reset(data) never ran) and Saving would wipe real settings.
+          <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-16 text-center text-slate-500 shadow-sm">
+            <AlertTriangle className="h-8 w-8 text-slate-300" />
+            <p className="text-sm">Failed to load notification settings.</p>
+            <button
+              onClick={() => refetch()}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+            >
+              <RefreshCw className="h-3.5 w-3.5" /> Retry
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit((v) => save(v))} className="space-y-4">

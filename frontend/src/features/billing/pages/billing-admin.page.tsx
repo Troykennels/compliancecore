@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   ShieldAlert, Tag, Building2, FileText, Plus, Edit2, ToggleLeft, ToggleRight,
-  CheckCircle2, XCircle, Loader2, Download,
+  CheckCircle2, XCircle, Loader2, Download, AlertTriangle, RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -22,6 +22,34 @@ const TABS: Array<{ id: Tab; label: string; icon: JSX.Element }> = [
   { id: 'tenants', label: 'Tenants',  icon: <Building2 className="h-4 w-4" /> },
   { id: 'invoices',label: 'Invoices', icon: <FileText className="h-4 w-4" /> },
 ];
+
+// ── Query error state ────────────────────────────────────────────────────────────
+function QueryError({ onRetry, message = 'Failed to load data.' }: { onRetry: () => void; message?: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-12 text-center text-slate-500">
+      <AlertTriangle className="h-8 w-8 text-slate-300" />
+      <p className="text-sm">{message}</p>
+      <button
+        onClick={onRetry}
+        className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+      >
+        <RefreshCw className="h-3.5 w-3.5" /> Retry
+      </button>
+    </div>
+  );
+}
+
+// ── Shared field wrapper ─────────────────────────────────────────────────────────
+// Declared at module scope so it keeps a stable identity across renders — declaring
+// it inside a component remounts every input on each keystroke (focus loss).
+function F({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-slate-700 mb-1">{label}</label>
+      {children}
+    </div>
+  );
+}
 
 // ── Plans tab ──────────────────────────────────────────────────────────────────
 function PlanForm({ initial, onDone }: {
@@ -69,12 +97,6 @@ function PlanForm({ initial, onDone }: {
     }
   }
 
-  const F = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div>
-      <label className="block text-xs font-medium text-slate-700 mb-1">{label}</label>
-      {children}
-    </div>
-  );
   const inp = 'w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
 
   return (
@@ -122,12 +144,13 @@ function PlanForm({ initial, onDone }: {
 }
 
 function PlansTab() {
-  const { data: plans = [], isLoading } = useAdminPlans();
+  const { data: plans = [], isLoading, isError, refetch } = useAdminPlans();
   const updatePlan = useAdminUpdatePlan();
   const [editId, setEditId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-indigo-500" /></div>;
+  if (isError) return <QueryError onRetry={() => refetch()} message="Failed to load plans." />;
 
   return (
     <div className="space-y-4">
@@ -163,7 +186,8 @@ function PlansTab() {
                   </button>
                   <button
                     onClick={() => updatePlan.mutate({ id: plan.id, dto: { isActive: !plan.isActive } })}
-                    className={`rounded-lg p-2 transition-colors ${plan.isActive ? 'text-emerald-600 hover:bg-emerald-50' : 'text-slate-400 hover:bg-slate-100'}`}
+                    disabled={updatePlan.isPending}
+                    className={`rounded-lg p-2 transition-colors disabled:opacity-50 ${plan.isActive ? 'text-emerald-600 hover:bg-emerald-50' : 'text-slate-400 hover:bg-slate-100'}`}
                     title={plan.isActive ? 'Deactivate' : 'Activate'}
                   >
                     {plan.isActive ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
@@ -260,11 +284,12 @@ function CouponForm({ onDone }: { onDone: () => void }) {
 }
 
 function CouponsTab() {
-  const { data: coupons = [], isLoading } = useAdminCoupons(true);
+  const { data: coupons = [], isLoading, isError, refetch } = useAdminCoupons(true);
   const updateCoupon = useAdminUpdateCoupon();
   const [showCreate, setShowCreate] = useState(false);
 
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-indigo-500" /></div>;
+  if (isError) return <QueryError onRetry={() => refetch()} message="Failed to load coupons." />;
 
   return (
     <div className="space-y-4">
@@ -308,7 +333,8 @@ function CouponsTab() {
                 <td className="px-4 py-3 text-right">
                   <button
                     onClick={() => updateCoupon.mutate({ id: c.id, dto: { isActive: !c.isActive } })}
-                    className={`rounded-lg p-1.5 transition-colors ${c.isActive ? 'text-emerald-600 hover:bg-red-50 hover:text-red-600' : 'text-slate-400 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                    disabled={updateCoupon.isPending}
+                    className={`rounded-lg p-1.5 transition-colors disabled:opacity-50 ${c.isActive ? 'text-emerald-600 hover:bg-red-50 hover:text-red-600' : 'text-slate-400 hover:bg-emerald-50 hover:text-emerald-600'}`}
                   >
                     {c.isActive ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
                   </button>
@@ -330,7 +356,7 @@ function CouponsTab() {
 
 // ── Tenants tab ────────────────────────────────────────────────────────────────
 function TenantsTab() {
-  const { data: tenants = [], isLoading } = useAdminTenantBilling();
+  const { data: tenants = [], isLoading, isError, refetch } = useAdminTenantBilling();
   const [search, setSearch] = useState('');
 
   const filtered = tenants.filter((t) =>
@@ -346,6 +372,7 @@ function TenantsTab() {
   };
 
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-indigo-500" /></div>;
+  if (isError) return <QueryError onRetry={() => refetch()} message="Failed to load tenant billing." />;
 
   return (
     <div className="space-y-4">
@@ -409,7 +436,7 @@ function TenantsTab() {
 
 // ── Invoices tab ───────────────────────────────────────────────────────────────
 function AdminInvoicesTab() {
-  const { data: invoices = [], isLoading } = useAdminInvoices({ limit: 100 });
+  const { data: invoices = [], isLoading, isError, refetch } = useAdminInvoices({ limit: 100 });
   const updateInvoice = useAdminUpdateInvoice();
   const [downloading, setDownloading] = useState<string | null>(null);
 
@@ -425,6 +452,7 @@ function AdminInvoicesTab() {
   }
 
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-indigo-500" /></div>;
+  if (isError) return <QueryError onRetry={() => refetch()} message="Failed to load invoices." />;
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white overflow-hidden overflow-x-auto">

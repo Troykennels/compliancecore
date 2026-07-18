@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { format, parseISO, differenceInDays } from 'date-fns';
-import { Plus, AlertTriangle, ShieldCheck, Clock, XCircle, Search } from 'lucide-react';
+import { format, parseISO, differenceInDays, isValid } from 'date-fns';
+import { Plus, AlertTriangle, ShieldCheck, Clock, XCircle, Search, RefreshCw } from 'lucide-react';
 import { useExpiryItems, useExpiryStats, useDeleteExpiryItem } from '../hooks/use-expiry';
 import { ExpiryFormModal } from '../components/expiry-form-modal';
 import type { ExpiryItem, ExpiryStatus, ExpiryEntityType } from '../types/expiry.types';
@@ -20,8 +20,12 @@ function StatCard({ label, value, icon, colorClass }: StatCardProps) {
   );
 }
 
+const DEFAULT_STATUS_CFG = { label: 'Unknown', className: 'bg-slate-100 text-slate-500' };
+
 function daysUntilLabel(dateStr: string): { text: string; color: string } {
-  const diff = differenceInDays(parseISO(dateStr), new Date());
+  const parsed = parseISO(dateStr);
+  if (!isValid(parsed)) return { text: '—', color: 'text-slate-400' };
+  const diff = differenceInDays(parsed, new Date());
   if (diff < 0)  return { text: `${Math.abs(diff)}d overdue`, color: 'text-red-600' };
   if (diff === 0) return { text: 'Due today',                 color: 'text-red-600' };
   if (diff <= 7)  return { text: `${diff}d left`,             color: 'text-red-600' };
@@ -38,7 +42,7 @@ export function ExpiryPage() {
   const [filterEntityType, setFilterEntityType] = useState<ExpiryEntityType | ''>('');
 
   const { data: statsData } = useExpiryStats();
-  const { data, isLoading } = useExpiryItems({
+  const { data, isLoading, isError, refetch } = useExpiryItems({
     status:     filterStatus || undefined,
     entityType: filterEntityType || undefined,
     q:          query || undefined,
@@ -50,8 +54,10 @@ export function ExpiryPage() {
 
   function openCreate() { setSelected(null); setModalOpen(true); }
   function openEdit(item: ExpiryItem) { setSelected(item); setModalOpen(true); }
-  async function handleDelete(id: string) {
-    if (confirm('Remove this expiry item?')) await deleteItem.mutateAsync(id);
+  function handleDelete(id: string) {
+    // Fire-and-forget: the hook surfaces success/error toasts. Using mutate (not
+    // mutateAsync) avoids an unhandled promise rejection when the delete fails.
+    if (confirm('Remove this expiry item?')) deleteItem.mutate(id);
   }
 
   return (
@@ -115,6 +121,17 @@ export function ExpiryPage() {
       {/* Table */}
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center text-slate-400 text-sm">Loading…</div>
+      ) : isError ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-slate-500">
+          <AlertTriangle className="h-8 w-8 text-red-400" />
+          <p className="text-sm">Couldn't load expiry items.</p>
+          <button
+            onClick={() => refetch()}
+            className="flex items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+          >
+            <RefreshCw className="h-4 w-4" /> Retry
+          </button>
+        </div>
       ) : items.length === 0 ? (
         <div className="flex flex-1 items-center justify-center text-slate-400 text-sm">
           No expiry items found. Click "Track Item" to get started.
@@ -135,7 +152,8 @@ export function ExpiryPage() {
             <tbody className="divide-y divide-slate-100">
               {items.map((item) => {
                 const remaining = daysUntilLabel(item.expiryDate);
-                const cfg = STATUS_CONFIG[item.status];
+                const cfg = STATUS_CONFIG[item.status] ?? DEFAULT_STATUS_CFG;
+                const expiryParsed = parseISO(item.expiryDate);
                 return (
                   <tr key={item.id} className="bg-white hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3">
@@ -143,7 +161,7 @@ export function ExpiryPage() {
                       {item.notes && <div className="text-xs text-slate-400 mt-0.5 line-clamp-1">{item.notes}</div>}
                     </td>
                     <td className="px-4 py-3 text-slate-600">{ENTITY_TYPE_LABELS[item.entityType]}</td>
-                    <td className="px-4 py-3 text-slate-600">{format(parseISO(item.expiryDate), 'MMM d, yyyy')}</td>
+                    <td className="px-4 py-3 text-slate-600">{isValid(expiryParsed) ? format(expiryParsed, 'MMM d, yyyy') : '—'}</td>
                     <td className={`px-4 py-3 font-medium ${remaining.color}`}>{remaining.text}</td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${cfg.className}`}>

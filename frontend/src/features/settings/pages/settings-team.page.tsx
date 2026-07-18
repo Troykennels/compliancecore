@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
-  UserPlus, MoreHorizontal, Trash2, ChevronDown, CheckCircle2, Clock,
+  UserPlus, MoreHorizontal, Trash2, ChevronDown, CheckCircle2, Clock, AlertTriangle, RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { settingsApi } from '../api/settings.api';
@@ -35,7 +35,7 @@ export function SettingsTeamPage(): JSX.Element {
 
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['settings', 'team'],
     queryFn: () => settingsApi.listMembers().then((r) => r.data.data.members),
   });
@@ -88,6 +88,17 @@ export function SettingsTeamPage(): JSX.Element {
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center text-slate-500">
+            <AlertTriangle className="h-8 w-8 text-slate-300" />
+            <p className="text-sm">Failed to load team members.</p>
+            <button
+              onClick={() => refetch()}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+            >
+              <RefreshCw className="h-3.5 w-3.5" /> Retry
+            </button>
           </div>
         ) : (
           <table className="w-full text-sm">
