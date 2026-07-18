@@ -314,7 +314,7 @@ export async function findAllPlans(filter: PlanListFilter = {}): Promise<Subscri
 
 export async function findPlanById(id: string): Promise<SubscriptionPlan | null> {
   const rows = await prisma.$queryRawUnsafe(
-    `SELECT * FROM global.subscription_plans WHERE id = $1`,
+    `SELECT * FROM global.subscription_plans WHERE id = $1::uuid`,
     id,
   ) as unknown[];
   return (rows as unknown[]).length ? mapPlan((rows as unknown[])[0]) : null;
@@ -368,7 +368,7 @@ export async function updatePlan(id: string, dto: UpdatePlanDto): Promise<Subscr
 
   values.push(id);
   const rows = await prisma.$queryRawUnsafe(
-    `UPDATE global.subscription_plans SET ${setClauses.join(', ')} WHERE id = $${idx} RETURNING *`,
+    `UPDATE global.subscription_plans SET ${setClauses.join(', ')} WHERE id = $${idx}::uuid RETURNING *`,
     ...values,
   ) as unknown[];
   return (rows as unknown[]).length ? mapPlan((rows as unknown[])[0]) : null;
@@ -393,7 +393,7 @@ export async function findCouponByCode(code: string): Promise<Coupon | null> {
 
 export async function findCouponById(id: string): Promise<Coupon | null> {
   const rows = await prisma.$queryRawUnsafe(
-    `SELECT * FROM global.coupons WHERE id = $1`,
+    `SELECT * FROM global.coupons WHERE id = $1::uuid`,
     id,
   ) as unknown[];
   return (rows as unknown[]).length ? mapCoupon((rows as unknown[])[0]) : null;
@@ -439,7 +439,7 @@ export async function updateCoupon(id: string, dto: UpdateCouponDto): Promise<Co
 
   values.push(id);
   const rows = await prisma.$queryRawUnsafe(
-    `UPDATE global.coupons SET ${setClauses.join(', ')} WHERE id = $${idx} RETURNING *`,
+    `UPDATE global.coupons SET ${setClauses.join(', ')} WHERE id = $${idx}::uuid RETURNING *`,
     ...values,
   ) as unknown[];
   return (rows as unknown[]).length ? mapCoupon((rows as unknown[])[0]) : null;
@@ -447,14 +447,14 @@ export async function updateCoupon(id: string, dto: UpdateCouponDto): Promise<Co
 
 export async function incrementCouponUses(id: string): Promise<void> {
   await prisma.$executeRawUnsafe(
-    `UPDATE global.coupons SET uses_count = uses_count + 1, updated_at = NOW() WHERE id = $1`,
+    `UPDATE global.coupons SET uses_count = uses_count + 1, updated_at = NOW() WHERE id = $1::uuid`,
     id,
   );
 }
 
 export async function recordCouponRedemption(couponId: string, tenantId: string, subscriptionId: string | null): Promise<void> {
   await prisma.$executeRawUnsafe(
-    `INSERT INTO global.coupon_redemptions (coupon_id, tenant_id, subscription_id) VALUES ($1,$2,$3)`,
+    `INSERT INTO global.coupon_redemptions (coupon_id, tenant_id, subscription_id) VALUES ($1::uuid,$2::uuid,$3::uuid)`,
     couponId, tenantId, subscriptionId,
   );
 }
@@ -466,7 +466,7 @@ export async function findSubscriptionByTenant(tenantId: string): Promise<Subscr
     FROM global.subscriptions s
     JOIN global.subscription_plans p ON p.id = s.plan_id
     LEFT JOIN global.coupons c ON c.id = s.coupon_id
-    WHERE s.tenant_id = $1
+    WHERE s.tenant_id = $1::uuid
     ORDER BY s.created_at DESC
     LIMIT 1
   `, tenantId) as unknown[];
@@ -479,7 +479,7 @@ export async function findSubscriptionById(id: string): Promise<Subscription | n
     FROM global.subscriptions s
     JOIN global.subscription_plans p ON p.id = s.plan_id
     LEFT JOIN global.coupons c ON c.id = s.coupon_id
-    WHERE s.id = $1
+    WHERE s.id = $1::uuid
   `, id) as unknown[];
   return (rows as unknown[]).length ? mapSubscription((rows as unknown[])[0]) : null;
 }
@@ -501,7 +501,7 @@ export async function createSubscription(dto: CreateSubscriptionDto & {
     INSERT INTO global.subscriptions
       (tenant_id, plan_id, status, billing_cycle, current_period_start, current_period_end,
        trial_ends_at, coupon_id, discount_percent, discount_fixed, next_invoice_amount, currency)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+    VALUES ($1::uuid,$2::uuid,$3,$4,$5,$6,$7,$8::uuid,$9,$10,$11,$12)
     RETURNING *
   `,
     dto.tenantId, dto.planId, dto.status, dto.billingCycle,
@@ -540,7 +540,7 @@ export async function updateSubscription(id: string, fields: Record<string, unkn
 
   values.push(id);
   const rows = await prisma.$queryRawUnsafe(`
-    UPDATE global.subscriptions SET ${setClauses.join(', ')} WHERE id = $${idx}
+    UPDATE global.subscriptions SET ${setClauses.join(', ')} WHERE id = $${idx}::uuid
     RETURNING *
   `, ...values) as unknown[];
 
@@ -584,7 +584,7 @@ export async function findDueSubscriptions(cutoff: Date): Promise<Array<{
 // ── Payment Methods ────────────────────────────────────────────────────────────
 export async function findPaymentMethods(tenantId: string): Promise<PaymentMethod[]> {
   const rows = await prisma.$queryRawUnsafe(
-    `SELECT * FROM global.payment_methods WHERE tenant_id = $1 AND is_active = true ORDER BY is_default DESC, created_at ASC`,
+    `SELECT * FROM global.payment_methods WHERE tenant_id = $1::uuid AND is_active = true ORDER BY is_default DESC, created_at ASC`,
     tenantId,
   ) as unknown[];
   return (rows as unknown[]).map(mapPaymentMethod);
@@ -592,7 +592,7 @@ export async function findPaymentMethods(tenantId: string): Promise<PaymentMetho
 
 export async function findPaymentMethodById(id: string, tenantId: string): Promise<PaymentMethod | null> {
   const rows = await prisma.$queryRawUnsafe(
-    `SELECT * FROM global.payment_methods WHERE id = $1 AND tenant_id = $2`,
+    `SELECT * FROM global.payment_methods WHERE id = $1::uuid AND tenant_id = $2::uuid`,
     id, tenantId,
   ) as unknown[];
   return (rows as unknown[]).length ? mapPaymentMethod((rows as unknown[])[0]) : null;
@@ -601,14 +601,14 @@ export async function findPaymentMethodById(id: string, tenantId: string): Promi
 export async function addPaymentMethod(tenantId: string, dto: AddPaymentMethodDto): Promise<PaymentMethod> {
   if (dto.setAsDefault) {
     await prisma.$executeRawUnsafe(
-      `UPDATE global.payment_methods SET is_default = false WHERE tenant_id = $1`,
+      `UPDATE global.payment_methods SET is_default = false WHERE tenant_id = $1::uuid`,
       tenantId,
     );
   }
   const rows = await prisma.$queryRawUnsafe(`
     INSERT INTO global.payment_methods
       (tenant_id, type, label, last4, brand, exp_month, exp_year, bank_name, bank_account_last4, is_default)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+    VALUES ($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     RETURNING *
   `,
     tenantId, dto.type, dto.label, dto.last4 ?? null, dto.brand ?? null,
@@ -624,14 +624,14 @@ export async function setDefaultPaymentMethod(id: string, tenantId: string): Pro
     tenantId,
   );
   await prisma.$executeRawUnsafe(
-    `UPDATE global.payment_methods SET is_default = true, updated_at = NOW() WHERE id = $1 AND tenant_id = $2`,
+    `UPDATE global.payment_methods SET is_default = true, updated_at = NOW() WHERE id = $1::uuid AND tenant_id = $2::uuid`,
     id, tenantId,
   );
 }
 
 export async function removePaymentMethod(id: string, tenantId: string): Promise<void> {
   await prisma.$executeRawUnsafe(
-    `UPDATE global.payment_methods SET is_active = false, updated_at = NOW() WHERE id = $1 AND tenant_id = $2`,
+    `UPDATE global.payment_methods SET is_active = false, updated_at = NOW() WHERE id = $1::uuid AND tenant_id = $2::uuid`,
     id, tenantId,
   );
 }
@@ -642,7 +642,7 @@ export async function findInvoices(filter: InvoiceListFilter = {}): Promise<Invo
   const values: unknown[] = [];
   let idx = 1;
 
-  if (filter.tenantId) { conditions.push(`i.tenant_id = $${idx++}`); values.push(filter.tenantId); }
+  if (filter.tenantId) { conditions.push(`i.tenant_id = $${idx++}::uuid`); values.push(filter.tenantId); }
   if (filter.status) { conditions.push(`i.status = $${idx++}`); values.push(filter.status); }
 
   const limit = filter.limit ?? 50;
@@ -661,7 +661,7 @@ export async function findInvoices(filter: InvoiceListFilter = {}): Promise<Invo
 }
 
 export async function findInvoiceById(id: string, tenantId?: string): Promise<Invoice | null> {
-  const where = tenantId ? `i.id = $1 AND i.tenant_id = $2` : `i.id = $1`;
+  const where = tenantId ? `i.id = $1::uuid AND i.tenant_id = $2::uuid` : `i.id = $1::uuid`;
   const args = tenantId ? [id, tenantId] : [id];
   const rows = await prisma.$queryRawUnsafe(`
     SELECT i.*, t.name AS tenant_name
@@ -676,7 +676,7 @@ export async function createInvoice(dto: CreateInvoiceDto): Promise<Invoice> {
   const rows = await prisma.$queryRawUnsafe(`
     INSERT INTO global.invoices
       (tenant_id, subscription_id, amount_due, currency, billing_period_start, billing_period_end, due_date, line_items, metadata)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9::jsonb)
+    VALUES ($1::uuid,$2::uuid,$3,$4,$5,$6,$7,$8::jsonb,$9::jsonb)
     RETURNING *
   `,
     dto.tenantId, dto.subscriptionId ?? null, dto.amountDue, dto.currency ?? 'USD',
@@ -696,7 +696,7 @@ export async function updateInvoice(id: string, dto: UpdateInvoiceDto): Promise<
 
   values.push(id);
   const rows = await prisma.$queryRawUnsafe(
-    `UPDATE global.invoices SET ${setClauses.join(', ')} WHERE id = $${idx} RETURNING *`,
+    `UPDATE global.invoices SET ${setClauses.join(', ')} WHERE id = $${idx}::uuid RETURNING *`,
     ...values,
   ) as unknown[];
   return (rows as unknown[]).length ? mapInvoice((rows as unknown[])[0]) : null;
@@ -705,7 +705,7 @@ export async function updateInvoice(id: string, dto: UpdateInvoiceDto): Promise<
 // ── Usage Records ──────────────────────────────────────────────────────────────
 export async function findUsageByTenant(tenantId: string, periodStart: Date): Promise<UsageRecord[]> {
   const rows = await prisma.$queryRawUnsafe(
-    `SELECT * FROM global.usage_records WHERE tenant_id = $1 AND period_start = $2`,
+    `SELECT * FROM global.usage_records WHERE tenant_id = $1::uuid AND period_start = $2`,
     tenantId, periodStart,
   ) as unknown[];
   return (rows as unknown[]).map(mapUsageRecord);
@@ -717,7 +717,7 @@ export async function upsertUsageRecord(
 ): Promise<void> {
   await prisma.$executeRawUnsafe(`
     INSERT INTO global.usage_records (tenant_id, metric, period_start, period_end, current_value, limit_value)
-    VALUES ($1,$2,$3,$4,$5,$6)
+    VALUES ($1::uuid,$2,$3,$4,$5,$6)
     ON CONFLICT (tenant_id, metric, period_start)
     DO UPDATE SET current_value = $5, limit_value = $6, updated_at = NOW()
   `, tenantId, metric, periodStart, periodEnd, currentValue, limitValue);

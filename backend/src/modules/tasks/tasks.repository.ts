@@ -15,16 +15,16 @@ export async function findTasks(
 
     if (filters.status)      { conditions.push(`t.status = $${p++}`);      params.push(filters.status); }
     if (filters.priority)    { conditions.push(`t.priority = $${p++}`);    params.push(filters.priority); }
-    if (filters.assignedTo)  { conditions.push(`t.assigned_to = $${p++}`); params.push(filters.assignedTo); }
+    if (filters.assignedTo)  { conditions.push(`t.assigned_to = $${p++}::uuid`); params.push(filters.assignedTo); }
     if (filters.entityType)  { conditions.push(`t.entity_type = $${p++}`); params.push(filters.entityType); }
-    if (filters.entityId)    { conditions.push(`t.entity_id = $${p++}`);   params.push(filters.entityId); }
-    if (filters.frameworkId) { conditions.push(`t.framework_id = $${p++}`);params.push(filters.frameworkId); }
+    if (filters.entityId)    { conditions.push(`t.entity_id = $${p++}::uuid`);   params.push(filters.entityId); }
+    if (filters.frameworkId) { conditions.push(`t.framework_id = $${p++}::uuid`);params.push(filters.frameworkId); }
     if (filters.dueBefore)   { conditions.push(`t.due_date <= $${p++}`);   params.push(filters.dueBefore); }
     if (filters.dueAfter)    { conditions.push(`t.due_date >= $${p++}`);   params.push(filters.dueAfter); }
-    if (filters.parentTaskId){ conditions.push(`t.parent_task_id = $${p++}`); params.push(filters.parentTaskId); }
+    if (filters.parentTaskId){ conditions.push(`t.parent_task_id = $${p++}::uuid`); params.push(filters.parentTaskId); }
     else                     { conditions.push(`t.parent_task_id IS NULL`); } // top-level only by default
     if (filters.overdue)     { conditions.push(`t.due_date < NOW() AND t.status NOT IN ('completed','cancelled')`); }
-    if (filters.myTasks)     { conditions.push(`t.assigned_to = $${p++}`); params.push(currentUserId); }
+    if (filters.myTasks)     { conditions.push(`t.assigned_to = $${p++}::uuid`); params.push(currentUserId); }
     if (filters.q)           { conditions.push(`t.title ILIKE $${p++}`);   params.push(`%${filters.q}%`); }
 
     const where = conditions.join(' AND ');

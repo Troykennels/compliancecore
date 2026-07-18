@@ -81,7 +81,7 @@ export async function getScoreTrend(
       SELECT TO_CHAR(snapshot_date, 'YYYY-MM-DD') AS date,
              ROUND(overall_score::numeric, 1)      AS score
       FROM compliance_score_snapshots
-      WHERE snapshot_date BETWEEN $1 AND $2
+      WHERE snapshot_date BETWEEN $1::timestamptz AND $2::timestamptz
       ORDER BY snapshot_date ASC
     `, dateFrom.toISOString(), dateTo.toISOString());
     return rows.map((r) => ({ date: r.date, score: Number(r.score ?? 0) }));

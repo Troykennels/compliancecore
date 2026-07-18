@@ -119,7 +119,7 @@ export async function findRequests(
     if (filters.assignedToMe) {
       conditions.push(`EXISTS (
         SELECT 1 FROM approval_request_steps ars
-        WHERE ars.request_id = ar.id AND ars.assigned_to = $${p++} AND ars.status = 'active'
+        WHERE ars.request_id = ar.id AND ars.assigned_to = $${p++}::uuid AND ars.status = 'active'
       )`);
       params.push(currentUserId);
     }
@@ -291,11 +291,11 @@ export async function decideRequestTx(
     const [activeStep] = await tx.$queryRawUnsafe<any[]>(`
       SELECT id, step_order, require_signature, allow_self_approval
       FROM approval_request_steps
-      WHERE request_id = $1 AND status = 'active'
+      WHERE request_id = $1::uuid AND status = 'active'
         AND (
-          assigned_to = $2
+          assigned_to = $2::uuid
           OR (approver_type = 'role' AND assigned_role = $3)
-          OR (approver_type = 'any_from_list' AND $2 = ANY(approver_user_list))
+          OR (approver_type = 'any_from_list' AND $2::uuid = ANY(approver_user_list))
         )
       ORDER BY step_order
       LIMIT 1
@@ -482,9 +482,9 @@ export async function getMyPendingRequests(schemaName: string, userId: string, u
       WHERE ar.deleted_at IS NULL AND ar.status = 'pending'
         AND ars.status = 'active'
         AND (
-          ars.assigned_to = $1
+          ars.assigned_to = $1::uuid
           OR (ars.approver_type = 'role' AND ars.assigned_role = $2)
-          OR (ars.approver_type = 'any_from_list' AND $1 = ANY(ars.approver_user_list))
+          OR (ars.approver_type = 'any_from_list' AND $1::uuid = ANY(ars.approver_user_list))
           OR ars.approver_type = 'manager'
         )
       ORDER BY ar.created_at DESC
