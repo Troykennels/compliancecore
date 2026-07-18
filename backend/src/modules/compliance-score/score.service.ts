@@ -84,7 +84,9 @@ export const scoreService = {
 
       const frameworks: FrameworkScore[] = [];
       for (const [frameworkId, stats] of byFramework) {
-        const frameworkName = frameworkId ? nameById.get(frameworkId) ?? null : null;
+        // Label the no-framework bucket explicitly — the frontend types treat
+        // frameworkName as non-null and one consumer reads .length on it.
+        const frameworkName = frameworkId ? nameById.get(frameworkId) ?? 'Unmapped' : 'Unmapped';
         frameworks.push(buildFrameworkScore(stats, frameworkId, frameworkName));
       }
 

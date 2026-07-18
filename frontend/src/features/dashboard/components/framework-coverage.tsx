@@ -36,11 +36,16 @@ export function FrameworkCoverage({ frameworks }: FrameworkCoverageProps) {
     );
   }
 
-  const data = frameworks.map((fw) => ({
-    name:  fw.frameworkName.length > 14 ? fw.frameworkName.slice(0, 12) + '…' : fw.frameworkName,
-    score: fw.score !== null ? Math.round(fw.score) : null,
-    total: fw.controlCounts.total,
-  }));
+  const data = frameworks.map((fw) => {
+    // frameworkName is null for the "unmapped" bucket (controls with no
+    // framework). Guard it — reading .length on null crashes the whole page.
+    const name = fw.frameworkName ?? 'Unmapped';
+    return {
+      name:  name.length > 14 ? name.slice(0, 12) + '…' : name,
+      score: fw.score !== null ? Math.round(fw.score) : null,
+      total: fw.controlCounts?.total ?? 0,
+    };
+  });
 
   return (
     <ResponsiveContainer width="100%" height={180}>
