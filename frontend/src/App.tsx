@@ -28,6 +28,9 @@ const OnboardingPage = lazyPage(() => import('./features/organizations/pages/onb
 const EmailVerificationPage = lazyPage(() => import('./features/auth/pages/email-verification.page'), 'EmailVerificationPage');
 const BranchesPage = lazyPage(() => import('./features/branches/pages/branches.page'), 'BranchesPage');
 const ControlsPage = lazyPage(() => import('./features/controls/pages/controls.page'), 'ControlsPage');
+const PoliciesPage = lazyPage(() => import('./features/policies/pages/policies.page'), 'PoliciesPage');
+const RisksPage = lazyPage(() => import('./features/risks/pages/risks.page'), 'RisksPage');
+const VendorsPage = lazyPage(() => import('./features/vendors/pages/vendors.page'), 'VendorsPage');
 const DepartmentsPage = lazyPage(() => import('./features/departments/pages/departments.page'), 'DepartmentsPage');
 const SettingsOrgPage = lazyPage(() => import('./features/settings/pages/settings-org.page'), 'SettingsOrgPage');
 const SettingsTeamPage = lazyPage(() => import('./features/settings/pages/settings-team.page'), 'SettingsTeamPage');
@@ -129,9 +132,9 @@ export default function App(): JSX.Element {
                 <Route path={PATHS.FRAMEWORKS}   element={<PlaceholderPage title="Frameworks" />} />
                 <Route path={PATHS.EVIDENCE}     element={<EvidencePage />} />
                 <Route path="/evidence/:id"      element={<EvidenceDetailPage />} />
-                <Route path={PATHS.POLICIES}     element={<PlaceholderPage title="Policies" />} />
-                <Route path={PATHS.RISKS}        element={<PlaceholderPage title="Risk Register" />} />
-                <Route path={PATHS.VENDORS}      element={<PlaceholderPage title="Vendors" />} />
+                <Route path={PATHS.POLICIES}     element={<PoliciesPage />} />
+                <Route path={PATHS.RISKS}        element={<RisksPage />} />
+                <Route path={PATHS.VENDORS}      element={<VendorsPage />} />
                 <Route path={PATHS.AUDITS}       element={<PlaceholderPage title="Audits" />} />
                 <Route path={PATHS.TRAINING}     element={<PlaceholderPage title="Training" />} />
                 <Route path={PATHS.INCIDENTS}    element={<PlaceholderPage title="Incidents" />} />

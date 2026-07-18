@@ -5,7 +5,7 @@ import {
   BarChart2, Settings, LogOut,
   ChevronDown, Building2, GitBranch, Calendar, Clock, ChevronsLeft,
   ChevronsRight, FileArchive, CheckSquare, ShieldAlert, ListChecks, Sparkles, PieChart,
-  CreditCard, Loader2,
+  CreditCard, Loader2, ScrollText, Flame, Store,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
 import { authApi } from '@/features/auth/api/auth.api';
@@ -41,6 +41,9 @@ const NAV_GROUPS: NavGroup[] = [
     heading: 'Governance',
     items: [
       { label: 'Controls',          to: PATHS.CONTROLS,           icon: <ShieldCheck className="h-4 w-4" /> },
+      { label: 'Policies',          to: PATHS.POLICIES,           icon: <ScrollText className="h-4 w-4" /> },
+      { label: 'Risk Register',     to: PATHS.RISKS,              icon: <Flame className="h-4 w-4" /> },
+      { label: 'Vendors',           to: PATHS.VENDORS,            icon: <Store className="h-4 w-4" /> },
       { label: 'Evidence Hub',      to: PATHS.EVIDENCE,           icon: <FileArchive className="h-4 w-4" /> },
     ],
   },
