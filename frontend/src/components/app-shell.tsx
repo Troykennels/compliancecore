@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, ShieldCheck, FileText, AlertTriangle,
   BarChart2, Settings, LogOut,
   ChevronDown, Building2, GitBranch, Calendar, Clock, ChevronsLeft,
   ChevronsRight, FileArchive, CheckSquare, ShieldAlert, ListChecks, Sparkles, PieChart,
-  CreditCard,
+  CreditCard, Loader2,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
 import { authApi } from '@/features/auth/api/auth.api';
@@ -224,9 +224,20 @@ export function AppShell() {
           <UserAvatar name={displayName} avatarUrl={user?.avatarUrl} />
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-hidden">
-          <Outlet />
+        {/* Page content. overflow-y-auto so pages that don't manage their own
+            scroll still scroll. The inner Suspense keeps the sidebar/topbar
+            mounted while a lazy page chunk loads (no full-screen white flash —
+            only the content area shows the spinner). */}
+        <main className="flex-1 overflow-y-auto">
+          <Suspense
+            fallback={
+              <div className="flex h-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              </div>
+            }
+          >
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>
