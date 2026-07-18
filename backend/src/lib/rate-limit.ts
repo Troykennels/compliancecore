@@ -1,6 +1,7 @@
 import rateLimit, { type Options } from 'express-rate-limit';
 import { RedisStore } from 'rate-limit-redis';
 import { redis } from '../config/redis';
+import { env } from '../config/env';
 
 // Shared rate-limiter factory backed by Redis.
 //
@@ -15,12 +16,16 @@ export function makeRateLimiter(
   return rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
-    store: new RedisStore({
-      // ioredis: `call(command, ...args)` issues a raw command. rate-limit-redis
-      // handles the atomic INCR/PEXPIRE script internally.
-      sendCommand: (command: string, ...args: string[]) =>
-        redis.call(command, ...args) as Promise<never>,
-      prefix: 'rl:',
+    // When Redis is disabled (local dev), fall back to the default in-process
+    // MemoryStore so auth routes still rate-limit without a Redis server.
+    ...(env.ENABLE_REDIS && {
+      store: new RedisStore({
+        // ioredis: `call(command, ...args)` issues a raw command. rate-limit-redis
+        // handles the atomic INCR/PEXPIRE script internally.
+        sendCommand: (command: string, ...args: string[]) =>
+          redis.call(command, ...args) as Promise<never>,
+        prefix: 'rl:',
+      }),
     }),
     ...opts,
   });

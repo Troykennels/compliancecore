@@ -18,40 +18,45 @@ async function bootstrap(): Promise<void> {
   await prisma.$connect();
   logger.info('Database connected');
 
-  await redis.connect();
-  logger.info('Redis connected');
-
   // Collect worker handles so they can be drained on shutdown (finish the
   // in-flight job, stop taking new ones) instead of being killed mid-processing.
   const workers: Worker[] = [];
 
-  workers.push(startOcrWorker());
-  logger.info('OCR worker started');
-
-  workers.push(startReminderWorker());
-  await scheduleReminderJob();
-  logger.info('Reminder worker started');
-
-  workers.push(startScoreSnapshotWorker());
-  await scheduleScoreSnapshotJob();
-  logger.info('Score snapshot worker started');
-
-  workers.push(startEscalationWorker());
-  await scheduleEscalationJob();
-  logger.info('Escalation worker started');
-
-  workers.push(startApprovalDeadlineWorker());
-  await scheduleApprovalDeadlineJob();
-  logger.info('Approval deadline worker started');
-
-  workers.push(startScheduledReportsWorker());
-  await scheduleReportsJob();
-  logger.info('Scheduled reports worker started');
-
   await initBillingTables();
-  workers.push(startBillingRenewalWorker());
-  await scheduleBillingRenewalJob();
-  logger.info('Billing renewal worker started');
+
+  if (env.ENABLE_REDIS) {
+    await redis.connect();
+    logger.info('Redis connected');
+
+    workers.push(startOcrWorker());
+    logger.info('OCR worker started');
+
+    workers.push(startReminderWorker());
+    await scheduleReminderJob();
+    logger.info('Reminder worker started');
+
+    workers.push(startScoreSnapshotWorker());
+    await scheduleScoreSnapshotJob();
+    logger.info('Score snapshot worker started');
+
+    workers.push(startEscalationWorker());
+    await scheduleEscalationJob();
+    logger.info('Escalation worker started');
+
+    workers.push(startApprovalDeadlineWorker());
+    await scheduleApprovalDeadlineJob();
+    logger.info('Approval deadline worker started');
+
+    workers.push(startScheduledReportsWorker());
+    await scheduleReportsJob();
+    logger.info('Scheduled reports worker started');
+
+    workers.push(startBillingRenewalWorker());
+    await scheduleBillingRenewalJob();
+    logger.info('Billing renewal worker started');
+  } else {
+    logger.warn('ENABLE_REDIS=false — cache is in-memory and background workers/queues are OFF (local dev only)');
+  }
 
   const app = createApp();
 
@@ -71,7 +76,7 @@ async function bootstrap(): Promise<void> {
       logger.info('Workers drained');
       await prisma.$disconnect();
       await redis.quit();
-      await redisForQueues.quit();
+      if (env.ENABLE_REDIS) await redisForQueues.quit();
       logger.info('Connections closed. Exiting.');
       process.exit(0);
     });

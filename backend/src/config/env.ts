@@ -7,6 +7,11 @@ const schema = z.object({
 
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
+  // Set to 'false' ONLY for local development without a Redis server: rate
+  // limiting falls back to an in-process store, the cache becomes an in-memory
+  // stub, and BullMQ background workers are not started. Defaults to enabled;
+  // production must keep Redis on (multi-instance limits, queues, revocation).
+  ENABLE_REDIS: z.string().transform((v) => v !== 'false').default('true'),
 
   JWT_PRIVATE_KEY_BASE64: z.string().min(1),
   JWT_PUBLIC_KEY_BASE64: z.string().min(1),
