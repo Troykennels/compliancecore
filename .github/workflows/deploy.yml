@@ -42,9 +42,20 @@ jobs:
       - name: Install Railway CLI
         run: npm i -g @railway/cli
       - name: Deploy
-        # Railway builds from backend/Dockerfile and runs the migrate+start
+        # `railway link` first: the CLI resolves the target project from local
+        # config, which exists on a developer machine but never on a fresh CI
+        # runner — without it `railway up` fails with "No linked project found".
+        # Project/environment/service are passed explicitly so the step is fully
+        # non-interactive.
+        #
+        # Railway then builds from backend/Dockerfile and runs the migrate+start
         # command from railway.json. --detach so the job doesn't hang on logs.
-        run: railway up --service compliancecore-api --detach
+        run: |
+          railway link \
+            --project "${{ vars.RAILWAY_PROJECT_ID }}" \
+            --environment production \
+            --service compliancecore-api
+          railway up --service compliancecore-api --detach
         env:
           # RAILWAY_API_TOKEN, not RAILWAY_TOKEN: the CLI reads RAILWAY_TOKEN as
           # a *project* token (scoped to one environment) and rejects an account
