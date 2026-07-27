@@ -58,7 +58,13 @@ export async function register(input: RegisterInput): Promise<{ message: string 
     emailVerificationExpiresAt: expiresAt,
   });
 
-  await sendVerificationEmail(input.email, input.firstName, verificationToken);
+  // Deliberately not awaited. The account is already committed, and the send is
+  // best-effort (sendVerificationEmail swallows its own errors and never
+  // rejects, so this cannot become an unhandled rejection). Awaiting it made
+  // registration hang for as long as the SMTP handshake took — up to minutes on
+  // an unreachable host — which read to users as "registration fails sometimes".
+  // Users who never receive the mail can request a resend.
+  void sendVerificationEmail(input.email, input.firstName, verificationToken);
 
   return { message: 'Account created. Please check your email to verify your address.' };
 }
@@ -78,7 +84,8 @@ export async function verifyEmail(rawToken: string): Promise<{ message: string }
   }
 
   await repo.setEmailVerified(user.id);
-  await sendWelcomeEmail(user.email, user.firstName ?? '');
+  // Best-effort, same reasoning as registration: never block the response on SMTP.
+  void sendWelcomeEmail(user.email, user.firstName ?? '');
 
   return { message: 'Email verified successfully. You can now log in.' };
 }
@@ -314,7 +321,10 @@ export async function forgotPassword(email: string): Promise<{ message: string }
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
   await repo.setPasswordResetToken(user.id, hash, expiresAt);
-  await sendPasswordResetEmail(user.email, user.firstName ?? '', raw);
+  // Best-effort and not awaited: the token is already persisted, the response is
+  // deliberately identical either way (anti-enumeration), and this endpoint is
+  // unauthenticated — blocking it on an SMTP handshake ties up request handlers.
+  void sendPasswordResetEmail(user.email, user.firstName ?? '', raw);
 
   return { message };
 }

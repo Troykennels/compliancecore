@@ -157,18 +157,28 @@ async function _sendTaskAssignedEmail(
   dueDate: string | undefined,
   assignedBy: string,
 ) {
-  return withTenantSchema(schemaName, async (prisma) => {
-    const [user] = await prisma.$queryRawUnsafe<any[]>(
-      `SELECT email, first_name, last_name FROM global.users WHERE id = $1`, assignedTo,
+  // Look the recipient up inside the tenant transaction, but send outside it.
+  // withTenantSchema wraps the callback in prisma.$transaction, so awaiting an
+  // SMTP handshake in there held a pooled connection and an open transaction
+  // open for the whole exchange — up to the socket timeout against a slow or
+  // unreachable host, which can exhaust the pool and trip transaction timeouts.
+  const user = await withTenantSchema(schemaName, async (prisma) => {
+    // $1 must be cast: Prisma binds JS strings as `text` and users.id is uuid,
+    // so an uncast comparison throws 42883. The caller swallows errors from
+    // this function, so that failure was silent — the email simply never sent.
+    const [row] = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT email, first_name, last_name FROM global.users WHERE id = $1::uuid`, assignedTo,
     );
-    if (!user?.email) return;
-    const tmpl = emailTemplates.taskAssigned({
-      recipientName: `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() || user.email,
-      taskTitle,
-      dueDate: dueDate ? new Date(dueDate).toLocaleDateString() : undefined,
-      assignedBy,
-      taskId,
-    });
-    await sendEmail({ to: user.email, ...tmpl });
+    return row;
   });
+
+  if (!user?.email) return;
+  const tmpl = emailTemplates.taskAssigned({
+    recipientName: `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() || user.email,
+    taskTitle,
+    dueDate: dueDate ? new Date(dueDate).toLocaleDateString() : undefined,
+    assignedBy,
+    taskId,
+  });
+  await sendEmail({ to: user.email, ...tmpl });
 }

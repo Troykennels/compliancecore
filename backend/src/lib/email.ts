@@ -2,11 +2,18 @@ import nodemailer from 'nodemailer';
 import { env } from '../config/env';
 import { logger } from './logger';
 
+// Explicit timeouts. Nodemailer's defaults are 2 min to connect and 10 min on
+// the socket, so an SMTP host that is unreachable, misconfigured, or simply
+// slow leaves the caller hanging for minutes. Every send here is best-effort
+// (see `send` below), so failing fast is strictly better than blocking.
 const transporter = nodemailer.createTransport({
   host: env.SMTP_HOST,
   port: env.SMTP_PORT,
   secure: env.SMTP_SECURE,
   auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
+  connectionTimeout: 10_000,
+  greetingTimeout:   10_000,
+  socketTimeout:     20_000,
 });
 
 async function send(to: string, subject: string, html: string): Promise<void> {

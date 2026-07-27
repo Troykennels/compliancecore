@@ -344,11 +344,43 @@ export async function createPlan(dto: CreatePlanDto): Promise<SubscriptionPlan> 
   return mapPlan((rows as unknown[])[0]);
 }
 
+// Prisma's $queryRawUnsafe binds every JS string parameter as `text`, and
+// Postgres has no implicit text→uuid or text→timestamptz *assignment* cast. A
+// SET clause that writes a string into one of those columns therefore fails
+// with 42883 ("column is of type uuid but expression is of type text") unless
+// the placeholder is cast explicitly — which is why `WHERE id = $n::uuid` was
+// already cast here but the SET clauses were not, breaking every plan change.
+//
+// Columns not listed are varchar/numeric/boolean/jsonb, which accept the type
+// Prisma binds them as. Keyed by column name across the billing tables; the
+// names are unique enough that one map serves all four update builders.
+const BILLING_COLUMN_CASTS: Record<string, string> = {
+  plan_id:              '::uuid',
+  coupon_id:            '::uuid',
+  subscription_id:      '::uuid',
+  tenant_id:            '::uuid',
+  created_by:           '::uuid',
+  current_period_start: '::timestamptz',
+  current_period_end:   '::timestamptz',
+  trial_ends_at:        '::timestamptz',
+  cancelled_at:         '::timestamptz',
+  expires_at:           '::timestamptz',
+  paid_at:              '::timestamptz',
+  due_date:             '::timestamptz',
+  billing_period_start: '::timestamptz',
+  billing_period_end:   '::timestamptz',
+};
+
+// Builds a single `col = $n[::cast]` assignment for a dynamic UPDATE.
+function assign(col: string, idx: number): string {
+  return `${col} = $${idx}${BILLING_COLUMN_CASTS[col] ?? ''}`;
+}
+
 export async function updatePlan(id: string, dto: UpdatePlanDto): Promise<SubscriptionPlan | null> {
   const setClauses: string[] = ['updated_at = NOW()'];
   const values: unknown[] = [];
   let idx = 1;
-  const add = (col: string, val: unknown) => { setClauses.push(`${col} = $${idx++}`); values.push(val); };
+  const add = (col: string, val: unknown) => { setClauses.push(assign(col, idx++)); values.push(val); };
 
   if (dto.name !== undefined) add('name', dto.name);
   if (dto.slug !== undefined) add('slug', dto.slug);
@@ -420,7 +452,7 @@ export async function updateCoupon(id: string, dto: UpdateCouponDto): Promise<Co
   const setClauses: string[] = ['updated_at = NOW()'];
   const values: unknown[] = [];
   let idx = 1;
-  const add = (col: string, val: unknown) => { setClauses.push(`${col} = $${idx++}`); values.push(val); };
+  const add = (col: string, val: unknown) => { setClauses.push(assign(col, idx++)); values.push(val); };
 
   if (dto.name !== undefined) add('name', dto.name);
   if (dto.description !== undefined) add('description', dto.description);
@@ -534,7 +566,7 @@ export async function updateSubscription(id: string, fields: Record<string, unkn
       throw new AppError(`Invalid subscription field: ${key}`, 400, 'INVALID_FIELD');
     }
     // key is validated against the allowlist above → safe to interpolate.
-    setClauses.push(`${key} = $${idx++}`);
+    setClauses.push(assign(key, idx++));
     values.push(val);
   }
 
@@ -690,9 +722,9 @@ export async function updateInvoice(id: string, dto: UpdateInvoiceDto): Promise<
   const setClauses: string[] = ['updated_at = NOW()'];
   const values: unknown[] = [];
   let idx = 1;
-  if (dto.status !== undefined) { setClauses.push(`status = $${idx++}`); values.push(dto.status); }
-  if (dto.amountPaid !== undefined) { setClauses.push(`amount_paid = $${idx++}`); values.push(dto.amountPaid); }
-  if ('paidAt' in dto) { setClauses.push(`paid_at = $${idx++}`); values.push(dto.paidAt ?? null); }
+  if (dto.status !== undefined) { setClauses.push(assign('status', idx++)); values.push(dto.status); }
+  if (dto.amountPaid !== undefined) { setClauses.push(assign('amount_paid', idx++)); values.push(dto.amountPaid); }
+  if ('paidAt' in dto) { setClauses.push(assign('paid_at', idx++)); values.push(dto.paidAt ?? null); }
 
   values.push(id);
   const rows = await prisma.$queryRawUnsafe(
