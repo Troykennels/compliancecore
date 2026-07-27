@@ -1,4 +1,5 @@
-import express, { type Express } from 'express';
+import express, { type Express, type Request } from 'express';
+import { asyncHandler } from './lib/asyncHandler';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -30,6 +31,8 @@ import { escalationsRouter } from './modules/escalations/escalations.router';
 import { aiRouter } from './modules/ai/ai.router';
 import { reportsRouter } from './modules/reports/reports.router';
 import { billingRouter } from './modules/billing/billing.router';
+import { paymentsRouter, paymentsPublicRouter } from './modules/payments/payments.router';
+import { paystackWebhook } from './modules/payments/payments.controller';
 import { healthRouter } from './modules/health/health.router';
 import { installOrionGate } from './orionLicense';
 import { env } from './config/env';
@@ -52,6 +55,22 @@ export function createApp(): Express {
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
       exposedHeaders: ['X-Request-ID'],
     }),
+  );
+
+  // ─── Paystack webhook (MUST be before express.json) ──────────────────────
+  // Paystack signs the raw request bytes with HMAC-SHA512. express.json()
+  // parses and discards those bytes, and re-serialising the parsed object
+  // reorders keys and changes whitespace — producing a different digest that
+  // rejects every legitimate webhook. Mounting the route here with
+  // express.raw() keeps the original buffer intact for verification.
+  app.post(
+    '/api/payments/webhook/paystack',
+    express.raw({ type: 'application/json', limit: '1mb' }),
+    (req, _res, next) => {
+      (req as Request & { rawBody?: Buffer }).rawBody = req.body as Buffer;
+      next();
+    },
+    asyncHandler(paystackWebhook),
   );
 
   // ─── Request Parsing ─────────────────────────────────────────────────────
@@ -106,6 +125,10 @@ export function createApp(): Express {
   app.use('/api/ai',             aiRouter);
   app.use('/api/reports',        reportsRouter);
   app.use('/api/billing',        billingRouter);
+  // Public router first: it only serves /config, so authenticated payment
+  // routes below are still reached for everything else.
+  app.use('/api/payments',       paymentsPublicRouter);
+  app.use('/api/payments',       paymentsRouter);
 
   // ─── 404 ─────────────────────────────────────────────────────────────────
   app.use((_req, res) => {

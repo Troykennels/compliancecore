@@ -51,6 +51,17 @@ const schema = z.object({
 
   // Groq (free-tier AI)
   GROQ_API_KEY: z.string().min(1),
+
+  // ─── Paystack ───────────────────────────────────────────────────────────
+  // Optional: a deployment with no payment provider still runs fully, it just
+  // cannot take money. Checkout returns a clear 503 instead of failing at the
+  // HTTP layer, so self-hosted and demo instances are not forced to hold keys.
+  PAYSTACK_SECRET_KEY: z.string().min(1).optional(),
+  PAYSTACK_PUBLIC_KEY: z.string().min(1).optional(),
+  // Currencies checkout will accept, in priority order. Paystack enables NGN by
+  // default; USD must be requested from Paystack support per merchant, so it is
+  // listed here but will be rejected by their API until enabled on the account.
+  PAYMENT_CURRENCIES: z.string().default('NGN,USD'),
 });
 
 const parsed = schema.safeParse(process.env);
