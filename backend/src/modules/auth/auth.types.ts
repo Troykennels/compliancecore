@@ -19,6 +19,12 @@ export interface JwtPayload {
   tenantId: string | null;
   permissions: string[];
   requiresOnboarding: boolean;
+  // Platform-owner flag, carried so the UI can decide whether to render
+  // owner-only navigation. It is a HINT ONLY — every /api/billing/admin route
+  // still calls requireSuperadmin, which re-reads the flag from the database on
+  // each request. That matters because a token stays valid for its full 15
+  // minutes, so a revoked superadmin would otherwise keep access until expiry.
+  isSuperadmin: boolean;
   jti: string;           // unique token ID for revocation
   iat: number;
   exp: number;
@@ -35,6 +41,10 @@ export interface UserPublic {
   emailVerifiedAt: Date | null;
   isActive: boolean;
   onboardingCompletedAt: Date | null;
+  // Lets the client show or hide owner-only navigation. Safe to expose: it
+  // tells the user something they already know about their own account, and
+  // grants nothing — every admin route independently re-checks the database.
+  isSuperadmin: boolean;
   createdAt: Date;
 }
 

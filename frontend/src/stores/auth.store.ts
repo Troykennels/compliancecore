@@ -21,6 +21,10 @@ export interface AuthUser {
   emailVerifiedAt: string | null;
   isActive: boolean;
   onboardingCompletedAt: string | null;
+  // Platform-owner flag. Used only to decide whether owner-only navigation is
+  // rendered — the API enforces access independently on every admin route, so
+  // a tampered client gains nothing by flipping this.
+  isSuperadmin?: boolean;
 }
 
 export interface TenantSummary {

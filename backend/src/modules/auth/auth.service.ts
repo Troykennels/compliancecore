@@ -466,6 +466,7 @@ function toPublicUser(user: Awaited<ReturnType<typeof repo.findUserById>> & {}):
     emailVerifiedAt: user!.emailVerifiedAt,
     isActive: user!.isActive,
     onboardingCompletedAt: user!.onboardingCompletedAt,
+    isSuperadmin: user!.isSuperadmin,
     createdAt: user!.createdAt,
   };
 }
@@ -491,6 +492,7 @@ function buildTokens(
     tenantId: activeMembership?.tenant.id ?? null,
     permissions,
     requiresOnboarding: !user.onboardingCompletedAt,
+    isSuperadmin: user.isSuperadmin,
   });
 
   const { raw: rawRefreshToken } = generateRefreshToken();

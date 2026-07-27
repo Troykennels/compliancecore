@@ -59,11 +59,21 @@ export async function createCheckout(input: {
     throw new ValidationError(`Plan "${plan.name}" has no price set for ${currency}.`);
   }
 
-  const amount = input.billingCycle === 'yearly' ? price.priceYearly : price.priceMonthly;
+  const basePrice = input.billingCycle === 'yearly' ? price.priceYearly : price.priceMonthly;
+
+  // Honour any discount already on the subscription. Without this a coupon
+  // holder is charged the full list price at checkout while their subscription
+  // reports the discounted amount as due — i.e. billed more than they owe.
+  const sub = await billingRepo.findSubscriptionByTenant(input.tenantId);
+  const amount = sub
+    ? billingService.applyDiscount(basePrice, sub.discountPercent, sub.discountFixed)
+    : basePrice;
+
   if (amount <= 0) {
-    // Free plans must not round-trip through the payment provider — Paystack
-    // rejects a zero amount, and there is nothing to collect anyway.
-    throw new ValidationError('This plan is free — no payment is required. Change the plan directly.');
+    // Nothing to collect — either a free plan or a discount that covers the
+    // full amount. Paystack rejects a zero amount, so this must not round-trip
+    // through the provider.
+    throw new ValidationError('No payment is required for this plan. Change the plan directly.');
   }
 
   // Our own reference doubles as the idempotency key. Random suffix so a retried
@@ -85,7 +95,10 @@ export async function createCheckout(input: {
     amountMajor: amount,
     currency,
     reference,
-    callbackUrl: `${env.FRONTEND_URL}/billing?reference=${reference}`,
+    // Return to the page the user started from, so the result is shown in
+    // context next to the plan they chose. Must match the route that reads
+    // ?reference= and calls /payments/confirm (billing-plans.page.tsx).
+    callbackUrl: `${env.FRONTEND_URL}/billing/plans?reference=${reference}`,
     // Echoed back on the webhook; useful when reconciling in the Paystack
     // dashboard, but never trusted as the source of truth — the reference is.
     metadata: {
@@ -126,6 +139,21 @@ async function applyPaidTransaction(
       billingCycle: claimed.billingCycle,
       status: 'active',
     } as never);
+
+    // Grant the period that was actually paid for.
+    //
+    // updateSubscription deliberately does not move current_period_start/end —
+    // an admin correcting a plan mid-period should not hand out free service.
+    // But a *payment* buys a fresh term, and without this the customer keeps
+    // whatever period they already had: someone upgrading monthly -> yearly paid
+    // the yearly price and still expired a month later, and the renewal job
+    // (which keys off current_period_end) re-invoiced them then.
+    const start = billingService.periodStart(claimed.billingCycle);
+    const end = billingService.periodEnd(start, claimed.billingCycle);
+    await billingRepo.updateSubscription(existing.id, {
+      current_period_start: start,
+      current_period_end: end,
+    });
   } else {
     await billingService.createSubscription(claimed.tenantId, {
       planId: claimed.planId,

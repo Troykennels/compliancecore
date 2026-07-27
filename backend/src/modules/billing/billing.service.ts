@@ -16,6 +16,9 @@ function calcBasePrice(plan: SubscriptionPlan, cycle: BillingCycle): number {
   return cycle === 'yearly' ? plan.priceYearly : plan.priceMonthly;
 }
 
+// Re-exported at the bottom of this file. Checkout uses it so it charges the
+// same discounted figure the subscription reports as due — charging the
+// undiscounted price would bill a coupon holder more than they owe.
 function applyDiscount(base: number, pct: number, fixed: number): number {
   const afterPct = base * (1 - pct / 100);
   return Math.max(0, afterPct - fixed);
@@ -28,13 +31,16 @@ function advancePeriod(date: Date, cycle: BillingCycle): Date {
   return d;
 }
 
-function periodStart(cycle: BillingCycle): Date {
+// Exported so the payment flow can grant the period it was actually paid for
+// using identical date arithmetic, rather than re-deriving it and drifting on
+// month-end edge cases.
+export function periodStart(cycle: BillingCycle): Date {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   return now;
 }
 
-function periodEnd(start: Date, cycle: BillingCycle): Date {
+export function periodEnd(start: Date, cycle: BillingCycle): Date {
   return advancePeriod(start, cycle);
 }
 

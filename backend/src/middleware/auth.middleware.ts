@@ -34,6 +34,9 @@ export function authenticate(): RequestHandler {
       jti: payload.jti,
       exp: payload.exp,
       requiresOnboarding: payload.requiresOnboarding ?? false,
+      // Defaults to false so tokens issued before this claim existed are simply
+      // treated as non-superadmin rather than undefined.
+      isSuperadmin: payload.isSuperadmin ?? false,
     };
 
     next();

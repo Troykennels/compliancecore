@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle2, Loader2, ArrowLeft, Tag, X, AlertTriangle, RefreshCw } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { usePublicPlans, useSubscription, useCreateSubscription, useUpdateSubscription, useApplyCoupon, useRemoveCoupon } from '../hooks/use-billing';
 import { billingApi } from '../api/billing.api';
+import { paymentsApi, type PlanPrice } from '../api/payments.api';
 import { PATHS } from '@/routes/paths';
 import type { BillingCycle, SubscriptionPlan } from '../types/billing.types';
 
@@ -19,14 +21,25 @@ function PlanCard({
   current,
   onSelect,
   loading,
+  prices,
+  currency,
 }: {
   plan: SubscriptionPlan;
   cycle: BillingCycle;
   current: boolean;
   onSelect: (plan: SubscriptionPlan) => void;
   loading: boolean;
+  prices?: PlanPrice[];
+  currency: string;
 }) {
-  const price = cycle === 'monthly' ? plan.priceMonthly : plan.priceYearly;
+  // Prefer the per-currency price; fall back to the plan's own base price so
+  // the card still renders correctly before prices load, or on a deployment
+  // that has no multi-currency rows.
+  const row = prices?.find((p) => p.currency === currency);
+  const displayCurrency = row ? row.currency : plan.currency;
+  const price = row
+    ? cycle === 'monthly' ? row.priceMonthly : row.priceYearly
+    : cycle === 'monthly' ? plan.priceMonthly : plan.priceYearly;
   const highlight = PLAN_HIGHLIGHT[plan.slug];
 
   return (
@@ -57,7 +70,7 @@ function PlanCard({
 
       <div className="mb-6">
         <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-extrabold text-slate-900">{fmt(price, plan.currency)}</span>
+          <span className="text-3xl font-extrabold text-slate-900">{fmt(price, displayCurrency)}</span>
           {price > 0 && (
             <span className="text-sm text-slate-500">/{cycle === 'monthly' ? 'month' : 'year'}</span>
           )}
@@ -112,11 +125,70 @@ export function BillingPlansPage(): JSX.Element {
   const navigate = useNavigate();
 
   const [cycle, setCycle] = useState<BillingCycle>('monthly');
+  const [currency, setCurrency] = useState<string>('NGN');
+  const [payError, setPayError] = useState<string | null>(null);
   const [couponInput, setCouponInput] = useState('');
   const [showCoupon, setShowCoupon] = useState(false);
   const [couponValidation, setCouponValidation] = useState<{ valid: boolean; message: string; discount?: number } | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [selectingPlanId, setSelectingPlanId] = useState<string | null>(null);
+
+  const { data: paymentConfig } = useQuery({
+    queryKey: ['payments', 'config'],
+    queryFn: paymentsApi.getConfig,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Per-currency prices for every plan, keyed by plan id. The plan record itself
+  // carries only its base currency, so NGN pricing has to come from here.
+  const { data: planPrices = {} } = useQuery({
+    queryKey: ['payments', 'plan-prices', plans.map((p) => p.id).join(',')],
+    enabled: plans.length > 0,
+    queryFn: async () => {
+      const entries = await Promise.all(
+        plans.map(async (p) => [p.id, await paymentsApi.getPlanPrices(p.id)] as const),
+      );
+      return Object.fromEntries(entries) as Record<string, PlanPrice[]>;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Default to the first currency the deployment actually supports, rather than
+  // assuming NGN — the list is configuration, not a constant.
+  useEffect(() => {
+    if (paymentConfig?.currencies?.length && !paymentConfig.currencies.includes(currency)) {
+      setCurrency(paymentConfig.currencies[0]);
+    }
+  }, [paymentConfig, currency]);
+
+  // Paystack redirects back here with ?reference=... Confirm it server-side;
+  // the endpoint is idempotent, so refreshing this page is harmless.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [confirming, setConfirming] = useState(false);
+  const [confirmMsg, setConfirmMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  useEffect(() => {
+    const reference = searchParams.get('reference');
+    if (!reference) return;
+    setConfirming(true);
+    paymentsApi
+      .confirm(reference)
+      .then((r) => {
+        setConfirmMsg(
+          r.status === 'success'
+            ? { ok: true, text: 'Payment successful — your plan is now active.' }
+            : { ok: false, text: `Payment ${r.status}. Your plan is unchanged.` },
+        );
+      })
+      .catch(() => setConfirmMsg({ ok: false, text: 'Could not confirm the payment. If you were charged, it will be applied automatically.' }))
+      .finally(() => {
+        setConfirming(false);
+        // Drop the reference so a refresh does not re-run confirmation.
+        searchParams.delete('reference');
+        setSearchParams(searchParams, { replace: true });
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleValidateCoupon() {
     if (!couponInput) return;
@@ -147,7 +219,28 @@ export function BillingPlansPage(): JSX.Element {
 
   async function handleSelectPlan(plan: SubscriptionPlan) {
     setSelectingPlanId(plan.id);
+    setPayError(null);
     try {
+      // Paid plans go through the payment provider. The subscription is NOT
+      // changed here — the backend activates it only after the charge is
+      // confirmed server-side, so an abandoned checkout leaves the current plan
+      // untouched. Free plans have nothing to charge and switch directly.
+      const price = currency === 'NGN'
+        ? planPrices[plan.id]?.find((p) => p.currency === 'NGN')
+        : planPrices[plan.id]?.find((p) => p.currency === currency);
+      const amount = price ? (cycle === 'yearly' ? price.priceYearly : price.priceMonthly) : 0;
+
+      if (paymentConfig?.configured && amount > 0) {
+        const checkout = await paymentsApi.createCheckout({
+          planId: plan.id,
+          currency,
+          billingCycle: cycle,
+        });
+        // Full navigation, not client-side routing: this is Paystack's domain.
+        window.location.href = checkout.authorizationUrl;
+        return;
+      }
+
       if (subscription) {
         await updateSub.mutateAsync({ planId: plan.id, billingCycle: cycle });
         if (couponInput && couponValidation?.valid) {
@@ -161,8 +254,14 @@ export function BillingPlansPage(): JSX.Element {
         });
       }
       navigate(PATHS.BILLING);
-    } catch {
-      // errors shown by mutations
+    } catch (err) {
+      // Checkout failures need to surface here — unlike the plan mutations,
+      // which render their own error state. The provider's message is the
+      // useful one (e.g. "Currency not supported by merchant" before USD is
+      // enabled on the account), so show it rather than a generic string.
+      const msg =
+        (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      setPayError(msg ?? 'Could not start checkout. Please try again.');
     } finally {
       setSelectingPlanId(null);
     }
@@ -216,6 +315,47 @@ export function BillingPlansPage(): JSX.Element {
             </button>
           ))}
         </div>
+
+        {/* Currency selector — only when the deployment can actually take
+            payment in more than one currency. */}
+        {paymentConfig?.configured && paymentConfig.currencies.length > 1 && (
+          <div className="mt-3 inline-flex items-center rounded-xl bg-slate-100 p-1 ml-0 sm:ml-3">
+            {paymentConfig.currencies.map((c) => (
+              <button
+                key={c}
+                onClick={() => setCurrency(c)}
+                className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-all ${
+                  currency === c ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                {c === 'NGN' ? '₦ NGN' : c === 'USD' ? '$ USD' : c}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Payment result, shown after returning from the provider */}
+        {confirming && (
+          <div className="mt-4 flex items-center justify-center gap-2 text-sm text-slate-500">
+            <Loader2 className="h-4 w-4 animate-spin" /> Confirming your payment…
+          </div>
+        )}
+        {confirmMsg && (
+          <div
+            className={`mt-4 mx-auto max-w-xl rounded-lg border px-4 py-2.5 text-sm ${
+              confirmMsg.ok
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                : 'border-amber-200 bg-amber-50 text-amber-800'
+            }`}
+          >
+            {confirmMsg.text}
+          </div>
+        )}
+        {payError && (
+          <div className="mt-4 mx-auto max-w-xl rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
+            {payError}
+          </div>
+        )}
 
         {/* Coupon toggle */}
         <div className="mt-4 flex justify-center">
@@ -280,6 +420,8 @@ export function BillingPlansPage(): JSX.Element {
             current={subscription?.planId === plan.id && subscription?.billingCycle === cycle}
             onSelect={handleSelectPlan}
             loading={selectingPlanId === plan.id}
+            prices={planPrices[plan.id]}
+            currency={currency}
           />
         ))}
       </div>

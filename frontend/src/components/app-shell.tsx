@@ -101,6 +101,18 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
+// Owner-only navigation. Kept out of NAV_GROUPS so it is never rendered for a
+// normal customer: /billing/admin exposes every tenant's billing, and until now
+// it had a route but no link, so even the platform owner could only reach it by
+// typing the URL. Hiding the link is presentation only — requireSuperadmin on
+// the API is what actually enforces access.
+const OWNER_NAV_GROUP: NavGroup = {
+  heading: 'Platform Owner',
+  items: [
+    { label: 'Billing Admin', to: PATHS.BILLING_ADMIN, icon: <Building2 className="h-4 w-4" /> },
+  ],
+};
+
 function UserAvatar({ name, avatarUrl }: { name: string; avatarUrl?: string | null }) {
   if (avatarUrl) {
     return <img src={avatarUrl} alt={name} className="h-8 w-8 rounded-full object-cover" />;
@@ -116,6 +128,10 @@ function UserAvatar({ name, avatarUrl }: { name: string; avatarUrl?: string | nu
 export function AppShell() {
   const [collapsed, setCollapsed] = useState(false);
   const { user, activeTenant, clearAuth } = useAuthStore();
+
+  // Append the owner group only for a platform superadmin, so customers never
+  // see a link into cross-tenant billing.
+  const navGroups = user?.isSuperadmin ? [...NAV_GROUPS, OWNER_NAV_GROUP] : NAV_GROUPS;
   const navigate = useNavigate();
 
   async function handleLogout() {
@@ -171,7 +187,7 @@ export function AppShell() {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
-          {NAV_GROUPS.map((group, gi) => (
+          {navGroups.map((group, gi) => (
             <div key={gi}>
               {group.heading && !collapsed && (
                 <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
