@@ -1,11 +1,12 @@
 {
+  "// startCommand": "Must be wrapped in `sh -c`. backend/Dockerfile declares ENTRYPOINT [dumb-init, --], so Railway appends the start command as ARGV to that entrypoint rather than running it through a shell. Unwrapped, the `&&` and everything after it are passed as arguments to migrate.mjs, which ignores them and exits 0 — the container then dies before the server ever starts, and the healthcheck fails. render.yaml uses the same sh -c form.",
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "backend/Dockerfile"
   },
   "deploy": {
-    "startCommand": "node scripts/migrate.mjs && node dist/server.js",
+    "startCommand": "sh -c \"node scripts/migrate.mjs && node dist/server.js\"",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",
