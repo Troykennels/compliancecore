@@ -70,9 +70,9 @@ export function createApp(): Express {
   app.use('/health', healthRouter);
 
   // ─── Orion licensing gate ────────────────────────────────────────────────
-  // Baked product config; a deployment is licensed by setting ORION_LICENSE_KEY.
-  // COMPLETELY OFF unless that variable is set, and fails open on any error, so
-  // it can never take a running deployment down.
+  // A deployment is licensed by setting ORION_LICENSE_KEY + ORION_LICENSE_API_KEY.
+  // COMPLETELY OFF unless both are set, and fails open on any error, so it can
+  // never take a running deployment down.
   try {
     installOrionGate(app);
   } catch {

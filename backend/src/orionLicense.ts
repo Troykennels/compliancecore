@@ -1,12 +1,17 @@
 /**
  * ComplianceCore - Orion licensing gate (cloud).
  * ==============================================
- * Product settings are baked in (same for every deployment); to license a
- * deployment you set ONE variable: ORION_LICENSE_KEY.
+ * To license a deployment you set TWO variables:
+ *   ORION_LICENSE_KEY      the customer's license key (per deployment)
+ *   ORION_LICENSE_API_KEY  the OLM integration credential (per vendor)
+ *
+ * The integration credential is a SECRET and has deliberately no baked-in
+ * default: a value compiled into this file ships to every customer that
+ * receives the source or the built image, which is the same as publishing it.
  *
  * SAFETY (this is a deployed service):
- *   - COMPLETELY OFF unless ORION_LICENSE_KEY is set -> the deployment behaves
- *     exactly as before. Nothing changes until a key is set.
+ *   - COMPLETELY OFF unless BOTH variables are set -> the deployment behaves
+ *     exactly as before. Nothing changes until they are set.
  *   - Validates the license KEY online (cached), and FAILS OPEN on any error or
  *     if OLM is unreachable, so a licensing/network problem can never take the
  *     service down. Only a definitive "revoked / expired / not found" blocks.
@@ -22,9 +27,7 @@ const PRODUCT_CODE = process.env.ORION_LICENSE_PRODUCT_CODE ?? 'compliancecore';
 const API_URL =
   process.env.ORION_LICENSE_API_URL ??
   'https://olm-api-production-85fe.up.railway.app';
-const API_KEY =
-  process.env.ORION_LICENSE_API_KEY ??
-  'olm_4a771d07.UuyI1X2K8_w460B22kaDB9aVPI71XAt2g3QzSAr2Si8';
+const API_KEY = (process.env.ORION_LICENSE_API_KEY ?? '').trim();
 const LICENSE_KEY = (process.env.ORION_LICENSE_KEY ?? '').trim();
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
@@ -39,6 +42,10 @@ let cache: (LicenseState & { at: number }) | null = null;
 
 function olmValidate(timeoutMs = 8000): Promise<LicenseState> {
   return new Promise((resolve, reject) => {
+    // Without the integration credential OLM cannot be queried at all. Reject so
+    // getState() takes its fail-open path rather than sending an unauthenticated
+    // request and reading whatever comes back as a licensing decision.
+    if (!API_KEY) return reject(new Error('ORION_LICENSE_API_KEY is not set'));
     let u: URL;
     try {
       u = new URL(
@@ -111,13 +118,25 @@ const UNLICENSED_HTML =
   '<!doctype html><meta charset="utf-8"><body style="margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:Segoe UI,Arial;background:#0b1220;color:#fff;text-align:center"><div style="padding:32px;max-width:460px"><h2>ComplianceCore is not licensed</h2><p style="color:#9aa7c7">This deployment does not have a valid license.</p><p style="color:#5f6b8a;font-size:13px">Please contact your administrator (Orion Soft).</p></div></body>';
 
 /**
- * Install the licensing gate, but ONLY if ORION_LICENSE_KEY is set. Returns
- * true if installed, false if it stayed off. Never throws.
+ * Install the licensing gate, but ONLY if both ORION_LICENSE_KEY and
+ * ORION_LICENSE_API_KEY are set. Returns true if installed, false if it stayed
+ * off. Never throws.
  */
 export function installOrionGate(app: Express): boolean {
   if (!LICENSE_KEY) {
     // eslint-disable-next-line no-console
     console.log('[orion] licensing OFF (no ORION_LICENSE_KEY) - deployment unchanged');
+    return false;
+  }
+  if (!API_KEY) {
+    // A gate with no way to reach OLM would fail open on every request anyway;
+    // staying off avoids an outbound call per cold start that can only ever
+    // return "unknown". Loud, because someone intended licensing to be ON.
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[orion] ORION_LICENSE_KEY is set but ORION_LICENSE_API_KEY is not — ' +
+        'licensing CANNOT be enforced and stays OFF. Set both to enable it.',
+    );
     return false;
   }
   app.use(async (req: Request, res: Response, next: NextFunction) => {
