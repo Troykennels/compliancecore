@@ -166,6 +166,82 @@ export async function initBillingTables(): Promise<void> {
     ON CONFLICT (slug) DO NOTHING
   `);
 
+  // ── Multi-currency plan pricing ──────────────────────────────────────────
+  // Lives here, not in a SQL migration, because it has a foreign key to
+  // subscription_plans — which is created above rather than by the migration
+  // runner. Migrations all run before the app boots, so on a fresh database a
+  // migration referencing this table fails with "relation does not exist".
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS global.plan_prices (
+      id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      plan_id       UUID NOT NULL REFERENCES global.subscription_plans(id) ON DELETE CASCADE,
+      currency      CHAR(3) NOT NULL,
+      price_monthly NUMERIC(12, 2) NOT NULL DEFAULT 0,
+      price_yearly  NUMERIC(12, 2) NOT NULL DEFAULT 0,
+      is_active     BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT plan_prices_currency_upper CHECK (currency = UPPER(currency)),
+      CONSTRAINT plan_prices_non_negative   CHECK (price_monthly >= 0 AND price_yearly >= 0),
+      CONSTRAINT plan_prices_plan_currency  UNIQUE (plan_id, currency)
+    )
+  `);
+  await prisma.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS idx_plan_prices_plan ON global.plan_prices (plan_id)`,
+  );
+
+  // Every plan keeps its existing price under its existing currency.
+  await prisma.$executeRawUnsafe(`
+    INSERT INTO global.plan_prices (plan_id, currency, price_monthly, price_yearly)
+    SELECT id, UPPER(COALESCE(currency, 'USD')), COALESCE(price_monthly, 0), COALESCE(price_yearly, 0)
+    FROM global.subscription_plans
+    ON CONFLICT (plan_id, currency) DO NOTHING
+  `);
+
+  // PLACEHOLDER NGN pricing at 1 USD = 1600 NGN, rounded to the nearest ₦100,
+  // so Paystack checkout has something to charge against out of the box. This
+  // is not a pricing decision — set real values in the owner console. ON
+  // CONFLICT DO NOTHING means edited prices are never overwritten on reboot.
+  await prisma.$executeRawUnsafe(`
+    INSERT INTO global.plan_prices (plan_id, currency, price_monthly, price_yearly)
+    SELECT id, 'NGN',
+           ROUND(COALESCE(price_monthly, 0) * 1600 / 100) * 100,
+           ROUND(COALESCE(price_yearly,  0) * 1600 / 100) * 100
+    FROM global.subscription_plans
+    WHERE UPPER(COALESCE(currency, 'USD')) <> 'NGN'
+    ON CONFLICT (plan_id, currency) DO NOTHING
+  `);
+
+  // ── Payment transactions ─────────────────────────────────────────────────
+  // Same reasoning: foreign keys to subscription_plans and tenants.
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS global.payment_transactions (
+      id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      reference      VARCHAR(100) NOT NULL UNIQUE,
+      tenant_id      UUID NOT NULL REFERENCES global.tenants(id) ON DELETE CASCADE,
+      user_id        UUID REFERENCES global.users(id) ON DELETE SET NULL,
+      plan_id        UUID NOT NULL REFERENCES global.subscription_plans(id),
+      billing_cycle  VARCHAR(20) NOT NULL,
+      currency       CHAR(3) NOT NULL,
+      amount         NUMERIC(12, 2) NOT NULL,
+      provider       VARCHAR(20) NOT NULL DEFAULT 'paystack',
+      status         VARCHAR(20) NOT NULL DEFAULT 'pending',
+      processed_at   TIMESTAMPTZ,
+      paid_at        TIMESTAMPTZ,
+      provider_ref   VARCHAR(120),
+      failure_reason TEXT,
+      created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT payment_tx_currency_upper      CHECK (currency = UPPER(currency)),
+      CONSTRAINT payment_tx_amount_non_negative CHECK (amount >= 0),
+      CONSTRAINT payment_tx_cycle               CHECK (billing_cycle IN ('monthly', 'yearly')),
+      CONSTRAINT payment_tx_status              CHECK (status IN ('pending', 'success', 'failed', 'abandoned'))
+    )
+  `);
+  await prisma.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS idx_payment_tx_tenant ON global.payment_transactions (tenant_id, created_at DESC)`,
+  );
+
   _initialized = true;
   logger.info('Billing tables initialised');
 }
