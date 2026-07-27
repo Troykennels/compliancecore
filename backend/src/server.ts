@@ -25,7 +25,17 @@ async function bootstrap(): Promise<void> {
   await initBillingTables();
 
   if (env.ENABLE_REDIS) {
-    await redis.connect();
+    // The shared client is created with lazyConnect, but importing the routers
+    // above already built the Redis-backed rate-limit store, and its init()
+    // issues a command — which makes ioredis start connecting on its own. A
+    // second connect() would then throw "Redis is already connecting/connected"
+    // and kill the process at boot, so only connect while the client is idle.
+    // ping() is what actually proves the connection is usable, which is the
+    // point of doing this before the server accepts traffic.
+    if (redis.status === 'wait') {
+      await redis.connect();
+    }
+    await redis.ping();
     logger.info('Redis connected');
 
     workers.push(startOcrWorker());
