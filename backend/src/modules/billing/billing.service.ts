@@ -74,6 +74,27 @@ export async function adminCreatePlan(dto: CreatePlanDto): Promise<SubscriptionP
 export async function adminUpdatePlan(id: string, dto: UpdatePlanDto): Promise<SubscriptionPlan> {
   const plan = await repo.updatePlan(id, dto);
   if (!plan) throw new NotFoundError('Plan', id);
+
+  // Keep the per-currency price in step with the plan's own price.
+  //
+  // Checkout charges from global.plan_prices, but this admin endpoint (and the
+  // owner console behind it) writes the legacy columns on subscription_plans.
+  // Without this the two silently diverge: an owner sets Starter to $10 in the
+  // console, plan_prices still says 0, and every customer checks out free while
+  // the subscription reports $10 as due.
+  //
+  // Only the plan's own currency is synced. Other currencies are independent
+  // pricing decisions — overwriting an NGN price from a USD edit would apply a
+  // made-up exchange rate the owner never agreed to.
+  if (dto.priceMonthly !== undefined || dto.priceYearly !== undefined) {
+    await repo.upsertPlanPrice(
+      id,
+      plan.currency,
+      dto.priceMonthly ?? plan.priceMonthly,
+      dto.priceYearly ?? plan.priceYearly,
+    );
+  }
+
   return plan;
 }
 

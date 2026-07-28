@@ -872,3 +872,30 @@ export async function findAllTenantBilling(): Promise<TenantBillingRow[]> {
     currency: r.currency ?? 'USD',
   }));
 }
+
+/**
+ * Creates or updates the price for one (plan, currency) pair.
+ *
+ * Used to keep global.plan_prices — which checkout charges from — in step with
+ * edits made to a plan in the owner console, which writes the legacy price
+ * columns on subscription_plans.
+ */
+export async function upsertPlanPrice(
+  planId: string,
+  currency: string,
+  priceMonthly: number,
+  priceYearly: number,
+): Promise<void> {
+  await prisma.$executeRawUnsafe(
+    `INSERT INTO global.plan_prices (plan_id, currency, price_monthly, price_yearly)
+     VALUES ($1::uuid, UPPER($2), $3, $4)
+     ON CONFLICT (plan_id, currency)
+     DO UPDATE SET price_monthly = EXCLUDED.price_monthly,
+                   price_yearly  = EXCLUDED.price_yearly,
+                   updated_at    = NOW()`,
+    planId,
+    currency,
+    priceMonthly,
+    priceYearly,
+  );
+}
