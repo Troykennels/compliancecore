@@ -27,6 +27,19 @@ const schema = z.object({
   SMTP_PASS: z.string(),
   EMAIL_FROM: z.string().default('ComplianceCore <noreply@compliancecore.io>'),
 
+  // Where customer replies should land. EMAIL_FROM is typically a noreply
+  // address on a send-only domain, so without this a customer replying to a
+  // receipt — which is exactly when they have a billing question — reaches
+  // nobody. Falls back to EMAIL_FROM when unset.
+  EMAIL_REPLY_TO: z.string().email().optional(),
+
+  // Business address for sale and revenue notifications. Without it these go to
+  // whoever currently holds superadmin, which means company revenue mail lands
+  // in a personal inbox and follows that person if the role ever moves. Set a
+  // company address so the notifications belong to the business, not a person.
+  // Comma-separated for more than one recipient.
+  BILLING_NOTIFY_EMAIL: z.string().optional(),
+
   // Brevo HTTP API key. When set, mail is sent over HTTPS instead of SMTP.
   //
   // Preferred on any managed host: Railway (and many other PaaS) block outbound

@@ -50,6 +50,8 @@ export interface PaymentTransaction {
   id: string;
   reference: string;
   tenantId: string;
+  /** Who paid — used to address the receipt. Null if the user was since removed. */
+  userId: string | null;
   planId: string;
   billingCycle: 'monthly' | 'yearly';
   currency: string;
@@ -63,6 +65,7 @@ function mapTx(r: any): PaymentTransaction {
     id: r.id,
     reference: r.reference,
     tenantId: r.tenant_id,
+    userId: r.user_id ?? null,
     planId: r.plan_id,
     billingCycle: r.billing_cycle,
     currency: String(r.currency).trim(),

@@ -5,6 +5,7 @@ import { AppError, NotFoundError, ValidationError } from '../../lib/errors';
 import * as billingRepo from '../billing/billing.repository';
 import * as billingService from '../billing/billing.service';
 import * as repo from './payments.repository';
+import { sendPaymentEmails } from './payment-emails';
 import {
   initializeTransaction,
   verifyTransaction,
@@ -171,6 +172,24 @@ async function applyPaidTransaction(
     { reference, tenantId: claimed.tenantId, planId: claimed.planId, amount: claimed.amount, currency: claimed.currency },
     'Payment applied — subscription activated',
   );
+
+  // Confirmations are sent after the subscription is active and are deliberately
+  // not awaited: the money is taken and the plan granted regardless, and making
+  // the webhook wait on SMTP would risk Paystack timing out and retrying a
+  // payment that already succeeded. sendPaymentEmails swallows its own errors.
+  const sub = await billingRepo.findSubscriptionByTenant(claimed.tenantId);
+  void sendPaymentEmails({
+    tenantId: claimed.tenantId,
+    userId: claimed.userId ?? null,
+    planId: claimed.planId,
+    amount: claimed.amount,
+    currency: claimed.currency,
+    billingCycle: claimed.billingCycle,
+    reference,
+    periodStart: sub ? new Date(sub.currentPeriodStart) : new Date(),
+    periodEnd: sub ? new Date(sub.currentPeriodEnd) : new Date(),
+  });
+
   return { applied: true };
 }
 

@@ -37,6 +37,7 @@ async function sendViaHttpApi(
   subject: string,
   html: string,
   attachments?: Array<{ filename: string; content: Buffer; contentType: string }>,
+  replyTo?: string,
 ): Promise<void> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20_000);
@@ -54,6 +55,7 @@ async function sendViaHttpApi(
         to: [{ email: to }],
         subject,
         htmlContent: html,
+        ...(replyTo && { replyTo: { email: replyTo } }),
         // Brevo takes attachments base64-encoded rather than as raw bytes.
         ...(attachments?.length && {
           attachment: attachments.map((a) => ({
@@ -210,16 +212,20 @@ export async function sendRawEmail(opts: {
   subject: string;
   html: string;
   attachments?: Array<{ filename: string; content: Buffer; contentType: string }>;
+  /** Defaults to EMAIL_REPLY_TO. Pass explicitly to override per message. */
+  replyTo?: string;
 }): Promise<void> {
+  const replyTo = opts.replyTo ?? env.EMAIL_REPLY_TO;
   try {
     if (useHttpApi) {
-      await sendViaHttpApi(opts.to, opts.subject, opts.html, opts.attachments);
+      await sendViaHttpApi(opts.to, opts.subject, opts.html, opts.attachments, replyTo);
     } else {
       await transporter.sendMail({
         from: env.EMAIL_FROM,
         to: opts.to,
         subject: opts.subject,
         html: opts.html,
+        ...(replyTo && { replyTo }),
         attachments: opts.attachments?.map((a) => ({
           filename: a.filename,
           content: a.content,

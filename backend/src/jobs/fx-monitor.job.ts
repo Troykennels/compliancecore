@@ -3,8 +3,8 @@ import { redisForQueues } from '../config/redis';
 import { logger } from '../lib/logger';
 import { env } from '../config/env';
 import { sendRawEmail } from '../lib/email';
-import { prisma } from '../lib/prisma';
 import { reviewFxPricing } from '../modules/billing/fx-review.service';
+import { resolveOwnerRecipients } from '../modules/payments/payment-emails';
 
 // Daily check of how far foreign-currency prices have drifted from their USD
 // equivalent, emailed to the platform owner when it matters.
@@ -37,12 +37,11 @@ async function processJob(_job: Job): Promise<void> {
     return;
   }
 
-  const owners = await prisma.user.findMany({
-    where: { isSuperadmin: true, deletedAt: null, isActive: true },
-    select: { email: true },
-  });
+  // Same recipients as billing notifications, so all owner-facing mail can be
+  // pointed at a company address rather than a personal one.
+  const owners = await resolveOwnerRecipients();
   if (!owners.length) {
-    logger.warn('FX monitor: prices have drifted but no superadmin exists to notify');
+    logger.warn('FX monitor: prices have drifted but there is nobody to notify');
     return;
   }
 
