@@ -134,11 +134,14 @@ async function applyPaidTransaction(
   const existing = await billingRepo.findSubscriptionByTenant(claimed.tenantId);
 
   if (existing) {
-    await billingService.updateSubscription(claimed.tenantId, {
-      planId: claimed.planId,
-      billingCycle: claimed.billingCycle,
-      status: 'active',
-    } as never);
+    // paidUpgrade: the charge for this exact plan and cycle has already been
+    // verified with the provider above, so this is the one place allowed to
+    // move a tenant onto a more expensive plan.
+    await billingService.updateSubscription(
+      claimed.tenantId,
+      { planId: claimed.planId, billingCycle: claimed.billingCycle, status: 'active' } as never,
+      { paidUpgrade: true },
+    );
 
     // Grant the period that was actually paid for.
     //
@@ -155,13 +158,13 @@ async function applyPaidTransaction(
       current_period_end: end,
     });
   } else {
-    await billingService.createSubscription(claimed.tenantId, {
-      planId: claimed.planId,
-      billingCycle: claimed.billingCycle,
-      // Payment already taken — starting a trial on a paid subscription would
-      // delay the first real invoice and misreport revenue.
-      trialDays: 0,
-    } as never);
+    // Payment already taken, so no trial: starting one here would delay the
+    // first real invoice and misreport revenue.
+    await billingService.createSubscription(
+      claimed.tenantId,
+      { planId: claimed.planId, billingCycle: claimed.billingCycle },
+      { paidUpgrade: true },
+    );
   }
 
   logger.info(

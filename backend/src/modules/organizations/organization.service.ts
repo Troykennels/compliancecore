@@ -85,11 +85,11 @@ export const organizationService = {
       try {
         const plan = await billingRepo.findPlanBySlug(TRIAL_PLAN_SLUG);
         if (plan) {
-          await billingService.createSubscription(id, {
-            planId: plan.id,
-            billingCycle: 'monthly',
-            trialDays: TRIAL_DAYS,
-          } as never);
+          await billingService.createSubscription(
+            id,
+            { planId: plan.id, billingCycle: 'monthly' },
+            { trialDays: TRIAL_DAYS },
+          );
         }
       } catch (err) {
         logger.error({ err, tenantId: id }, 'Could not start trial subscription — falling back to date-anchored trial');

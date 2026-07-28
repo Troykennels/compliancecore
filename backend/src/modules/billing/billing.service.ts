@@ -108,18 +108,46 @@ export async function getSubscription(tenantId: string): Promise<Subscription | 
   return repo.findSubscriptionByTenant(tenantId);
 }
 
-export async function createSubscription(tenantId: string, dto: CreateSubscriptionDto): Promise<Subscription> {
+/**
+ * Creates a tenant's first subscription.
+ *
+ * `opts.paidUpgrade` marks a call that a verified payment authorises, and
+ * `opts.trialDays` is the server-chosen trial length used when an organisation
+ * is created. Neither can come from a request body — trialDays was previously
+ * client-supplied, which allowed POSTing a 365-day trial of Enterprise.
+ */
+export async function createSubscription(
+  tenantId: string,
+  dto: CreateSubscriptionDto,
+  opts?: { paidUpgrade?: boolean; trialDays?: number },
+): Promise<Subscription> {
   // Guard against double-charging: a tenant may only hold one subscription.
   const existing = await repo.findSubscriptionByTenant(tenantId);
   if (existing) {
     throw new ConflictError('This organisation already has a subscription. Update it instead.');
   }
 
+  // Same rule as updateSubscription: a paid plan may only be taken up through
+  // the payment flow, or as the server-granted trial at signup.
+  if (!opts?.paidUpgrade && !opts?.trialDays) {
+    const target = await repo.findPlanById(dto.planId);
+    if (target && calcBasePrice(target, dto.billingCycle ?? 'monthly') > 0) {
+      throw new AppError(
+        `Subscribing to ${target.name} requires payment. Start checkout to continue.`,
+        402,
+        'PAYMENT_REQUIRED',
+      );
+    }
+  }
+
   const plan = await repo.findPlanById(dto.planId);
   if (!plan) throw new NotFoundError('Plan', dto.planId);
 
   const cycle: BillingCycle = dto.billingCycle ?? 'monthly';
-  const trialDays = dto.trialDays ?? (plan.priceMonthly === 0 ? 0 : 14);
+  // Server-decided only. dto.trialDays is deliberately ignored — see the note
+  // on this function and in billing.schema.ts. A paid plan reached through
+  // checkout gets no trial, because it has already been paid for.
+  const trialDays = opts?.trialDays ?? 0;
   const now = new Date();
   const start = periodStart(cycle);
   const end = periodEnd(start, cycle);
@@ -183,9 +211,50 @@ export async function createSubscription(tenantId: string, dto: CreateSubscripti
   return sub;
 }
 
-export async function updateSubscription(tenantId: string, dto: UpdateSubscriptionDto): Promise<Subscription> {
+/**
+ * Updates a tenant's own subscription.
+ *
+ * `opts.paidUpgrade` is the authorisation that money changed hands, and is set
+ * ONLY by the payments module after a charge has been verified with the
+ * provider. It is deliberately not part of UpdateSubscriptionDto so it can
+ * never arrive from a request body.
+ *
+ * Without this guard the endpoint was a complete bypass of billing: any user
+ * with billing:write — which every organisation owner has — could PATCH
+ * themselves onto Enterprise and receive a 200, no payment involved. Verified
+ * against production before the fix.
+ */
+export async function updateSubscription(
+  tenantId: string,
+  dto: UpdateSubscriptionDto,
+  opts?: { paidUpgrade?: boolean },
+): Promise<Subscription> {
   const existing = await repo.findSubscriptionByTenant(tenantId);
   if (!existing) throw new NotFoundError('Subscription');
+
+  // Refuse any self-service change that increases what is owed. Downgrades and
+  // moves to a free plan stay allowed — a customer may always spend less.
+  if (!opts?.paidUpgrade) {
+    const targetPlanId = dto.planId ?? existing.planId;
+    const targetCycle = dto.billingCycle ?? existing.billingCycle;
+    const targetPlan = await repo.findPlanById(targetPlanId);
+    if (targetPlan) {
+      const currentPlan = await repo.findPlanById(existing.planId);
+      const targetPrice = calcBasePrice(targetPlan, targetCycle);
+      const currentPrice = currentPlan ? calcBasePrice(currentPlan, existing.billingCycle) : 0;
+      const isUpgrade =
+        (dto.planId !== undefined && dto.planId !== existing.planId) ||
+        (dto.billingCycle !== undefined && dto.billingCycle !== existing.billingCycle);
+
+      if (isUpgrade && targetPrice > 0 && targetPrice > currentPrice) {
+        throw new AppError(
+          `Changing to ${targetPlan.name} requires payment. Start checkout to complete the upgrade.`,
+          402,
+          'PAYMENT_REQUIRED',
+        );
+      }
+    }
+  }
 
   const fields: Record<string, unknown> = {};
 

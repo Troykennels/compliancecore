@@ -12,7 +12,10 @@ export const createSubscriptionSchema = z.object({
   planId: z.string().uuid('planId must be a valid id'),
   billingCycle: z.enum(BILLING_CYCLES, { errorMap: () => ({ message: 'Invalid billing cycle' }) }).optional(),
   couponCode: z.string().min(1).max(64).optional(),
-  trialDays: z.number().int().min(0).max(365).optional(),
+  // trialDays is NOT accepted from clients. It used to be, which let a caller
+  // POST {planId: <enterprise>, trialDays: 365} and self-grant a year of a paid
+  // plan for free. Trial length is decided by the server (TRIAL_DAYS) when an
+  // organisation is created; nothing else may set it.
 });
 
 export const updateSubscriptionSchema = z
