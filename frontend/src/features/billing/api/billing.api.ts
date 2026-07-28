@@ -3,7 +3,7 @@ import type {
   BillingOverview, Subscription, SubscriptionPlan, PaymentMethod, Invoice,
   UsageSummary, CouponValidation, TenantBillingRow, Coupon,
   CreateSubscriptionDto, UpdateSubscriptionDto, AddPaymentMethodDto,
-  CreateCouponDto, CreatePlanDto,
+  CreateCouponDto, CreatePlanDto, FxReview,
 } from '../types/billing.types';
 
 type Res<T> = Promise<{ data: { success: boolean; data: T } }>;
@@ -76,6 +76,25 @@ export const billingApi = {
 
     updatePlan: (id: string, dto: Partial<CreatePlanDto> & { isActive?: boolean }): Res<SubscriptionPlan> =>
       apiClient.patch(`/billing/admin/plans/${id}`, dto),
+
+    // Per-currency prices. The plan record holds a single currency, so NGN
+    // pricing can only be read and written here.
+    getPlanPrices: (planId: string): Res<Array<{ currency: string; priceMonthly: number; priceYearly: number }>> =>
+      apiClient.get(`/billing/admin/plans/${planId}/prices`),
+
+    setPlanPrice: (
+      planId: string,
+      dto: { currency: string; priceMonthly: number; priceYearly: number },
+    ): Res<Array<{ currency: string; priceMonthly: number; priceYearly: number }>> =>
+      apiClient.put(`/billing/admin/plans/${planId}/prices`, dto),
+
+    // How far each currency's price has drifted from its USD equivalent at the
+    // live rate. Advisory only — applying is a separate call.
+    getFxReview: (currency = 'NGN'): Res<FxReview> =>
+      apiClient.get('/billing/admin/fx-review', { params: { currency } }),
+
+    applyFxSuggestions: (planIds: string[], currency = 'NGN'): Res<{ applied: number }> =>
+      apiClient.post('/billing/admin/fx-review/apply', { planIds, currency }),
 
     getCoupons: (includeInactive = false): Res<Coupon[]> =>
       apiClient.get('/billing/admin/coupons', { params: { includeInactive } }),

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import {
   ShieldAlert, Tag, Building2, FileText, Plus, Edit2, ToggleLeft, ToggleRight,
-  CheckCircle2, XCircle, Loader2, Download, AlertTriangle, RefreshCw,
+  CheckCircle2, XCircle, Loader2, Download, AlertTriangle, RefreshCw, TrendingUp,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PricingTab } from '../components/pricing-tab';
 import {
   useAdminPlans, useAdminCreatePlan, useAdminUpdatePlan,
   useAdminCoupons, useAdminCreateCoupon, useAdminUpdateCoupon,
@@ -15,9 +16,10 @@ import type {
 } from '../types/billing.types';
 
 // ── Tab definitions ────────────────────────────────────────────────────────────
-type Tab = 'plans' | 'coupons' | 'tenants' | 'invoices';
+type Tab = 'plans' | 'pricing' | 'coupons' | 'tenants' | 'invoices';
 const TABS: Array<{ id: Tab; label: string; icon: JSX.Element }> = [
   { id: 'plans',   label: 'Plans',    icon: <ShieldAlert className="h-4 w-4" /> },
+  { id: 'pricing', label: 'Pricing',  icon: <TrendingUp className="h-4 w-4" /> },
   { id: 'coupons', label: 'Coupons',  icon: <Tag className="h-4 w-4" /> },
   { id: 'tenants', label: 'Tenants',  icon: <Building2 className="h-4 w-4" /> },
   { id: 'invoices',label: 'Invoices', icon: <FileText className="h-4 w-4" /> },
@@ -556,6 +558,7 @@ export function BillingAdminPage(): JSX.Element {
       </div>
 
       {tab === 'plans'    && <PlansTab />}
+      {tab === 'pricing'  && <PricingTab />}
       {tab === 'coupons'  && <CouponsTab />}
       {tab === 'tenants'  && <TenantsTab />}
       {tab === 'invoices' && <AdminInvoicesTab />}

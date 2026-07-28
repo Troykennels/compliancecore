@@ -208,3 +208,28 @@ export interface CreatePlanDto {
   isPublic?: boolean;
   sortOrder?: number;
 }
+
+// ── FX price review ───────────────────────────────────────────────────────────
+export interface FxSuggestion {
+  planId: string;
+  planSlug: string;
+  planName: string;
+  currency: string;
+  usdMonthly: number;
+  usdYearly: number;
+  currentMonthly: number;
+  currentYearly: number;
+  suggestedMonthly: number;
+  suggestedYearly: number;
+  driftPercent: number;
+  needsReview: boolean;
+}
+
+export interface FxReview {
+  currency: string;
+  rate: number | null;
+  fetchedAt: string | null;
+  thresholdPercent: number;
+  suggestions: FxSuggestion[];
+  unavailableReason?: string;
+}
