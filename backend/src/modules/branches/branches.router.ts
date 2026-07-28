@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { resolveTenant } from '../../middleware/tenant.middleware';
-import { enforceEntitlement } from '../../middleware/entitlement.middleware';
+import { enforceEntitlement, enforceLimit } from '../../middleware/entitlement.middleware';
+import { countBranches } from '../../lib/usage-counts';
 import { requirePermission } from '../../middleware/rbac.middleware';
 import { validate, validateQuery } from '../../middleware/validate.middleware';
 import { branchesController } from './branches.controller';
@@ -29,6 +30,7 @@ router.get('/:id', branchesController.getById);
 router.post(
   '/',
   requirePermission('org:write'),
+  enforceLimit('branches', countBranches),
   validate(createBranchSchema),
   branchesController.create,
 );

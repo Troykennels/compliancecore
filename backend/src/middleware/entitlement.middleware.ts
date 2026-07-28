@@ -67,7 +67,11 @@ export function enforceLimit(
 ): RequestHandler {
   return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     try {
-      const ent = req.entitlement ?? (req.tenant?.id ? await getEntitlement(req.tenant.id) : null);
+      // Same fallback as the counters: some routers authenticate without
+      // running resolveTenant, so req.tenant may be absent even though the
+      // caller clearly belongs to a tenant.
+      const tenantId = req.tenant?.id ?? req.user?.tenantId;
+      const ent = req.entitlement ?? (tenantId ? await getEntitlement(tenantId) : null);
       if (!ent) return next();
 
       const limit = ent.limits[metric];

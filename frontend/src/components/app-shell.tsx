@@ -9,6 +9,7 @@ import {
   Library, TrendingUp, Plug,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
+import { EntitlementBanner } from '@/components/entitlement-banner';
 import { authApi } from '@/features/auth/api/auth.api';
 import { PATHS } from '@/routes/paths';
 import { NotificationBell } from '@/features/notifications/components/notification-bell';
@@ -258,6 +259,10 @@ export function AppShell() {
           <NotificationBell />
           <UserAvatar name={displayName} avatarUrl={user?.avatarUrl} />
         </header>
+
+        {/* Subscription state. Outside <main> so it stays visible while a page
+            scrolls, and renders nothing at all on a healthy subscription. */}
+        <EntitlementBanner />
 
         {/* Page content. overflow-y-auto so pages that don't manage their own
             scroll still scroll. The inner Suspense keeps the sidebar/topbar

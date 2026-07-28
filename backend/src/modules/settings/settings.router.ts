@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { requirePermission, requireRole } from '../../middleware/rbac.middleware';
 import { validate } from '../../middleware/validate.middleware';
+import { enforceLimit } from '../../middleware/entitlement.middleware';
+import { countUsers } from '../../lib/usage-counts';
 import { settingsController } from './settings.controller';
 import {
   inviteMemberSchema,
@@ -23,6 +25,9 @@ router.get('/team/members', settingsController.listMembers);
 router.post(
   '/team/members/invite',
   requirePermission('team:write'),
+  // Counts existing members, so the limit blocks the invite that would take the
+  // organisation over its plan rather than failing later at acceptance.
+  enforceLimit('users', countUsers),
   validate(inviteMemberSchema),
   settingsController.inviteMember,
 );

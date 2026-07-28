@@ -21,6 +21,9 @@ router.get('/coupons/validate', asyncHandler(ctrl.validateCoupon));
 // ── Authenticated tenant routes ───────────────────────────────────────────────
 router.use(authenticate());
 
+// No billing permission required: every member needs to know their
+// organisation is in read-only, not just whoever manages the invoices.
+router.get('/entitlement', asyncHandler(ctrl.getEntitlement));
 router.get('/overview', requirePermission('billing:read'), asyncHandler(ctrl.getBillingOverview));
 router.get('/subscription', requirePermission('billing:read'), asyncHandler(ctrl.getSubscription));
 router.post('/subscription', requirePermission('billing:write'), validate(createSubscriptionSchema), asyncHandler(ctrl.createSubscription));

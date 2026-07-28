@@ -15,6 +15,19 @@ export async function validateCoupon(req: Request, res: Response) {
   res.json({ success: true, data: result });
 }
 
+// ── Entitlement ────────────────────────────────────────────────────────────────
+/**
+ * What this organisation may currently do. Drives the trial/expiry banner and
+ * lets the UI disable actions it knows will be refused.
+ *
+ * enforceEntitlement has already attached req.entitlement on this route, so the
+ * value returned is exactly the one the server enforces with — the client can
+ * never be shown a state that differs from what the API applies.
+ */
+export async function getEntitlement(req: Request, res: Response) {
+  res.json({ success: true, data: req.entitlement ?? null });
+}
+
 // ── Tenant Billing ─────────────────────────────────────────────────────────────
 export async function getBillingOverview(req: Request, res: Response) {
   const data = await service.getBillingOverview(tid(req));
