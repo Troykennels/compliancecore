@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { resolveTenant } from '../../middleware/tenant.middleware';
+import { enforceEntitlement } from '../../middleware/entitlement.middleware';
 import { requirePermission } from '../../middleware/rbac.middleware';
 import { asyncHandler } from '../../lib/asyncHandler';
 import * as ctrl from './payments.controller';
@@ -17,7 +18,7 @@ paymentsPublicRouter.get('/config', asyncHandler(ctrl.getConfig));
 
 // ─── Authenticated ───────────────────────────────────────────────────────────
 export const paymentsRouter = Router();
-paymentsRouter.use(authenticate(), resolveTenant);
+paymentsRouter.use(authenticate(), resolveTenant, enforceEntitlement());
 
 // Prices for a plan across every currency it is sold in.
 paymentsRouter.get('/plans/:planId/prices', requirePermission('billing:read'), asyncHandler(ctrl.getPlanPrices));

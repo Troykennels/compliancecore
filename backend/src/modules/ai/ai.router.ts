@@ -2,12 +2,13 @@ import { Router } from 'express';
 import { makeRateLimiter } from '../../lib/rate-limit';
 import { authenticate } from '../../middleware/auth.middleware';
 import { resolveTenant } from '../../middleware/tenant.middleware';
+import { enforceEntitlement } from '../../middleware/entitlement.middleware';
 import { requirePermission } from '../../middleware/rbac.middleware';
 import { asyncHandler } from '../../lib/asyncHandler';
 import * as ctrl from './ai.controller';
 
 const router = Router();
-router.use(authenticate(), resolveTenant);
+router.use(authenticate(), resolveTenant, enforceEntitlement());
 
 // Every AI route hits the paid Groq API with up to ~60 KB of prompt. Without a
 // cap, one authenticated user (any role with ai:use, incl. viewer) could drive

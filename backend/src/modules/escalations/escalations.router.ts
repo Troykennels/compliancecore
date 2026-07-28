@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { resolveTenant } from '../../middleware/tenant.middleware';
+import { enforceEntitlement } from '../../middleware/entitlement.middleware';
 import { requirePermission } from '../../middleware/rbac.middleware';
 import { validateUuidParam } from '../../middleware/validate-params.middleware';
 import { asyncHandler } from '../../lib/asyncHandler';
 import * as ctrl from './escalations.controller';
 
 const router = Router();
-router.use(authenticate(), resolveTenant);
+router.use(authenticate(), resolveTenant, enforceEntitlement());
 
 // Rules
 router.get('/rules',              requirePermission('escalations:read'),   asyncHandler(ctrl.listRules));

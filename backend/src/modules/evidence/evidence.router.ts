@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { resolveTenant } from '../../middleware/tenant.middleware';
+import { enforceEntitlement } from '../../middleware/entitlement.middleware';
 import { requirePermission } from '../../middleware/rbac.middleware';
 import { validate, validateQuery } from '../../middleware/validate.middleware';
 import { asyncHandler } from '../../lib/asyncHandler';
@@ -35,7 +36,7 @@ router.post(
 );
 
 // ── All routes below require auth + tenant ────────────────────────────────────
-router.use(authenticate(), resolveTenant);
+router.use(authenticate(), resolveTenant, enforceEntitlement());
 
 // ── Categories ────────────────────────────────────────────────────────────────
 router.get('/categories',        asyncHandler(ctrl.listCategories));

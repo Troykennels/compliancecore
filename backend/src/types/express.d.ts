@@ -17,6 +17,10 @@ declare global {
         // every admin request, so a stale token cannot retain owner access.
         isSuperadmin: boolean;
       };
+      // entitlement is set by enforceEntitlement() (entitlement.middleware.ts).
+      // Present on any tenant-scoped route so limit checks and the client
+      // banner can reuse the lookup instead of repeating it.
+      entitlement?: import('../lib/entitlements').Entitlement;
       // tenant is set by resolveTenant() middleware (tenant.middleware.ts)
       tenant?: {
         id: string;

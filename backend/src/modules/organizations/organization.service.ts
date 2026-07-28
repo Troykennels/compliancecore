@@ -6,6 +6,10 @@ import { invalidateTenantCache } from '../../middleware/tenant.middleware';
 import { setAuditSessionVars } from '../../middleware/audit.middleware';
 import { prisma, tenantSchemaName } from '../../lib/prisma';
 import { provisionTenantSchema, dropTenantSchema } from '../../lib/provisioning';
+import { logger } from '../../lib/logger';
+import { TRIAL_DAYS, TRIAL_PLAN_SLUG } from '../../lib/entitlements';
+import * as billingRepo from '../billing/billing.repository';
+import * as billingService from '../billing/billing.service';
 
 // Deterministic, URL-safe, collision-free slug: slugified name + short id suffix.
 function makeSlug(name: string, id: string): string {
@@ -43,7 +47,7 @@ export const organizationService = {
     await provisionTenantSchema(schemaName);
 
     try {
-      return await prisma.$transaction(async (tx) => {
+      const created = await prisma.$transaction(async (tx) => {
         const tenant = await tx.tenant.create({
           data: {
             id,
@@ -71,6 +75,27 @@ export const organizationService = {
 
         return tenant;
       });
+
+      // Start the free trial. Deliberately outside the transaction above and
+      // non-fatal: billing lives in its own raw-SQL tables, and a failure here
+      // must not roll back — or worse, tear down — a tenant that was created
+      // successfully. getEntitlement() falls back to a trial anchored on the
+      // tenant's createdAt, so an organisation whose subscription row failed to
+      // write still gets its full trial rather than being locked out.
+      try {
+        const plan = await billingRepo.findPlanBySlug(TRIAL_PLAN_SLUG);
+        if (plan) {
+          await billingService.createSubscription(id, {
+            planId: plan.id,
+            billingCycle: 'monthly',
+            trialDays: TRIAL_DAYS,
+          } as never);
+        }
+      } catch (err) {
+        logger.error({ err, tenantId: id }, 'Could not start trial subscription — falling back to date-anchored trial');
+      }
+
+      return created;
     } catch (err) {
       await dropTenantSchema(schemaName);
       throw err;

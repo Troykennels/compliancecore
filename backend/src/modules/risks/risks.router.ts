@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { resolveTenant } from '../../middleware/tenant.middleware';
+import { enforceEntitlement } from '../../middleware/entitlement.middleware';
 import { requirePermission } from '../../middleware/rbac.middleware';
 import { validate, validateQuery } from '../../middleware/validate.middleware';
 import { asyncHandler } from '../../lib/asyncHandler';
@@ -8,7 +9,7 @@ import { createRiskSchema, updateRiskSchema, listRisksSchema } from './risks.sch
 import * as ctrl from './risks.controller';
 
 const router = Router();
-router.use(authenticate(), resolveTenant);
+router.use(authenticate(), resolveTenant, enforceEntitlement());
 
 router.get('/',       requirePermission('risks:read'),   validateQuery(listRisksSchema), asyncHandler(ctrl.listRisks));
 router.get('/stats',  requirePermission('risks:read'),   asyncHandler(ctrl.getRiskStats));

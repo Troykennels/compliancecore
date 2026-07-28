@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { resolveTenant } from '../../middleware/tenant.middleware';
+import { enforceEntitlement } from '../../middleware/entitlement.middleware';
 import { requirePermission } from '../../middleware/rbac.middleware';
 import { validate, validateQuery } from '../../middleware/validate.middleware';
 import { asyncHandler } from '../../lib/asyncHandler';
@@ -8,7 +9,7 @@ import { createPolicySchema, updatePolicySchema, listPoliciesSchema } from './po
 import * as ctrl from './policies.controller';
 
 const router = Router();
-router.use(authenticate(), resolveTenant);
+router.use(authenticate(), resolveTenant, enforceEntitlement());
 
 router.get('/',            requirePermission('policies:read'),  validateQuery(listPoliciesSchema), asyncHandler(ctrl.listPolicies));
 router.get('/:id',         requirePermission('policies:read'),  asyncHandler(ctrl.getPolicy));
