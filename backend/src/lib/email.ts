@@ -16,10 +16,71 @@ const transporter = nodemailer.createTransport({
   socketTimeout:     20_000,
 });
 
+// ─── Transport selection ─────────────────────────────────────────────────────
+// Brevo's HTTP API is used whenever BREVO_API_KEY is set, because managed hosts
+// commonly block outbound SMTP. This deployment proved it: with entirely valid
+// credentials, a verified sender and IP restrictions disabled, every send from
+// Railway failed with `ETIMEDOUT Connection timeout` — the TCP connection to
+// port 587 never opened. Port 443 is not blocked anywhere.
+const useHttpApi = Boolean(env.BREVO_API_KEY);
+
+// EMAIL_FROM is an RFC 5322 address ("Name <a@b.c>"); the HTTP API wants the
+// name and address as separate fields.
+function parseFrom(): { name: string; email: string } {
+  const m = env.EMAIL_FROM.match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
+  if (m) return { name: m[1].replace(/^"|"$/g, '') || 'ComplianceCore', email: m[2] };
+  return { name: 'ComplianceCore', email: env.EMAIL_FROM.trim() };
+}
+
+async function sendViaHttpApi(
+  to: string,
+  subject: string,
+  html: string,
+  attachments?: Array<{ filename: string; content: Buffer; contentType: string }>,
+): Promise<void> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20_000);
+  try {
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'api-key': env.BREVO_API_KEY as string,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        sender: parseFrom(),
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+        // Brevo takes attachments base64-encoded rather than as raw bytes.
+        ...(attachments?.length && {
+          attachment: attachments.map((a) => ({
+            name: a.filename,
+            content: a.content.toString('base64'),
+          })),
+        }),
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new Error(`Brevo API ${res.status}: ${body.slice(0, 300)}`);
+    }
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function send(to: string, subject: string, html: string): Promise<void> {
   try {
-    await transporter.sendMail({ from: env.EMAIL_FROM, to, subject, html });
-    logger.info({ to, subject }, 'Email sent');
+    if (useHttpApi) {
+      await sendViaHttpApi(to, subject, html);
+    } else {
+      await transporter.sendMail({ from: env.EMAIL_FROM, to, subject, html });
+    }
+    logger.info({ to, subject, transport: useHttpApi ? 'http' : 'smtp' }, 'Email sent');
   } catch (err) {
     // The reason goes in the MESSAGE, not just the structured field. Hosted log
     // viewers commonly surface only pino's `msg`, so "Failed to send email" on
@@ -151,17 +212,21 @@ export async function sendRawEmail(opts: {
   attachments?: Array<{ filename: string; content: Buffer; contentType: string }>;
 }): Promise<void> {
   try {
-    await transporter.sendMail({
-      from: env.EMAIL_FROM,
-      to: opts.to,
-      subject: opts.subject,
-      html: opts.html,
-      attachments: opts.attachments?.map((a) => ({
-        filename: a.filename,
-        content: a.content,
-        contentType: a.contentType,
-      })),
-    });
+    if (useHttpApi) {
+      await sendViaHttpApi(opts.to, opts.subject, opts.html, opts.attachments);
+    } else {
+      await transporter.sendMail({
+        from: env.EMAIL_FROM,
+        to: opts.to,
+        subject: opts.subject,
+        html: opts.html,
+        attachments: opts.attachments?.map((a) => ({
+          filename: a.filename,
+          content: a.content,
+          contentType: a.contentType,
+        })),
+      });
+    }
   } catch (err) {
     logger.error({ err, to: opts.to, subject: opts.subject }, 'Failed to send raw email');
   }

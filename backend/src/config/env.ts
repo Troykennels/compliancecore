@@ -27,6 +27,15 @@ const schema = z.object({
   SMTP_PASS: z.string(),
   EMAIL_FROM: z.string().default('ComplianceCore <noreply@compliancecore.io>'),
 
+  // Brevo HTTP API key. When set, mail is sent over HTTPS instead of SMTP.
+  //
+  // Preferred on any managed host: Railway (and many other PaaS) block outbound
+  // SMTP ports to deter spam, so smtp-relay.brevo.com:587 fails with ETIMEDOUT
+  // no matter how correct the credentials are. Port 443 is never blocked.
+  // Leave unset to keep using SMTP — useful for self-hosting or a non-Brevo
+  // provider.
+  BREVO_API_KEY: z.string().min(1).optional(),
+
   COOKIE_SECRET: z.string().min(32),
 
   // Server-only HMAC key for digital-signature certificates. MUST be set and
