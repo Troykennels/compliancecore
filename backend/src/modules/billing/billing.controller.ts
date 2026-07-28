@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import * as service from './billing.service';
 import { getEntitlement as resolveEntitlement } from '../../lib/entitlements';
+import * as fxReview from './fx-review.service';
 
 const tid = (req: Request): string => req.user!.tenantId!;
 
@@ -176,6 +177,33 @@ export async function adminDownloadInvoicePdf(req: Request, res: Response) {
   res.setHeader('Content-Disposition', `attachment; filename="invoice-${inv.number}.pdf"`);
   res.setHeader('Content-Length', buffer.length);
   res.end(buffer);
+}
+
+// ── FX price review (superadmin) ──────────────────────────────────────────────
+export async function adminFxReview(req: Request, res: Response) {
+  const currency = String(req.query.currency ?? 'NGN');
+  res.json({ success: true, data: await fxReview.reviewFxPricing(currency) });
+}
+
+export async function adminApplyFxSuggestions(req: Request, res: Response) {
+  const { planIds, currency } = req.body as { planIds?: string[]; currency?: string };
+  const data = await fxReview.applyFxSuggestions(planIds ?? [], currency ?? 'NGN');
+  res.json({ success: true, data });
+}
+
+// ── Per-currency plan prices (superadmin) ─────────────────────────────────────
+export async function adminGetPlanPrices(req: Request, res: Response) {
+  const { findPlanPricesByPlan } = await import('./billing.repository');
+  res.json({ success: true, data: await findPlanPricesByPlan(req.params.id) });
+}
+
+export async function adminSetPlanPrice(req: Request, res: Response) {
+  const { currency, priceMonthly, priceYearly } = req.body as {
+    currency: string; priceMonthly: number; priceYearly: number;
+  };
+  const { upsertPlanPrice, findPlanPricesByPlan } = await import('./billing.repository');
+  await upsertPlanPrice(req.params.id, currency, priceMonthly, priceYearly);
+  res.json({ success: true, data: await findPlanPricesByPlan(req.params.id) });
 }
 
 export async function adminUpdateSubscription(req: Request, res: Response) {

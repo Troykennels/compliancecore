@@ -899,3 +899,19 @@ export async function upsertPlanPrice(
     priceYearly,
   );
 }
+
+/** Every active per-currency price row for a plan. */
+export async function findPlanPricesByPlan(planId: string): Promise<
+  Array<{ currency: string; priceMonthly: number; priceYearly: number }>
+> {
+  const rows = (await prisma.$queryRawUnsafe(
+    `SELECT currency, price_monthly, price_yearly
+       FROM global.plan_prices WHERE plan_id = $1::uuid AND is_active ORDER BY currency`,
+    planId,
+  )) as Array<{ currency: string; price_monthly: string; price_yearly: string }>;
+  return rows.map((r) => ({
+    currency: String(r.currency).trim(),
+    priceMonthly: Number(r.price_monthly),
+    priceYearly: Number(r.price_yearly),
+  }));
+}

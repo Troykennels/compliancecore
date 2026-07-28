@@ -47,6 +47,16 @@ router.get('/admin/plans', requireSuperadmin, asyncHandler(ctrl.adminGetPlans));
 router.post('/admin/plans', requireSuperadmin, asyncHandler(ctrl.adminCreatePlan));
 router.patch('/admin/plans/:id', requireSuperadmin, validateUuidParam('id'), asyncHandler(ctrl.adminUpdatePlan));
 
+// Per-currency pricing. The plan record holds only one currency, so NGN prices
+// are edited here rather than through the plan itself.
+router.get('/admin/plans/:id/prices', requireSuperadmin, validateUuidParam('id'), asyncHandler(ctrl.adminGetPlanPrices));
+router.put('/admin/plans/:id/prices', requireSuperadmin, validateUuidParam('id'), asyncHandler(ctrl.adminSetPlanPrice));
+
+// FX drift review. Reports how far each currency's price has moved from its USD
+// equivalent at the live rate; applying a suggestion is a separate, explicit call.
+router.get('/admin/fx-review', requireSuperadmin, asyncHandler(ctrl.adminFxReview));
+router.post('/admin/fx-review/apply', requireSuperadmin, asyncHandler(ctrl.adminApplyFxSuggestions));
+
 router.get('/admin/coupons', requireSuperadmin, asyncHandler(ctrl.adminGetCoupons));
 router.post('/admin/coupons', requireSuperadmin, asyncHandler(ctrl.adminCreateCoupon));
 router.patch('/admin/coupons/:id', requireSuperadmin, validateUuidParam('id'), asyncHandler(ctrl.adminUpdateCoupon));

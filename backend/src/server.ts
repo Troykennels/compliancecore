@@ -11,6 +11,7 @@ import { startEscalationWorker, scheduleEscalationJob } from './jobs/escalation.
 import { startApprovalDeadlineWorker, scheduleApprovalDeadlineJob } from './jobs/approval-deadline.job';
 import { startScheduledReportsWorker, scheduleReportsJob } from './jobs/scheduled-reports.job';
 import { startBillingRenewalWorker, scheduleBillingRenewalJob } from './jobs/billing-renewal.job';
+import { startFxMonitorWorker, scheduleFxMonitorJob } from './jobs/fx-monitor.job';
 import { initBillingTables } from './modules/billing/billing.repository';
 
 async function bootstrap(): Promise<void> {
@@ -64,6 +65,10 @@ async function bootstrap(): Promise<void> {
     workers.push(startBillingRenewalWorker());
     await scheduleBillingRenewalJob();
     logger.info('Billing renewal worker started');
+
+    workers.push(startFxMonitorWorker());
+    await scheduleFxMonitorJob();
+    logger.info('FX monitor worker started');
   } else {
     logger.warn('ENABLE_REDIS=false — cache is in-memory and background workers/queues are OFF (local dev only)');
   }
