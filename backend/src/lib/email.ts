@@ -19,8 +19,17 @@ const transporter = nodemailer.createTransport({
 async function send(to: string, subject: string, html: string): Promise<void> {
   try {
     await transporter.sendMail({ from: env.EMAIL_FROM, to, subject, html });
+    logger.info({ to, subject }, 'Email sent');
   } catch (err) {
-    logger.error({ err, to, subject }, 'Failed to send email');
+    // The reason goes in the MESSAGE, not just the structured field. Hosted log
+    // viewers commonly surface only pino's `msg`, so "Failed to send email" on
+    // its own is undebuggable — the SMTP response code and text are exactly
+    // what identifies an auth failure, a blocked IP or an unverified sender.
+    const e = err as { message?: string; responseCode?: number; response?: string; code?: string };
+    logger.error(
+      { err, to, subject },
+      `Failed to send email to ${to}: ${e.code ?? ''} ${e.responseCode ?? ''} ${e.response ?? e.message ?? 'unknown error'}`.replace(/\s+/g, ' ').trim(),
+    );
     // Do not throw — email failures should not fail the HTTP request.
     // The user can request a resend.
   }
