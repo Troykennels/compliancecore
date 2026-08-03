@@ -9,7 +9,7 @@ import { CRITICALITY_WEIGHT } from '../controls/controls.types';
 //   implemented       → full weight
 //   partially_implemented → half weight
 //   All other statuses  → 0 points
-function buildFrameworkScore(
+export function buildFrameworkScore(
   stats: { implementationStatus: string; criticality: string; count: number }[],
   frameworkId: string | null,
   frameworkName: string | null,

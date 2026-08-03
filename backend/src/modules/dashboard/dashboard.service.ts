@@ -5,7 +5,7 @@ import { expiryRepository } from '../expiry/expiry.repository';
 import { calendarRepository } from '../calendar/calendar.repository';
 import { notificationRepository } from '../notifications/notification.repository';
 import { scoreRepository } from '../compliance-score/score.repository';
-import { scoreService } from '../compliance-score/score.service';
+import { scoreService, buildFrameworkScore } from '../compliance-score/score.service';
 import type { ExpiryItem } from '../expiry/expiry.types';
 import type { CalendarEvent } from '../calendar/calendar.types';
 
@@ -82,7 +82,7 @@ export const dashboardService = {
       ] = await Promise.all([
         scoreRepository.getLatestSnapshot(tx),
         scoreRepository.getTrend(tx, 180),
-        controlsRepository.getStatusCounts(tx),
+        controlsRepository.getStatusCountsByFramework(tx),
         expiryRepository.countByStatus(tx),
         expiryRepository.findExpiringSoon(tx, 30),
         calendarRepository.findUpcoming(tx, 14),
@@ -115,7 +115,11 @@ export const dashboardService = {
 
       return {
         complianceScore: {
-          overall:      latestSnapshot?.overallScore ?? null,
+          // Snapshots are written nightly, so a tenant that onboarded and
+          // adopted a framework today has none yet. Falling back to a live
+          // calculation means the headline number is right from the first
+          // minute instead of blank until the job next runs.
+          overall:      latestSnapshot?.overallScore ?? buildFrameworkScore(controlStats, null, 'All Frameworks').score,
           trend,
           snapshotDate: latestSnapshot?.snapshotDate?.toISOString().split('T')[0] ?? null,
         },

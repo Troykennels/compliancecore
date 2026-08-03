@@ -21,9 +21,16 @@ export const frameworksService = {
     return framework;
   },
 
-  // Adopt a framework: create one starter control per framework category in the
-  // tenant `controls` table, skipping any category already adopted for this
-  // framework. Returns the number of controls created.
+  // Adopt a framework: copy its published control library (ISO 27001 Annex A,
+  // SOC 2 TSC, NDPR articles, …) into the tenant `controls` table so the
+  // organisation gets a real, auditable control set to work through.
+  //
+  // Controls already adopted for this framework are skipped, so re-adopting is
+  // safe and picks up controls added to the library since the last adoption.
+  //
+  // Frameworks whose library has not been modelled yet fall back to one starter
+  // control per category — better than adopting nothing, and clearly reported
+  // via `source` so the UI can say so rather than implying full coverage.
   async adopt(schemaName: string, id: string, actor: Actor): Promise<AdoptResult> {
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
@@ -33,20 +40,37 @@ export const frameworksService = {
 
       const existing = await frameworksRepository.existingControlRefs(tx, id);
 
+      const library = framework.controls;
+      const source: AdoptResult['source'] = library.length ? 'library' : 'categories';
+
+      const toAdopt = library.length
+        ? library.map((c) => ({
+            controlRef:  c.controlRef,
+            title:       c.title,
+            description: c.description,
+            category:    c.categoryName,
+            guidance:    c.guidance,
+          }))
+        : framework.categories.map((c) => ({
+            controlRef:  c.code,
+            title:       c.name,
+            description: c.description,
+            category:    c.name,
+            guidance:    null,
+          }));
+
       let created = 0;
-      for (const category of framework.categories) {
-        if (existing.has(category.code)) continue;
-        const inserted = await frameworksRepository.insertStarterControl(tx, {
+      let skipped = 0;
+      for (const control of toAdopt) {
+        if (existing.has(control.controlRef)) { skipped++; continue; }
+        created += await frameworksRepository.insertStarterControl(tx, {
           frameworkId: id,
-          controlRef:  category.code,
-          title:       category.name,
-          description: category.description,
-          createdBy:   actor.id,
+          ...control,
+          createdBy: actor.id,
         });
-        created += inserted;
       }
 
-      return { created };
+      return { created, skipped, source };
     });
   },
 };
