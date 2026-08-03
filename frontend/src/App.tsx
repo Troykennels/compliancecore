@@ -31,6 +31,7 @@ const ControlsPage = lazyPage(() => import('./features/controls/pages/controls.p
 const PoliciesPage = lazyPage(() => import('./features/policies/pages/policies.page'), 'PoliciesPage');
 const RisksPage = lazyPage(() => import('./features/risks/pages/risks.page'), 'RisksPage');
 const VendorsPage = lazyPage(() => import('./features/vendors/pages/vendors.page'), 'VendorsPage');
+const IncidentsPage = lazyPage(() => import('./features/incidents/pages/incidents.page'), 'IncidentsPage');
 const AuditsPage = lazyPage(() => import('./features/audits/pages/audits.page'), 'AuditsPage');
 const TrainingPage = lazyPage(() => import('./features/training/pages/training.page'), 'TrainingPage');
 const FrameworksPage = lazyPage(() => import('./features/frameworks/pages/frameworks.page'), 'FrameworksPage');
@@ -142,7 +143,7 @@ export default function App(): JSX.Element {
                 <Route path={PATHS.VENDORS}      element={<VendorsPage />} />
                 <Route path={PATHS.AUDITS}       element={<AuditsPage />} />
                 <Route path={PATHS.TRAINING}     element={<TrainingPage />} />
-                <Route path={PATHS.INCIDENTS}    element={<PlaceholderPage title="Incidents" />} />
+                <Route path={PATHS.INCIDENTS}    element={<IncidentsPage />} />
                 <Route path={PATHS.ANALYTICS}    element={<AnalyticsPage />} />
                 <Route path={PATHS.REPORTS}      element={<ExecutiveDashboardPage />} />
 
@@ -210,11 +211,3 @@ function RouteFallback(): JSX.Element {
   );
 }
 
-// Temporary placeholder — each feature module implements its own page
-function PlaceholderPage({ title }: { title: string }): JSX.Element {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <p className="text-slate-400">{title} — coming soon</p>
-    </div>
-  );
-}

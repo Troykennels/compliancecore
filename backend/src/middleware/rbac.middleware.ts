@@ -63,6 +63,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     'evidence:read', 'evidence:write', 'evidence:share',
     'policies:read',
     'risks:read',
+    // A control owner is usually the person who first notices and reports an
+    // incident affecting their control, so they can raise and update one.
+    'incidents:read', 'incidents:write',
     'reports:read',
     'calendar:read', 'calendar:write',
     'expiry:read',
@@ -79,6 +82,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     'policies:read',
     'risks:read',
     'audits:read',
+    // The incident register and its timeline are primary audit evidence — an
+    // auditor who cannot read them cannot test incident-response controls.
+    'incidents:read',
     'reports:read',
     'calendar:read',
     'expiry:read',
@@ -95,6 +101,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     'policies:read',
     'risks:read',
     'vendors:read',
+    'incidents:read',
     'reports:read',
     'calendar:read',
     'expiry:read',
