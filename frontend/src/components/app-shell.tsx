@@ -6,7 +6,7 @@ import {
   ChevronDown, Building2, GitBranch, Calendar, Clock, ChevronsLeft,
   ChevronsRight, FileArchive, CheckSquare, ShieldAlert, ListChecks, Sparkles, PieChart,
   CreditCard, Loader2, ScrollText, Flame, Store, ClipboardCheck, GraduationCap,
-  Library, TrendingUp, Plug,
+  Library, TrendingUp, Plug, Siren,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth.store';
@@ -47,6 +47,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Controls',          to: PATHS.CONTROLS,           icon: <ShieldCheck className="h-4 w-4" /> },
       { label: 'Policies',          to: PATHS.POLICIES,           icon: <ScrollText className="h-4 w-4" /> },
       { label: 'Risk Register',     to: PATHS.RISKS,              icon: <Flame className="h-4 w-4" /> },
+      { label: 'Incidents',         to: PATHS.INCIDENTS,          icon: <Siren className="h-4 w-4" /> },
       { label: 'Vendors',           to: PATHS.VENDORS,            icon: <Store className="h-4 w-4" /> },
       { label: 'Evidence Hub',      to: PATHS.EVIDENCE,           icon: <FileArchive className="h-4 w-4" /> },
     ],
