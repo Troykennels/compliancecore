@@ -26,12 +26,12 @@ export async function findWorkflows(schemaName: string): Promise<ApprovalWorkflo
 export async function findWorkflowById(schemaName: string, id: string): Promise<(ApprovalWorkflow & { steps: ApprovalWorkflowStep[] }) | null> {
   return withTenantSchema(schemaName, async (prisma) => {
     const rows = await prisma.$queryRawUnsafe<any[]>(`
-      SELECT aw.* FROM approval_workflows aw WHERE aw.id = $1 AND aw.deleted_at IS NULL
+      SELECT aw.* FROM approval_workflows aw WHERE aw.id = $1::uuid AND aw.deleted_at IS NULL
     `, id);
     if (!rows.length) return null;
     const workflow = mapWorkflow(rows[0]);
     const steps = await prisma.$queryRawUnsafe<any[]>(`
-      SELECT * FROM approval_workflow_steps WHERE workflow_id = $1 ORDER BY step_order
+      SELECT * FROM approval_workflow_steps WHERE workflow_id = $1::uuid ORDER BY step_order
     `, id);
     return { ...workflow, steps: steps.map(mapWorkflowStep) };
   });
@@ -41,13 +41,13 @@ export async function createWorkflow(schemaName: string, dto: CreateWorkflowDto,
   return withTenantSchema(schemaName, async (prisma) => {
     const [wf] = await prisma.$queryRawUnsafe<any[]>(`
       INSERT INTO approval_workflows(name, description, entity_type, created_by)
-      VALUES($1,$2,$3,$4) RETURNING id
+      VALUES($1,$2,$3,$4::uuid) RETURNING id
     `, dto.name, dto.description ?? null, dto.entityType, userId);
 
     for (const step of dto.steps) {
       await prisma.$executeRawUnsafe(`
         INSERT INTO approval_workflow_steps(workflow_id,step_order,name,approver_type,approver_id,approver_role,approver_user_list,min_approvals,deadline_hours,allow_self_approval,require_signature,instructions)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        VALUES($1::uuid,$2,$3,$4,$5::uuid,$6,$7::uuid[],$8,$9,$10,$11,$12)
       `, wf.id, step.stepOrder, step.name, step.approverType,
         step.approverId ?? null, step.approverRole ?? null,
         step.approverUserList ? `{${step.approverUserList.join(',')}}` : '{}',
@@ -69,15 +69,15 @@ export async function updateWorkflow(schemaName: string, id: string, dto: Partia
           description = COALESCE($3, description),
           entity_type = COALESCE($4, entity_type),
           updated_at  = NOW()
-        WHERE id = $1 AND deleted_at IS NULL
+        WHERE id = $1::uuid AND deleted_at IS NULL
       `, id, dto.name ?? null, dto.description ?? null, dto.entityType ?? null);
     }
     if (dto.steps) {
-      await prisma.$executeRawUnsafe(`DELETE FROM approval_workflow_steps WHERE workflow_id = $1`, id);
+      await prisma.$executeRawUnsafe(`DELETE FROM approval_workflow_steps WHERE workflow_id = $1::uuid`, id);
       for (const step of dto.steps) {
         await prisma.$executeRawUnsafe(`
           INSERT INTO approval_workflow_steps(workflow_id,step_order,name,approver_type,approver_id,approver_role,approver_user_list,min_approvals,deadline_hours,allow_self_approval,require_signature,instructions)
-          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+          VALUES($1::uuid,$2,$3,$4,$5::uuid,$6,$7::uuid[],$8,$9,$10,$11,$12)
         `, id, step.stepOrder, step.name, step.approverType,
           step.approverId ?? null, step.approverRole ?? null,
           step.approverUserList ? `{${step.approverUserList.join(',')}}` : '{}',
@@ -92,7 +92,7 @@ export async function updateWorkflow(schemaName: string, id: string, dto: Partia
 
 export async function softDeleteWorkflow(schemaName: string, id: string): Promise<void> {
   return withTenantSchema(schemaName, async (prisma) => {
-    await prisma.$executeRawUnsafe(`UPDATE approval_workflows SET deleted_at=NOW() WHERE id=$1`, id);
+    await prisma.$executeRawUnsafe(`UPDATE approval_workflows SET deleted_at=NOW() WHERE id=$1::uuid`, id);
   });
 }
 
@@ -111,7 +111,7 @@ export async function findRequests(
     if (filters.status)     { conditions.push(`ar.status = $${p++}`);      params.push(filters.status); }
     if (filters.entityType) { conditions.push(`ar.entity_type = $${p++}`); params.push(filters.entityType); }
     if (filters.priority)   { conditions.push(`ar.priority = $${p++}`);    params.push(filters.priority); }
-    if (filters.requestedBy){ conditions.push(`ar.requested_by = $${p++}`);params.push(filters.requestedBy); }
+    if (filters.requestedBy){ conditions.push(`ar.requested_by = $${p++}::uuid`);params.push(filters.requestedBy); }
     if (filters.q) {
       conditions.push(`ar.title ILIKE $${p++}`);
       params.push(`%${filters.q}%`);
@@ -154,7 +154,7 @@ export async function findRequestById(schemaName: string, id: string): Promise<(
              u.email AS requester_email
       FROM approval_requests ar
       LEFT JOIN global.users u ON u.id = ar.requested_by
-      WHERE ar.id = $1 AND ar.deleted_at IS NULL
+      WHERE ar.id = $1::uuid AND ar.deleted_at IS NULL
     `, id);
     if (!rows.length) return null;
     const request = mapRequest(rows[0]);
@@ -166,7 +166,7 @@ export async function findRequestById(schemaName: string, id: string): Promise<(
       FROM approval_request_steps ars
       LEFT JOIN global.users u1 ON u1.id = ars.assigned_to
       LEFT JOIN global.users u2 ON u2.id = ars.decided_by
-      WHERE ars.request_id = $1
+      WHERE ars.request_id = $1::uuid
       ORDER BY ars.step_order
     `, id);
     return { ...request, steps: steps.map(mapRequestStep) };
@@ -188,7 +188,7 @@ export async function createRequest(
   return withTenantSchema(schemaName, async (prisma) => {
     const [req] = await prisma.$queryRawUnsafe<any[]>(`
       INSERT INTO approval_requests(workflow_id,title,description,entity_type,entity_id,status,priority,total_steps,requested_by,deadline,metadata)
-      VALUES($1,$2,$3,$4,$5,'pending',$6,$7,$8,$9,$10) RETURNING id
+      VALUES($1::uuid,$2,$3,$4,$5::uuid,'pending',$6,$7,$8::uuid,$9::timestamptz,$10::jsonb) RETURNING id
     `,
       dto.workflowId ?? null, dto.title, dto.description ?? null,
       dto.entityType, dto.entityId ?? null, dto.priority ?? 'medium',
@@ -207,7 +207,7 @@ export async function createRequest(
       }
       await prisma.$executeRawUnsafe(`
         INSERT INTO approval_request_steps(request_id,step_order,name,status,approver_type,assigned_to,assigned_role,approver_user_list,min_approvals,allow_self_approval,require_signature,instructions,activated_at,deadline)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,${activatedAt},${deadline})
+        VALUES($1::uuid,$2,$3,$4,$5,$6::uuid,$7,$8::uuid[],$9,$10,$11,$12,${activatedAt},${deadline})
       `,
         reqId, step.stepOrder, step.name, status, step.approverType,
         step.assignedTo, step.assignedRole,
@@ -231,9 +231,9 @@ export async function updateStepDecision(
   return withTenantSchema(schemaName, async (prisma) => {
     await prisma.$executeRawUnsafe(`
       UPDATE approval_request_steps
-      SET status = $2, decided_by = $3, decision = $4, comments = $5,
-          digital_signature_id = $6, decided_at = NOW()
-      WHERE id = $1
+      SET status = $2, decided_by = $3::uuid, decision = $4, comments = $5,
+          digital_signature_id = $6::uuid, decided_at = NOW()
+      WHERE id = $1::uuid
     `, stepId, decision, decidedBy, decision, comments, signatureId);
   });
 }
@@ -274,7 +274,7 @@ export async function decideRequestTx(
     //    concurrent decision on the same request blocks here until we commit.
     const lockRows = await tx.$queryRawUnsafe<any[]>(`
       SELECT id, status, requested_by FROM approval_requests
-      WHERE id = $1 AND deleted_at IS NULL
+      WHERE id = $1::uuid AND deleted_at IS NULL
       FOR UPDATE
     `, requestId);
     if (!lockRows.length) throw new AppError('Approval request not found', 404);
@@ -322,7 +322,7 @@ export async function decideRequestTx(
         'approval_step', activeStep.id, signature.documentHash, decidingUserId, signedAt,
       );
       const [u] = await tx.$queryRawUnsafe<any[]>(
-        `SELECT first_name, last_name, email FROM global.users WHERE id = $1`, decidingUserId,
+        `SELECT first_name, last_name, email FROM global.users WHERE id = $1::uuid`, decidingUserId,
       );
       const certificateData = {
         version: '1.0', algorithm: 'HMAC-SHA256',
@@ -335,7 +335,7 @@ export async function decideRequestTx(
         INSERT INTO digital_signatures(
           user_id, document_type, document_id, document_hash,
           signature_hash, signature_image, certificate_data, ip_address, user_agent, signed_at
-        ) VALUES($1,'approval_step',$2,$3,$4,$5,$6,$7,$8,$9)
+        ) VALUES($1::uuid,'approval_step',$2::uuid,$3,$4,$5,$6::jsonb,$7::inet,$8,$9::timestamptz)
         RETURNING id
       `,
         decidingUserId, activeStep.id, signature.documentHash, signatureHash,
@@ -350,9 +350,9 @@ export async function decideRequestTx(
     const stepStatus = decision; // approved | rejected | changes_requested | abstained
     const updated = await tx.$executeRawUnsafe(`
       UPDATE approval_request_steps
-      SET status = $2, decided_by = $3, decision = $4, comments = $5,
-          digital_signature_id = $6, decided_at = NOW()
-      WHERE id = $1 AND status = 'active'
+      SET status = $2, decided_by = $3::uuid, decision = $4, comments = $5,
+          digital_signature_id = $6::uuid, decided_at = NOW()
+      WHERE id = $1::uuid AND status = 'active'
     `, activeStep.id, stepStatus, decidingUserId, decision, comments, signatureId);
     if (updated === 0) throw new AppError('This step has already been decided', 409);
 
@@ -361,7 +361,7 @@ export async function decideRequestTx(
       await tx.$executeRawUnsafe(`
         UPDATE approval_requests
         SET status = $2, rejection_reason = $3, completed_at = NOW(), updated_at = NOW()
-        WHERE id = $1
+        WHERE id = $1::uuid
       `, requestId, decision, comments);
       return { requestStatus: decision, signatureId, activatedNextStep: false, nextStepAssignees: [] };
     }
@@ -372,7 +372,7 @@ export async function decideRequestTx(
     //    that only abstains can never satisfy its minApprovals threshold.
     const steps = await tx.$queryRawUnsafe<any[]>(`
       SELECT id, step_order, status, assigned_to, name, min_approvals
-      FROM approval_request_steps WHERE request_id = $1 ORDER BY step_order
+      FROM approval_request_steps WHERE request_id = $1::uuid ORDER BY step_order
     `, requestId);
     const group = steps.filter((s) => s.step_order === activeStep.step_order);
     const allDecided    = group.every((s) => ['approved', 'abstained', 'skipped'].includes(s.status));
@@ -390,7 +390,7 @@ export async function decideRequestTx(
       await tx.$executeRawUnsafe(`
         UPDATE approval_requests
         SET status = 'approved', completed_at = NOW(), updated_at = NOW()
-        WHERE id = $1
+        WHERE id = $1::uuid
       `, requestId);
       return { requestStatus: 'approved', signatureId, activatedNextStep: false, nextStepAssignees: [] };
     }
@@ -398,10 +398,10 @@ export async function decideRequestTx(
     await tx.$executeRawUnsafe(`
       UPDATE approval_request_steps
       SET status = 'active', activated_at = NOW()
-      WHERE request_id = $1 AND step_order = $2 AND status = 'pending'
+      WHERE request_id = $1::uuid AND step_order = $2 AND status = 'pending'
     `, requestId, nextOrder);
     await tx.$executeRawUnsafe(`
-      UPDATE approval_requests SET current_step = $2, updated_at = NOW() WHERE id = $1
+      UPDATE approval_requests SET current_step = $2, updated_at = NOW() WHERE id = $1::uuid
     `, requestId, nextOrder);
 
     const nextStepAssignees = steps
@@ -416,10 +416,10 @@ export async function activateNextStepGroup(schemaName: string, requestId: strin
     await prisma.$executeRawUnsafe(`
       UPDATE approval_request_steps
       SET status = 'active', activated_at = NOW()
-      WHERE request_id = $1 AND step_order = $2 AND status = 'pending'
+      WHERE request_id = $1::uuid AND step_order = $2 AND status = 'pending'
     `, requestId, nextStepOrder);
     await prisma.$executeRawUnsafe(`
-      UPDATE approval_requests SET current_step = $2, updated_at = NOW() WHERE id = $1
+      UPDATE approval_requests SET current_step = $2, updated_at = NOW() WHERE id = $1::uuid
     `, requestId, nextStepOrder);
   });
 }
@@ -429,7 +429,7 @@ export async function finaliseRequest(schemaName: string, id: string, status: st
     await prisma.$executeRawUnsafe(`
       UPDATE approval_requests
       SET status = $2, rejection_reason = $3, completed_at = NOW(), updated_at = NOW()
-      WHERE id = $1
+      WHERE id = $1::uuid
     `, id, status, rejectionReason);
   });
 }
@@ -437,10 +437,10 @@ export async function finaliseRequest(schemaName: string, id: string, status: st
 export async function cancelRequest(schemaName: string, id: string, reason?: string): Promise<void> {
   return withTenantSchema(schemaName, async (prisma) => {
     await prisma.$executeRawUnsafe(`
-      UPDATE approval_requests SET status='cancelled', rejection_reason=$2, completed_at=NOW(), updated_at=NOW() WHERE id=$1
+      UPDATE approval_requests SET status='cancelled', rejection_reason=$2, completed_at=NOW(), updated_at=NOW() WHERE id=$1::uuid
     `, id, reason ?? null);
     await prisma.$executeRawUnsafe(`
-      UPDATE approval_request_steps SET status='skipped' WHERE request_id=$1 AND status IN ('pending','active')
+      UPDATE approval_request_steps SET status='skipped' WHERE request_id=$1::uuid AND status IN ('pending','active')
     `, id);
   });
 }
@@ -451,7 +451,7 @@ export async function getStepsForRequest(schemaName: string, requestId: string):
       SELECT ars.*, u.email AS assignee_email
       FROM approval_request_steps ars
       LEFT JOIN global.users u ON u.id = ars.assigned_to
-      WHERE ars.request_id = $1
+      WHERE ars.request_id = $1::uuid
       ORDER BY ars.step_order
     `, requestId);
   });
@@ -462,7 +462,7 @@ export async function getStepsForRequest(schemaName: string, requestId: string):
 export async function getUserDisplayName(schemaName: string, userId: string): Promise<string | null> {
   return withTenantSchema(schemaName, async (prisma) => {
     const [u] = await prisma.$queryRawUnsafe<any[]>(
-      `SELECT first_name, last_name FROM global.users WHERE id = $1`, userId,
+      `SELECT first_name, last_name FROM global.users WHERE id = $1::uuid`, userId,
     );
     if (!u) return null;
     const name = `${u.first_name ?? ''} ${u.last_name ?? ''}`.trim();

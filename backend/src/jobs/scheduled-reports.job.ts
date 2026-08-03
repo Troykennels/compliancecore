@@ -124,7 +124,7 @@ async function processTenantReports(tenant: TenantRow): Promise<void> {
 
       await withTenantSchema(tenant.schema_name, async (prismaClient) => {
         await prismaClient.$queryRawUnsafe(
-          `UPDATE scheduled_reports SET last_run_at = NOW(), last_run_status = 'success', next_run_at = $1, updated_at = NOW() WHERE id = $2`,
+          `UPDATE scheduled_reports SET last_run_at = NOW(), last_run_status = 'success', next_run_at = $1::timestamptz, updated_at = NOW() WHERE id = $2::uuid`,
           nextRun.toISOString(),
           report.id,
         );
@@ -135,7 +135,7 @@ async function processTenantReports(tenant: TenantRow): Promise<void> {
       logger.error({ err, reportId: report.id, tenantId: tenant.id }, 'Failed to process scheduled report');
       await withTenantSchema(tenant.schema_name, async (prismaClient) => {
         await prismaClient.$queryRawUnsafe(
-          `UPDATE scheduled_reports SET last_run_status = 'failed', updated_at = NOW() WHERE id = $1`,
+          `UPDATE scheduled_reports SET last_run_status = 'failed', updated_at = NOW() WHERE id = $1::uuid`,
           report.id,
         ).catch(() => undefined);
       });

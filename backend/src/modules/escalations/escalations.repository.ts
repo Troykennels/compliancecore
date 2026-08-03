@@ -15,7 +15,7 @@ export async function findRules(schemaName: string): Promise<EscalationRule[]> {
 export async function findRuleById(schemaName: string, id: string): Promise<EscalationRule | null> {
   return withTenantSchema(schemaName, async (prisma) => {
     const rows = await prisma.$queryRawUnsafe<any[]>(`
-      SELECT * FROM escalation_rules WHERE id = $1 AND deleted_at IS NULL
+      SELECT * FROM escalation_rules WHERE id = $1::uuid AND deleted_at IS NULL
     `, id);
     return rows.length ? mapRule(rows[0]) : null;
   });
@@ -25,7 +25,7 @@ export async function createRule(schemaName: string, dto: CreateEscalationRuleDt
   return withTenantSchema(schemaName, async (prisma) => {
     const [row] = await prisma.$queryRawUnsafe<any[]>(`
       INSERT INTO escalation_rules(name,description,trigger_type,entity_type,conditions,escalation_chain,created_by)
-      VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id
+      VALUES($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7::uuid) RETURNING id
     `,
       dto.name, dto.description ?? null, dto.triggerType, dto.entityType ?? null,
       JSON.stringify(dto.conditions), JSON.stringify(dto.escalationChain), userId,
@@ -45,7 +45,7 @@ export async function updateRule(schemaName: string, id: string, dto: Partial<Cr
         conditions       = CASE WHEN $6::text IS NOT NULL THEN $6::jsonb ELSE conditions END,
         escalation_chain = CASE WHEN $7::text IS NOT NULL THEN $7::jsonb ELSE escalation_chain END,
         updated_at       = NOW()
-      WHERE id = $1 AND deleted_at IS NULL
+      WHERE id = $1::uuid AND deleted_at IS NULL
     `,
       id, dto.name ?? null, dto.description ?? null, dto.triggerType ?? null,
       dto.entityType ?? null,
@@ -58,14 +58,14 @@ export async function updateRule(schemaName: string, id: string, dto: Partial<Cr
 export async function toggleRule(schemaName: string, id: string, isActive: boolean): Promise<void> {
   return withTenantSchema(schemaName, async (prisma) => {
     await prisma.$executeRawUnsafe(
-      `UPDATE escalation_rules SET is_active=$2, updated_at=NOW() WHERE id=$1`, id, isActive,
+      `UPDATE escalation_rules SET is_active=$2, updated_at=NOW() WHERE id=$1::uuid`, id, isActive,
     );
   });
 }
 
 export async function softDeleteRule(schemaName: string, id: string): Promise<void> {
   return withTenantSchema(schemaName, async (prisma) => {
-    await prisma.$executeRawUnsafe(`UPDATE escalation_rules SET deleted_at=NOW() WHERE id=$1`, id);
+    await prisma.$executeRawUnsafe(`UPDATE escalation_rules SET deleted_at=NOW() WHERE id=$1::uuid`, id);
   });
 }
 
@@ -98,7 +98,7 @@ export async function hasActiveEvent(schemaName: string, ruleId: string, entityT
   return withTenantSchema(schemaName, async (prisma) => {
     const rows = await prisma.$queryRawUnsafe<any[]>(`
       SELECT 1 FROM escalation_events
-      WHERE rule_id=$1 AND entity_type=$2 AND entity_id=$3 AND status='active' LIMIT 1
+      WHERE rule_id=$1::uuid AND entity_type=$2 AND entity_id=$3::uuid AND status='active' LIMIT 1
     `, ruleId, entityType, entityId);
     return rows.length > 0;
   });
@@ -116,7 +116,7 @@ export async function createEvent(
     try {
       const [row] = await prisma.$queryRawUnsafe<any[]>(`
         INSERT INTO escalation_events(rule_id,entity_type,entity_id,next_escalation_at,metadata)
-        VALUES($1,$2,$3,$4,$5)
+        VALUES($1::uuid,$2,$3::uuid,$4::timestamptz,$5::jsonb)
         ON CONFLICT(rule_id,entity_type,entity_id,status) DO NOTHING
         RETURNING id
       `, ruleId, entityType, entityId, nextEscalationAt ?? null, JSON.stringify(metadata));
@@ -130,7 +130,7 @@ export async function createEvent(
 export async function advanceEvent(schemaName: string, eventId: string, nextStep: number, nextEscalationAt: Date | null): Promise<void> {
   return withTenantSchema(schemaName, async (prisma) => {
     await prisma.$executeRawUnsafe(`
-      UPDATE escalation_events SET current_chain_step=$2, next_escalation_at=$3 WHERE id=$1
+      UPDATE escalation_events SET current_chain_step=$2, next_escalation_at=$3::timestamptz WHERE id=$1::uuid
     `, eventId, nextStep, nextEscalationAt ?? null);
   });
 }
@@ -152,7 +152,7 @@ export async function resolveEvent(
           THEN COALESCE(ee.metadata, '{}'::jsonb) || jsonb_build_object('resolutionNote', $2::text)
           ELSE ee.metadata
         END
-      WHERE ee.id = $1
+      WHERE ee.id = $1::uuid
       RETURNING ee.*
     `, eventId, resolutionNote ?? null);
     if (!rows.length) return null;
@@ -161,7 +161,7 @@ export async function resolveEvent(
       SELECT ee.*, er.name AS rule_name
       FROM escalation_events ee
       JOIN escalation_rules er ON er.id = ee.rule_id
-      WHERE ee.id = $1
+      WHERE ee.id = $1::uuid
     `, eventId);
     return mapEvent(withName ?? rows[0]);
   });
@@ -170,7 +170,7 @@ export async function resolveEvent(
 export async function completeEvent(schemaName: string, eventId: string): Promise<void> {
   return withTenantSchema(schemaName, async (prisma) => {
     await prisma.$executeRawUnsafe(`
-      UPDATE escalation_events SET status='completed' WHERE id=$1
+      UPDATE escalation_events SET status='completed' WHERE id=$1::uuid
     `, eventId);
   });
 }

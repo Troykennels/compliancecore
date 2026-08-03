@@ -74,7 +74,7 @@ async function checkTenantDeadlines(schemaName: string) {
         SELECT ars.assigned_to, u.email, u.first_name || ' ' || u.last_name AS name
         FROM approval_request_steps ars
         JOIN global.users u ON u.id = ars.assigned_to
-        WHERE ars.request_id = $1 AND ars.status = 'active' AND ars.assigned_to IS NOT NULL
+        WHERE ars.request_id = $1::uuid AND ars.status = 'active' AND ars.assigned_to IS NOT NULL
       `, req.id),
     );
 

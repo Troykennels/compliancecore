@@ -361,7 +361,7 @@ export async function createScheduledReport(
     const [row] = await p.$queryRawUnsafe<any[]>(`
       INSERT INTO scheduled_reports
         (id, name, frequency, day_of_week, day_of_month, hour, recipients, format, is_active, next_run_at, created_by)
-      VALUES ($1,$2,$3,$4,$5,$6,$7::text[],$8,true,$9,$10)
+      VALUES ($1::uuid,$2,$3,$4,$5,$6,$7::text[],$8,true,$9::timestamptz,$10::uuid)
       RETURNING *
     `, id, dto.name, freq, dow, dom, hour,
       `{${dto.recipients.map((r) => `"${r}"`).join(',')}}`,
@@ -378,7 +378,7 @@ export async function updateScheduledReport(
   await ensureTable(schemaName);
   return withTenantSchema(schemaName, async (p) => {
     const [current] = await p.$queryRawUnsafe<any[]>(
-      `SELECT * FROM scheduled_reports WHERE id = $1`, id,
+      `SELECT * FROM scheduled_reports WHERE id = $1::uuid`, id,
     );
     if (!current) throw new NotFoundError('Scheduled report', id);
 
@@ -395,8 +395,8 @@ export async function updateScheduledReport(
     const [row] = await p.$queryRawUnsafe<any[]>(`
       UPDATE scheduled_reports SET
         name = $2, frequency = $3, day_of_week = $4, day_of_month = $5, hour = $6,
-        recipients = $7::text[], format = $8, is_active = $9, next_run_at = $10, updated_at = NOW()
-      WHERE id = $1 RETURNING *
+        recipients = $7::text[], format = $8, is_active = $9, next_run_at = $10::timestamptz, updated_at = NOW()
+      WHERE id = $1::uuid RETURNING *
     `, id, name, freq, dow ?? null, dom ?? null, hour,
       `{${recips.map((r: string) => `"${r}"`).join(',')}}`,
       format, isActive, nextRun.toISOString());
@@ -407,6 +407,6 @@ export async function updateScheduledReport(
 export async function deleteScheduledReport(schemaName: string, id: string): Promise<void> {
   await ensureTable(schemaName);
   await withTenantSchema(schemaName, async (p) => {
-    await p.$queryRawUnsafe(`DELETE FROM scheduled_reports WHERE id = $1`, id);
+    await p.$queryRawUnsafe(`DELETE FROM scheduled_reports WHERE id = $1::uuid`, id);
   });
 }
