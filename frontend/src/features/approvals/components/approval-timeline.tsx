@@ -1,6 +1,6 @@
 import React from 'react';
-import { format, parseISO } from 'date-fns';
 import { CheckCircle, XCircle, Clock, SkipForward, AlertCircle, User } from 'lucide-react';
+import { useOrgFormat } from '@/lib/org-format';
 import type { ApprovalRequestStep, ApprovalStepStatus } from '../types/approvals.types';
 
 const STEP_ICON: Record<ApprovalStepStatus, React.ReactNode> = {
@@ -27,6 +27,7 @@ interface ApprovalTimelineProps {
 }
 
 export function ApprovalTimeline({ steps }: ApprovalTimelineProps) {
+  const fmt = useOrgFormat();
   const ordered = [...steps].sort((a, b) => a.stepOrder - b.stepOrder);
 
   return (
@@ -83,7 +84,7 @@ export function ApprovalTimeline({ steps }: ApprovalTimelineProps) {
               {step.decidedBy && (
                 <p className="mt-1.5 text-xs text-slate-600">
                   Decided by <span className="font-medium">{step.deciderName ?? step.decidedBy}</span>
-                  {step.decidedAt && ` · ${format(parseISO(step.decidedAt), 'MMM d, yyyy h:mm a')}`}
+                  {step.decidedAt && ` · ${fmt.formatDateTimeMedium(step.decidedAt)}`}
                 </p>
               )}
 
@@ -108,7 +109,7 @@ export function ApprovalTimeline({ steps }: ApprovalTimelineProps) {
 
               {step.deadline && !step.decidedAt && (
                 <p className="mt-1 text-[11px] text-red-600">
-                  Due {format(parseISO(step.deadline), 'MMM d, yyyy h:mm a')}
+                  Due {fmt.formatDateTimeMedium(step.deadline)}
                 </p>
               )}
             </div>

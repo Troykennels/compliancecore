@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { format, parseISO, isPast } from 'date-fns';
+import { parseISO, isPast } from 'date-fns';
 import { ArrowLeft, Edit2, Trash2, Plus, CheckSquare, Calendar, User, Tag, AlertCircle, RotateCcw } from 'lucide-react';
 import { PATHS } from '@/routes/paths';
 import { useTask, useSubtasks, useTaskComments, useUpdateTask, useDeleteTask } from '../hooks/use-tasks';
@@ -8,8 +8,10 @@ import { TaskFormModal } from '../components/task-form-modal';
 import { TaskCommentItem, AddCommentForm } from '../components/task-comment';
 import { STATUS_CONFIG, PRIORITY_CONFIG } from '../types/tasks.types';
 import type { Task } from '../types/tasks.types';
+import { useOrgFormat } from '@/lib/org-format';
 
-export function TaskDetailPage() {
+export function TaskDetailPage() {
+  const fmt = useOrgFormat();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [showEdit, setShowEdit] = useState(false);
@@ -208,7 +210,7 @@ export function TaskDetailPage() {
               {task.dueDate && (
                 <MetaRow icon={<Calendar className="h-3.5 w-3.5" />} label="Due Date">
                   <span className={`text-xs font-medium ${isOverdue ? 'text-red-600' : 'text-slate-800'}`}>
-                    {format(parseISO(task.dueDate), 'MMM d, yyyy h:mm a')}
+                    {fmt.formatDateTimeMedium(task.dueDate)}
                   </span>
                 </MetaRow>
               )}
@@ -218,7 +220,7 @@ export function TaskDetailPage() {
                 </MetaRow>
               )}
               <MetaRow icon={<Calendar className="h-3.5 w-3.5" />} label="Created">
-                <span className="text-xs text-slate-600">{format(parseISO(task.createdAt), 'MMM d, yyyy')}</span>
+                <span className="text-xs text-slate-600">{fmt.formatDateMedium(task.createdAt)}</span>
               </MetaRow>
               {task.entityType && (
                 <MetaRow icon={<Tag className="h-3.5 w-3.5" />} label="Linked To">

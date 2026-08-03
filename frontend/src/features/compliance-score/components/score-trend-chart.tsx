@@ -2,8 +2,8 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import { format, parseISO } from 'date-fns';
 import type { ScoreTrendPoint } from '../types/score.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 interface ScoreTrendChartProps {
   data: ScoreTrendPoint[];
@@ -21,9 +21,10 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
-export function ScoreTrendChart({ data, height = 220 }: ScoreTrendChartProps) {
+export function ScoreTrendChart({ data, height = 220 }: ScoreTrendChartProps) {
+  const fmt = useOrgFormat();
   const chartData = data.map((d) => ({
-    date:  format(parseISO(d.date), 'MMM d'),
+    date:  fmt.formatDateShort(d.date),
     score: d.score !== null ? Math.round(d.score * 100) / 100 : null,
   }));
 

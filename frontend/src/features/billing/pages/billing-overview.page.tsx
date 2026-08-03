@@ -9,6 +9,7 @@ import { useBillingOverview, useApplyCoupon, useRemoveCoupon, useRemovePaymentMe
 import { PATHS } from '@/routes/paths';
 import type { SubscriptionStatus, InvoiceStatus, PaymentMethod } from '../types/billing.types';
 import { billingApi } from '../api/billing.api';
+import { useOrgFormat } from '@/lib/org-format';
 
 // ── Status helpers ─────────────────────────────────────────────────────────────
 function SubStatusBadge({ status }: { status: SubscriptionStatus }) {
@@ -207,7 +208,8 @@ function QueryError({ onRetry, message = 'Something went wrong while loading thi
 }
 
 // ── Main page ──────────────────────────────────────────────────────────────────
-export function BillingOverviewPage(): JSX.Element {
+export function BillingOverviewPage(): JSX.Element {
+  const fmt = useOrgFormat();
   const { data: overview, isLoading, isError, refetch } = useBillingOverview();
   const [downloading, setDownloading] = useState<string | null>(null);
 
@@ -292,20 +294,20 @@ export function BillingOverviewPage(): JSX.Element {
               <div>
                 <p className="text-slate-500">Current Period</p>
                 <p className="font-semibold text-slate-800">
-                  {new Date(sub.currentPeriodStart).toLocaleDateString('en-GB')} –{' '}
-                  {new Date(sub.currentPeriodEnd).toLocaleDateString('en-GB')}
+                  {fmt.formatDate(sub.currentPeriodStart)} –{' '}
+                  {fmt.formatDate(sub.currentPeriodEnd)}
                 </p>
               </div>
               {sub.trialEndsAt && (
                 <div>
                   <p className="text-slate-500">Trial Ends</p>
-                  <p className="font-semibold text-slate-800">{new Date(sub.trialEndsAt).toLocaleDateString('en-GB')}</p>
+                  <p className="font-semibold text-slate-800">{fmt.formatDate(sub.trialEndsAt)}</p>
                 </div>
               )}
               {sub.cancelledAt && (
                 <div>
                   <p className="text-slate-500">Cancelled At</p>
-                  <p className="font-semibold text-red-700">{new Date(sub.cancelledAt).toLocaleDateString('en-GB')}</p>
+                  <p className="font-semibold text-red-700">{fmt.formatDate(sub.cancelledAt)}</p>
                 </div>
               )}
             </div>
@@ -391,7 +393,7 @@ export function BillingOverviewPage(): JSX.Element {
                   <tr key={inv.id}>
                     <td className="py-2.5 font-mono text-xs text-slate-700">{inv.number}</td>
                     <td className="py-2.5 text-xs text-slate-500">
-                      {new Date(inv.billingPeriodStart).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
+                      {fmt.formatMonthYear(inv.billingPeriodStart)}
                     </td>
                     <td className="py-2.5 text-right font-semibold text-slate-900">
                       {inv.currency} {inv.amountDue.toFixed(2)}

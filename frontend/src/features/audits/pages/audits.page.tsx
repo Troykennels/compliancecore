@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { format, parseISO } from 'date-fns';
 import {
   Plus, Search, ClipboardCheck, MoreHorizontal, Pencil, Trash2,
   AlertTriangle, RefreshCw, ChevronLeft, ChevronRight,
@@ -13,10 +12,12 @@ import type {
   AuditStatus,
 } from '../types/audits.types';
 import { AUDIT_TYPE_CONFIG, AUDIT_STATUS_CONFIG } from '../types/audits.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 const PAGE_SIZE = 20;
 
-export function AuditsPage(): JSX.Element {
+export function AuditsPage(): JSX.Element {
+  const fmt = useOrgFormat();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<AuditStatus | ''>('');
   const [typeFilter, setTypeFilter] = useState<AuditType | ''>('');
@@ -170,9 +171,9 @@ export function AuditsPage(): JSX.Element {
                       <td className="px-6 py-4 text-slate-600">
                         {audit.startDate || audit.endDate ? (
                           <div className="text-xs">
-                            {audit.startDate ? format(parseISO(audit.startDate), 'MMM d, yyyy') : '—'}
+                            {audit.startDate ? fmt.formatDateMedium(audit.startDate) : '—'}
                             {' – '}
-                            {audit.endDate ? format(parseISO(audit.endDate), 'MMM d, yyyy') : '—'}
+                            {audit.endDate ? fmt.formatDateMedium(audit.endDate) : '—'}
                           </div>
                         ) : (
                           <span className="text-slate-400">—</span>

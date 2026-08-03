@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { format, parseISO, isPast } from 'date-fns';
+import { parseISO, isPast } from 'date-fns';
 import {
   Plus, Search, FileText, MoreHorizontal, Pencil, Trash2, Send,
   AlertTriangle, RefreshCw, ChevronLeft, ChevronRight, AlertCircle,
@@ -9,10 +9,12 @@ import { usePolicies, useDeletePolicy, usePublishPolicy } from '../hooks/use-pol
 import { PolicyFormModal } from '../components/policy-form-modal';
 import type { Policy, PolicyStatus } from '../types/policies.types';
 import { DOCUMENT_TYPE_CONFIG, POLICY_STATUS_CONFIG } from '../types/policies.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 const PAGE_SIZE = 20;
 
-export function PoliciesPage(): JSX.Element {
+export function PoliciesPage(): JSX.Element {
+  const fmt = useOrgFormat();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<PolicyStatus | ''>('');
   const [page, setPage] = useState(1);
@@ -156,7 +158,7 @@ export function PoliciesPage(): JSX.Element {
                         {policy.reviewDueDate ? (
                           <div className="flex items-center gap-1">
                             {isOverdue && <AlertCircle className="h-3.5 w-3.5" />}
-                            {format(parseISO(policy.reviewDueDate), 'MMM d, yyyy')}
+                            {fmt.formatDateMedium(policy.reviewDueDate)}
                           </div>
                         ) : (
                           <span className="text-slate-400">—</span>

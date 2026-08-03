@@ -14,6 +14,7 @@ import { billingApi } from '../api/billing.api';
 import type {
   CreatePlanDto, CreateCouponDto, PlanSlug,
 } from '../types/billing.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 // ── Tab definitions ────────────────────────────────────────────────────────────
 type Tab = 'plans' | 'pricing' | 'coupons' | 'tenants' | 'invoices';
@@ -286,6 +287,7 @@ function CouponForm({ onDone }: { onDone: () => void }) {
 }
 
 function CouponsTab() {
+  const fmt = useOrgFormat();
   const { data: coupons = [], isLoading, isError, refetch } = useAdminCoupons(true);
   const updateCoupon = useAdminUpdateCoupon();
   const [showCreate, setShowCreate] = useState(false);
@@ -325,7 +327,7 @@ function CouponsTab() {
                   {c.usesCount}{c.maxUses != null ? ` / ${c.maxUses}` : ''}
                 </td>
                 <td className="px-4 py-3 text-xs text-slate-500">
-                  {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString('en-GB') : 'Never'}
+                  {c.expiresAt ? fmt.formatDate(c.expiresAt) : 'Never'}
                 </td>
                 <td className="px-4 py-3 text-center">
                   <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${c.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
@@ -358,6 +360,7 @@ function CouponsTab() {
 
 // ── Tenants tab ────────────────────────────────────────────────────────────────
 function TenantsTab() {
+  const fmt = useOrgFormat();
   const { data: tenants = [], isLoading, isError, refetch } = useAdminTenantBilling();
   const [search, setSearch] = useState('');
 
@@ -413,7 +416,7 @@ function TenantsTab() {
                   ) : '—'}
                 </td>
                 <td className="px-4 py-3 text-xs text-slate-500">
-                  {t.currentPeriodEnd ? new Date(t.currentPeriodEnd).toLocaleDateString('en-GB') : '—'}
+                  {t.currentPeriodEnd ? fmt.formatDate(t.currentPeriodEnd) : '—'}
                 </td>
                 <td className="px-4 py-3 text-right text-xs font-semibold text-slate-800">
                   {t.nextInvoiceAmount != null ? `${t.currency} ${t.nextInvoiceAmount.toFixed(2)}` : '—'}
@@ -438,6 +441,7 @@ function TenantsTab() {
 
 // ── Invoices tab ───────────────────────────────────────────────────────────────
 function AdminInvoicesTab() {
+  const fmt = useOrgFormat();
   const { data: invoices = [], isLoading, isError, refetch } = useAdminInvoices({ limit: 100 });
   const updateInvoice = useAdminUpdateInvoice();
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -475,7 +479,7 @@ function AdminInvoicesTab() {
               <td className="px-4 py-3 font-mono text-xs font-bold text-slate-800">{inv.number}</td>
               <td className="px-4 py-3 text-xs text-slate-600">{inv.tenantName ?? inv.tenantId}</td>
               <td className="px-4 py-3 text-xs text-slate-500">
-                {new Date(inv.billingPeriodStart).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
+                {fmt.formatMonthYear(inv.billingPeriodStart)}
               </td>
               <td className="px-4 py-3 text-right font-semibold text-slate-900">
                 {inv.currency} {inv.amountDue.toFixed(2)}

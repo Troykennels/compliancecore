@@ -4,12 +4,13 @@ import {
   Search, Upload, FileText, Lock, ChevronLeft, ChevronRight,
   File, Image, FileArchive, AlertCircle, Loader2,
 } from 'lucide-react';
-import { format, isValid } from 'date-fns';
+import { isValid } from 'date-fns';
 import { PATHS } from '@/routes/paths';
 import { useEvidence } from '../hooks/use-evidence';
 import { EvidenceFiltersPanel } from '../components/evidence-filters';
 import { EvidenceUploadModal } from '../components/evidence-upload-modal';
 import type { Evidence, EvidenceFilters } from '../types/evidence.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 function fileIcon(mimeType: string | null) {
   if (!mimeType) return File;
@@ -36,6 +37,7 @@ const OCR_STATUS_BADGE: Record<string, string> = {
 };
 
 function EvidenceCard({ evidence }: { evidence: Evidence }) {
+  const fmt = useOrgFormat();
   const navigate = useNavigate();
   const Icon = fileIcon(evidence.currentMimeType);
 
@@ -102,7 +104,7 @@ function EvidenceCard({ evidence }: { evidence: Evidence }) {
             </span>
           )}
           <span>·</span>
-          <span>{isValid(new Date(evidence.createdAt)) ? format(new Date(evidence.createdAt), 'dd MMM yyyy') : '—'}</span>
+          <span>{isValid(new Date(evidence.createdAt)) ? fmt.formatDateMedium(evidence.createdAt) : '—'}</span>
         </div>
       </div>
     </div>

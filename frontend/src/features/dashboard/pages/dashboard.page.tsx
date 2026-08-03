@@ -1,4 +1,3 @@
-import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import {
   ShieldCheck, AlertTriangle, Calendar, Bell,
@@ -14,6 +13,7 @@ import { FrameworkCoverage } from '../components/framework-coverage';
 import { useCurrentScore } from '../../compliance-score/hooks/use-score';
 import { EVENT_TYPE_COLORS } from '../../calendar/types/calendar.types';
 import type { CalendarEventType } from '../../calendar/types/calendar.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 const STATUS_BADGE: Record<string, string> = {
   upcoming:    'bg-blue-100 text-blue-700',
@@ -23,6 +23,7 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 export function DashboardPage() {
+  const fmt = useOrgFormat();
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useDashboard();
   const { data: scoreData } = useCurrentScore();
@@ -63,7 +64,7 @@ export function DashboardPage() {
       <div className="shrink-0">
         <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
         <p className="text-sm text-slate-500 mt-0.5">
-          Compliance overview — {format(new Date(), 'MMMM d, yyyy')}
+          Compliance overview — {fmt.formatDateMedium(new Date())}
         </p>
       </div>
 
@@ -72,7 +73,7 @@ export function DashboardPage() {
         <MetricCard
           title="Compliance Score"
           value={complianceScore.overall !== null ? `${Math.round(complianceScore.overall)}%` : 'N/A'}
-          subtitle={complianceScore.snapshotDate ? `as of ${format(parseISO(complianceScore.snapshotDate), 'MMM d')}` : 'Real-time'}
+          subtitle={complianceScore.snapshotDate ? `as of ${fmt.formatDateShort(complianceScore.snapshotDate)}` : 'Real-time'}
           icon={<ShieldCheck className="h-5 w-5" />}
           colorClass="bg-blue-100 text-blue-600"
           onClick={() => navigate('/compliance-score')}
@@ -158,7 +159,7 @@ export function DashboardPage() {
                   <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: ev.color || EVENT_TYPE_COLORS[ev.eventType as CalendarEventType] }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-slate-900 truncate">{ev.title}</p>
-                    <p className="text-[10px] text-slate-500">{format(parseISO(ev.startDate), 'MMM d')}</p>
+                    <p className="text-[10px] text-slate-500">{fmt.formatDateShort(ev.startDate)}</p>
                   </div>
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_BADGE[ev.status] ?? 'bg-slate-100 text-slate-500'}`}>
                     {ev.status.replace('_', ' ')}

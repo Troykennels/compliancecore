@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { format, parseISO } from 'date-fns';
 import { Plus, GitBranch, Clock, CheckCircle, XCircle, AlertCircle, Trash2, Eye, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PATHS } from '@/routes/paths';
@@ -13,6 +12,7 @@ import {
 import { ApprovalRequestModal } from '../components/approval-request-modal';
 import { WorkflowBuilder } from '../components/workflow-builder';
 import type { ApprovalStatus } from '../types/approvals.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 const STATUS_ICON: Record<ApprovalStatus, React.ReactNode> = {
   draft:              <Clock className="h-4 w-4 text-slate-400" />,
@@ -44,6 +44,7 @@ const PRIORITY_BADGE: Record<string, string> = {
 type Tab = 'my-pending' | 'all' | 'workflows';
 
 export function ApprovalsPage() {
+  const fmt = useOrgFormat();
   const [tab, setTab] = useState<Tab>('my-pending');
   const [statusFilter, setStatusFilter] = useState('');
   const [showRequestModal, setShowRequestModal] = useState(false);
@@ -215,7 +216,7 @@ export function ApprovalsPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-slate-500 text-xs">
-                        {wf.createdAt ? format(parseISO(wf.createdAt), 'MMM d, yyyy') : '—'}
+                        {wf.createdAt ? fmt.formatDateMedium(wf.createdAt) : '—'}
                       </td>
                       <td className="px-4 py-3">
                         <button
@@ -277,6 +278,7 @@ function ErrorBlock({ label, onRetry }: { label: string; onRetry: () => void }) 
 }
 
 function RequestCard({ req, onCancel }: { req: any; onCancel: (id: string) => void }) {
+  const fmt = useOrgFormat();
   const canCancel = req.status === 'pending' || req.status === 'draft';
 
   return (
@@ -289,7 +291,7 @@ function RequestCard({ req, onCancel }: { req: any; onCancel: (id: string) => vo
               <p className="text-sm font-semibold text-slate-900 truncate">{req.title}</p>
               <p className="text-xs text-slate-500 mt-0.5">
                 {req.entityType} {req.requesterName && `· Requested by ${req.requesterName}`}
-                {req.createdAt && ` · ${format(parseISO(req.createdAt), 'MMM d, yyyy')}`}
+                {req.createdAt && ` · ${fmt.formatDateMedium(req.createdAt)}`}
               </p>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">

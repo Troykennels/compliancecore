@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { settingsApi } from '../api/settings.api';
 import { SettingsLayout } from '../components/settings-layout';
 import { WEBHOOK_EVENTS, type WebhookCreated } from '../types/settings.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 const schema = z.object({
   name:   z.string().min(1, 'Name is required').max(100),
@@ -18,7 +19,8 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export function SettingsWebhooksPage(): JSX.Element {
+export function SettingsWebhooksPage(): JSX.Element {
+  const fmt = useOrgFormat();
   const [createOpen, setCreateOpen] = useState(false);
   const [createdWebhook, setCreatedWebhook] = useState<WebhookCreated | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -133,7 +135,7 @@ export function SettingsWebhooksPage(): JSX.Element {
                     <p className="mt-1 text-xs text-slate-400">
                       {wh.events.length} event{wh.events.length !== 1 ? 's' : ''} ·{' '}
                       {wh.lastTriggeredAt
-                        ? `Last triggered ${new Date(wh.lastTriggeredAt).toLocaleDateString()}`
+                        ? `Last triggered ${fmt.formatDate(wh.lastTriggeredAt)}`
                         : 'Never triggered'}
                     </p>
                   </div>

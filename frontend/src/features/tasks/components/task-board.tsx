@@ -1,7 +1,8 @@
-import { format, parseISO, isPast } from 'date-fns';
+import { parseISO, isPast } from 'date-fns';
 import { Calendar, User, AlertCircle, Eye } from 'lucide-react';
 import type { Task, TaskStatus } from '../types/tasks.types';
 import { STATUS_CONFIG, PRIORITY_CONFIG } from '../types/tasks.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 const BOARD_COLUMNS: { status: TaskStatus; label: string; headerColor: string }[] = [
   { status: 'todo',        label: 'To Do',       headerColor: 'border-t-slate-400' },
@@ -93,6 +94,7 @@ function BoardColumn({
 }
 
 function BoardCard({ task, onClick, onView }: { task: Task; onClick: () => void; onView?: () => void }) {
+  const fmt = useOrgFormat();
   const priCfg = PRIORITY_CONFIG[task.priority];
   const isOverdue = task.dueDate && isPast(parseISO(task.dueDate)) && task.status !== 'completed' && task.status !== 'cancelled';
   const tags = task.tags ?? [];
@@ -166,7 +168,7 @@ function BoardCard({ task, onClick, onView }: { task: Task; onClick: () => void;
         {task.dueDate && (
           <div className={`flex items-center gap-1 text-[11px] ml-auto ${isOverdue ? 'text-red-600 font-semibold' : 'text-slate-400'}`}>
             <Calendar className="h-3 w-3" />
-            {format(parseISO(task.dueDate), 'MMM d')}
+            {fmt.formatDateShort(task.dueDate)}
           </div>
         )}
       </div>
