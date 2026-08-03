@@ -15,7 +15,10 @@ services:
     healthCheckPath: /health
     autoDeploy: true
     # The Dockerfile only starts the server; migrate first (as railway.json did).
-    dockerCommand: sh -c "node scripts/migrate.mjs && node dist/server.js"
+    # migrate-tenants applies database/tenant-template/* to tenants that ALREADY
+    # exist — provisioning only covers new signups, so without it a newly added
+    # per-tenant table is missing for every current customer.
+    dockerCommand: sh -c "node scripts/migrate.mjs && node scripts/migrate-tenants.mjs && node dist/server.js"
     envVars:
       - key: NODE_ENV
         value: production

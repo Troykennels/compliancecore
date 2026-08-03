@@ -1,4 +1,5 @@
 {
+  "// migrateTenants": "migrate.mjs only touches the global schema. Per-tenant tables are applied at provisioning for NEW tenants, so an added tenant-template file would be missing for every EXISTING customer until migrate-tenants.mjs runs. It is idempotent, so running it on every boot is safe.",
   "// startCommand": "Must be wrapped in `sh -c`. backend/Dockerfile declares ENTRYPOINT [dumb-init, --], so Railway appends the start command as ARGV to that entrypoint rather than running it through a shell. Unwrapped, the `&&` and everything after it are passed as arguments to migrate.mjs, which ignores them and exits 0 — the container then dies before the server ever starts, and the healthcheck fails. render.yaml uses the same sh -c form.",
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
@@ -6,7 +7,7 @@
     "dockerfilePath": "backend/Dockerfile"
   },
   "deploy": {
-    "startCommand": "sh -c \"node scripts/migrate.mjs && node dist/server.js\"",
+    "startCommand": "sh -c \"node scripts/migrate.mjs && node scripts/migrate-tenants.mjs && node dist/server.js\"",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",
