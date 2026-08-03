@@ -1,7 +1,7 @@
 import React from 'react';
 import { Activity, Upload, Eye, Download, Share2, FileSearch, Tag, Link, Archive, UserX, RefreshCw } from 'lucide-react';
-import { format } from 'date-fns';
 import { useEvidenceAuditTrail } from '../hooks/use-evidence';
+import { useOrgFormat } from '@/lib/org-format';
 
 const EVENT_CONFIG: Record<string, { icon: React.ElementType; label: string; color: string }> = {
   uploaded:        { icon: Upload,       label: 'Uploaded',             color: 'text-blue-600 bg-blue-100' },
@@ -26,7 +26,8 @@ interface EvidenceAuditTrailProps {
   evidenceId: string;
 }
 
-export function EvidenceAuditTrail({ evidenceId }: EvidenceAuditTrailProps) {
+export function EvidenceAuditTrail({ evidenceId }: EvidenceAuditTrailProps) {
+  const fmt = useOrgFormat();
   const { data: events = [], isLoading } = useEvidenceAuditTrail(evidenceId);
 
   if (isLoading) {
@@ -76,7 +77,7 @@ export function EvidenceAuditTrail({ evidenceId }: EvidenceAuditTrailProps) {
                   )}
                 </div>
                 <time className="shrink-0 text-xs text-slate-400">
-                  {format(new Date(event.createdAt), 'dd MMM yyyy, HH:mm')}
+                  {fmt.formatDateTimeMedium(event.createdAt)}
                 </time>
               </div>
             </li>

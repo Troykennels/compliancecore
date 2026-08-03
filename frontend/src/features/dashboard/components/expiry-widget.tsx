@@ -1,7 +1,7 @@
-import { format, parseISO } from 'date-fns';
 import { AlertTriangle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { ExpiryUrgentItem } from '../api/dashboard.api';
+import { useOrgFormat } from '@/lib/org-format';
 
 interface ExpiryWidgetProps {
   items: ExpiryUrgentItem[];
@@ -22,7 +22,8 @@ function daysLabel(daysUntil: number): string {
   return `${daysUntil}d`;
 }
 
-export function ExpiryWidget({ items, expiringSoon, expired }: ExpiryWidgetProps) {
+export function ExpiryWidget({ items, expiringSoon, expired }: ExpiryWidgetProps) {
+  const fmt = useOrgFormat();
   const navigate = useNavigate();
 
   if (items.length === 0) {
@@ -57,7 +58,7 @@ export function ExpiryWidget({ items, expiringSoon, expired }: ExpiryWidgetProps
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-slate-900 truncate">{item.name}</p>
             <p className="text-[11px] text-slate-500">
-              {format(parseISO(item.expiryDate), 'MMM d, yyyy')}
+              {fmt.formatDateMedium(item.expiryDate)}
             </p>
           </div>
           <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${urgencyClass(item.daysUntil)}`}>

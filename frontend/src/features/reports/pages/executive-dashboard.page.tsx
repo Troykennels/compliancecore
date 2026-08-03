@@ -15,6 +15,7 @@ import type {
   ReportFilter, ControlsByCriticality, FrameworkCoverage,
   ScheduledReport, CreateScheduledReportDto,
 } from '../types/reports.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 // ── Palette ────────────────────────────────────────────────────────────────────
 
@@ -281,6 +282,7 @@ function EvidenceBar({ breakdown }: { breakdown: { active: number; archived: num
 const DOW_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function ScheduleModal({ onClose }: { onClose: () => void }) {
+  const fmt = useOrgFormat();
   const { data: schedules = [], isLoading } = useScheduledReports();
   const create = useCreateScheduledReport();
   const update = useUpdateScheduledReport();
@@ -364,8 +366,8 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
                     </div>
                     {r.nextRunAt && (
                       <p className="text-[10px] text-slate-400 mt-1">
-                        Next: {new Date(r.nextRunAt).toLocaleString()}
-                        {r.lastRunAt && ` · Last: ${new Date(r.lastRunAt).toLocaleString()}`}
+                        Next: {fmt.formatDateTime(r.nextRunAt)}
+                        {r.lastRunAt && ` · Last: ${fmt.formatDateTime(r.lastRunAt)}`}
                       </p>
                     )}
                   </div>
@@ -506,6 +508,7 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 export function ExecutiveDashboardPage() {
+  const fmt = useOrgFormat();
   const [filter, setFilter] = useState<ReportFilter>({ days: 90 });
   const [showSchedule, setShowSchedule] = useState(false);
   const { data, isLoading, isError, refetch, isFetching } = useExecutiveDashboard(filter);
@@ -531,7 +534,7 @@ export function ExecutiveDashboardPage() {
             </div>
             <p className="text-sm text-slate-500 mt-0.5">
               {data
-                ? `Last updated ${new Date(data.generatedAt).toLocaleString()}`
+                ? `Last updated ${fmt.formatDateTime(data.generatedAt)}`
                 : isError
                 ? 'Failed to load compliance overview'
                 : 'Loading compliance overview…'}

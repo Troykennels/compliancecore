@@ -10,6 +10,7 @@ import { ROLE_LABELS, type MemberRole } from '../types/settings.types';
 import { InviteMemberModal } from '../components/invite-member-modal';
 import { SettingsLayout } from '../components/settings-layout';
 import { useCurrentUser, useUserRole } from '@/stores/auth.store';
+import { useOrgFormat } from '@/lib/org-format';
 
 const ROLE_BADGE: Record<MemberRole, string> = {
   owner:              'bg-indigo-100 text-indigo-700',
@@ -24,7 +25,8 @@ const ASSIGNABLE_ROLES: MemberRole[] = [
   'admin', 'compliance_manager', 'control_owner', 'auditor', 'viewer',
 ];
 
-export function SettingsTeamPage(): JSX.Element {
+export function SettingsTeamPage(): JSX.Element {
+  const fmt = useOrgFormat();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
@@ -173,7 +175,7 @@ export function SettingsTeamPage(): JSX.Element {
                     </td>
                     <td className="px-6 py-4 text-xs text-slate-500">
                       {member.joinedAt
-                        ? new Date(member.joinedAt).toLocaleDateString()
+                        ? fmt.formatDate(member.joinedAt)
                         : '—'}
                     </td>
                     {canManage && (

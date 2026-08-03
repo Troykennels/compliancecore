@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { settingsApi } from '../api/settings.api';
 import { SettingsLayout } from '../components/settings-layout';
 import type { ApiKeyCreated } from '../types/settings.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 const API_PERMISSIONS = [
   { value: 'controls:read',   label: 'Controls — Read' },
@@ -34,7 +35,8 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export function SettingsApiKeysPage(): JSX.Element {
+export function SettingsApiKeysPage(): JSX.Element {
+  const fmt = useOrgFormat();
   const [createOpen, setCreateOpen] = useState(false);
   const [createdKey, setCreatedKey] = useState<ApiKeyCreated | null>(null);
   const [showKey, setShowKey] = useState(false);
@@ -140,10 +142,10 @@ export function SettingsApiKeysPage(): JSX.Element {
                     <td className="px-6 py-4 font-medium text-slate-900">{key.name}</td>
                     <td className="px-6 py-4 font-mono text-xs text-slate-500">{key.keyPrefix}…</td>
                     <td className="px-6 py-4 text-slate-500">
-                      {key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : 'Never'}
+                      {key.lastUsedAt ? fmt.formatDate(key.lastUsedAt) : 'Never'}
                     </td>
                     <td className="px-6 py-4 text-slate-500">
-                      {key.expiresAt ? new Date(key.expiresAt).toLocaleDateString() : 'Never'}
+                      {key.expiresAt ? fmt.formatDate(key.expiresAt) : 'Never'}
                     </td>
                     <td className="px-4 py-4 text-right">
                       <button

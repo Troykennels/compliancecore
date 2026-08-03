@@ -86,6 +86,11 @@ BEGIN
 END;
 $$;
 
+-- Dropped first so re-applying this template to an EXISTING tenant succeeds.
+-- Every other object here uses IF NOT EXISTS; plain CREATE TRIGGER was the one
+-- statement that made the template non-idempotent, which broke back-filling a
+-- new template onto tenants that already exist.
+DROP TRIGGER IF EXISTS tg_evidence_search_vector ON {{SCHEMA}}.evidence;
 CREATE TRIGGER tg_evidence_search_vector
   BEFORE INSERT OR UPDATE ON {{SCHEMA}}.evidence
   FOR EACH ROW EXECUTE FUNCTION {{SCHEMA}}.fn_update_evidence_search_vector();
@@ -120,12 +125,23 @@ CREATE TABLE IF NOT EXISTS {{SCHEMA}}.evidence_versions (
   UNIQUE (evidence_id, version_number)
 );
 
--- After creating this table, add the FK from evidence to evidence_versions
-ALTER TABLE {{SCHEMA}}.evidence
-  ADD CONSTRAINT fk_evidence_current_version
-  FOREIGN KEY (current_version_id)
-  REFERENCES {{SCHEMA}}.evidence_versions(id) ON DELETE SET NULL
-  DEFERRABLE INITIALLY DEFERRED;
+-- After creating this table, add the FK from evidence to evidence_versions.
+-- Postgres has no ADD CONSTRAINT IF NOT EXISTS, so guard on the catalogue —
+-- otherwise re-applying this template to an existing tenant aborts here.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'fk_evidence_current_version'
+      AND conrelid = '{{SCHEMA}}.evidence'::regclass
+  ) THEN
+    ALTER TABLE {{SCHEMA}}.evidence
+      ADD CONSTRAINT fk_evidence_current_version
+      FOREIGN KEY (current_version_id)
+      REFERENCES {{SCHEMA}}.evidence_versions(id) ON DELETE SET NULL
+      DEFERRABLE INITIALLY DEFERRED;
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_evidence_versions_evidence
   ON {{SCHEMA}}.evidence_versions(evidence_id);

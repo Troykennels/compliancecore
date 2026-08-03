@@ -31,4 +31,10 @@ router.post(
   organizationController.completeOnboarding,
 );
 
+// ── Compliance scoping questionnaire ────────────────────────────────────────
+// GET is readable by anyone who can read the org, so the dashboard can surface
+// "you have not scoped your programme yet". Saving is an org:write action.
+router.get('/scoping', organizationController.getScoping);
+router.post('/scoping', requirePermission('org:write'), organizationController.saveScoping);
+
 export default router;

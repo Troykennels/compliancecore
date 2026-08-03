@@ -6,7 +6,7 @@ SET search_path = {{SCHEMA}};
 -- ============================================================
 -- APPROVAL WORKFLOWS (TEMPLATES)
 -- ============================================================
-CREATE TABLE approval_workflows (
+CREATE TABLE IF NOT EXISTS approval_workflows (
     id            UUID         DEFAULT gen_random_uuid() PRIMARY KEY,
     name          VARCHAR(500) NOT NULL,
     description   TEXT,
@@ -18,11 +18,11 @@ CREATE TABLE approval_workflows (
     deleted_at    TIMESTAMPTZ
 );
 
-CREATE INDEX idx_approval_workflows_entity_type ON approval_workflows(entity_type) WHERE deleted_at IS NULL;
-CREATE INDEX idx_approval_workflows_active      ON approval_workflows(is_active)   WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_approval_workflows_entity_type ON approval_workflows(entity_type) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_approval_workflows_active      ON approval_workflows(is_active)   WHERE deleted_at IS NULL;
 
 -- Steps within workflow templates
-CREATE TABLE approval_workflow_steps (
+CREATE TABLE IF NOT EXISTS approval_workflow_steps (
     id                  UUID         DEFAULT gen_random_uuid() PRIMARY KEY,
     workflow_id         UUID         NOT NULL REFERENCES approval_workflows(id) ON DELETE CASCADE,
     step_order          INTEGER      NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE approval_workflow_steps (
 -- ============================================================
 -- APPROVAL REQUESTS (INSTANCES)
 -- ============================================================
-CREATE TABLE approval_requests (
+CREATE TABLE IF NOT EXISTS approval_requests (
     id               UUID         DEFAULT gen_random_uuid() PRIMARY KEY,
     workflow_id      UUID         REFERENCES approval_workflows(id),
     title            VARCHAR(500) NOT NULL,
@@ -69,14 +69,14 @@ CREATE TABLE approval_requests (
     deleted_at       TIMESTAMPTZ
 );
 
-CREATE INDEX idx_approval_requests_status      ON approval_requests(status)       WHERE deleted_at IS NULL;
-CREATE INDEX idx_approval_requests_requested_by ON approval_requests(requested_by) WHERE deleted_at IS NULL;
-CREATE INDEX idx_approval_requests_entity       ON approval_requests(entity_type, entity_id) WHERE deleted_at IS NULL;
-CREATE INDEX idx_approval_requests_created_at  ON approval_requests(created_at DESC) WHERE deleted_at IS NULL;
-CREATE INDEX idx_approval_requests_workflow    ON approval_requests(workflow_id);
+CREATE INDEX IF NOT EXISTS idx_approval_requests_status      ON approval_requests(status)       WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_approval_requests_requested_by ON approval_requests(requested_by) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_approval_requests_entity       ON approval_requests(entity_type, entity_id) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_approval_requests_created_at  ON approval_requests(created_at DESC) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_approval_requests_workflow    ON approval_requests(workflow_id);
 
 -- Step instances for each approval request
-CREATE TABLE approval_request_steps (
+CREATE TABLE IF NOT EXISTS approval_request_steps (
     id                   UUID         DEFAULT gen_random_uuid() PRIMARY KEY,
     request_id           UUID         NOT NULL REFERENCES approval_requests(id) ON DELETE CASCADE,
     workflow_step_id     UUID         REFERENCES approval_workflow_steps(id),
@@ -103,16 +103,16 @@ CREATE TABLE approval_request_steps (
     created_at           TIMESTAMPTZ  DEFAULT NOW()
 );
 
-CREATE INDEX idx_request_steps_request_id  ON approval_request_steps(request_id);
-CREATE INDEX idx_request_steps_assigned_to ON approval_request_steps(assigned_to) WHERE status = 'active';
-CREATE INDEX idx_request_steps_status      ON approval_request_steps(status);
-CREATE INDEX idx_request_steps_workflow_step ON approval_request_steps(workflow_step_id);
-CREATE INDEX idx_request_steps_signature     ON approval_request_steps(digital_signature_id);
+CREATE INDEX IF NOT EXISTS idx_request_steps_request_id  ON approval_request_steps(request_id);
+CREATE INDEX IF NOT EXISTS idx_request_steps_assigned_to ON approval_request_steps(assigned_to) WHERE status = 'active';
+CREATE INDEX IF NOT EXISTS idx_request_steps_status      ON approval_request_steps(status);
+CREATE INDEX IF NOT EXISTS idx_request_steps_workflow_step ON approval_request_steps(workflow_step_id);
+CREATE INDEX IF NOT EXISTS idx_request_steps_signature     ON approval_request_steps(digital_signature_id);
 
 -- ============================================================
 -- DIGITAL SIGNATURES
 -- ============================================================
-CREATE TABLE digital_signatures (
+CREATE TABLE IF NOT EXISTS digital_signatures (
     id                UUID         DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id           UUID         NOT NULL REFERENCES global.users(id),
     document_type     VARCHAR(100) NOT NULL, -- 'approval_step' | 'policy' | 'contract' | 'report' | 'evidence'
@@ -132,24 +132,36 @@ CREATE TABLE digital_signatures (
     created_at        TIMESTAMPTZ  DEFAULT NOW()
 );
 
-CREATE INDEX idx_signatures_document    ON digital_signatures(document_type, document_id);
-CREATE INDEX idx_signatures_user_id     ON digital_signatures(user_id);
-CREATE INDEX idx_signatures_signed_at   ON digital_signatures(signed_at DESC);
-CREATE INDEX idx_signatures_valid       ON digital_signatures(is_valid) WHERE is_valid = TRUE;
+CREATE INDEX IF NOT EXISTS idx_signatures_document    ON digital_signatures(document_type, document_id);
+CREATE INDEX IF NOT EXISTS idx_signatures_user_id     ON digital_signatures(user_id);
+CREATE INDEX IF NOT EXISTS idx_signatures_signed_at   ON digital_signatures(signed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signatures_valid       ON digital_signatures(is_valid) WHERE is_valid = TRUE;
 
 -- At most one *valid* signature per (document, signer). Backstops the
 -- application-level duplicate guard against races/double-submits.
-CREATE UNIQUE INDEX uq_signatures_valid_per_signer
+CREATE UNIQUE INDEX IF NOT EXISTS uq_signatures_valid_per_signer
   ON digital_signatures(document_type, document_id, user_id) WHERE is_valid = TRUE;
 
--- Back-reference: add FK from approval_request_steps to digital_signatures
-ALTER TABLE approval_request_steps
-    ADD CONSTRAINT fk_step_signature FOREIGN KEY (digital_signature_id) REFERENCES digital_signatures(id);
+-- Back-reference: add FK from approval_request_steps to digital_signatures.
+-- Guarded on the catalogue because ADD CONSTRAINT has no IF NOT EXISTS form and
+-- this template must stay re-appliable to tenants that already exist.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'fk_step_signature'
+      AND conrelid = '{{SCHEMA}}.approval_request_steps'::regclass
+  ) THEN
+    ALTER TABLE {{SCHEMA}}.approval_request_steps
+      ADD CONSTRAINT fk_step_signature
+      FOREIGN KEY (digital_signature_id) REFERENCES {{SCHEMA}}.digital_signatures(id);
+  END IF;
+END $$;
 
 -- ============================================================
 -- TASKS
 -- ============================================================
-CREATE TABLE tasks (
+CREATE TABLE IF NOT EXISTS tasks (
     id              UUID         DEFAULT gen_random_uuid() PRIMARY KEY,
     title           VARCHAR(1000) NOT NULL,
     description     TEXT,
@@ -176,16 +188,16 @@ CREATE TABLE tasks (
     deleted_at      TIMESTAMPTZ
 );
 
-CREATE INDEX idx_tasks_assigned_to  ON tasks(assigned_to)  WHERE deleted_at IS NULL;
-CREATE INDEX idx_tasks_status       ON tasks(status)        WHERE deleted_at IS NULL;
-CREATE INDEX idx_tasks_priority     ON tasks(priority)      WHERE deleted_at IS NULL;
-CREATE INDEX idx_tasks_due_date     ON tasks(due_date)      WHERE deleted_at IS NULL;
-CREATE INDEX idx_tasks_entity       ON tasks(entity_type, entity_id) WHERE deleted_at IS NULL;
-CREATE INDEX idx_tasks_parent       ON tasks(parent_task_id)         WHERE deleted_at IS NULL;
-CREATE INDEX idx_tasks_created_at   ON tasks(created_at DESC)        WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_tasks_assigned_to  ON tasks(assigned_to)  WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_tasks_status       ON tasks(status)        WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_tasks_priority     ON tasks(priority)      WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_tasks_due_date     ON tasks(due_date)      WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_tasks_entity       ON tasks(entity_type, entity_id) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_tasks_parent       ON tasks(parent_task_id)         WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_tasks_created_at   ON tasks(created_at DESC)        WHERE deleted_at IS NULL;
 
 -- Task comments
-CREATE TABLE task_comments (
+CREATE TABLE IF NOT EXISTS task_comments (
     id          UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
     task_id     UUID        NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
     user_id     UUID        NOT NULL REFERENCES global.users(id),
@@ -196,10 +208,10 @@ CREATE TABLE task_comments (
     deleted_at  TIMESTAMPTZ
 );
 
-CREATE INDEX idx_task_comments_task_id ON task_comments(task_id, created_at) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_task_comments_task_id ON task_comments(task_id, created_at) WHERE deleted_at IS NULL;
 
 -- Task attachments (link to evidence)
-CREATE TABLE task_attachments (
+CREATE TABLE IF NOT EXISTS task_attachments (
     id          UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
     task_id     UUID        NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
     evidence_id UUID        NOT NULL,
@@ -207,12 +219,12 @@ CREATE TABLE task_attachments (
     created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_task_attachments_task ON task_attachments(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_attachments_task ON task_attachments(task_id);
 
 -- ============================================================
 -- ESCALATION RULES + EVENTS
 -- ============================================================
-CREATE TABLE escalation_rules (
+CREATE TABLE IF NOT EXISTS escalation_rules (
     id               UUID         DEFAULT gen_random_uuid() PRIMARY KEY,
     name             VARCHAR(500) NOT NULL,
     description      TEXT,
@@ -232,10 +244,10 @@ CREATE TABLE escalation_rules (
     deleted_at       TIMESTAMPTZ
 );
 
-CREATE INDEX idx_escalation_rules_trigger  ON escalation_rules(trigger_type) WHERE deleted_at IS NULL;
-CREATE INDEX idx_escalation_rules_active   ON escalation_rules(is_active)    WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_escalation_rules_trigger  ON escalation_rules(trigger_type) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_escalation_rules_active   ON escalation_rules(is_active)    WHERE deleted_at IS NULL;
 
-CREATE TABLE escalation_events (
+CREATE TABLE IF NOT EXISTS escalation_events (
     id                  UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
     rule_id             UUID        NOT NULL REFERENCES escalation_rules(id),
     entity_type         VARCHAR(100) NOT NULL,
@@ -251,17 +263,17 @@ CREATE TABLE escalation_events (
     UNIQUE(rule_id, entity_type, entity_id, status)
 );
 
-CREATE INDEX idx_escalation_events_status          ON escalation_events(status);
-CREATE INDEX idx_escalation_events_next_at         ON escalation_events(next_escalation_at) WHERE status = 'active';
-CREATE INDEX idx_escalation_events_entity          ON escalation_events(entity_type, entity_id);
-CREATE INDEX idx_escalation_events_rule            ON escalation_events(rule_id);
+CREATE INDEX IF NOT EXISTS idx_escalation_events_status          ON escalation_events(status);
+CREATE INDEX IF NOT EXISTS idx_escalation_events_next_at         ON escalation_events(next_escalation_at) WHERE status = 'active';
+CREATE INDEX IF NOT EXISTS idx_escalation_events_entity          ON escalation_events(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_escalation_events_rule            ON escalation_events(rule_id);
 
 -- ============================================================
 -- NOTIFICATION EXTENSIONS
 -- ============================================================
 
 -- Per-user per-type notification channel preferences
-CREATE TABLE notification_preferences (
+CREATE TABLE IF NOT EXISTS notification_preferences (
     id                UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id           UUID        NOT NULL REFERENCES global.users(id),
     notification_type VARCHAR(100) NOT NULL,
@@ -274,7 +286,7 @@ CREATE TABLE notification_preferences (
 );
 
 -- Delivery log for email/slack/webhook notifications
-CREATE TABLE notification_delivery_log (
+CREATE TABLE IF NOT EXISTS notification_delivery_log (
     id              UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
     notification_id UUID        REFERENCES notifications(id),
     channel         VARCHAR(50) NOT NULL,  -- 'email' | 'slack' | 'webhook'
@@ -287,6 +299,6 @@ CREATE TABLE notification_delivery_log (
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_delivery_log_notification ON notification_delivery_log(notification_id);
-CREATE INDEX idx_delivery_log_status       ON notification_delivery_log(status);
-CREATE INDEX idx_delivery_log_channel      ON notification_delivery_log(channel);
+CREATE INDEX IF NOT EXISTS idx_delivery_log_notification ON notification_delivery_log(notification_id);
+CREATE INDEX IF NOT EXISTS idx_delivery_log_status       ON notification_delivery_log(status);
+CREATE INDEX IF NOT EXISTS idx_delivery_log_channel      ON notification_delivery_log(channel);

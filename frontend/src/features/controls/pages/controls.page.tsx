@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { format, parseISO, isPast } from 'date-fns';
+import { parseISO, isPast } from 'date-fns';
 import {
   Plus, Search, ShieldCheck, MoreHorizontal, Pencil, Trash2, CheckCircle2,
   AlertTriangle, RefreshCw, ChevronLeft, ChevronRight, AlertCircle,
@@ -13,10 +13,12 @@ import type {
   ControlImplementationStatus,
 } from '../types/controls.types';
 import { CRITICALITY_CONFIG, IMPLEMENTATION_STATUS_CONFIG } from '../types/controls.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 const PAGE_SIZE = 20;
 
-export function ControlsPage(): JSX.Element {
+export function ControlsPage(): JSX.Element {
+  const fmt = useOrgFormat();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ControlImplementationStatus | ''>('');
   const [criticalityFilter, setCriticalityFilter] = useState<ControlCriticality | ''>('');
@@ -179,7 +181,7 @@ export function ControlsPage(): JSX.Element {
                         {control.dueDate ? (
                           <div className="flex items-center gap-1">
                             {isOverdue && <AlertCircle className="h-3.5 w-3.5" />}
-                            {format(parseISO(control.dueDate), 'MMM d, yyyy')}
+                            {fmt.formatDateMedium(control.dueDate)}
                           </div>
                         ) : (
                           <span className="text-slate-400">—</span>

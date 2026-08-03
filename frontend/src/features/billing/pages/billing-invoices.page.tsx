@@ -6,6 +6,7 @@ import { useInvoices } from '../hooks/use-billing';
 import { billingApi } from '../api/billing.api';
 import { PATHS } from '@/routes/paths';
 import type { InvoiceStatus } from '../types/billing.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
   { value: '', label: 'All Statuses' },
@@ -24,7 +25,8 @@ const STATUS_COLORS: Record<InvoiceStatus, string> = {
   uncollectible: 'bg-red-100 text-red-600',
 };
 
-export function BillingInvoicesPage(): JSX.Element {
+export function BillingInvoicesPage(): JSX.Element {
+  const fmt = useOrgFormat();
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -126,12 +128,12 @@ export function BillingInvoicesPage(): JSX.Element {
                 <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3 font-mono text-xs font-semibold text-slate-800">{inv.number}</td>
                   <td className="px-4 py-3 text-xs text-slate-600">
-                    {new Date(inv.billingPeriodStart).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    {fmt.formatDateMedium(inv.billingPeriodStart)}
                     {' – '}
-                    {new Date(inv.billingPeriodEnd).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    {fmt.formatDateMedium(inv.billingPeriodEnd)}
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-600">
-                    {new Date(inv.dueDate).toLocaleDateString('en-GB')}
+                    {fmt.formatDate(inv.dueDate)}
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-slate-900">
                     {inv.currency} {inv.amountDue.toFixed(2)}

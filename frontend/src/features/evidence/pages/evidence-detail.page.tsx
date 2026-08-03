@@ -4,7 +4,6 @@ import {
   ArrowLeft, Pencil, Trash2, Share2, Lock, ChevronDown,
   File, Calendar, Loader2, AlertCircle, X, Check,
 } from 'lucide-react';
-import { format } from 'date-fns';
 import { PATHS } from '@/routes/paths';
 import { useEvidenceDetail, useUpdateEvidence, useDeleteEvidence, useEvidenceTagMutation } from '../hooks/use-evidence';
 import { EvidencePreview } from '../components/evidence-preview';
@@ -14,6 +13,7 @@ import { EvidenceAuditTrail } from '../components/evidence-audit-trail';
 import { EvidenceShareModal } from '../components/evidence-share-modal';
 import { TagSelector } from '../components/tag-selector';
 import type { EvidenceStatus } from '../types/evidence.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 const STATUS_OPTIONS: { value: EvidenceStatus; label: string; color: string }[] = [
   { value: 'active',   label: 'Active',   color: 'bg-green-100 text-green-700' },
@@ -23,7 +23,8 @@ const STATUS_OPTIONS: { value: EvidenceStatus; label: string; color: string }[] 
 
 type DetailTab = 'preview' | 'ocr' | 'versions' | 'audit';
 
-export function EvidenceDetailPage() {
+export function EvidenceDetailPage() {
+  const fmt = useOrgFormat();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -280,20 +281,20 @@ export function EvidenceDetailPage() {
               <MetaRow
                 icon={Calendar}
                 label="Uploaded"
-                value={format(new Date(evidence.createdAt), 'dd MMM yyyy')}
+                value={fmt.formatDateMedium(evidence.createdAt)}
               />
               {evidence.collectedAt && (
                 <MetaRow
                   icon={Calendar}
                   label="Collected"
-                  value={format(new Date(evidence.collectedAt), 'dd MMM yyyy')}
+                  value={fmt.formatDateMedium(evidence.collectedAt)}
                 />
               )}
               {evidence.retentionDate && (
                 <MetaRow
                   icon={Calendar}
                   label="Retention"
-                  value={format(new Date(evidence.retentionDate), 'dd MMM yyyy')}
+                  value={fmt.formatDateMedium(evidence.retentionDate)}
                 />
               )}
             </div>

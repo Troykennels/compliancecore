@@ -72,7 +72,7 @@ export async function findTaskById(schemaName: string, id: string): Promise<Task
       LEFT JOIN global.users u1 ON u1.id = t.assigned_to
       LEFT JOIN global.users u2 ON u2.id = t.assigned_by
       LEFT JOIN global.users u3 ON u3.id = t.created_by
-      WHERE t.id = $1 AND t.deleted_at IS NULL
+      WHERE t.id = $1::uuid AND t.deleted_at IS NULL
     `, id);
     if (!rows.length) return null;
     return mapTask(rows[0]);
@@ -88,7 +88,7 @@ export async function findSubtasks(schemaName: string, parentId: string): Promis
       FROM tasks t
       LEFT JOIN global.users u1 ON u1.id = t.assigned_to
       LEFT JOIN global.users u2 ON u2.id = t.assigned_by
-      WHERE t.parent_task_id = $1 AND t.deleted_at IS NULL
+      WHERE t.parent_task_id = $1::uuid AND t.deleted_at IS NULL
       ORDER BY t.created_at ASC
     `, parentId);
     return rows.map(mapTask);
@@ -99,7 +99,7 @@ export async function createTask(schemaName: string, dto: CreateTaskDto, userId:
   return withTenantSchema(schemaName, async (prisma) => {
     const [row] = await prisma.$queryRawUnsafe<any[]>(`
       INSERT INTO tasks(title,description,assigned_to,assigned_by,due_date,priority,entity_type,entity_id,framework_id,parent_task_id,estimated_hours,tags,is_recurring,recurrence_rule,created_by)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::text[],$13,$14,$15) RETURNING id
+      VALUES($1,$2,$3::uuid,$4::uuid,$5::timestamptz,$6,$7,$8::uuid,$9::uuid,$10::uuid,$11,$12::text[],$13,$14,$15::uuid) RETURNING id
     `,
       dto.title, dto.description ?? null, dto.assignedTo ?? null, userId,
       dto.dueDate ?? null, dto.priority ?? 'medium',
@@ -133,14 +133,14 @@ export async function updateTask(schemaName: string, id: string, dto: UpdateTask
         actual_hours    = CASE WHEN $8::numeric IS NOT NULL THEN $8 ELSE actual_hours END,
         completed_at    = ${completedAt},
         updated_at      = NOW()
-      WHERE id = $1 AND deleted_at IS NULL
+      WHERE id = $1::uuid AND deleted_at IS NULL
     `, id, dto.title ?? null, dto.description ?? null, dto.assignedTo ?? null,
       dto.dueDate ?? null, dto.priority ?? null, dto.status ?? null, dto.actualHours ?? null,
       dto.assignedTo !== undefined,
     );
     if (dto.tags) {
       await prisma.$executeRawUnsafe(
-        `UPDATE tasks SET tags = $2::text[] WHERE id = $1`,
+        `UPDATE tasks SET tags = $2::text[] WHERE id = $1::uuid`,
         id, dto.tags,
       );
     }
@@ -149,7 +149,7 @@ export async function updateTask(schemaName: string, id: string, dto: UpdateTask
 
 export async function softDeleteTask(schemaName: string, id: string): Promise<void> {
   return withTenantSchema(schemaName, async (prisma) => {
-    await prisma.$executeRawUnsafe(`UPDATE tasks SET deleted_at=NOW() WHERE id=$1`, id);
+    await prisma.$executeRawUnsafe(`UPDATE tasks SET deleted_at=NOW() WHERE id=$1::uuid`, id);
   });
 }
 
@@ -177,7 +177,7 @@ export async function findComments(schemaName: string, taskId: string): Promise<
       SELECT tc.*, u.first_name || ' ' || u.last_name AS user_name, u.email AS user_email
       FROM task_comments tc
       JOIN global.users u ON u.id = tc.user_id
-      WHERE tc.task_id = $1 AND tc.deleted_at IS NULL
+      WHERE tc.task_id = $1::uuid AND tc.deleted_at IS NULL
       ORDER BY tc.created_at ASC
     `, taskId);
     return rows.map(mapComment);
@@ -188,7 +188,7 @@ export async function addComment(schemaName: string, taskId: string, userId: str
   return withTenantSchema(schemaName, async (prisma) => {
     const [row] = await prisma.$queryRawUnsafe<any[]>(`
       INSERT INTO task_comments(task_id, user_id, body, is_internal)
-      VALUES($1,$2,$3,$4) RETURNING id
+      VALUES($1::uuid,$2::uuid,$3,$4) RETURNING id
     `, taskId, userId, dto.body, dto.isInternal ?? false);
     return row.id as string;
   });
@@ -206,8 +206,8 @@ export async function deleteComment(
     // the actor has an elevated (moderator) role.
     const affected = await prisma.$executeRawUnsafe(
       `UPDATE task_comments SET deleted_at = NOW()
-       WHERE id = $1 AND task_id = $2 AND deleted_at IS NULL
-         AND ($4::boolean OR user_id = $3)`,
+       WHERE id = $1::uuid AND task_id = $2::uuid AND deleted_at IS NULL
+         AND ($4::boolean OR user_id = $3::uuid)`,
       commentId, taskId, userId, canModerate,
     );
     return affected === 1;

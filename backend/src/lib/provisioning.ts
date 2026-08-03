@@ -35,17 +35,24 @@ export async function provisionTenantSchema(schemaName: string): Promise<void> {
   const client = new pg.Client({ connectionString: env.DATABASE_URL });
   await client.connect();
   try {
-    await client.query('BEGIN');
+    // Read every template up front, then send the whole thing as ONE statement
+    // batch. Provisioning is on the critical path of the signup request, and on
+    // a managed/remote Postgres the per-round-trip latency dominates: seven
+    // sequential round-trips is what pushes onboarding past a PaaS gateway
+    // timeout, at which point the browser gives up while the server commits
+    // anyway. One round-trip keeps the request comfortably inside the budget.
+    // Still a single transaction, so partial provisioning remains impossible.
+    const templates = await Promise.all(
+      files.map(async (file) => {
+        const raw = await readFile(path.join(templateDir, file), 'utf8');
+        return raw.split('{{SCHEMA}}').join(schemaName);
+      }),
+    );
+
     // schemaName is validated against SAFE_SCHEMA_RE above, so interpolation is safe.
-    await client.query(`CREATE SCHEMA IF NOT EXISTS "${schemaName}"`);
-
-    for (const file of files) {
-      const raw = await readFile(path.join(templateDir, file), 'utf8');
-      const sql = raw.split('{{SCHEMA}}').join(schemaName);
-      await client.query(sql);
-    }
-
-    await client.query('COMMIT');
+    await client.query(
+      ['BEGIN', `CREATE SCHEMA IF NOT EXISTS "${schemaName}"`, ...templates, 'COMMIT'].join(';\n'),
+    );
     logger.info({ schemaName, templates: files.length }, 'Provisioned tenant schema');
   } catch (err) {
     await client.query('ROLLBACK').catch(() => {});

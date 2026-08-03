@@ -6,8 +6,10 @@ import {
   Shield, Smartphone, LogOut, Loader2, AlertTriangle, RefreshCw, Monitor,
 } from 'lucide-react';
 import { SettingsLayout } from '../components/settings-layout';
+import { MfaSetup } from '../components/mfa-setup';
 import { authApi } from '@/features/auth/api/auth.api';
 import { useAuthStore } from '@/stores/auth.store';
+import { useOrgFormat } from '@/lib/org-format';
 import { PATHS } from '@/routes/paths';
 
 // Security settings surface account-level MFA and session management, which are
@@ -16,9 +18,16 @@ import { PATHS } from '@/routes/paths';
 export function SettingsSecurityPage(): JSX.Element {
   const navigate = useNavigate();
   const clearAuth = useAuthStore((s) => s.clearAuth);
+  const fmt = useOrgFormat();
 
   const [showSessions, setShowSessions] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+
+  // ── Account state (drives the 2FA enabled/disabled view) ───────────────────
+  const meQuery = useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: () => authApi.me().then((r) => r.data.data),
+  });
 
   // ── Active sessions ────────────────────────────────────────────────────────
   const sessionsQuery = useQuery({
@@ -99,20 +108,17 @@ export function SettingsSecurityPage(): JSX.Element {
           </div>
 
           <div className="divide-y divide-slate-100">
-            {/* MFA — no management route yet */}
+            {/* MFA enrolment. The setup flow renders inline below the row, so
+                the QR code and backup codes have room to breathe. */}
             <SecurityItem
               icon={Smartphone}
               title="Two-Factor Authentication"
               description="Add an extra layer of protection to your account with TOTP-based 2FA."
               action={
-                <button
-                  type="button"
-                  disabled
-                  title="2FA management is coming soon"
-                  className="cursor-not-allowed rounded-md border border-slate-200 px-4 py-2 text-sm font-medium text-slate-400"
-                >
-                  Coming soon
-                </button>
+                <MfaSetup
+                  enabled={meQuery.data?.mfaEnabled ?? false}
+                  onChanged={() => void meQuery.refetch()}
+                />
               }
             />
 
@@ -170,7 +176,7 @@ export function SettingsSecurityPage(): JSX.Element {
                           </p>
                           <p className="text-xs text-slate-500">
                             {s.ipAddress ?? 'Unknown IP'} · Last active{' '}
-                            {new Date(s.lastActiveAt).toLocaleString()}
+                            {fmt.formatDateTime(s.lastActiveAt)}
                           </p>
                         </div>
                         {!s.isCurrent && (

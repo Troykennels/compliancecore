@@ -42,4 +42,24 @@ export const organizationController = {
       next(err);
     }
   },
+
+  // ── Compliance scoping ────────────────────────────────────────────────────
+
+  async getScoping(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await organizationService.getScoping(req.user!.tenantId!);
+      ok(res, req, result);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async saveScoping(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await organizationService.saveScoping(req.user!.tenantId!, req.body);
+      ok(res, req, result);
+    } catch (err) {
+      next(err);
+    }
+  },
 };

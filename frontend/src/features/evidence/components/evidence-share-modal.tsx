@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { X, Link2, Mail, Clock, Lock, Copy, Check, AlertCircle, Trash2 } from 'lucide-react';
-import { format } from 'date-fns';
 import { useEvidenceShares, useCreateShare, useRevokeShare } from '../hooks/use-evidence';
 import { useActiveTenant } from '@/stores/auth.store';
 import type { CreateShareDto } from '../types/evidence.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 interface EvidenceShareModalProps {
   open: boolean;
@@ -12,7 +12,8 @@ interface EvidenceShareModalProps {
   evidenceTitle: string;
 }
 
-export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }: EvidenceShareModalProps) {
+export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }: EvidenceShareModalProps) {
+  const fmt = useOrgFormat();
   const { data: shares = [], isLoading } = useEvidenceShares(evidenceId);
   const createShare = useCreateShare(evidenceId);
   const revokeShare = useRevokeShare(evidenceId);
@@ -183,13 +184,13 @@ export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }:
                         {share.expiresAt && (
                           <span className="flex items-center gap-0.5 rounded-full bg-slate-200 px-1.5 py-0.5 text-xs text-slate-600">
                             <Clock className="h-2.5 w-2.5" />
-                            Expires {format(new Date(share.expiresAt), 'dd MMM yyyy')}
+                            Expires {fmt.formatDateMedium(share.expiresAt)}
                           </span>
                         )}
                       </div>
                       <p className="mt-0.5 text-xs text-slate-500">
                         {share.accessedCount} access{share.accessedCount !== 1 ? 'es' : ''} ·{' '}
-                        Created {format(new Date(share.createdAt), 'dd MMM yyyy')}
+                        Created {fmt.formatDateMedium(share.createdAt)}
                       </p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">

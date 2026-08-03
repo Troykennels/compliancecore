@@ -51,7 +51,7 @@ async function processDueSubscription(row: DueRow): Promise<void> {
   if (row.cancel_at_period_end) {
     // Mark cancelled
     await prisma.$executeRawUnsafe(
-      `UPDATE global.subscriptions SET status = 'cancelled', cancelled_at = NOW(), updated_at = NOW() WHERE id = $1`,
+      `UPDATE global.subscriptions SET status = 'cancelled', cancelled_at = NOW(), updated_at = NOW() WHERE id = $1::uuid`,
       row.id,
     );
     logger.info({ subscriptionId: row.id, tenant: row.tenant_name }, 'Subscription cancelled at period end');
@@ -104,9 +104,9 @@ async function processDueSubscription(row: DueRow): Promise<void> {
   // Advance subscription period
   await prisma.$executeRawUnsafe(`
     UPDATE global.subscriptions
-    SET status = 'active', current_period_start = $1, current_period_end = $2,
+    SET status = 'active', current_period_start = $1::timestamptz, current_period_end = $2::timestamptz,
         next_invoice_amount = $3, updated_at = NOW()
-    WHERE id = $4
+    WHERE id = $4::uuid
   `, newStart, newEnd, nextAmount, row.id);
 
   logger.info({ subscriptionId: row.id, invoiceId: inv.id, tenant: row.tenant_name, amount: nextAmount }, 'Subscription renewed');

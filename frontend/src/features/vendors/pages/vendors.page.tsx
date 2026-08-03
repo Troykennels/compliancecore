@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { format, parseISO } from 'date-fns';
 import {
   Plus, Search, Building2, MoreHorizontal, Pencil, Trash2,
   AlertTriangle, RefreshCw, ChevronLeft, ChevronRight,
@@ -13,10 +12,12 @@ import type {
   VendorStatus,
 } from '../types/vendors.types';
 import { RISK_LEVEL_CONFIG, VENDOR_STATUS_CONFIG } from '../types/vendors.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 const PAGE_SIZE = 20;
 
-export function VendorsPage(): JSX.Element {
+export function VendorsPage(): JSX.Element {
+  const fmt = useOrgFormat();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<VendorStatus | ''>('');
   const [riskFilter, setRiskFilter] = useState<VendorRiskLevel | ''>('');
@@ -176,7 +177,7 @@ export function VendorsPage(): JSX.Element {
                       </td>
                       <td className="px-6 py-4 text-slate-600">
                         {vendor.nextReviewDate ? (
-                          format(parseISO(vendor.nextReviewDate), 'MMM d, yyyy')
+                          fmt.formatDateMedium(vendor.nextReviewDate)
                         ) : (
                           <span className="text-slate-400">—</span>
                         )}

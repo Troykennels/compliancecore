@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Clock, Download, Upload } from 'lucide-react';
-import { format } from 'date-fns';
 import { useEvidenceVersions } from '../hooks/use-evidence';
 import { evidenceApi } from '../api/evidence.api';
 import { useUpload } from '../hooks/use-upload';
 import { EvidenceDropzone } from './evidence-dropzone';
+import { useOrgFormat } from '@/lib/org-format';
 
 interface EvidenceVersionHistoryProps {
   evidenceId: string;
@@ -19,7 +19,8 @@ function formatBytes(bytes: number) {
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${units[i]}`;
 }
 
-export function EvidenceVersionHistory({ evidenceId, currentVersionId }: EvidenceVersionHistoryProps) {
+export function EvidenceVersionHistory({ evidenceId, currentVersionId }: EvidenceVersionHistoryProps) {
+  const fmt = useOrgFormat();
   const { data: versions = [], refetch } = useEvidenceVersions(evidenceId);
   const [showNewVersion, setShowNewVersion] = useState(false);
   const [newFile, setNewFile] = useState<File | null>(null);
@@ -138,7 +139,7 @@ export function EvidenceVersionHistory({ evidenceId, currentVersionId }: Evidenc
                 <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-slate-500">
                   <span>{formatBytes(version.fileSizeBytes)}</span>
                   <span>·</span>
-                  <span>{format(new Date(version.createdAt), 'dd MMM yyyy, HH:mm')}</span>
+                  <span>{fmt.formatDateTimeMedium(version.createdAt)}</span>
                   {version.uploaderName && <><span>·</span><span>{version.uploaderName}</span></>}
                 </div>
                 {version.changeNote && (

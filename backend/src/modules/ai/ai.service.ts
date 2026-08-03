@@ -32,7 +32,7 @@ async function getEvidenceOcrText(
     const rows = await prisma.$queryRawUnsafe<any[]>(`
       SELECT title, ocr_text, ocr_status
       FROM evidence
-      WHERE id = $1 AND deleted_at IS NULL
+      WHERE id = $1::uuid AND deleted_at IS NULL
     `, evidenceId);
     if (!rows.length) throw new NotFoundError('Evidence not found');
     const row = rows[0];

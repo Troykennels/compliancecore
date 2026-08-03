@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { format, parseISO } from 'date-fns';
 import { ShieldCheck, ShieldX, RotateCcw, AlertTriangle, RefreshCw } from 'lucide-react';
+import { useOrgFormat } from '@/lib/org-format';
 import { useSignatures, useRevokeSignature } from '../hooks/use-signatures';
 
 export function SignaturesPage() {
+  const fmt = useOrgFormat();
   const [validFilter, setValidFilter] = useState<'all' | 'valid' | 'revoked'>('all');
   const [page, setPage] = useState(1);
   const [revokeTarget, setRevokeTarget] = useState<string | null>(null);
@@ -98,7 +99,7 @@ export function SignaturesPage() {
                     <p className="text-slate-400 text-[11px]">{sig.certificateData?.signerEmail}</p>
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-600">
-                    {sig.signedAt ? format(parseISO(sig.signedAt), 'MMM d, yyyy h:mm a') : '—'}
+                    {fmt.formatDateTime(sig.signedAt)}
                   </td>
                   <td className="px-4 py-3">
                     <span className="font-mono text-[11px] text-slate-500">{sig.documentHash ? `${sig.documentHash.slice(0, 16)}…` : '—'}</span>

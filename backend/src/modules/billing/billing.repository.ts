@@ -728,7 +728,7 @@ export async function addPaymentMethod(tenantId: string, dto: AddPaymentMethodDt
 
 export async function setDefaultPaymentMethod(id: string, tenantId: string): Promise<void> {
   await prisma.$executeRawUnsafe(
-    `UPDATE global.payment_methods SET is_default = false WHERE tenant_id = $1`,
+    `UPDATE global.payment_methods SET is_default = false WHERE tenant_id = $1::uuid`,
     tenantId,
   );
   await prisma.$executeRawUnsafe(

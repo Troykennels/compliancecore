@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { format, parseISO } from 'date-fns';
 import { Plus, AlertTriangle, CheckCircle, Power, Trash2, ChevronRight, RefreshCw } from 'lucide-react';
 import {
   useEscalationRules,
@@ -11,6 +10,7 @@ import {
 import { EscalationRuleForm } from '../components/escalation-rule-form';
 import { TRIGGER_CONFIG, ACTION_CONFIG } from '../types/escalations.types';
 import type { EscalationEventStatus } from '../types/escalations.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 type Tab = 'rules' | 'events';
 
@@ -40,7 +40,8 @@ function ErrorBlock({ label, onRetry }: { label: string; onRetry: () => void }) 
   );
 }
 
-export function EscalationsPage() {
+export function EscalationsPage() {
+  const fmt = useOrgFormat();
   const [tab, setTab] = useState<Tab>('rules');
   const [showForm, setShowForm] = useState(false);
   const [eventStatusFilter, setEventStatusFilter] = useState<EscalationEventStatus | ''>('');
@@ -241,10 +242,10 @@ export function EscalationsPage() {
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-600">Step {ev.currentChainStep + 1}</td>
                       <td className="px-4 py-3 text-xs text-slate-500">
-                        {ev.nextEscalationAt ? format(parseISO(ev.nextEscalationAt), 'MMM d, h:mm a') : '—'}
+                        {ev.nextEscalationAt ? fmt.formatDateTimeMedium(ev.nextEscalationAt) : '—'}
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-500">
-                        {format(parseISO(ev.createdAt), 'MMM d, yyyy')}
+                        {fmt.formatDateMedium(ev.createdAt)}
                       </td>
                       <td className="px-4 py-3">
                         {ev.status === 'active' && (

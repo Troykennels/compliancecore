@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { format, parseISO } from 'date-fns';
 import { Trash2, Lock } from 'lucide-react';
 import type { TaskComment } from '../types/tasks.types';
 import { useDeleteComment } from '../hooks/use-tasks';
+import { useOrgFormat } from '@/lib/org-format';
 
 interface TaskCommentProps {
   comment:    TaskComment;
@@ -10,7 +10,8 @@ interface TaskCommentProps {
   canDelete:  boolean;
 }
 
-export function TaskCommentItem({ comment, taskId, canDelete }: TaskCommentProps) {
+export function TaskCommentItem({ comment, taskId, canDelete }: TaskCommentProps) {
+  const fmt = useOrgFormat();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const deleteComment = useDeleteComment(taskId);
 
@@ -29,7 +30,7 @@ export function TaskCommentItem({ comment, taskId, canDelete }: TaskCommentProps
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xs font-semibold text-slate-800">{comment.userName ?? 'Unknown'}</span>
           <span className="text-[11px] text-slate-400">
-            {format(parseISO(comment.createdAt), 'MMM d, yyyy h:mm a')}
+            {fmt.formatDateTimeMedium(comment.createdAt)}
           </span>
           {comment.editedAt && (
             <span className="text-[10px] text-slate-400 italic">(edited)</span>

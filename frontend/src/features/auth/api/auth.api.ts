@@ -57,6 +57,12 @@ export const authApi = {
   disableMfa: async (password: string) =>
     apiClient.delete<ApiResponse<{ message: string }>>('/auth/mfa', { data: { password } }),
 
+  switchTenant: async (tenantId: string) =>
+    apiClient.post<ApiResponse<{ accessToken: string; activeTenant: TenantSummary }>>(
+      '/auth/switch-tenant',
+      { tenantId },
+    ),
+
   getSessions: async () =>
     apiClient.get<ApiResponse<SessionInfo[]>>('/auth/sessions'),
 

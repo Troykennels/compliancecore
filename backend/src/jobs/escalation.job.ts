@@ -343,7 +343,7 @@ async function _notifyRole(
 async function _sendEscalationEmail(schemaName: string, userId: string, entityTitle: string, message: string, entityUrl: string) {
   try {
     const [user] = await withTenantSchema(schemaName, (p) =>
-      p.$queryRawUnsafe<any[]>(`SELECT email, first_name, last_name FROM global.users WHERE id=$1`, userId),
+      p.$queryRawUnsafe<any[]>(`SELECT email, first_name, last_name FROM global.users WHERE id=$1::uuid`, userId),
     );
     if (!user?.email) return;
     const tmpl = emailTemplates.escalationAlert({

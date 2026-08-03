@@ -14,6 +14,8 @@
     "test:watch": "vitest",
     "db:generate": "prisma generate",
     "db:migrate": "node scripts/migrate.mjs",
+    "db:migrate-tenants": "node scripts/migrate-tenants.mjs",
+    "preflight": "node scripts/preflight.mjs",
     "db:seed": "node scripts/migrate.mjs --seed",
     "db:seed-demo": "node scripts/seed-demo.mjs",
     "db:backup": "bash scripts/backup.sh",

@@ -3,6 +3,7 @@ import { SettingsLayout } from '../components/settings-layout';
 import { useOrganizationProfile } from '@/features/organizations/hooks/use-organization';
 import { CompanyProfileForm } from '@/features/organizations/components/company-profile-form';
 import { LogoUpload } from '@/features/organizations/components/logo-upload';
+import { ScopingQuestionnaire } from '@/features/organizations/components/scoping-questionnaire';
 
 export function SettingsOrgPage(): JSX.Element {
   const { data: org, isLoading, isError } = useOrganizationProfile();
@@ -10,6 +11,21 @@ export function SettingsOrgPage(): JSX.Element {
   return (
     <SettingsLayout>
       <div className="space-y-6">
+        {/* Compliance scope. Revisitable because the answers go stale — taking
+            card payments or opening an EU office changes what applies. */}
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-200 px-6 py-4">
+            <h2 className="text-base font-semibold text-slate-900">Compliance Scope</h2>
+            <p className="mt-0.5 text-sm text-slate-500">
+              How your organisation operates, and the frameworks that follow from it. Update this
+              whenever the business changes.
+            </p>
+          </div>
+          <div className="p-6">
+            <ScopingQuestionnaire variant="settings" />
+          </div>
+        </section>
+
         {/* Card */}
         <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-200 px-6 py-4">

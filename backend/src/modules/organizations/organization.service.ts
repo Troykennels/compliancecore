@@ -10,6 +10,9 @@ import { logger } from '../../lib/logger';
 import { TRIAL_DAYS, TRIAL_PLAN_SLUG } from '../../lib/entitlements';
 import * as billingRepo from '../billing/billing.repository';
 import * as billingService from '../billing/billing.service';
+import {
+  scopingProfileSchema, recommendFrameworks, type FrameworkRecommendation,
+} from './scoping';
 
 // Deterministic, URL-safe, collision-free slug: slugified name + short id suffix.
 function makeSlug(name: string, id: string): string {
@@ -30,11 +33,33 @@ export const organizationService = {
    */
   async createOrganization(userId: string, input: CreateOrganizationInput) {
     // A user may only belong to one org via this onboarding path.
+    //
+    // Retrying returns the organisation that already exists instead of a 409.
+    // Provisioning a tenant schema is slow enough that a PaaS gateway timeout or
+    // an impatient reload can drop the response *after* the tenant was committed
+    // — the client then sees a failure for work that actually succeeded. Failing
+    // the retry with "you already belong to an organization" strands the user on
+    // the onboarding screen with no way forward, which is precisely the reported
+    // bug. Onboarding is idempotent from the caller's point of view: same input,
+    // same outcome, safe to repeat.
     const existing = await prisma.tenantMembership.findFirst({
       where: { userId, deletedAt: null },
-      select: { id: true },
+      select: { tenantId: true },
     });
     if (existing) {
+      const org = await prisma.tenant.findFirst({
+        where: { id: existing.tenantId, deletedAt: null },
+        select: {
+          id: true, name: true, slug: true, plan: true, onboardingDoneAt: true,
+          industry: true, size: true, createdAt: true,
+        },
+      });
+      if (org) {
+        logger.info({ userId, tenantId: org.id }, 'Onboarding retried — returning existing organization');
+        return org;
+      }
+      // Membership pointing at a deleted tenant is genuinely inconsistent state;
+      // let the caller see it rather than silently provisioning a second org.
       throw new AppError('You already belong to an organization.', 409, 'ALREADY_ONBOARDED');
     }
 
@@ -154,5 +179,55 @@ export const organizationService = {
     const org = await organizationRepository.findById(tenantId);
     if (!org) throw new NotFoundError('Organization not found.');
     return organizationRepository.markOnboardingComplete(tenantId);
+  },
+
+  /**
+   * Returns the saved scoping answers plus the frameworks they imply.
+   *
+   * Recommendations are recomputed on read rather than stored, so adding a new
+   * regulation to the rule set immediately benefits every existing tenant
+   * instead of only those who re-answer the questionnaire.
+   */
+  async getScoping(tenantId: string) {
+    const rows = await prisma.$queryRaw<{ scoping_profile: unknown; scoping_completed_at: Date | null }[]>`
+      SELECT scoping_profile, scoping_completed_at
+      FROM global.tenants WHERE id = ${tenantId}::uuid AND deleted_at IS NULL
+    `;
+    if (!rows.length) throw new NotFoundError('Organization not found.');
+
+    const raw = rows[0].scoping_profile;
+    if (!raw) {
+      return { profile: null, completedAt: null, recommendations: [] as FrameworkRecommendation[] };
+    }
+
+    // Parse rather than trust: the stored blob predates any later change to the
+    // question set, and defaults fill in anything that was not asked back then.
+    const parsed = scopingProfileSchema.safeParse(raw);
+    if (!parsed.success) {
+      logger.warn({ tenantId }, 'Stored scoping profile no longer matches the schema — treating as unanswered');
+      return { profile: null, completedAt: null, recommendations: [] as FrameworkRecommendation[] };
+    }
+
+    return {
+      profile: parsed.data,
+      completedAt: rows[0].scoping_completed_at?.toISOString() ?? null,
+      recommendations: recommendFrameworks(parsed.data),
+    };
+  },
+
+  async saveScoping(tenantId: string, input: unknown) {
+    const profile = scopingProfileSchema.parse(input);
+
+    const updated = await prisma.$executeRaw`
+      UPDATE global.tenants
+      SET scoping_profile = ${JSON.stringify(profile)}::jsonb,
+          scoping_completed_at = NOW(),
+          updated_at = NOW()
+      WHERE id = ${tenantId}::uuid AND deleted_at IS NULL
+    `;
+    if (updated === 0) throw new NotFoundError('Organization not found.');
+
+    invalidateTenantCache(tenantId);
+    return { profile, recommendations: recommendFrameworks(profile) };
   },
 };

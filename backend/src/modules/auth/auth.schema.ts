@@ -54,6 +54,10 @@ export const mfaBackupCodeSchema = z.object({
 
 export const refreshTokenSchema = z.object({});
 
+export const switchTenantSchema = z.object({
+  tenantId: z.string().uuid('Invalid organization id'),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;

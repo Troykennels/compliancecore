@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { format, parseISO, isPast } from 'date-fns';
+import { parseISO, isPast } from 'date-fns';
 import { Plus, LayoutGrid, List, AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PATHS } from '@/routes/paths';
@@ -8,10 +8,12 @@ import { TaskBoard } from '../components/task-board';
 import { TaskFormModal } from '../components/task-form-modal';
 import type { Task, TaskStatus, TaskPriority } from '../types/tasks.types';
 import { STATUS_CONFIG, PRIORITY_CONFIG } from '../types/tasks.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 type View = 'board' | 'list';
 
-export function TasksPage() {
+export function TasksPage() {
+  const fmt = useOrgFormat();
   const [view, setView] = useState<View>('board');
   const [statusFilter, setStatusFilter] = useState<TaskStatus | ''>('');
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | ''>('');
@@ -163,7 +165,7 @@ export function TasksPage() {
                       {task.dueDate ? (
                         <div className="flex items-center gap-1">
                           {isOverdue && <AlertCircle className="h-3 w-3" />}
-                          {format(parseISO(task.dueDate), 'MMM d, yyyy')}
+                          {fmt.formatDateMedium(task.dueDate)}
                         </div>
                       ) : '—'}
                     </td>

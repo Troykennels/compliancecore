@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { format, parseISO } from 'date-fns';
 import { ArrowLeft, CheckCircle, XCircle, Clock, AlertCircle, FileSignature } from 'lucide-react';
 import { PATHS } from '@/routes/paths';
 import { useApprovalRequest, useMyPendingApprovals, useCancelApproval } from '../hooks/use-approvals';
 import { ApprovalTimeline } from '../components/approval-timeline';
 import { ApprovalDecisionModal } from '../components/approval-decision-modal';
 import type { ApprovalStatus, ApprovalRequestStep } from '../types/approvals.types';
+import { useOrgFormat } from '@/lib/org-format';
 
 const STATUS_CONFIG: Record<ApprovalStatus, { label: string; icon: React.ReactNode; className: string }> = {
   draft:             { label: 'Draft',             icon: <Clock className="h-4 w-4" />,        className: 'bg-slate-100 text-slate-700' },
@@ -18,7 +18,8 @@ const STATUS_CONFIG: Record<ApprovalStatus, { label: string; icon: React.ReactNo
   changes_requested: { label: 'Changes Requested', icon: <AlertCircle className="h-4 w-4" />, className: 'bg-orange-100 text-orange-700' },
 };
 
-export function ApprovalDetailPage() {
+export function ApprovalDetailPage() {
+  const fmt = useOrgFormat();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [decideStep, setDecideStep] = useState<ApprovalRequestStep | null>(null);
@@ -137,17 +138,17 @@ export function ApprovalDetailPage() {
               )}
               {request.createdAt && (
                 <MetaRow label="Submitted">
-                  <span className="text-xs text-slate-700">{format(parseISO(request.createdAt), 'MMM d, yyyy h:mm a')}</span>
+                  <span className="text-xs text-slate-700">{fmt.formatDateTimeMedium(request.createdAt)}</span>
                 </MetaRow>
               )}
               {request.deadline && (
                 <MetaRow label="Deadline">
-                  <span className="text-xs text-red-600 font-medium">{format(parseISO(request.deadline), 'MMM d, yyyy h:mm a')}</span>
+                  <span className="text-xs text-red-600 font-medium">{fmt.formatDateTimeMedium(request.deadline)}</span>
                 </MetaRow>
               )}
               {request.completedAt && (
                 <MetaRow label="Completed">
-                  <span className="text-xs text-slate-700">{format(parseISO(request.completedAt), 'MMM d, yyyy h:mm a')}</span>
+                  <span className="text-xs text-slate-700">{fmt.formatDateTimeMedium(request.completedAt)}</span>
                 </MetaRow>
               )}
               <MetaRow label="Progress">

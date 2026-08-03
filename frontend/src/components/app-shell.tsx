@@ -8,6 +8,7 @@ import {
   CreditCard, Loader2, ScrollText, Flame, Store, ClipboardCheck, GraduationCap,
   Library, TrendingUp, Plug,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth.store';
 import { EntitlementBanner } from '@/components/entitlement-banner';
 import { authApi } from '@/features/auth/api/auth.api';
@@ -128,7 +129,28 @@ function UserAvatar({ name, avatarUrl }: { name: string; avatarUrl?: string | nu
 
 export function AppShell() {
   const [collapsed, setCollapsed] = useState(false);
-  const { user, activeTenant, clearAuth } = useAuthStore();
+  const [orgMenuOpen, setOrgMenuOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
+  const { user, activeTenant, allTenants, clearAuth, switchTenant } = useAuthStore();
+
+  // Only worth a dropdown when there is somewhere else to go.
+  const canSwitch = allTenants.length > 1;
+
+  async function handleSwitchTenant(tenantId: string) {
+    setOrgMenuOpen(false);
+    if (tenantId === activeTenant?.id) return;
+    setSwitching(true);
+    try {
+      await switchTenant(tenantId);
+      // Land on the dashboard: the previous page may have been a detail route
+      // whose record belongs to the organisation we just left.
+      navigate(PATHS.DASHBOARD);
+    } catch {
+      toast.error('Could not switch organization.');
+    } finally {
+      setSwitching(false);
+    }
+  }
 
   // Append the owner group only for a platform superadmin, so customers never
   // see a link into cross-tenant billing.
@@ -175,14 +197,45 @@ export function AppShell() {
           </button>
         </div>
 
-        {/* Org name */}
+        {/* Org name / switcher */}
         {!collapsed && activeTenant && (
-          <div className="border-b border-slate-100 px-3 py-2.5">
-            <div className="flex items-center gap-1.5">
+          <div className="relative border-b border-slate-100 px-3 py-2.5">
+            <button
+              type="button"
+              onClick={() => canSwitch && setOrgMenuOpen((o) => !o)}
+              disabled={!canSwitch || switching}
+              className={`flex w-full items-center gap-1.5 rounded-md text-left ${
+                canSwitch ? 'hover:bg-slate-50' : 'cursor-default'
+              } disabled:opacity-60`}
+              title={canSwitch ? 'Switch organization' : activeTenant.name}
+            >
               <Building2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
               <span className="text-xs font-medium text-slate-600 truncate">{activeTenant.name}</span>
-              <ChevronDown className="h-3 w-3 text-slate-400 shrink-0 ml-auto" />
-            </div>
+              {switching
+                ? <Loader2 className="h-3 w-3 animate-spin text-slate-400 shrink-0 ml-auto" />
+                : canSwitch && <ChevronDown className="h-3 w-3 text-slate-400 shrink-0 ml-auto" />}
+            </button>
+
+            {orgMenuOpen && canSwitch && (
+              <ul className="absolute left-2 right-2 top-full z-20 mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                {allTenants.map((t) => (
+                  <li key={t.id}>
+                    <button
+                      type="button"
+                      onClick={() => handleSwitchTenant(t.id)}
+                      className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-slate-50 ${
+                        t.id === activeTenant.id ? 'font-semibold text-blue-700' : 'text-slate-700'
+                      }`}
+                    >
+                      <span className="truncate">{t.name}</span>
+                      <span className="ml-auto shrink-0 text-[10px] uppercase tracking-wide text-slate-400">
+                        {t.role.replace(/_/g, ' ')}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 

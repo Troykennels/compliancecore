@@ -4,6 +4,7 @@ import { useCurrentScore, useScoreTrend, useTriggerSnapshot } from '../hooks/use
 import { ScoreGauge } from '../components/score-gauge';
 import { FrameworkScoreCard } from '../components/framework-score-card';
 import { ScoreTrendChart } from '../components/score-trend-chart';
+import { useOrgFormat } from '@/lib/org-format';
 
 const TREND_OPTIONS: { label: string; days: number }[] = [
   { label: '30d', days: 30 },
@@ -12,7 +13,8 @@ const TREND_OPTIONS: { label: string; days: number }[] = [
   { label: '1y',  days: 365 },
 ];
 
-export function ScorePage() {
+export function ScorePage() {
+  const fmt = useOrgFormat();
   const [trendDays, setTrendDays] = useState(180);
   const { data: scoreData, isLoading: scoreLoading, isError: scoreError, refetch: refetchScore } = useCurrentScore();
   const { data: trendData = [], isLoading: trendLoading } = useScoreTrend(trendDays);
@@ -60,7 +62,7 @@ export function ScorePage() {
               <ScoreGauge score={scoreData?.overall ?? null} size={200} />
               <p className="mt-2 text-xs text-slate-500">
                 {scoreData?.calculatedAt
-                  ? `Calculated ${new Date(scoreData.calculatedAt).toLocaleTimeString()}`
+                  ? `Calculated ${fmt.formatTime(scoreData.calculatedAt)}`
                   : 'Real-time score'}
               </p>
             </div>
