@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Library, Eye, Download, Loader2, Layers, CheckCircle2,
-  AlertTriangle, RefreshCw, MapPin, Building2,
+  AlertTriangle, RefreshCw, MapPin, Building2, ShieldCheck,
 } from 'lucide-react';
 import { useFrameworks, useAdoptFramework } from '../hooks/use-frameworks';
 import { FrameworkDetailModal } from '../components/framework-detail-modal';
@@ -103,16 +103,27 @@ function FrameworkCard({ framework, onView, onAdopt, isAdopting }: CardProps): J
         )}
       </div>
 
-      {/* Counts */}
-      <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-4 text-xs">
+      {/* Counts. The library size is the number that matters — it is what
+          adopting will actually give you — so it leads, and a framework with an
+          empty library says so plainly rather than offering a button that
+          quietly creates nothing. */}
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-slate-100 pt-4 text-xs">
         <div className="flex items-center gap-1.5 text-slate-600">
           <Layers className="h-3.5 w-3.5 text-slate-400" />
           <span className="font-semibold text-slate-900">{framework.categoryCount}</span> categories
         </div>
+        {framework.libraryControlCount > 0 ? (
+          <div className="flex items-center gap-1.5 text-slate-600">
+            <ShieldCheck className="h-3.5 w-3.5 text-slate-400" />
+            <span className="font-semibold text-slate-900">{framework.libraryControlCount}</span> controls available
+          </div>
+        ) : (
+          <span className="text-amber-700">Controls coming soon</span>
+        )}
         {isAdopted && (
           <div className="flex items-center gap-1.5 text-emerald-700">
             <CheckCircle2 className="h-3.5 w-3.5" />
-            <span className="font-semibold">{framework.adoptedControlCount}</span> controls
+            <span className="font-semibold">{framework.adoptedControlCount}</span> adopted
           </div>
         )}
       </div>
