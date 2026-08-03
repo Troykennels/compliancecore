@@ -13,7 +13,11 @@ const listSigSchema = z.object({
 const createSigSchema = z.object({
   documentType:   z.string().min(1).max(100),
   documentId:     z.string().uuid(),
-  documentHash:   z.string().length(64),
+  // Optional: the server derives the authoritative digest from the stored
+  // record. When present it is checked against that digest, so a client that
+  // renders a stale copy is told to reload rather than signing something the
+  // user never saw.
+  documentHash:   z.string().length(64).optional(),
   signatureImage: z.string().optional(),
 });
 

@@ -35,7 +35,12 @@ export interface VerifySignatureResult {
 }
 
 export interface CreateSignatureDto {
-  documentHash:        string;
+  documentType:          string;
+  documentId:            string;
+  /** Omit to let the server derive it. The API recomputes the digest from the
+   *  stored record and rejects a supplied value that no longer matches, so a
+   *  stale page cannot sign a version the user never saw. */
+  documentHash?:         string;
   signatureImageBase64?: string;
 }
 

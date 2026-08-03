@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ShieldCheck, ShieldX, ShieldAlert } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { useOrgFormat } from '@/lib/org-format';
 import { useVerifySignature } from '../hooks/use-signatures';
 
 interface SignatureBadgeProps {
@@ -10,6 +10,7 @@ interface SignatureBadgeProps {
 
 export function SignatureBadge({ signatureId, compact = false }: SignatureBadgeProps) {
   const [showTooltip, setShowTooltip] = useState(false);
+  const fmt = useOrgFormat();
   const { data: result, isLoading } = useVerifySignature(signatureId);
 
   if (isLoading) {
@@ -56,7 +57,7 @@ export function SignatureBadge({ signatureId, compact = false }: SignatureBadgeP
               <dl className="space-y-1">
                 <TooltipRow label="Signed by" value={sig.certificateData.signerName} />
                 <TooltipRow label="Email" value={sig.certificateData.signerEmail} />
-                <TooltipRow label="Signed at" value={sig.signedAt ? format(parseISO(sig.signedAt), 'MMM d, yyyy h:mm a') : '—'} />
+                <TooltipRow label="Signed at" value={fmt.formatDateTime(sig.signedAt)} />
                 <TooltipRow label="Algorithm" value={sig.certificateData.algorithm} />
               </dl>
             )}
@@ -86,7 +87,7 @@ export function SignatureBadge({ signatureId, compact = false }: SignatureBadgeP
           {sig.certificateData && (
             <div className="mt-1.5 space-y-0.5 text-xs text-slate-600">
               <p>By <span className="font-medium">{sig.certificateData.signerName}</span> ({sig.certificateData.signerEmail})</p>
-              <p>{sig.signedAt ? format(parseISO(sig.signedAt), 'MMMM d, yyyy \'at\' h:mm a') : '—'}</p>
+              <p>{fmt.formatDateTime(sig.signedAt)}</p>
               <p className="font-mono text-[10px] text-slate-400 mt-1 break-all">{sig.signatureHash.slice(0, 32)}…</p>
             </div>
           )}

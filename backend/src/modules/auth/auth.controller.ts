@@ -293,17 +293,35 @@ export async function revokeSessionById(
   }
 }
 
+// ─── Switch Tenant ────────────────────────────────────────────────────────────
+
+export async function switchTenant(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const result = await service.switchTenant(
+      req.user.id,
+      req.body.tenantId,
+      req.cookies?.[REFRESH_COOKIE],
+    );
+    ok(res, req, result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 // ─── Current User ─────────────────────────────────────────────────────────────
 
 export async function me(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { findUserById, findUserMemberships } = await import('./auth.repository');
+    const { findUserById, findUserMemberships, findMfaCredential } = await import('./auth.repository');
     const user = await findUserById(req.user.id);
     if (!user) {
       res.status(401).json({ data: null, error: { code: 'UNAUTHORIZED', message: 'User not found' }, meta: {} });
       return;
     }
-    const memberships = await findUserMemberships(user.id);
+    const [memberships, mfaCredential] = await Promise.all([
+      findUserMemberships(user.id),
+      findMfaCredential(user.id),
+    ]);
     ok(res, req, {
       id: user.id,
       email: user.email,
@@ -313,6 +331,11 @@ export async function me(req: Request, res: Response, next: NextFunction): Promi
       emailVerifiedAt: user.emailVerifiedAt,
       isActive: user.isActive,
       onboardingCompletedAt: user.onboardingCompletedAt,
+      isSuperadmin: user.isSuperadmin,
+      // Only a *verified* credential counts: setup writes an unverified one, and
+      // an abandoned enrolment must not make the UI claim 2FA is protecting the
+      // account when login would never challenge for it.
+      mfaEnabled: mfaCredential?.isVerified ?? false,
       tenants: memberships.map((m) => ({
         id: m.tenant.id,
         name: m.tenant.name,

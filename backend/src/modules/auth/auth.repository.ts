@@ -139,6 +139,16 @@ export async function findSessionById(sessionId: string): Promise<Session | null
   return prisma.session.findUnique({ where: { id: sessionId } });
 }
 
+// Repoints a live session at a different tenant. The session — not the access
+// token — is the durable record of which organisation the user is working in,
+// so refreshAccessToken() keeps returning the new tenant after the switch.
+export async function setSessionTenant(sessionId: string, tenantId: string): Promise<void> {
+  await prisma.session.update({
+    where: { id: sessionId },
+    data: { tenantId, lastActiveAt: new Date() },
+  });
+}
+
 export async function findActiveSessions(userId: string): Promise<Session[]> {
   return prisma.session.findMany({
     where: { userId, revokedAt: null, expiresAt: { gt: new Date() } },

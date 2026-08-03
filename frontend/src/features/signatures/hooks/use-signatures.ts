@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { signaturesApi } from '../api/signatures.api';
-import type { SignatureFilters } from '../types/signatures.types';
+import type { SignatureFilters, CreateSignatureDto } from '../types/signatures.types';
 
 export const signatureKeys = {
   all:     ['signatures'] as const,
@@ -38,7 +38,7 @@ export function useVerifySignature(id: string) {
 export function useCreateSignature() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (dto: { documentHash: string; signatureImageBase64?: string }) =>
+    mutationFn: (dto: CreateSignatureDto) =>
       signaturesApi.create(dto).then((r) => r.data.data!),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: signatureKeys.all });

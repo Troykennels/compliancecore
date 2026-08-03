@@ -92,6 +92,9 @@ router.post('/mfa/setup', controller.setupMfa);
 router.post('/mfa/setup/confirm', validate(schema.mfaVerifySchema), controller.confirmMfaSetup);
 router.delete('/mfa', controller.disableMfa);
 
+// Switch the active organization for users who belong to more than one.
+router.post('/switch-tenant', validate(schema.switchTenantSchema), controller.switchTenant);
+
 // Session management
 router.get('/sessions', controller.getSessions);
 router.delete('/sessions/:sessionId', controller.revokeSessionById);

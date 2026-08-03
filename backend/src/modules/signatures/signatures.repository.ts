@@ -86,7 +86,7 @@ export async function createSignature(
     // a double-submit or replay.
     const [existing] = await prisma.$queryRawUnsafe<any[]>(
       `SELECT id FROM digital_signatures
-        WHERE document_type = $1 AND document_id = $2 AND user_id = $3 AND is_valid = TRUE
+        WHERE document_type = $1 AND document_id = $2::uuid AND user_id = $3::uuid AND is_valid = TRUE
         LIMIT 1`,
       input.documentType, input.documentId, input.userId,
     );
@@ -95,7 +95,7 @@ export async function createSignature(
     }
 
     const [user] = await prisma.$queryRawUnsafe<any[]>(
-      `SELECT first_name, last_name, email FROM global.users WHERE id = $1`, input.userId,
+      `SELECT first_name, last_name, email FROM global.users WHERE id = $1::uuid`, input.userId,
     );
 
     const certificateData = {
@@ -114,7 +114,7 @@ export async function createSignature(
       INSERT INTO digital_signatures(
         user_id, document_type, document_id, document_hash,
         signature_hash, signature_image, certificate_data, ip_address, user_agent, signed_at
-      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      ) VALUES($1::uuid,$2,$3::uuid,$4,$5,$6,$7::jsonb,$8::inet,$9,$10::timestamptz)
       RETURNING id
     `,
       input.userId, input.documentType, input.documentId, input.documentHash,
@@ -134,7 +134,7 @@ export async function findSignatureById(schemaName: string, id: string): Promise
              u.email AS signer_email
       FROM digital_signatures ds
       LEFT JOIN global.users u ON u.id = ds.user_id
-      WHERE ds.id = $1
+      WHERE ds.id = $1::uuid
     `, id);
     if (!rows.length) return null;
     return mapSignature(rows[0]);
@@ -153,7 +153,7 @@ export async function findSignaturesForDocument(
              u.email AS signer_email
       FROM digital_signatures ds
       LEFT JOIN global.users u ON u.id = ds.user_id
-      WHERE ds.document_type = $1 AND ds.document_id = $2
+      WHERE ds.document_type = $1 AND ds.document_id = $2::uuid
       ORDER BY ds.signed_at DESC
     `, documentType, documentId);
     return rows.map(mapSignature);
@@ -176,7 +176,7 @@ export async function findSignatures(
     const params: any[] = [];
     let p = 1;
 
-    if (filters.userId !== undefined)  { conditions.push(`ds.user_id = $${p++}`);  params.push(filters.userId); }
+    if (filters.userId !== undefined)  { conditions.push(`ds.user_id = $${p++}::uuid`);  params.push(filters.userId); }
     if (filters.isValid !== undefined) { conditions.push(`ds.is_valid = $${p++}`); params.push(filters.isValid); }
 
     const where  = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -213,8 +213,8 @@ export async function revokeSignature(
     // conflict rather than a silent no-op "success".
     const affected = await prisma.$executeRawUnsafe(`
       UPDATE digital_signatures
-      SET is_valid = FALSE, revoked_at = NOW(), revoked_by = $2, revocation_reason = $3
-      WHERE id = $1 AND is_valid = TRUE
+      SET is_valid = FALSE, revoked_at = NOW(), revoked_by = $2::uuid, revocation_reason = $3
+      WHERE id = $1::uuid AND is_valid = TRUE
     `, id, revokedBy, reason);
     if (affected === 0) {
       throw new AppError('Signature not found or already revoked', 409);

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { setAccessToken, clearAccessToken } from '@/lib/api-client';
 import { queryClient } from '@/lib/query-client';
+import { authApi } from '@/features/auth/api/auth.api';
 
 export type UserRole =
   | 'owner'
@@ -25,6 +26,9 @@ export interface AuthUser {
   // rendered — the API enforces access independently on every admin route, so
   // a tampered client gains nothing by flipping this.
   isSuperadmin?: boolean;
+  // Whether a *verified* TOTP credential exists. Drives the security page only;
+  // the server decides independently whether to issue an MFA challenge.
+  mfaEnabled?: boolean;
 }
 
 export interface TenantSummary {
@@ -49,10 +53,10 @@ interface AuthState {
   ) => void;
   clearAuth: () => void;
   setInitialised: () => void;
-  switchTenant: (tenantId: string) => void;
+  switchTenant: (tenantId: string) => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   activeTenant: null,
   allTenants: [],
@@ -76,12 +80,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isInitialising: false });
   },
 
-  switchTenant: (tenantId) => {
-    const tenant = get().allTenants.find((t) => t.id === tenantId) ?? null;
+  // Switching organisation MUST go through the API. The backend reads the active
+  // tenant from the signed access token, so changing only local state would leave
+  // every request still hitting the previous organisation while the UI claimed
+  // otherwise — the same data labelled with the wrong company name.
+  switchTenant: async (tenantId) => {
+    const { data } = await authApi.switchTenant(tenantId);
+    const { accessToken, activeTenant } = data.data;
+    setAccessToken(accessToken);
     // Tenant-scoped data must not carry over — clear the cache so every query
     // refetches under the new tenant instead of showing stale wrong-tenant data.
     queryClient.clear();
-    set({ activeTenant: tenant });
+    set({ activeTenant });
   },
 }));
 

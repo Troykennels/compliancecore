@@ -1,5 +1,6 @@
 import * as repo from './signatures.repository';
 import { verifySignatureHash } from './signatures.repository';
+import { resolveDocumentHash } from './document-hash';
 import { AppError, ValidationError } from '../../lib/errors';
 
 // A SHA-256 digest rendered as lowercase/uppercase hex is exactly 64 hex chars.
@@ -28,27 +29,36 @@ export async function createSignature(
   input: {
     documentType:   string;
     documentId:     string;
-    documentHash:   string;
+    /** Optional cross-check only — the authoritative digest is derived server-side. */
+    documentHash?:  string;
     signatureImage?: string;
     ipAddress:      string;
     userAgent:      string;
   },
 ) {
-  // The document hash is currently client-supplied. We cannot yet recompute it
-  // server-side because the referenced document content is not addressable in a
-  // uniform way across every documentType ('policy' | 'contract' | 'report' |
-  // 'evidence' | 'approval_step'). Until each document source exposes a canonical
-  // byte stream, enforce the minimum integrity guarantee: the hash MUST be a
-  // well-formed 64-char hex SHA-256 digest, so a malformed/placeholder value can
-  // never be bound into a legally-meaningful signature certificate.
-  // TODO: recompute documentHash server-side from the referenced document
-  //       (by documentType/documentId) and reject a mismatch, once a document
-  //       content resolver exists for every documentType.
-  if (!SHA256_HEX.test(input.documentHash)) {
-    throw new ValidationError('documentHash must be a 64-character hex SHA-256 digest.');
+  // The digest is derived from the stored record, never taken from the caller —
+  // see document-hash.ts for why a client-supplied hash makes the certificate
+  // worthless as evidence.
+  const documentHash = await resolveDocumentHash(schemaName, input.documentType, input.documentId);
+
+  // When the client sends a hash it is treated as a claim about what the signer
+  // was actually looking at. A mismatch means the document changed between being
+  // displayed and being signed, so the signature would attest to something the
+  // user never saw — refuse rather than silently sign the newer version.
+  if (input.documentHash !== undefined) {
+    if (!SHA256_HEX.test(input.documentHash)) {
+      throw new ValidationError('documentHash must be a 64-character hex SHA-256 digest.');
+    }
+    if (input.documentHash.toLowerCase() !== documentHash) {
+      throw new AppError(
+        'This document has changed since it was opened. Reload it and review the current version before signing.',
+        409,
+        'DOCUMENT_CHANGED',
+      );
+    }
   }
 
-  const id = await repo.createSignature(schemaName, { ...input, userId });
+  const id = await repo.createSignature(schemaName, { ...input, documentHash, userId });
   return repo.findSignatureById(schemaName, id);
 }
 

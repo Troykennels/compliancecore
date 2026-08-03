@@ -33,7 +33,9 @@ import {
 import { getPermissionsForRole } from '../../middleware/rbac.middleware';
 import { logger } from '../../lib/logger';
 import * as repo from './auth.repository';
-import type { LoginResult, MfaSetupResult, SessionInfo, UserPublic } from './auth.types';
+import type {
+  LoginResult, MfaSetupResult, SessionInfo, UserPublic, TenantSummary, UserRole,
+} from './auth.types';
 import type { RegisterInput, LoginInput, ResetPasswordInput, ChangePasswordInput } from './auth.schema';
 
 // ─── Register ─────────────────────────────────────────────────────────────────
@@ -274,6 +276,61 @@ export async function refreshAccessToken(
   await repo.touchSession(stored.sessionId);
 
   return { accessToken, rawRefreshToken: newRawToken };
+}
+
+// ─── Switch Tenant ────────────────────────────────────────────────────────────
+
+/**
+ * Moves the caller's session to another organisation they belong to.
+ *
+ * Membership is re-checked here rather than trusted from the client: the tenant
+ * id ends up inside a signed access token that every downstream module uses to
+ * pick a schema, so accepting an unverified id would be a direct cross-tenant
+ * data leak.
+ *
+ * The session row is updated too, not just the token. Without that, the next
+ * silent refresh would read the old session and quietly drop the user back into
+ * the previous organisation.
+ */
+export async function switchTenant(
+  userId: string,
+  targetTenantId: string,
+  rawRefreshToken: string | undefined,
+): Promise<{ accessToken: string; activeTenant: TenantSummary }> {
+  const memberships = await repo.findUserMemberships(userId);
+  const target = memberships.find((m) => m.tenant.id === targetTenantId);
+  if (!target) {
+    throw new ForbiddenError('You do not have access to that organization.');
+  }
+
+  const user = await repo.findUserById(userId);
+  if (!user || !user.isActive) {
+    throw new UnauthorizedError('User not found or inactive');
+  }
+
+  // Persist the choice on the session behind the refresh cookie, so it survives
+  // token refresh and page reloads. The refresh token itself is deliberately NOT
+  // rotated: switching organisation is not a re-authentication, and issuing a
+  // new cookie here would race the silent-refresh interceptor and trip the
+  // token-reuse detector that revokes every session for the user.
+  if (rawRefreshToken) {
+    const stored = await repo.findRefreshToken(sha256(rawRefreshToken));
+    if (stored?.sessionId) {
+      await repo.setSessionTenant(stored.sessionId, targetTenantId);
+    }
+  }
+
+  const { accessToken } = buildTokens(user, { tenantId: targetTenantId, memberships });
+
+  return {
+    accessToken,
+    activeTenant: {
+      id: target.tenant.id,
+      name: target.tenant.name,
+      slug: target.tenant.slug,
+      role: target.role as UserRole,
+    },
+  };
 }
 
 // ─── Logout ───────────────────────────────────────────────────────────────────
