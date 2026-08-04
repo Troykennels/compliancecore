@@ -10,6 +10,7 @@ import { ErrorBoundary } from './components/error-boundary';
 import { authApi } from './features/auth/api/auth.api';
 import { ProtectedRoute, PublicOnlyRoute } from './routes/protected.routes';
 import { AppShell } from './components/app-shell';
+import { IdleTimeout } from './components/idle-timeout';
 import { PATHS } from './routes/paths';
 
 // Route-level code-splitting: each page is its own lazy chunk so the initial
@@ -91,6 +92,11 @@ function AuthInitialiser({ children }: { children: React.ReactNode }): JSX.Eleme
             emailVerifiedAt: u.emailVerifiedAt,
             isActive: u.isActive,
             onboardingCompletedAt: u.onboardingCompletedAt,
+            // Carried through deliberately. Dropping these made the flags true
+            // on login and undefined after any reload, so the owner-only
+            // navigation appeared once and then silently disappeared.
+            isSuperadmin: u.isSuperadmin,
+            mfaEnabled: u.mfaEnabled,
           },
           newToken,
           u.tenants[0] ?? null,
@@ -113,6 +119,9 @@ export default function App(): JSX.Element {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthInitialiser>
+          {/* Inside the router (it navigates) and outside Routes (it must run on
+              every authenticated page, not per-route). */}
+          <IdleTimeout />
           <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* Public-only: redirect to dashboard if already logged in */}

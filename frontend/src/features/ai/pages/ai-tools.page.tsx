@@ -9,6 +9,7 @@ import {
   useGenerateChecklist, useDocumentQa, useAiSearch,
 } from '../hooks/use-ai';
 import type { RiskLevel, ChecklistItem } from '../types/ai.types';
+import { Markdown } from '@/components/markdown';
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
@@ -165,7 +166,7 @@ function ContractSummarizer() {
           </div>
 
           <ResultCard title="Executive Summary">
-            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{data.summary}</p>
+            <Markdown content={data.summary} />
           </ResultCard>
 
           <div className="grid grid-cols-2 gap-4">
@@ -307,8 +308,11 @@ function PolicyGenerator() {
               ))}
             </div>
           )}
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 max-h-[480px] overflow-y-auto">
-            <pre className="text-xs text-slate-700 whitespace-pre-wrap font-sans leading-relaxed">{data.policy}</pre>
+          {/* Rendered, not printed: the model returns markdown, and showing the
+              raw "#" and "**" makes a generated policy look like a draft note
+              rather than a document you would hand to an auditor. */}
+          <div className="max-h-[480px] overflow-y-auto rounded-xl border border-slate-200 bg-white p-6">
+            <Markdown content={data.policy} />
           </div>
         </div>
       )}
@@ -395,7 +399,7 @@ function RiskAnalyzer() {
           </div>
 
           <ResultCard title="Risk Assessment Narrative">
-            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{data.summary}</p>
+            <Markdown content={data.summary} />
           </ResultCard>
 
           <div className="grid grid-cols-2 gap-4">
@@ -630,7 +634,7 @@ function DocumentQa() {
               <span className="text-[11px] font-semibold uppercase tracking-wide">{CONFIDENCE_LABELS[data.confidence]}</span>
               <CopyButton text={data.answer} />
             </div>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">{data.answer}</p>
+            <Markdown content={data.answer} />
           </div>
 
           {(data.citations?.length ?? 0) > 0 && (
@@ -702,7 +706,7 @@ function AiSearchPanel() {
       {data && (
         <div className="space-y-4">
           <ResultCard title="AI Answer">
-            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{data.answer}</p>
+            <Markdown content={data.answer} />
           </ResultCard>
 
           {(data.relevantDocuments?.length ?? 0) > 0 && (

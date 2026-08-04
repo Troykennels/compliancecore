@@ -73,6 +73,8 @@ export function OnboardingPage() {
           emailVerifiedAt: u.emailVerifiedAt,
           isActive: u.isActive,
           onboardingCompletedAt: u.onboardingCompletedAt,
+          isSuperadmin: u.isSuperadmin,
+          mfaEnabled: u.mfaEnabled,
         },
         accessToken,
         u.tenants[0] ?? null,
