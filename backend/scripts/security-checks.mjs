@@ -18,7 +18,10 @@
 import pg from 'pg';
 import { authenticator } from 'otplib';
 
-const API = process.env.API_URL ?? 'http://127.0.0.1:3011';
+// Same default as e2e-journey.mjs, which is the port CI boots the server on.
+// This originally defaulted to a local dev port, so the CI step connected to
+// nothing and the whole run failed on a refused connection.
+const API = process.env.API_URL ?? 'http://127.0.0.1:3002';
 const DB = process.env.DATABASE_URL;
 const stamp = Date.now();
 const EMAIL = `fix${stamp}@example.com`;
