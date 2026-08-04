@@ -12,7 +12,7 @@ interface EvidenceShareModalProps {
   evidenceTitle: string;
 }
 
-export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }: EvidenceShareModalProps) {
+export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }: EvidenceShareModalProps) {
   const fmt = useOrgFormat();
   const { data: shares = [], isLoading } = useEvidenceShares(evidenceId);
   const createShare = useCreateShare(evidenceId);
@@ -30,7 +30,12 @@ export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }:
 
   const handleCreate = async () => {
     const result = await createShare.mutateAsync(form);
-    setNewShareUrl(result.shareUrl);
+    // Built locally rather than using result.shareUrl. The server-built URL
+    // already carries ?tenant=tenant_<hex>, and the shared page prefixes
+    // "tenant_" again before calling the API — so the freshly-created link
+    // resolved to tenant_tenant_<hex> and simply failed, while the same share
+    // copied from the list below worked. Both now come from buildShareUrl.
+    setNewShareUrl(buildShareUrl(result.share.shareToken));
     setForm({ shareType: 'link' });
   };
 

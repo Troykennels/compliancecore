@@ -19,8 +19,12 @@ export async function findTasks(
     if (filters.entityType)  { conditions.push(`t.entity_type = $${p++}`); params.push(filters.entityType); }
     if (filters.entityId)    { conditions.push(`t.entity_id = $${p++}::uuid`);   params.push(filters.entityId); }
     if (filters.frameworkId) { conditions.push(`t.framework_id = $${p++}::uuid`);params.push(filters.frameworkId); }
-    if (filters.dueBefore)   { conditions.push(`t.due_date <= $${p++}`);   params.push(filters.dueBefore); }
-    if (filters.dueAfter)    { conditions.push(`t.due_date >= $${p++}`);   params.push(filters.dueAfter); }
+    // Explicit ::timestamptz — Prisma binds a JS value as text, and there is no
+    // `timestamptz <= text` operator, so without the cast this 500s. Every
+    // sibling module casts (calendar ::timestamptz, controls ::date); tasks was
+    // the one that was missed.
+    if (filters.dueBefore)   { conditions.push(`t.due_date <= $${p++}::timestamptz`); params.push(filters.dueBefore); }
+    if (filters.dueAfter)    { conditions.push(`t.due_date >= $${p++}::timestamptz`); params.push(filters.dueAfter); }
     if (filters.parentTaskId){ conditions.push(`t.parent_task_id = $${p++}::uuid`); params.push(filters.parentTaskId); }
     else                     { conditions.push(`t.parent_task_id IS NULL`); } // top-level only by default
     if (filters.overdue)     { conditions.push(`t.due_date < NOW() AND t.status NOT IN ('completed','cancelled')`); }
@@ -97,12 +101,15 @@ export async function findSubtasks(schemaName: string, parentId: string): Promis
 
 export async function createTask(schemaName: string, dto: CreateTaskDto, userId: string): Promise<string> {
   return withTenantSchema(schemaName, async (prisma) => {
+    // `status` is written explicitly. It used to be omitted entirely, so the
+    // column default won and every task created from the board's per-column "+"
+    // button landed in "To Do" regardless of which column it was added from.
     const [row] = await prisma.$queryRawUnsafe<any[]>(`
-      INSERT INTO tasks(title,description,assigned_to,assigned_by,due_date,priority,entity_type,entity_id,framework_id,parent_task_id,estimated_hours,tags,is_recurring,recurrence_rule,created_by)
-      VALUES($1,$2,$3::uuid,$4::uuid,$5::timestamptz,$6,$7,$8::uuid,$9::uuid,$10::uuid,$11,$12::text[],$13,$14,$15::uuid) RETURNING id
+      INSERT INTO tasks(title,description,assigned_to,assigned_by,due_date,priority,status,entity_type,entity_id,framework_id,parent_task_id,estimated_hours,tags,is_recurring,recurrence_rule,created_by)
+      VALUES($1,$2,$3::uuid,$4::uuid,$5::timestamptz,$6,$7,$8,$9::uuid,$10::uuid,$11::uuid,$12,$13::text[],$14,$15,$16::uuid) RETURNING id
     `,
       dto.title, dto.description ?? null, dto.assignedTo ?? null, userId,
-      dto.dueDate ?? null, dto.priority ?? 'medium',
+      dto.dueDate ?? null, dto.priority ?? 'medium', dto.status ?? 'todo',
       dto.entityType ?? null, dto.entityId ?? null, dto.frameworkId ?? null,
       dto.parentTaskId ?? null, dto.estimatedHours ?? null,
       dto.tags ?? [],

@@ -53,6 +53,39 @@ const EVENT_TONE: Record<string, string> = {
 
 const NEUTRAL_TONE = 'bg-slate-100 text-slate-500 ring-slate-500/15';
 
+/**
+ * The endpoint sends an event type and a metadata blob, not a written sentence.
+ * The feed used to render `ev.description`, `ev.actorName` and
+ * `ev.evidenceTitle` — three fields the API has never returned — so every row
+ * showed a bare "System" with no text at all. The wording is built here
+ * instead, from what actually arrives.
+ */
+const EVENT_VERB: Record<string, string> = {
+  uploaded:      'uploaded',
+  previewed:     'previewed',
+  downloaded:    'downloaded',
+  updated:       'updated',
+  deleted:       'deleted',
+  shared:        'shared',
+  share_revoked: 'revoked sharing on',
+  ocr_completed: 'finished text extraction on',
+  ocr_failed:    'failed text extraction on',
+  version_added: 'added a version to',
+  tag_added:     'tagged',
+  tag_removed:   'removed a tag from',
+  confirmed:     'confirmed',
+};
+
+/** Best-effort title from the metadata blob, whatever key it happens to use. */
+function subjectOf(metadata: Record<string, unknown> | null): string | null {
+  if (!metadata) return null;
+  for (const key of ['title', 'name', 'evidenceTitle', 'fileName', 'filename']) {
+    const v = metadata[key];
+    if (typeof v === 'string' && v.trim()) return v;
+  }
+  return null;
+}
+
 interface ActivityFeedProps {
   events: RecentActivityEvent[];
 }
@@ -76,6 +109,7 @@ export function ActivityFeed({ events }: ActivityFeedProps) {
       {events.map((ev, idx) => {
         const icon = EVENT_ICON[ev.eventType] ?? <CheckCircle className="h-4 w-4" />;
         const tone = EVENT_TONE[ev.eventType] ?? NEUTRAL_TONE;
+        const subject = subjectOf(ev.metadata);
         const isLast = idx === events.length - 1;
         return (
           <li key={ev.id} className="relative flex items-start gap-3 pb-4 last:pb-0">
@@ -97,11 +131,11 @@ export function ActivityFeed({ events }: ActivityFeedProps) {
             </span>
             <div className="min-w-0 flex-1 pt-1">
               <p className="text-sm leading-snug text-slate-700">
-                <span className="font-medium text-slate-900">{ev.actorName ?? 'System'}</span>
-                {' '}{ev.description}
-                {ev.evidenceTitle && (
-                  <span className="font-medium text-slate-900"> &ldquo;{ev.evidenceTitle}&rdquo;</span>
-                )}
+                <span className="font-medium text-slate-900">{ev.actorEmail ?? 'System'}</span>
+                {' '}{EVENT_VERB[ev.eventType] ?? ev.eventType.replace(/_/g, ' ')}
+                {subject ? (
+                  <span className="font-medium text-slate-900"> &ldquo;{subject}&rdquo;</span>
+                ) : ' an evidence item'}
               </p>
               <time
                 dateTime={ev.createdAt}

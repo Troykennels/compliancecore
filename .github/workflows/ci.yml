@@ -96,6 +96,14 @@ jobs:
           set +e
           node scripts/e2e-journey.mjs
           RESULT=$?
+          # Guards for defects the happy path cannot see: these assert that
+          # something is REFUSED (an MFA challenge token used as a session, a
+          # tenant self-activating its own subscription), so the E2E would stay
+          # green while they regressed.
+          if [ $RESULT -eq 0 ]; then
+            node scripts/security-checks.mjs
+            RESULT=$?
+          fi
           set -e
           kill $SERVER_PID 2>/dev/null || true
           exit $RESULT

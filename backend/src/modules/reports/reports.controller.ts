@@ -2,11 +2,20 @@ import type { Request, Response } from 'express';
 import { z } from 'zod';
 import * as service from './reports.service';
 
-const filterSchema = z.object({
-  days:     z.coerce.number().int().min(7).max(365).optional(),
-  dateFrom: z.string().optional(),
-  dateTo:   z.string().optional(),
-});
+// dateFrom/dateTo were plain strings, so `?dateFrom=yesterday` became an
+// Invalid Date and threw RangeError deep in the repository when .toISOString()
+// was called on it — a 500 on the executive report and on both exports.
+// `z.coerce.date()` rejects it as a 422 at the edge, like the sibling schemas.
+const filterSchema = z
+  .object({
+    days:     z.coerce.number().int().min(7).max(365).optional(),
+    dateFrom: z.coerce.date().optional(),
+    dateTo:   z.coerce.date().optional(),
+  })
+  .refine((v) => !v.dateFrom || !v.dateTo || v.dateFrom <= v.dateTo, {
+    message: 'dateFrom must be on or before dateTo',
+    path: ['dateFrom'],
+  });
 
 const createSchema = z.object({
   name:        z.string().min(1).max(255),

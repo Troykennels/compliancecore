@@ -9,7 +9,10 @@ import type { Task } from '../types/tasks.types';
 const schema = z.object({
   title:       z.string().min(1, 'Title required').max(500),
   description: z.string().max(10000).optional(),
-  status:      z.enum(['todo','in_progress','in_review','completed','cancelled']).default('todo'),
+  // Must match TaskStatus and the API's own enum, including 'blocked' — the
+  // board has a Blocked column, so its "+" button posted a status this schema
+  // rejected.
+  status:      z.enum(['todo','in_progress','in_review','completed','cancelled','blocked']).default('todo'),
   priority:    z.enum(['critical','high','medium','low']).default('medium'),
   assignedTo:  z.string().uuid().optional().or(z.literal('')),
   dueDate:     z.string().optional(),

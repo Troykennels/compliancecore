@@ -24,6 +24,20 @@ function applyDiscount(base: number, pct: number, fixed: number): number {
   return Math.max(0, afterPct - fixed);
 }
 
+/**
+ * Formats a money amount for an invoice in the currency it was raised in.
+ *
+ * PDFKit's standard fonts are WinAnsi-encoded and have no glyph for ₦, so the
+ * naira symbol would render as a blank box on the very document a customer
+ * files for tax. The ISO code is used instead — unambiguous, and it renders
+ * everywhere.
+ */
+function formatInvoiceAmount(currency: string): (amount: number) => string {
+  const code = (currency || 'NGN').toUpperCase();
+  return (amount: number) =>
+    `${code} ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 function advancePeriod(date: Date, cycle: BillingCycle): Date {
   const d = new Date(date);
   if (cycle === 'yearly') d.setFullYear(d.getFullYear() + 1);
@@ -171,8 +185,12 @@ export async function createSubscription(
   const trialDays = opts?.trialDays ?? 0;
   const now = new Date();
   const start = periodStart(cycle);
-  const end = periodEnd(start, cycle);
   const trialEndsAt = trialDays > 0 ? new Date(now.getTime() + trialDays * 86400_000) : null;
+  // A trial's period must END when the trial ends. Giving it a full month while
+  // the trial ran 14 days meant the entitlement resolver, which falls back to
+  // the period once the trial date passes, silently handed out ~31 days of the
+  // Professional tier plus 7 days of grace — TRIAL_DAYS was decorative.
+  const end = trialEndsAt ?? periodEnd(start, cycle);
 
   let discountPercent = 0;
   let discountFixed = 0;
@@ -256,6 +274,23 @@ export async function updateSubscription(
   // Refuse any self-service change that increases what is owed. Downgrades and
   // moves to a free plan stay allowed — a customer may always spend less.
   if (!opts?.paidUpgrade) {
+    // Status is not a self-service field. The plan/cycle guard below only fires
+    // when planId or billingCycle changes, so a status-only PATCH slipped past
+    // it entirely: a lapsed tenant could send {"status":"active"} and get a 200,
+    // which both restored write access and put the row back into the renewal
+    // job's selection set, extending the period every month without paying.
+    //
+    // Cancelling is the one status change a customer may legitimately make
+    // themselves; every other transition is a billing outcome, so it may only be
+    // set by the payments module after a verified charge, or by the renewal job.
+    if (dto.status !== undefined && dto.status !== 'cancelled') {
+      throw new AppError(
+        'Subscription status is set by billing, not directly. Start checkout to reactivate, or cancel from here.',
+        403,
+        'FORBIDDEN',
+      );
+    }
+
     const targetPlanId = dto.planId ?? existing.planId;
     const targetCycle = dto.billingCycle ?? existing.billingCycle;
     const targetPlan = await repo.findPlanById(targetPlanId);
@@ -554,12 +589,18 @@ export function generateInvoicePdf(invoice: Invoice): Promise<Buffer> {
     doc.text('Amount', 490, y + 6, { width: 60, align: 'right' });
     y += 25;
 
+    // Every figure on this document used a hard-coded "$", so a ₦850,000
+    // invoice was issued to the customer reading "$850,000.00" — a ~1600x
+    // misstatement on a document used as an accounting and tax record. The
+    // amount is formatted in the currency the invoice was actually raised in.
+    const money = formatInvoiceAmount(invoice.currency);
+
     doc.font('Helvetica').fillColor(C.slate).fontSize(9);
     for (const item of invoice.lineItems) {
       doc.text(item.description, 60, y, { width: 300 });
       doc.text(String(item.quantity), 370, y, { width: 40, align: 'right' });
-      doc.text(`$${item.unitAmount.toFixed(2)}`, 420, y, { width: 60, align: 'right' });
-      doc.text(`$${item.amount.toFixed(2)}`, 490, y, { width: 60, align: 'right' });
+      doc.text(money(item.unitAmount), 405, y, { width: 75, align: 'right' });
+      doc.text(money(item.amount), 480, y, { width: 70, align: 'right' });
       y += 18;
       doc.moveTo(50, y).lineTo(50 + W, y).stroke(C.border);
       y += 5;
@@ -567,19 +608,19 @@ export function generateInvoicePdf(invoice: Invoice): Promise<Buffer> {
 
     // Totals
     y += 10;
-    doc.fillColor(C.muted).fontSize(9).text('Subtotal', 390, y, { width: 100, align: 'right' });
-    doc.fillColor(C.slate).font('Helvetica-Bold').text(`$${invoice.amountDue.toFixed(2)}`, 490, y, { width: 60, align: 'right' });
+    doc.fillColor(C.muted).fontSize(9).text('Subtotal', 380, y, { width: 95, align: 'right' });
+    doc.fillColor(C.slate).font('Helvetica-Bold').text(money(invoice.amountDue), 480, y, { width: 70, align: 'right' });
     y += 16;
-    doc.fillColor(C.muted).font('Helvetica').text('Amount Paid', 390, y, { width: 100, align: 'right' });
+    doc.fillColor(C.muted).font('Helvetica').text('Amount Paid', 380, y, { width: 95, align: 'right' });
     doc.fillColor(invoice.amountPaid > 0 ? C.green : C.muted).font('Helvetica-Bold')
-      .text(`$${invoice.amountPaid.toFixed(2)}`, 490, y, { width: 60, align: 'right' });
+      .text(money(invoice.amountPaid), 480, y, { width: 70, align: 'right' });
     y += 6;
-    doc.rect(390, y, 160, 1).fill(C.border);
+    doc.rect(380, y, 170, 1).fill(C.border);
     y += 8;
-    doc.fillColor(C.slate).font('Helvetica-Bold').fontSize(11).text('Balance Due', 390, y, { width: 100, align: 'right' });
+    doc.fillColor(C.slate).font('Helvetica-Bold').fontSize(11).text('Balance Due', 380, y, { width: 95, align: 'right' });
     const balance = Math.max(0, invoice.amountDue - invoice.amountPaid);
     doc.fillColor(balance > 0 ? C.indigo : C.green).fontSize(11)
-      .text(`$${balance.toFixed(2)}`, 490, y, { width: 60, align: 'right' });
+      .text(money(balance), 480, y, { width: 70, align: 'right' });
 
     // Footer
     doc.rect(50, 790, W, 1).fill(C.border);

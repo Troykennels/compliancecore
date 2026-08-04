@@ -1,4 +1,7 @@
-export type TaskStatus   = 'todo' | 'in_progress' | 'in_review' | 'completed' | 'cancelled';
+// 'blocked' is accepted, stored and returned by the API. Omitting it here meant
+// STATUS_CONFIG[task.status] was undefined for such a task and reading .bgColor
+// off it threw, blanking the whole page to the error boundary.
+export type TaskStatus   = 'todo' | 'in_progress' | 'in_review' | 'completed' | 'cancelled' | 'blocked';
 export type TaskPriority = 'critical' | 'high' | 'medium' | 'low';
 
 export interface Task {
@@ -89,6 +92,7 @@ export const STATUS_CONFIG: Record<TaskStatus, { label: string; color: string; b
   in_review:   { label: 'In Review',   color: 'text-purple-700',bgColor: 'bg-purple-100'},
   completed:   { label: 'Completed',   color: 'text-green-700', bgColor: 'bg-green-100' },
   cancelled:   { label: 'Cancelled',   color: 'text-slate-500', bgColor: 'bg-slate-100' },
+  blocked:     { label: 'Blocked',     color: 'text-red-700',   bgColor: 'bg-red-100'   },
 };
 
 export const PRIORITY_CONFIG: Record<TaskPriority, { label: string; color: string; dotColor: string }> = {

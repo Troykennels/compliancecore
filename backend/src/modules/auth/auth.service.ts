@@ -430,6 +430,19 @@ export async function setupMfa(userId: string): Promise<MfaSetupResult> {
   const user = await repo.findUserById(userId);
   if (!user) throw new NotFoundError('User');
 
+  // Re-enrolling resets the stored credential to unverified, and login only
+  // demands a second factor when a VERIFIED credential exists — so calling this
+  // on an account that already has MFA turned it off, silently, with nothing
+  // more than a bearer token. Disabling MFA correctly requires the password;
+  // this path bypassed that entirely and was the quieter way to do the same
+  // thing. Re-enrolment now has to go through disable first, which does ask.
+  const existing = await repo.findMfaCredential(userId);
+  if (existing?.isVerified) {
+    throw new ConflictError(
+      'Two-factor authentication is already enabled. Disable it first to enrol a new device.',
+    );
+  }
+
   const secret = authenticator.generateSecret();
   const otpauth = authenticator.keyuri(user.email, 'ComplianceCore', secret);
   const qrCodeDataUri = await QRCode.toDataURL(otpauth);

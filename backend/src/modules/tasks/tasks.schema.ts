@@ -9,6 +9,10 @@ export const createTaskSchema = z.object({
   assignedTo:     z.string().uuid().optional().nullable(),
   dueDate:        z.string().datetime().optional(),
   priority,
+  // The board's per-column "+" button sends the column's status, but this
+  // schema had no `status` key, so Zod stripped it and every task landed in
+  // "To Do" no matter which column you created it from.
+  status:         status.optional(),
   entityType:     z.string().max(100).optional(),
   entityId:       z.string().uuid().optional(),
   frameworkId:    z.string().uuid().optional(),
@@ -36,8 +40,13 @@ export const listTasksSchema = z.object({
   entityType:  z.string().optional(),
   entityId:    z.string().uuid().optional(),
   frameworkId: z.string().uuid().optional(),
-  dueBefore:   z.string().optional(),
-  dueAfter:    z.string().optional(),
+  // Bound directly against the timestamptz column `due_date`. As bare strings
+  // Prisma bound them as text, so Postgres had no `timestamptz <= text`
+  // operator and every filtered request was a 500 — the filter has never
+  // worked. Coercing here also rejects nonsense like `?dueBefore=soon` as a
+  // 422 instead of letting it reach the database.
+  dueBefore:   z.coerce.date().optional(),
+  dueAfter:    z.coerce.date().optional(),
   overdue:     z.coerce.boolean().optional(),
   myTasks:     z.coerce.boolean().optional(),
   parentTaskId:z.string().uuid().optional(),

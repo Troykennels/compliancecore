@@ -63,7 +63,7 @@ export function ExpiryWidget({ items, expiringSoon, expired }: ExpiryWidgetProps
 
       <ul className="space-y-1.5">
         {items.map((item) => {
-          const u = urgency(item.daysUntil);
+          const u = urgency(item.daysUntilExpiry);
           return (
             <li key={item.id}>
               <button

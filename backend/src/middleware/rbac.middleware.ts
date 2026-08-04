@@ -14,7 +14,10 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     'risks:read', 'risks:write', 'risks:delete',
     'vendors:read', 'vendors:write', 'vendors:delete',
     'audits:read', 'audits:write', 'audits:delete',
-    'training:read', 'training:write',
+    // DELETE /api/training/:id requires 'training:delete', which no role held —
+    // so the endpoint was unreachable for everyone except the owner, whose
+    // wildcard covers it. Admin holds the delete scope for every other module.
+    'training:read', 'training:write', 'training:delete',
     'incidents:read', 'incidents:write',
     'privacy:read', 'privacy:write',
     'integrations:read', 'integrations:write',

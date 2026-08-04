@@ -14,17 +14,26 @@ import { env } from '../config/env';
 // out everyone, because one person fumbling a password consumed the global
 // allowance.
 //
-// The platform edge appends the immediate peer to X-Forwarded-For, so the
-// leftmost entry is the original client. A client can forge extra entries by
-// sending its own X-Forwarded-For, which at worst lets an attacker spread their
-// own attempts across buckets — no worse than switching IPs, and far better
-// than every legitimate user sharing one.
+// The platform edge APPENDS the peer it sees to X-Forwarded-For, so the entry
+// to trust is the RIGHTMOST one — the only entry written by our own proxy.
+//
+// This previously took the leftmost, which the caller controls completely. A
+// request carrying `X-Forwarded-For: 1.2.3.4` arrives at the app as
+// "1.2.3.4, <real client>", so reading the left gave the attacker a fresh
+// bucket per request just by varying the header. That made the limits on login,
+// MFA challenge, registration and password reset decorative: unlimited password
+// guessing, and an unthrottled oracle against a 6-digit TOTP code.
+//
+// Forging cannot beat the rightmost entry, because anything the client sends is
+// pushed left when the edge appends. A legitimate client sends no header at
+// all, so for them the two are identical and nothing changes.
 function clientIp(req: Request): string {
   const xff = req.headers['x-forwarded-for'];
-  const first = Array.isArray(xff) ? xff[0] : xff;
-  const candidate = first?.split(',')[0]?.trim();
+  const raw = Array.isArray(xff) ? xff.join(',') : xff;
+  const entries = raw?.split(',').map((s) => s.trim()).filter(Boolean) ?? [];
+  const candidate = entries[entries.length - 1];
   // Fall back to req.ip (and finally a constant) so a missing header degrades
-  // to the previous behaviour rather than throwing.
+  // gracefully rather than throwing.
   return candidate || req.ip || 'unknown';
 }
 

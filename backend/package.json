@@ -17,6 +17,7 @@
     "db:migrate-tenants": "node scripts/migrate-tenants.mjs",
     "preflight": "node scripts/preflight.mjs",
     "test:e2e": "node scripts/e2e-journey.mjs",
+    "test:security": "node scripts/security-checks.mjs",
     "db:seed": "node scripts/migrate.mjs --seed",
     "db:seed-demo": "node scripts/seed-demo.mjs",
     "db:backup": "bash scripts/backup.sh",

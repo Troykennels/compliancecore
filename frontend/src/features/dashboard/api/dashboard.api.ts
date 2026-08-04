@@ -16,7 +16,10 @@ export interface ExpiryUrgentItem {
   entityType: string;
   expiryDate: string;
   status: string;
-  daysUntil: number;
+  // Named to match what the API actually sends. It was `daysUntil` here, which
+  // no endpoint has ever returned, so the dashboard rendered "undefined left"
+  // and every urgency band silently failed to fire.
+  daysUntilExpiry: number;
 }
 
 export interface ExpirySummary {
@@ -42,12 +45,15 @@ export interface CalendarSummary {
   upcomingEvents: CalendarUpcomingEvent[];
 }
 
+// Mirrors getRecentEvidenceActivity in backend/src/modules/dashboard.
+// This previously declared `description`, `actorName` and `evidenceTitle` —
+// none of which the endpoint sends — so every row of the dashboard's audit
+// trail rendered as a bare "System" with no text.
 export interface RecentActivityEvent {
   id: string;
   eventType: string;
-  description: string;
-  actorName: string | null;
-  evidenceTitle: string | null;
+  actorEmail: string | null;
+  metadata: Record<string, unknown> | null;
   createdAt: string;
 }
 

@@ -4,11 +4,17 @@ import type { Task, TaskStatus } from '../types/tasks.types';
 import { STATUS_CONFIG, PRIORITY_CONFIG } from '../types/tasks.types';
 import { useOrgFormat } from '@/lib/org-format';
 
+// Every status the API can return needs a column, or tasks in the missing ones
+// vanish from the default view: a task set to Blocked or Cancelled simply
+// disappeared, and filtering by Cancelled showed four empty columns while the
+// result set was not empty.
 const BOARD_COLUMNS: { status: TaskStatus; label: string; headerColor: string }[] = [
   { status: 'todo',        label: 'To Do',       headerColor: 'border-t-slate-400' },
   { status: 'in_progress', label: 'In Progress',  headerColor: 'border-t-blue-500' },
+  { status: 'blocked',     label: 'Blocked',      headerColor: 'border-t-red-500' },
   { status: 'in_review',   label: 'In Review',    headerColor: 'border-t-purple-500' },
   { status: 'completed',   label: 'Completed',    headerColor: 'border-t-green-500' },
+  { status: 'cancelled',   label: 'Cancelled',    headerColor: 'border-t-slate-300' },
 ];
 
 interface TaskBoardProps {

@@ -1,7 +1,9 @@
 export interface ReportFilter {
   days?: number;
-  dateFrom?: string;
-  dateTo?: string;
+  // Parsed at the edge by z.coerce.date(), so an unparseable value is a 422
+  // rather than an Invalid Date that throws RangeError inside the repository.
+  dateFrom?: Date;
+  dateTo?: Date;
 }
 
 export interface ComplianceKpis {

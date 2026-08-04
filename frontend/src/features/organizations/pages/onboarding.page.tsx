@@ -15,7 +15,16 @@ const ORG_SIZES = ['1-10', '11-50', '51-200', '201-500', '501-1000', '1001+'] as
 const schema = z.object({
   name: z.string().min(2, 'Organization name must be at least 2 characters').max(255),
   industry: z.string().max(100).optional(),
-  size: z.enum(ORG_SIZES).optional(),
+  // The select starts on its "" placeholder and the field is genuinely
+  // optional, but a bare `z.enum(...).optional()` rejects "" — so anyone who
+  // did not open the dropdown got a silently dead "Create organization"
+  // button: no error, no toast, no navigation, because handleSubmit never
+  // reached onSubmit. That blocked the first action of every new customer.
+  // "" is now accepted and normalised away before it is sent.
+  size: z
+    .union([z.enum(ORG_SIZES), z.literal('')])
+    .optional()
+    .transform((v) => (v === '' ? undefined : v)),
 });
 
 type FormValues = z.infer<typeof schema>;

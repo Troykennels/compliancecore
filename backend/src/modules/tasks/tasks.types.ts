@@ -52,6 +52,8 @@ export interface CreateTaskDto {
   assignedTo?:    string | null;
   dueDate?:       string;
   priority?:      TaskPriority;
+  /** Defaults to 'todo'. Set by the board when creating into a named column. */
+  status?:        TaskStatus;
   entityType?:    string;
   entityId?:      string;
   frameworkId?:   string;
@@ -74,8 +76,10 @@ export interface TaskFilters {
   entityType?:  string;
   entityId?:    string;
   frameworkId?: string;
-  dueBefore?:   string;
-  dueAfter?:    string;
+  // Parsed at the edge by z.coerce.date() and bound with an explicit
+  // ::timestamptz cast, so the filter works instead of 500ing.
+  dueBefore?:   Date;
+  dueAfter?:    Date;
   overdue?:     boolean;
   myTasks?:     boolean;
   page?:        number;
