@@ -11,6 +11,7 @@ import {
   verifyTransaction,
   verifyWebhookSignature,
   isPaystackConfigured,
+  type PaystackAuthorization,
 } from './paystack.client';
 
 export type BillingCycle = 'monthly' | 'yearly';
@@ -114,6 +115,46 @@ export async function createCheckout(input: {
 }
 
 /**
+ * Records a payment against the customer's ledger.
+ *
+ * Prefers the outstanding invoice the payment was raised for; if there is none
+ * — an in-period upgrade, say, where updateSubscription raises no invoice — a
+ * paid invoice is written so the revenue is still recorded rather than lost.
+ */
+async function settleInvoiceFor(
+  claimed: { tenantId: string; amount: number; currency: string; planId: string; billingCycle: string },
+  paidAt: Date,
+): Promise<void> {
+  const open = await billingRepo.findOpenInvoice(claimed.tenantId);
+  if (open) {
+    await billingRepo.markInvoicePaid(open.id, claimed.amount, paidAt);
+    return;
+  }
+
+  const sub = await billingRepo.findSubscriptionByTenant(claimed.tenantId);
+  const plan = await billingRepo.findPlanById(claimed.planId);
+  const start = sub ? new Date(sub.currentPeriodStart) : paidAt;
+  const end = sub ? new Date(sub.currentPeriodEnd) : paidAt;
+
+  const invoice = await billingRepo.createInvoice({
+    tenantId: claimed.tenantId,
+    subscriptionId: sub?.id,
+    amountDue: claimed.amount,
+    currency: claimed.currency,
+    billingPeriodStart: start,
+    billingPeriodEnd: end,
+    dueDate: paidAt,
+    lineItems: [{
+      description: `${plan?.name ?? 'Subscription'} — ${claimed.billingCycle} subscription`,
+      quantity: 1,
+      unitAmount: claimed.amount,
+      amount: claimed.amount,
+    }],
+  });
+  await billingRepo.markInvoicePaid(invoice.id, claimed.amount, paidAt);
+}
+
+/**
  * Applies a confirmed payment: claims the transaction, then activates or
  * upgrades the subscription.
  *
@@ -125,6 +166,11 @@ async function applyPaidTransaction(
   reference: string,
   providerRef: string | null,
   paidAt: Date | null,
+  authorization?: PaystackAuthorization | null,
+  // The address Paystack billed. Charging a stored authorization requires the
+  // same email the authorization was created against, so it is kept alongside
+  // the token rather than guessed from the tenant's membership later.
+  payerEmail?: string | null,
 ): Promise<{ applied: boolean }> {
   const claimed = await repo.claimTransaction(reference, providerRef, paidAt);
   if (!claimed) {
@@ -166,6 +212,40 @@ async function applyPaidTransaction(
       { planId: claimed.planId, billingCycle: claimed.billingCycle },
       { paidUpgrade: true },
     );
+  }
+
+  // Keep the card so the subscription can actually recur. Without this the
+  // renewal job has nothing to charge and the customer silently gets the plan
+  // free from month two onward.
+  //
+  // Never fatal: the money is taken and the plan is granted either way, and
+  // failing here would leave a paid customer without access.
+  if (authorization?.authorization_code && authorization.reusable && payerEmail) {
+    try {
+      await billingRepo.saveAuthorization({
+        tenantId: claimed.tenantId,
+        authorizationCode: authorization.authorization_code,
+        email: payerEmail,
+        last4: authorization.last4,
+        brand: authorization.brand ?? authorization.card_type,
+        expMonth: authorization.exp_month,
+        expYear: authorization.exp_year,
+        bank: authorization.bank,
+        channel: authorization.channel,
+      });
+    } catch (err) {
+      logger.error({ err, reference }, 'Could not store payment authorization — renewals will need re-entry');
+    }
+  }
+
+  // Settle the ledger. createSubscription raises an invoice for a paid plan
+  // with amount_paid = 0, and nothing ever marked it paid — so a paying
+  // customer kept an open invoice showing the full balance due, and revenue
+  // reconciliation reported nothing collected.
+  try {
+    await settleInvoiceFor(claimed, paidAt ?? new Date());
+  } catch (err) {
+    logger.error({ err, reference }, 'Could not settle invoice for payment');
   }
 
   logger.info(
@@ -215,7 +295,13 @@ export async function confirmByReference(tenantId: string, reference: string) {
   }
 
   assertAmountMatches(tx, verified.amount, verified.currency, reference);
-  const { applied } = await applyPaidTransaction(reference, verified.reference, verified.paid_at ? new Date(verified.paid_at) : null);
+  const { applied } = await applyPaidTransaction(
+    reference,
+    verified.reference,
+    verified.paid_at ? new Date(verified.paid_at) : null,
+    verified.authorization,
+    verified.customer?.email ?? null,
+  );
   return { status: 'success' as const, alreadyApplied: !applied };
 }
 
@@ -284,7 +370,13 @@ export async function handleWebhook(rawBody: Buffer, signature: string | undefin
   }
 
   assertAmountMatches(tx, verified.amount, verified.currency, reference);
-  await applyPaidTransaction(reference, verified.reference, verified.paid_at ? new Date(verified.paid_at) : null);
+  await applyPaidTransaction(
+    reference,
+    verified.reference,
+    verified.paid_at ? new Date(verified.paid_at) : null,
+    verified.authorization,
+    verified.customer?.email ?? null,
+  );
 }
 
 export async function listTenantPayments(tenantId: string) {

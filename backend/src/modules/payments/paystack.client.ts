@@ -63,6 +63,26 @@ export interface InitializeResult {
   reference: string;
 }
 
+/**
+ * The reusable card token Paystack returns with every successful charge.
+ *
+ * `reusable: false` means the instrument cannot be charged again without the
+ * customer present — some bank transfer and USSD channels behave this way — so
+ * it must be checked before storing, not assumed.
+ */
+export interface PaystackAuthorization {
+  authorization_code: string;
+  bin: string | null;
+  last4: string | null;
+  exp_month: string | null;
+  exp_year: string | null;
+  card_type: string | null;
+  bank: string | null;
+  channel: string | null;
+  brand: string | null;
+  reusable: boolean;
+}
+
 export interface VerifyResult {
   status: string;              // 'success' | 'failed' | 'abandoned' | ...
   reference: string;
@@ -71,6 +91,9 @@ export interface VerifyResult {
   paid_at: string | null;
   metadata: Record<string, unknown> | null;
   customer: { email: string } | null;
+  // Present on a successful charge. Without keeping this there is no way to
+  // bill the customer again, which is why renewals never collected anything.
+  authorization: PaystackAuthorization | null;
 }
 
 /**
@@ -118,6 +141,48 @@ export async function verifyTransaction(reference: string): Promise<VerifyResult
  * Compared with timingSafeEqual to avoid leaking the expected digest byte by
  * byte through response timing.
  */
+/**
+ * Charges a stored authorization without the customer present — the mechanism
+ * that makes a subscription actually recur.
+ *
+ * Paystack returns HTTP 200 with `status: 'failed'` in the body for a declined
+ * card, so a non-throwing call is NOT proof of payment: the returned status
+ * must be inspected. That is different from a network or auth failure, which
+ * throws, and the caller has to treat the two differently — a decline is the
+ * customer's problem, an unreachable provider is ours.
+ *
+ * Amount is in the currency's smallest unit, matching initializeTransaction.
+ */
+export interface ChargeResult {
+  status: string;              // 'success' | 'failed' | ...
+  reference: string;
+  amount: number;
+  currency: string;
+  paid_at: string | null;
+  gateway_response: string | null;
+}
+
+export async function chargeAuthorization(input: {
+  authorizationCode: string;
+  email: string;
+  amountMajor: number;
+  currency: string;
+  reference: string;
+  metadata: Record<string, unknown>;
+}): Promise<ChargeResult> {
+  return call<ChargeResult>('/transaction/charge_authorization', {
+    method: 'POST',
+    body: JSON.stringify({
+      authorization_code: input.authorizationCode,
+      email: input.email,
+      amount: Math.round(input.amountMajor * 100),
+      currency: input.currency,
+      reference: input.reference,
+      metadata: input.metadata,
+    }),
+  });
+}
+
 export function verifyWebhookSignature(rawBody: Buffer, signature: string | undefined): boolean {
   if (!signature || !env.PAYSTACK_SECRET_KEY) return false;
   const expected = crypto

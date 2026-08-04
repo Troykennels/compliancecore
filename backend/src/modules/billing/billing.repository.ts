@@ -104,6 +104,29 @@ export async function initBillingTables(): Promise<void> {
     )
   `);
 
+  // Reusable provider token, so a subscription can actually be charged again.
+  // Added as ALTER rather than folded into the CREATE above because every
+  // existing deployment already has this table.
+  //
+  // The authorization code is a bearer credential for charging that card, but
+  // it is worthless without our Paystack secret key, and it must be readable to
+  // be usable — so it is stored as-is rather than encrypted, and protected by
+  // the same controls as the rest of the billing schema.
+  await prisma.$executeRawUnsafe(`
+    ALTER TABLE global.payment_methods
+      ADD COLUMN IF NOT EXISTS provider VARCHAR(20) NOT NULL DEFAULT 'paystack',
+      ADD COLUMN IF NOT EXISTS authorization_code VARCHAR(120),
+      ADD COLUMN IF NOT EXISTS authorization_email VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS is_reusable BOOLEAN NOT NULL DEFAULT false
+  `);
+  // One row per stored card per tenant, so re-paying with the same card updates
+  // the token instead of accumulating duplicates on every renewal.
+  await prisma.$executeRawUnsafe(`
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_payment_methods_tenant_auth
+      ON global.payment_methods (tenant_id, authorization_code)
+      WHERE authorization_code IS NOT NULL
+  `);
+
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS global.invoices (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -935,6 +958,118 @@ export async function addPaymentMethod(tenantId: string, dto: AddPaymentMethodDt
   return mapPaymentMethod((rows as unknown[])[0]);
 }
 
+/**
+ * Records the reusable card token returned by a successful charge.
+ *
+ * Upserts on (tenant, authorization_code) so paying twice with the same card
+ * refreshes the token rather than stacking duplicate rows, and makes it the
+ * default so the renewal job has an unambiguous instrument to charge.
+ */
+export async function saveAuthorization(input: {
+  tenantId: string;
+  authorizationCode: string;
+  email: string;
+  last4: string | null;
+  brand: string | null;
+  expMonth: string | null;
+  expYear: string | null;
+  bank: string | null;
+  channel: string | null;
+}): Promise<void> {
+  const label = input.brand && input.last4
+    ? `${input.brand} •••• ${input.last4}`
+    : input.bank ?? 'Saved payment method';
+
+  await prisma.$executeRawUnsafe(
+    `UPDATE global.payment_methods SET is_default = false WHERE tenant_id = $1::uuid`,
+    input.tenantId,
+  );
+
+  await prisma.$executeRawUnsafe(`
+    INSERT INTO global.payment_methods
+      (tenant_id, type, label, last4, brand, exp_month, exp_year, bank_name,
+       provider, authorization_code, authorization_email, is_reusable, is_default, is_active)
+    VALUES ($1::uuid, $2, $3, $4, $5, $6::int, $7::int, $8,
+            'paystack', $9, $10, true, true, true)
+    ON CONFLICT (tenant_id, authorization_code) WHERE authorization_code IS NOT NULL
+    DO UPDATE SET
+      label = EXCLUDED.label, last4 = EXCLUDED.last4, brand = EXCLUDED.brand,
+      exp_month = EXCLUDED.exp_month, exp_year = EXCLUDED.exp_year,
+      authorization_email = EXCLUDED.authorization_email,
+      is_reusable = true, is_default = true, is_active = true, updated_at = NOW()
+  `,
+    input.tenantId,
+    input.channel === 'card' ? 'card' : 'bank',
+    label,
+    input.last4,
+    input.brand,
+    input.expMonth ? Number(input.expMonth) : null,
+    input.expYear ? Number(input.expYear) : null,
+    input.bank,
+    input.authorizationCode,
+    input.email,
+  );
+}
+
+/** The instrument the renewal job should charge, if the tenant has one. */
+export async function findChargeableAuthorization(
+  tenantId: string,
+): Promise<{ authorizationCode: string; email: string; label: string } | null> {
+  const rows = await prisma.$queryRawUnsafe(`
+    SELECT authorization_code AS "authorizationCode",
+           authorization_email AS "email",
+           label
+      FROM global.payment_methods
+     WHERE tenant_id = $1::uuid
+       AND is_active = true
+       AND is_reusable = true
+       AND authorization_code IS NOT NULL
+       AND authorization_email IS NOT NULL
+     ORDER BY is_default DESC, updated_at DESC
+     LIMIT 1
+  `, tenantId) as Array<{ authorizationCode: string; email: string; label: string }>;
+  return rows[0] ?? null;
+}
+
+/**
+ * Marks an invoice settled.
+ *
+ * Nothing wrote amount_paid or paid_at anywhere in the codebase, so a customer
+ * who had paid still saw an open invoice for the full balance — and could
+ * download a PDF saying so — while the ledger reported zero collected against
+ * real Paystack settlements.
+ */
+export async function markInvoicePaid(
+  invoiceId: string,
+  amountPaid: number,
+  paidAt: Date,
+): Promise<void> {
+  await prisma.$executeRawUnsafe(`
+    UPDATE global.invoices
+       SET amount_paid = $2,
+           paid_at     = $3::timestamptz,
+           status      = CASE WHEN $2 >= amount_due THEN 'paid' ELSE 'partial' END,
+           updated_at  = NOW()
+     WHERE id = $1::uuid
+  `, invoiceId, amountPaid, paidAt);
+}
+
+/**
+ * The invoice a payment should settle: the most recent unpaid one for the
+ * tenant. Returns null when there is nothing outstanding, in which case the
+ * caller records a fresh paid invoice instead of inventing a settlement.
+ */
+export async function findOpenInvoice(tenantId: string): Promise<Invoice | null> {
+  const rows = await prisma.$queryRawUnsafe(`
+    SELECT * FROM global.invoices
+     WHERE tenant_id = $1::uuid
+       AND status IN ('open', 'partial', 'past_due')
+     ORDER BY created_at DESC
+     LIMIT 1
+  `, tenantId) as unknown[];
+  return rows.length ? mapInvoice(rows[0]) : null;
+}
+
 export async function setDefaultPaymentMethod(id: string, tenantId: string): Promise<void> {
   await prisma.$executeRawUnsafe(
     `UPDATE global.payment_methods SET is_default = false WHERE tenant_id = $1::uuid`,
@@ -1106,6 +1241,29 @@ export async function upsertPlanPrice(
     currency,
     priceMonthly,
     priceYearly,
+  );
+
+  // Mirror back onto the plan when this IS the plan's own currency.
+  //
+  // Two live price sources with a one-way sync is how a customer ends up
+  // charged one figure and invoiced another: checkout reads plan_prices, while
+  // the upgrade guard, next_invoice_amount, the first invoice and every renewal
+  // read subscription_plans.price_monthly/yearly. Editing a price in the owner
+  // console wrote only plan_prices, so the two drifted apart silently from the
+  // first edit — and because the free/paid decision in the upgrade guard reads
+  // the plan column, a plan left at 0 there was handed out without payment.
+  //
+  // Scoped to the matching currency: a USD row must never overwrite an NGN
+  // plan's headline price.
+  await prisma.$executeRawUnsafe(
+    `UPDATE global.subscription_plans
+        SET price_monthly = $2, price_yearly = $3, updated_at = NOW()
+      WHERE id = $1::uuid
+        AND UPPER(COALESCE(currency, 'NGN')) = UPPER($4)`,
+    planId,
+    priceMonthly,
+    priceYearly,
+    currency,
   );
 }
 
