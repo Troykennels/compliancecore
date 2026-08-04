@@ -10,6 +10,7 @@ import { MetricCard } from '../components/metric-card';
 import { ExpiryWidget } from '../components/expiry-widget';
 import { ActivityFeed } from '../components/activity-feed';
 import { FrameworkCoverage } from '../components/framework-coverage';
+import { DashboardInsights } from '../components/dashboard-insights';
 import { useCurrentScore } from '../../compliance-score/hooks/use-score';
 import { EVENT_TYPE_COLORS } from '../../calendar/types/calendar.types';
 import type { CalendarEventType } from '../../calendar/types/calendar.types';
@@ -225,6 +226,19 @@ export function DashboardPage() {
           <ActivityFeed events={recentActivity} />
         </div>
       </div>
+
+      {/* Insight panels. Rendered after the existing summary so the page still
+          reads top-down: headline numbers, then where the gaps are. Each panel
+          owns its own query, so a slow or failing module degrades that card
+          rather than the whole dashboard. */}
+      <DashboardInsights
+        trend={complianceScore.trend}
+        upcomingEvents={calendar.upcomingEvents}
+        urgentExpiry={expiry.urgentItems}
+        expiringSoon={expiry.expiringSoon}
+        score={complianceScore.overall}
+        frameworks={frameworks}
+      />
     </div>
   );
 }
