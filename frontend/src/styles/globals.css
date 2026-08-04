@@ -46,6 +46,11 @@
 
     --radius: 0.625rem;
 
+    /* Belt and braces with the meta tag in index.html. This is what stops the
+       browser rendering native widgets — inputs, selects, the date picker, the
+       scrollbars — in its dark theme on a machine set to dark. */
+    color-scheme: light;
+
     /* Sidebar sits fractionally off the page ground so the navigation rail
        reads as chrome rather than as content. */
     --nav: 0 0% 100%;
@@ -90,6 +95,9 @@
 
     --nav: 217 30% 12%;
     --nav-border: 217 17% 26%;
+
+    /* Only correct once something actually applies this attribute. */
+    color-scheme: dark;
   }
 
   * {
@@ -117,6 +125,54 @@
     text-wrap: balance;
   }
 
+  /* Form controls state their own colours.
+
+     Of the ~291 inputs, selects and textareas in the app, most set only a
+     border and padding and leave background and text colour to the browser.
+     That is fine until the browser decides to render them dark, which is how
+     every form on every screen turned into black boxes with invisible text.
+     Declaring them here means no field depends on a user-agent default again.
+
+     These sit in the base layer, so any Tailwind utility on the element —
+     `bg-slate-50` on a read-only field, say — still wins. Types that are not
+     text-like are excluded: forcing a background onto a checkbox, a colour
+     swatch or a range slider breaks their native rendering.
+
+     Those exclusions are wrapped in :where() so they contribute NO specificity.
+     A bare :not() chain counts five times over and out-weighed the :disabled
+     rule below, which left disabled fields looking perfectly editable. */
+  input:where(:not([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file'])),
+  select,
+  textarea {
+    background-color: hsl(var(--surface));
+    color: hsl(var(--foreground));
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--muted-foreground));
+    opacity: 1; /* Firefox dims placeholders by default, on top of the colour. */
+  }
+
+  /* The options list of a native select is drawn by the OS, and inherits from
+     the element rather than the page. */
+  option {
+    background-color: hsl(var(--surface));
+    color: hsl(var(--foreground));
+  }
+
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    background-color: hsl(var(--muted));
+    /* Deliberately darker than --muted-foreground, which lands at 4.28:1 on
+       this background. WCAG exempts disabled controls from contrast rules, but
+       a disabled field usually holds a value the reader still needs — a plan
+       limit, a locked reference — so it is set to clear AA anyway. */
+    color: hsl(221 13% 38%);
+    cursor: not-allowed;
+  }
+
   /* A single, unmistakable focus treatment. The app previously relied on
      Tailwind's default `focus:ring` on some inputs and nothing at all on most
      buttons and links, so keyboard users lost their place constantly. */
@@ -139,28 +195,37 @@
      grey and it is the single loudest element on a dense screen. */
   * {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--border)) transparent;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
   }
 
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
     background: transparent;
   }
 
+  /* Quiet until you reach for it. The bar sat at full contrast permanently,
+     which on the sidebar and inside dialogs read as a hard line dividing the
+     layout rather than as a control. */
   ::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--border));
+    background-color: hsl(var(--muted-foreground) / 0.25);
     border-radius: 9999px;
-    border: 3px solid transparent;
+    border: 2px solid transparent;
     background-clip: content-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: hsl(var(--muted-foreground) / 0.5);
+    background-color: hsl(var(--muted-foreground) / 0.45);
     background-clip: content-box;
+  }
+
+  /* The corner where two bars meet renders as an opaque grey square by
+     default, which is the most visible part of the whole treatment. */
+  ::-webkit-scrollbar-corner {
+    background: transparent;
   }
 
   /* Figures in a table must line up. Inter's proportional digits make a column

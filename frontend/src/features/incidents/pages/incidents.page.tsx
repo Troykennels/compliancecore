@@ -512,15 +512,22 @@ function Modal({ title, children, onClose, wide }: {
   title: string; children: React.ReactNode; onClose: () => void; wide?: boolean;
 }): JSX.Element {
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4">
-      <div className={`mt-8 w-full ${wide ? 'max-w-2xl' : 'max-w-lg'} rounded-xl border border-slate-200 bg-white shadow-xl`}>
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
-          <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-          <button type="button" onClick={onClose} className="rounded-md p-1 text-slate-400 hover:bg-slate-100">
-            <X className="h-4 w-4" />
-          </button>
+    // The only modal in the app that was top-aligned rather than centred, so it
+    // sat noticeably higher than every other dialog. The outer element owns the
+    // scrolling and the inner flex centres within `min-h-full`: short content
+    // sits in the middle, tall content scrolls without the top being clipped —
+    // which is what plain `items-center` + `overflow-y-auto` gets wrong.
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 p-4">
+      <div className="flex min-h-full items-center justify-center">
+        <div className={`w-full ${wide ? 'max-w-2xl' : 'max-w-lg'} rounded-xl border border-slate-200 bg-white shadow-xl`}>
+          <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
+            <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+            <button type="button" onClick={onClose} className="rounded-md p-1 text-slate-400 hover:bg-slate-100">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="p-5">{children}</div>
         </div>
-        <div className="p-5">{children}</div>
       </div>
     </div>
   );

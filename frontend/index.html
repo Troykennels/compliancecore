@@ -7,7 +7,12 @@
     <!-- Matches brand-600 in the token layer; this tints the browser chrome on
          Android and the title bar of an installed PWA. -->
     <meta name="theme-color" content="#0F56C9" />
-    <meta name="color-scheme" content="light dark" />
+    <!-- The app has no dark mode: nothing ever sets data-theme, so the page is
+         always light. Declaring "light dark" told the browser we handled dark
+         mode, so on a machine set to dark it applied its own dark styling to
+         every input, select and date picker while our CSS kept the page white —
+         black fields on white cards, unreadable, across every form. -->
+    <meta name="color-scheme" content="light" />
     <meta
       name="description"
       content="ComplianceCore — governance, risk and compliance management for regulated organisations."
