@@ -152,10 +152,11 @@ export async function initBillingTables(): Promise<void> {
 
   // Seed default plans.
   //
-  // Prices here must match database/migrations/010_pricing_ngn_2026.sql, which
-  // applies the same figures to databases that already existed. This branch only
-  // ever runs on a fresh install — ON CONFLICT DO NOTHING means an existing row
-  // is never overwritten, so an owner's edits in the console survive a reboot.
+  // Prices here must match applyPricingCorrection() below, which brings a
+  // database that predates naira pricing up to the same figures. This branch
+  // only ever runs on a fresh install — ON CONFLICT DO NOTHING means an
+  // existing row is never overwritten, so an owner's edits in the console
+  // survive a reboot.
   //
   // Annual is 10x monthly across the self-service tiers: two months free.
   //
@@ -256,8 +257,202 @@ export async function initBillingTables(): Promise<void> {
     `CREATE INDEX IF NOT EXISTS idx_payment_tx_tenant ON global.payment_transactions (tenant_id, created_at DESC)`,
   );
 
+  await applyPricingCorrection();
+
   _initialized = true;
   logger.info('Billing tables initialised');
+}
+
+/**
+ * One-time pricing and plan-allocation correction.
+ *
+ * The seed above only fires on a fresh database — it uses ON CONFLICT DO
+ * NOTHING so it can never stamp on prices an owner has edited in the console.
+ * That is the right behaviour, but it also means it can never *correct* a
+ * database that was created before the naira pricing existed and is still
+ * sitting on the placeholder USD figures.
+ *
+ * This used to be migrations 010 and 011. It cannot be: those run before the
+ * app boots, and global.subscription_plans is created here, at boot — so on any
+ * clean database they failed with "relation does not exist" and took CI (and
+ * therefore the deploy) down with them.
+ *
+ * Guarded by a row in global.schema_migrations, the same table the migration
+ * runner uses, so it applies exactly once per database and is skipped on every
+ * subsequent boot.
+ */
+async function applyPricingCorrection(): Promise<void> {
+  // The insert is the lock: if it affects no rows, another boot (or an earlier
+  // deploy) has already done this work.
+  const claimed = await prisma.$executeRawUnsafe(`
+    INSERT INTO global.schema_migrations (version, description)
+    VALUES ('010b_pricing_and_plan_allocation',
+            'Naira pricing, Business tier and plan allowances (applied at boot)')
+    ON CONFLICT (version) DO NOTHING
+  `);
+  if (claimed === 0) return;
+
+  logger.info('Applying one-time pricing and plan allocation correction');
+
+  // ── Business tier ─────────────────────────────────────────────────────────
+  // Sits between Professional and Enterprise.
+  await prisma.$executeRawUnsafe(`
+    INSERT INTO global.subscription_plans
+        (name, slug, description, price_monthly, price_yearly, currency,
+         max_users, max_frameworks, max_evidence_gb, max_branches, max_departments,
+         features, sort_order, is_active, is_public)
+    SELECT
+        'Business', 'business',
+        'For established organisations running several frameworks across multiple locations',
+        180000, 1800000, 'NGN',
+        100, NULL, 250, NULL, NULL,
+        '["100 team members","Unlimited compliance frameworks","250 GB evidence storage","Everything in Professional","Departments","Branches","Multi-location support","Advanced analytics","API access","Priority support","Executive reporting","AI assistant","Vendor portal","Risk management","Workflow automation"]'::jsonb,
+        3, TRUE, TRUE
+    WHERE NOT EXISTS (SELECT 1 FROM global.subscription_plans WHERE slug = 'business')
+  `);
+
+  // ── Naira prices for the self-service tiers ───────────────────────────────
+  // Scoped to plans NOT already in naira, so a price the owner has since edited
+  // in the pricing console is never overwritten. Annual is 10x monthly: two
+  // months free.
+  await prisma.$executeRawUnsafe(`
+    UPDATE global.subscription_plans
+       SET price_monthly = v.monthly,
+           price_yearly  = v.yearly,
+           currency      = 'NGN',
+           sort_order    = v.sort_order,
+           updated_at    = NOW()
+      FROM (VALUES
+            ('starter',       25000::numeric,   250000::numeric, 1),
+            ('professional',  85000::numeric,   850000::numeric, 2),
+            ('business',     180000::numeric,  1800000::numeric, 3)
+           ) AS v(slug, monthly, yearly, sort_order)
+     WHERE global.subscription_plans.slug = v.slug
+       AND UPPER(COALESCE(global.subscription_plans.currency, 'USD')) <> 'NGN'
+  `);
+
+  // Enterprise and MSP are shown as "Contact Sales" but must stay priced.
+  //
+  // Two rules, both about safety rather than commerce:
+  //
+  //  1. The price must stay ABOVE ZERO. createSubscription/updateSubscription
+  //     treat a zero-priced plan as free, so zeroing these would let anyone
+  //     assign themselves Enterprise without paying.
+  //
+  //  2. The currency must match the other plans. The upgrade guard compares
+  //     target price against current price numerically; leaving these in USD
+  //     while the self-service tiers moved to naira made "299" look cheaper
+  //     than "85,000", so Enterprise read as a downgrade and was granted free.
+  //     billing.service.ts now also refuses to compare across currencies, but
+  //     the data should not set that trap in the first place.
+  await prisma.$executeRawUnsafe(`
+    UPDATE global.subscription_plans p
+       SET currency      = 'NGN',
+           price_monthly = COALESCE(pp.price_monthly, p.price_monthly * 1600),
+           price_yearly  = COALESCE(pp.price_yearly,  p.price_yearly  * 1600),
+           sort_order    = CASE p.slug WHEN 'enterprise' THEN 4 WHEN 'msp' THEN 5 END,
+           updated_at    = NOW()
+      FROM (SELECT plan_id, price_monthly, price_yearly
+              FROM global.plan_prices WHERE currency = 'NGN') pp
+     WHERE p.slug IN ('enterprise', 'msp')
+       AND pp.plan_id = p.id
+       AND UPPER(COALESCE(p.currency, 'USD')) <> 'NGN'
+  `);
+
+  // ── plan_prices (what checkout actually charges) ──────────────────────────
+  // Checkout reads this table, not the columns above, so the two must agree or
+  // a customer is charged something different from the price they were shown.
+  await prisma.$executeRawUnsafe(`
+    INSERT INTO global.plan_prices (plan_id, currency, price_monthly, price_yearly)
+    SELECT p.id, 'NGN', v.monthly, v.yearly
+      FROM global.subscription_plans p
+      JOIN (VALUES
+            ('starter',       25000::numeric,   250000::numeric),
+            ('professional',  85000::numeric,   850000::numeric),
+            ('business',     180000::numeric,  1800000::numeric)
+           ) AS v(slug, monthly, yearly) ON v.slug = p.slug
+    ON CONFLICT (plan_id, currency) DO NOTHING
+  `);
+
+  // Retire the placeholder USD rows for the self-service tiers. Selling in USD
+  // requires Paystack to enable it per merchant; until then an active USD price
+  // only offers a customer a checkout that fails at the provider. Deactivated
+  // rather than deleted so the figures are recoverable when USD is switched on.
+  await prisma.$executeRawUnsafe(`
+    UPDATE global.plan_prices
+       SET is_active  = FALSE,
+           updated_at = NOW()
+     WHERE currency = 'USD'
+       AND plan_id IN (SELECT id FROM global.subscription_plans
+                        WHERE slug IN ('starter', 'professional', 'business'))
+  `);
+
+  // ── Plan allowances and advertised features ───────────────────────────────
+  // Every limit here is the same or HIGHER than what it replaces, so no
+  // existing customer can be pushed over a cap by this change:
+  //
+  //   Starter        3 ->   5 users,  2 ->  3 frameworks,   1 ->   5 GB
+  //   Professional  15 ->  25 users,  5 -> 10 frameworks,  10 ->  50 GB
+  //   Business      50 -> 100 users,  unlimited frameworks, 50 -> 250 GB
+  //   Enterprise / MSP        unlimited, unchanged
+  await prisma.$executeRawUnsafe(`
+    UPDATE global.subscription_plans
+       SET max_users       = 5,
+           max_frameworks  = 3,
+           max_evidence_gb = 5,
+           features = '["5 team members","3 compliance frameworks","5 GB evidence storage","Compliance dashboard","Compliance calendar","Tasks","Expiry tracker","Basic audit trail","Email notifications"]'::jsonb,
+           updated_at = NOW()
+     WHERE slug = 'starter'
+  `);
+
+  await prisma.$executeRawUnsafe(`
+    UPDATE global.subscription_plans
+       SET max_users       = 25,
+           max_frameworks  = 10,
+           max_evidence_gb = 50,
+           features = '["25 team members","10 compliance frameworks","50 GB evidence storage","Everything in Starter","Risk register","Vendor management","Evidence hub","Incident management","AI assistant","Scheduled reports","Approval workflows","Digital signatures","Executive dashboard","Analytics"]'::jsonb,
+           updated_at = NOW()
+     WHERE slug = 'professional'
+  `);
+
+  // Business advertises multi-location, so branches and departments become
+  // unlimited to match. Advertising a capability and then capping it at fifteen
+  // is the kind of mismatch a customer only discovers after paying.
+  await prisma.$executeRawUnsafe(`
+    UPDATE global.subscription_plans
+       SET max_users        = 100,
+           max_frameworks   = NULL,
+           max_evidence_gb  = 250,
+           max_branches     = NULL,
+           max_departments  = NULL,
+           features = '["100 team members","Unlimited compliance frameworks","250 GB evidence storage","Everything in Professional","Departments","Branches","Multi-location support","Advanced analytics","API access","Priority support","Executive reporting","AI assistant","Vendor portal","Risk management","Workflow automation"]'::jsonb,
+           updated_at = NOW()
+     WHERE slug = 'business'
+  `);
+
+  await prisma.$executeRawUnsafe(`
+    UPDATE global.subscription_plans
+       SET max_users       = NULL,
+           max_frameworks  = NULL,
+           max_evidence_gb = NULL,
+           max_branches    = NULL,
+           max_departments = NULL,
+           features = '["Unlimited users","Unlimited compliance frameworks","Unlimited evidence storage","Everything in Business","Single sign-on (SSO)","SCIM user provisioning","Dedicated support","Full API access","White-label branding","Dedicated customer success manager","Custom deployment"]'::jsonb,
+           updated_at = NOW()
+     WHERE slug = 'enterprise'
+  `);
+
+  await prisma.$executeRawUnsafe(`
+    UPDATE global.subscription_plans
+       SET max_users       = NULL,
+           max_frameworks  = NULL,
+           max_evidence_gb = NULL,
+           max_branches    = NULL,
+           max_departments = NULL,
+           features = '["Unlimited client organisations","White-label client portal","Multi-client dashboard","Bulk client onboarding","Tenant management","Client billing","Client reporting","Everything in Enterprise"]'::jsonb,
+           updated_at = NOW()
+     WHERE slug = 'msp'
+  `);
 }
 
 // ── Row-to-domain mappers ──────────────────────────────────────────────────────
