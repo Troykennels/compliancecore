@@ -11,6 +11,7 @@ import { InviteMemberModal } from '../components/invite-member-modal';
 import { SettingsLayout } from '../components/settings-layout';
 import { useCurrentUser, useUserRole } from '@/stores/auth.store';
 import { useOrgFormat } from '@/lib/org-format';
+import { SkeletonTable } from '@/components/ui';
 
 const ROLE_BADGE: Record<MemberRole, string> = {
   owner:              'bg-indigo-100 text-indigo-700',
@@ -88,9 +89,7 @@ export function SettingsTeamPage(): JSX.Element {
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
-          </div>
+          <SkeletonTable rows={8} columns={5} />
         ) : isError ? (
           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center text-slate-500">
             <AlertTriangle className="h-8 w-8 text-slate-300" />

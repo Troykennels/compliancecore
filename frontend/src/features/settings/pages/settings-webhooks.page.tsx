@@ -10,6 +10,7 @@ import { settingsApi } from '../api/settings.api';
 import { SettingsLayout } from '../components/settings-layout';
 import { WEBHOOK_EVENTS, type WebhookCreated } from '../types/settings.types';
 import { useOrgFormat } from '@/lib/org-format';
+import { SkeletonCard } from '@/components/ui';
 
 const schema = z.object({
   name:   z.string().min(1, 'Name is required').max(100),
@@ -93,8 +94,10 @@ export function SettingsWebhooksPage(): JSX.Element {
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} rows={3} />
+              ))}
             </div>
           ) : isError ? (
             <div className="flex flex-col items-center justify-center gap-3 py-12 text-center text-slate-500">

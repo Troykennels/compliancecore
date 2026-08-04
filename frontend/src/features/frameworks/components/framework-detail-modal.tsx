@@ -1,5 +1,6 @@
 import { X, Loader2, Layers, Download, AlertTriangle } from 'lucide-react';
 import { useFramework, useAdoptFramework } from '../hooks/use-frameworks';
+import { SkeletonCard } from '@/components/ui';
 
 interface Props {
   frameworkId: string;
@@ -44,8 +45,10 @@ export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Eleme
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
           {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} rows={3} />
+              ))}
             </div>
           ) : isError || !framework ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">

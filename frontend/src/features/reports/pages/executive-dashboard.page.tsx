@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import {
   BarChart2, FileDown, FileSpreadsheet, Calendar, Clock,
-  Loader2, RefreshCw, TrendingUp, ShieldCheck, CheckSquare, X, Plus, Trash2, ToggleLeft, ToggleRight, Mail, AlertTriangle,
+  RefreshCw, TrendingUp, ShieldCheck, CheckSquare, X, Plus, Trash2, ToggleLeft, ToggleRight, Mail,
 } from 'lucide-react';
 import {
   useExecutiveDashboard, useDownloadPdf, useDownloadExcel,
@@ -16,55 +16,75 @@ import type {
   ScheduledReport, CreateScheduledReportDto,
 } from '../types/reports.types';
 import { useOrgFormat } from '@/lib/org-format';
+import { CHART } from '@/lib/chart-theme';
+import { Button, ErrorState, Skeleton } from '@/components/ui';
+import { useAuthStore } from '@/stores/auth.store';
 
 // ── Palette ────────────────────────────────────────────────────────────────────
+// Drawn from the shared chart theme so a "72%" here is the same amber as a
+// "72%" on the dashboard. These were previously a private hex set, which is why
+// the two screens never quite agreed.
 
 const CHART_COLORS = {
-  implemented:   '#16a34a',
-  partial:       '#f59e0b',
-  notImpl:       '#dc2626',
-  planned:       '#3b82f6',
-  notApplicable: '#94a3b8',
-  todo:          '#94a3b8',
-  in_progress:   '#3b82f6',
-  in_review:     '#a855f7',
-  completed:     '#16a34a',
-  cancelled:     '#6b7280',
-  blocked:       '#f97316',
-  active:        '#16a34a',
-  archived:      '#64748b',
-  expired:       '#dc2626',
-  blue:          '#2563eb',
+  implemented:   CHART.success,
+  partial:       CHART.warning,
+  notImpl:       CHART.danger,
+  planned:       CHART.brandSoft,
+  notApplicable: CHART.axis,
+  todo:          CHART.axis,
+  in_progress:   CHART.brand,
+  in_review:     CHART.brandSoft,
+  completed:     CHART.success,
+  cancelled:     '#4B5568',
+  blocked:       CHART.warning,
+  active:        CHART.success,
+  archived:      '#4B5568',
+  expired:       CHART.danger,
+  blue:          CHART.brand,
 };
 
 const CRITICALITY_COLORS: Record<string, string> = {
-  critical: '#dc2626',
-  high:     '#f97316',
-  medium:   '#f59e0b',
-  low:      '#3b82f6',
+  critical: CHART.danger,
+  high:     '#EE9E2E',
+  medium:   CHART.warning,
+  low:      CHART.brandSoft,
 };
 
 // ── Shared UI primitives ───────────────────────────────────────────────────────
 
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-xl border border-slate-200 bg-white ${className}`}>{children}</div>;
+  return (
+    <div className={`card-surface overflow-hidden ${className}`}>{children}</div>
+  );
 }
 
 function CardHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="border-b border-slate-100 px-5 py-3.5">
-      <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-      {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
+      <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+      {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
     </div>
   );
 }
 
-function Skeleton({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-md bg-slate-100 ${className}`} />;
+function EmptyChart() {
+  return (
+    <div className="flex h-full flex-col items-center justify-center text-center">
+      <BarChart2 className="mb-1.5 h-6 w-6 text-slate-300" aria-hidden="true" />
+      <p className="text-xs text-slate-500">Nothing to chart yet</p>
+    </div>
+  );
 }
 
-function EmptyChart() {
-  return <div className="flex items-center justify-center h-full text-xs text-slate-400">No data available</div>;
+/** Placeholder shaped like a chart panel, so the layout does not jump. */
+function ChartSkeleton({ className = '' }: { className?: string }) {
+  return (
+    <div className={`card-surface p-5 ${className}`}>
+      <Skeleton className="h-3.5 w-40" />
+      <Skeleton className="mt-1.5 h-2.5 w-24" />
+      <Skeleton className="mt-5 h-40 w-full rounded-lg" />
+    </div>
+  );
 }
 
 // ── KPI Card ───────────────────────────────────────────────────────────────────
@@ -79,20 +99,22 @@ function KpiCard({
   color?: 'blue' | 'green' | 'amber' | 'red';
 }) {
   const colors = {
-    blue:  'bg-blue-50 text-blue-600',
+    blue:  'bg-brand-50 text-brand-600',
     green: 'bg-green-50 text-green-600',
     amber: 'bg-amber-50 text-amber-600',
     red:   'bg-red-50 text-red-600',
   };
   return (
-    <Card className="p-5 flex items-start gap-4">
+    <Card className="flex items-start gap-4 p-5">
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${colors[color]}`}>
         <Icon className="h-5 w-5" />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-slate-500 mb-0.5">{label}</p>
-        <p className="text-2xl font-bold text-slate-900 leading-none">{value}</p>
-        {sub && <p className="text-xs text-slate-400 mt-1">{sub}</p>}
+      <div className="min-w-0 flex-1">
+        <p className="eyebrow mb-1">{label}</p>
+        <p data-numeric className="text-2xl font-semibold leading-none tracking-tight text-slate-900">
+          {value}
+        </p>
+        {sub && <p className="mt-1.5 text-xs text-slate-500">{sub}</p>}
       </div>
     </Card>
   );
@@ -512,6 +534,9 @@ export function ExecutiveDashboardPage() {
   const [filter, setFilter] = useState<ReportFilter>({ days: 90 });
   const [showSchedule, setShowSchedule] = useState(false);
   const { data, isLoading, isError, refetch, isFetching } = useExecutiveDashboard(filter);
+  // Named on the printed masthead so the sheet identifies which organisation
+  // it covers once it is off the screen.
+  const activeTenant = useAuthStore((s) => s.activeTenant);
   const pdf   = useDownloadPdf(filter);
   const excel = useDownloadExcel(filter);
 
@@ -522,17 +547,32 @@ export function ExecutiveDashboardPage() {
     : 'blue';
 
   return (
-    <div className="h-full overflow-y-auto bg-slate-50">
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="h-full overflow-y-auto bg-slate-50 print:overflow-visible print:bg-white">
+      <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 print:max-w-none print:p-0">
+
+        {/* ── Print masthead ────────────────────────────────────────────────────
+            Only appears on paper. A printed compliance report that does not say
+            which organisation it covers, over what period, and when it was
+            generated is not evidence — it is a picture of some numbers. */}
+        <div className="hidden print:mb-6 print:block print:border-b print:border-slate-300 print:pb-4">
+          <h1 className="text-xl font-semibold text-slate-900">Compliance Report</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            {activeTenant?.name ?? 'Organisation'} · Period: last {filter.days ?? 90} days
+          </p>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Generated {data ? fmt.formatDateTime(data.generatedAt) : fmt.formatDateTime(new Date())}
+            {' · ComplianceCore'}
+          </p>
+        </div>
 
         {/* ── Page Header ───────────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div data-print="hide" className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <BarChart2 className="h-5 w-5 text-blue-600" />
-              <h1 className="text-xl font-bold text-slate-900">Executive Dashboard</h1>
+              <BarChart2 className="h-5 w-5 text-brand-600" aria-hidden="true" />
+              <h1 className="text-2xl font-semibold text-slate-900">Executive Dashboard</h1>
             </div>
-            <p className="text-sm text-slate-500 mt-0.5">
+            <p className="mt-1 text-sm text-slate-500">
               {data
                 ? `Last updated ${fmt.formatDateTime(data.generatedAt)}`
                 : isError
@@ -542,52 +582,64 @@ export function ExecutiveDashboardPage() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <DateRangePicker filter={filter} onChange={setFilter} />
-            <button onClick={() => refetch()}
-              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50">
-              <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? 'animate-spin' : ''}`} />
+            <Button variant="secondary" size="sm" onClick={() => refetch()}>
+              <RefreshCw className={isFetching ? 'animate-spin' : ''} />
               Refresh
-            </button>
-            <button onClick={() => pdf.mutate()}
-              disabled={pdf.isPending || isLoading}
-              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50">
-              {pdf.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileDown className="h-3.5 w-3.5" />}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => pdf.mutate()}
+              loading={pdf.isPending}
+              disabled={isLoading}
+            >
+              {!pdf.isPending && <FileDown />}
               Export PDF
-            </button>
-            <button onClick={() => excel.mutate()}
-              disabled={excel.isPending || isLoading}
-              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50">
-              {excel.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => excel.mutate()}
+              loading={excel.isPending}
+              disabled={isLoading}
+            >
+              {!excel.isPending && <FileSpreadsheet />}
               Export Excel
-            </button>
-            <button onClick={() => setShowSchedule(true)}
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700">
-              <Calendar className="h-3.5 w-3.5" />
-              Scheduled Reports
-            </button>
+            </Button>
+            <Button size="sm" onClick={() => setShowSchedule(true)}>
+              <Calendar />
+              Scheduled reports
+            </Button>
           </div>
         </div>
 
         {/* ── Error state ──────────────────────────────────────────────────── */}
         {isError && !isLoading && (
-          <div className="flex flex-col items-center justify-center gap-3 py-20 text-center text-slate-500">
-            <AlertTriangle className="h-10 w-10 text-slate-300" />
-            <p className="text-sm">Failed to load the executive dashboard.</p>
-            <button
-              onClick={() => refetch()}
-              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
-            >
-              <RefreshCw className="h-3.5 w-3.5" /> Retry
-            </button>
-          </div>
+          <Card>
+            <ErrorState
+              title="We couldn't build your report"
+              description="Your compliance data is safe — this is a problem reaching the reporting service, not a problem with your records."
+              onRetry={() => refetch()}
+            />
+          </Card>
         )}
 
         {/* ── KPI Cards ────────────────────────────────────────────────────── */}
         {isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1,2,3,4].map((i) => <Skeleton key={i} className="h-24" />)}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="card-surface flex items-start gap-4 p-5">
+                <Skeleton className="h-10 w-10 shrink-0 rounded-xl" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-2.5 w-20" />
+                  <Skeleton className="h-6 w-16" />
+                  <Skeleton className="h-2.5 w-24" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : data ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <KpiCard icon={TrendingUp} label="Compliance Score" value={`${data.kpis.overallScore}%`}
               sub={`${data.kpis.implementedControls} of ${data.kpis.totalControls} controls`}
               color={scoreColor} />
@@ -605,21 +657,21 @@ export function ExecutiveDashboardPage() {
 
         {/* ── Charts Row 1 — Score Trend + Controls Donut ──────────────────── */}
         {isLoading ? (
-          <div className="grid grid-cols-3 gap-4">
-            <Skeleton className="col-span-2 h-64" />
-            <Skeleton className="h-64" />
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <ChartSkeleton className="lg:col-span-2" />
+            <ChartSkeleton />
           </div>
         ) : data ? (
-          <div className="grid grid-cols-3 gap-4">
-            <Card className="col-span-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <Card className="lg:col-span-2">
               <CardHeader title="Compliance Score Trend" subtitle={`Last ${filter.days ?? 90} days`} />
-              <div className="p-4 h-56">
+              <div className="h-56 p-4">
                 <ScoreTrendChart data={data.scoreTrend} />
               </div>
             </Card>
             <Card>
               <CardHeader title="Controls by Status" />
-              <div className="p-4 h-56">
+              <div className="h-56 p-4">
                 <ControlsDonut breakdown={data.controlsBreakdown} />
               </div>
             </Card>
@@ -628,13 +680,13 @@ export function ExecutiveDashboardPage() {
 
         {/* ── Charts Row 2 — Framework Coverage + Tasks + Evidence ─────────── */}
         {isLoading ? (
-          <div className="grid grid-cols-3 gap-4">
-            <Skeleton className="h-64" />
-            <Skeleton className="h-64" />
-            <Skeleton className="h-64" />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <ChartSkeleton />
+            <ChartSkeleton />
+            <ChartSkeleton />
           </div>
         ) : data ? (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <Card>
               <CardHeader title="Framework Coverage" subtitle="% controls implemented" />
               <div className="p-4 h-56">
@@ -668,7 +720,7 @@ export function ExecutiveDashboardPage() {
 
         {/* ── Tables — Framework Detail + Expiry Items ─────────────────────── */}
         {!isLoading && data && (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {/* Framework detail table */}
             {data.frameworkCoverage.length > 0 && (
               <Card>

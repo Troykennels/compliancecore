@@ -6,6 +6,7 @@ import {
 import { useFrameworks, useAdoptFramework } from '../hooks/use-frameworks';
 import { FrameworkDetailModal } from '../components/framework-detail-modal';
 import type { Framework } from '../types/frameworks.types';
+import { SkeletonCard } from '@/components/ui';
 
 export function FrameworksPage(): JSX.Element {
   const { data, isLoading, isError, refetch } = useFrameworks();
@@ -27,8 +28,10 @@ export function FrameworksPage(): JSX.Element {
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16 shadow-sm">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} rows={3} />
+            ))}
           </div>
         ) : isError ? (
           <ErrorState onRetry={() => refetch()} />

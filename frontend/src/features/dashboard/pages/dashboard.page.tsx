@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import {
   ShieldCheck, AlertTriangle, Calendar, Bell,
-  CheckCircle, BarChart2, RefreshCw,
+  CheckCircle, BarChart2, ArrowRight,
 } from 'lucide-react';
 import { useDashboard } from '../hooks/use-dashboard';
 import { ScoreGauge } from '../../compliance-score/components/score-gauge';
@@ -15,13 +15,70 @@ import { useCurrentScore } from '../../compliance-score/hooks/use-score';
 import { EVENT_TYPE_COLORS } from '../../calendar/types/calendar.types';
 import type { CalendarEventType } from '../../calendar/types/calendar.types';
 import { useOrgFormat } from '@/lib/org-format';
+import { cn } from '@/lib/utils';
+import {
+  Card, CardHeader, ErrorState, PageHeader, PageShell, StatusPill,
+  SkeletonCard, SkeletonChart, SkeletonMetricCard, SkeletonRegion, Skeleton,
+  type StatusTone,
+} from '@/components/ui';
 
-const STATUS_BADGE: Record<string, string> = {
-  upcoming:    'bg-blue-100 text-blue-700',
-  in_progress: 'bg-amber-100 text-amber-700',
-  completed:   'bg-green-100 text-green-700',
-  overdue:     'bg-red-100 text-red-700',
+const EVENT_STATUS_TONE: Record<string, StatusTone> = {
+  upcoming: 'info',
+  in_progress: 'warning',
+  completed: 'success',
+  overdue: 'danger',
 };
+
+/** Control status, ordered worst-first so the gaps read before the wins. */
+const CONTROL_BANDS = [
+  { key: 'notImplemented', label: 'Not implemented', bar: 'bg-red-500' },
+  { key: 'partiallyImplemented', label: 'Partially implemented', bar: 'bg-amber-500' },
+  { key: 'planned', label: 'Planned', bar: 'bg-brand-400' },
+  { key: 'implemented', label: 'Implemented', bar: 'bg-green-500' },
+  { key: 'notApplicable', label: 'Not applicable', bar: 'bg-slate-300' },
+] as const;
+
+function ViewAll({ onClick, label = 'View all' }: { onClick: () => void; label?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group inline-flex items-center gap-1 rounded text-xs font-medium text-brand-600 transition-colors hover:text-brand-700"
+    >
+      {label}
+      <ArrowRight className="h-3 w-3 transition-transform duration-150 group-hover:translate-x-0.5" />
+    </button>
+  );
+}
+
+/**
+ * Loading view.
+ *
+ * Mirrors the real layout rather than showing a spinner, so the page does not
+ * reflow when the data lands — the cards are already where they will be.
+ */
+function DashboardSkeleton() {
+  return (
+    <PageShell width="wide">
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-44" />
+        <Skeleton className="h-3.5 w-64" />
+      </div>
+      <SkeletonRegion label="Loading dashboard" className="space-y-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => <SkeletonMetricCard key={i} />)}
+        </div>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <SkeletonChart height={200} />
+          <SkeletonChart height={200} className="lg:col-span-2" />
+        </div>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} rows={4} />)}
+        </div>
+      </SkeletonRegion>
+    </PageShell>
+  );
+}
 
 export function DashboardPage() {
   const fmt = useOrgFormat();
@@ -29,26 +86,19 @@ export function DashboardPage() {
   const { data, isLoading, isError, refetch } = useDashboard();
   const { data: scoreData } = useCurrentScore();
 
-  if (isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center text-slate-400 text-sm">
-        Loading dashboard…
-      </div>
-    );
-  }
+  if (isLoading) return <DashboardSkeleton />;
 
   if (isError || !data) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 text-slate-500">
-        <AlertTriangle className="h-10 w-10 text-slate-300" />
-        <p className="text-sm">Failed to load your dashboard.</p>
-        <button
-          onClick={() => refetch()}
-          className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
-        >
-          <RefreshCw className="h-3.5 w-3.5" /> Retry
-        </button>
-      </div>
+      <PageShell width="wide">
+        <Card flush>
+          <ErrorState
+            title="We couldn't load your dashboard"
+            description="Your compliance data is safe — this is a problem reaching the service, not a problem with your records."
+            onRetry={() => refetch()}
+          />
+        </Card>
+      </PageShell>
     );
   }
 
@@ -59,24 +109,24 @@ export function DashboardPage() {
     ? Math.round((controls.implemented / controls.total) * 100)
     : 0;
 
-  return (
-    <div className="flex flex-col h-full overflow-y-auto px-6 py-6 gap-6">
-      {/* Page title */}
-      <div className="shrink-0">
-        <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-0.5">
-          Compliance overview — {fmt.formatDateMedium(new Date())}
-        </p>
-      </div>
+  const expiryTotal = expiry.expiringSoon + expiry.expired;
 
-      {/* Top metric cards */}
-      <div className="grid grid-cols-2 gap-4 shrink-0 xl:grid-cols-4">
+  return (
+    <PageShell width="wide">
+      <PageHeader
+        title="Dashboard"
+        description={`Compliance overview — ${fmt.formatDateMedium(new Date())}`}
+      />
+
+      {/* Headline metrics. Single column on a phone: two 3xl figures side by
+          side at 375px truncate into meaninglessness. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           title="Compliance Score"
-          value={complianceScore.overall !== null ? `${Math.round(complianceScore.overall)}%` : 'N/A'}
+          value={complianceScore.overall !== null ? `${Math.round(complianceScore.overall)}%` : '—'}
           subtitle={complianceScore.snapshotDate ? `as of ${fmt.formatDateShort(complianceScore.snapshotDate)}` : 'Real-time'}
           icon={<ShieldCheck className="h-5 w-5" />}
-          colorClass="bg-blue-100 text-blue-600"
+          tone="brand"
           onClick={() => navigate('/compliance-score')}
         />
         <MetricCard
@@ -84,14 +134,15 @@ export function DashboardPage() {
           value={`${controls.implemented}/${controls.total}`}
           subtitle={`${controlImplementedPct}% complete`}
           icon={<CheckCircle className="h-5 w-5" />}
-          colorClass="bg-green-100 text-green-600"
+          tone={controlImplementedPct >= 80 ? 'success' : controlImplementedPct >= 50 ? 'warning' : 'danger'}
+          onClick={() => navigate('/controls')}
         />
         <MetricCard
           title="Expiry Alerts"
-          value={expiry.expiringSoon + expiry.expired}
+          value={expiryTotal}
           subtitle={`${expiry.expired} expired · ${expiry.expiringSoon} expiring`}
           icon={<AlertTriangle className="h-5 w-5" />}
-          colorClass={expiry.expired > 0 ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}
+          tone={expiry.expired > 0 ? 'danger' : expiry.expiringSoon > 0 ? 'warning' : 'success'}
           onClick={() => navigate('/expiry')}
         />
         <MetricCard
@@ -99,132 +150,147 @@ export function DashboardPage() {
           value={notifications.unread}
           subtitle={`${calendar.overdueCount} overdue events`}
           icon={<Bell className="h-5 w-5" />}
-          colorClass={notifications.unread > 0 ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-500'}
+          tone={notifications.unread > 0 ? 'warning' : 'neutral'}
           onClick={() => navigate('/notifications')}
         />
       </div>
 
-      {/* Middle row: score gauge + trend + upcoming calendar */}
-      <div className="grid grid-cols-1 gap-5 shrink-0 lg:grid-cols-3">
-        {/* Score gauge */}
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-6">
+      {/* Score gauge + trend */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <Card className="flex flex-col items-center justify-center py-7">
           <ScoreGauge score={complianceScore.overall} size={180} />
-          <p className="mt-2 text-xs text-slate-500">Overall Compliance</p>
-        </div>
+          <p className="eyebrow mt-3">Overall Compliance</p>
+        </Card>
 
-        {/* Score trend */}
-        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 lg:col-span-2">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Score Trend (180 days)</h2>
-            <button
-              onClick={() => navigate('/compliance-score')}
-              className="text-xs text-blue-600 hover:text-blue-800"
-            >
-              Full view
-            </button>
+        <Card className="lg:col-span-2">
+          <CardHeader
+            title="Score Trend"
+            description="Last 180 days"
+            action={<ViewAll onClick={() => navigate('/compliance-score')} label="Full view" />}
+          />
+          <div className="mt-4">
+            <ScoreTrendChart data={complianceScore.trend} height={172} />
           </div>
-          <ScoreTrendChart data={complianceScore.trend} height={160} />
-        </div>
+        </Card>
       </div>
 
-      {/* Bottom row: framework coverage + calendar + expiry + activity */}
-      <div className="grid grid-cols-1 gap-5 shrink-0 lg:grid-cols-3">
-        {/* Framework coverage */}
-        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Framework Coverage</h2>
-            <BarChart2 className="h-4 w-4 text-slate-400" />
+      {/* Coverage, upcoming work, control posture */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <Card>
+          <CardHeader
+            title="Framework Coverage"
+            action={<BarChart2 className="h-4 w-4 text-slate-400" aria-hidden="true" />}
+          />
+          <div className="mt-4">
+            <FrameworkCoverage frameworks={frameworks} />
           </div>
-          <FrameworkCoverage frameworks={frameworks} />
-        </div>
+        </Card>
 
-        {/* Upcoming calendar events */}
-        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Upcoming Events</h2>
-            <button onClick={() => navigate('/calendar')} className="text-xs text-blue-600 hover:text-blue-800">View all</button>
-          </div>
-          {calendar.upcomingEvents.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-slate-400">
-              <Calendar className="h-7 w-7 mb-2 opacity-30" />
-              <p className="text-xs">No upcoming events</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {calendar.upcomingEvents.map((ev) => (
-                <div
-                  key={ev.id}
-                  className="flex items-center gap-2.5 rounded-lg border border-slate-100 px-3 py-2 cursor-pointer hover:bg-slate-50"
-                  onClick={() => navigate('/calendar')}
-                >
-                  <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: ev.color || EVENT_TYPE_COLORS[ev.eventType as CalendarEventType] }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-slate-900 truncate">{ev.title}</p>
-                    <p className="text-[10px] text-slate-500">{fmt.formatDateShort(ev.startDate)}</p>
-                  </div>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_BADGE[ev.status] ?? 'bg-slate-100 text-slate-500'}`}>
-                    {ev.status.replace('_', ' ')}
-                  </span>
-                </div>
-              ))}
-              {calendar.overdueCount > 0 && (
-                <p className="text-xs text-red-600 font-medium pt-1">
-                  {calendar.overdueCount} overdue event{calendar.overdueCount > 1 ? 's' : ''}
+        <Card>
+          <CardHeader
+            title="Upcoming Events"
+            action={<ViewAll onClick={() => navigate('/calendar')} />}
+          />
+          <div className="mt-4">
+            {calendar.upcomingEvents.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <Calendar className="mb-2 h-7 w-7 text-slate-300" aria-hidden="true" />
+                <p className="text-xs font-medium text-slate-600">Nothing scheduled</p>
+                <p className="mt-0.5 text-2xs text-slate-400">
+                  Reviews and audits you plan will appear here.
                 </p>
-              )}
-            </div>
-          )}
-        </div>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                {calendar.upcomingEvents.map((ev) => (
+                  <button
+                    key={ev.id}
+                    type="button"
+                    onClick={() => navigate('/calendar')}
+                    className="flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-left transition-colors hover:border-slate-200 hover:bg-slate-50"
+                  >
+                    <span
+                      className="h-6 w-1 shrink-0 rounded-full"
+                      style={{ backgroundColor: ev.color || EVENT_TYPE_COLORS[ev.eventType as CalendarEventType] }}
+                      aria-hidden="true"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-xs font-medium text-slate-900">{ev.title}</span>
+                      <span className="block text-2xs text-slate-500">{fmt.formatDateShort(ev.startDate)}</span>
+                    </span>
+                    <StatusPill tone={EVENT_STATUS_TONE[ev.status] ?? 'neutral'} dot={false}>
+                      {ev.status.replace('_', ' ')}
+                    </StatusPill>
+                  </button>
+                ))}
+                {calendar.overdueCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/calendar')}
+                    className="mt-1 flex w-full items-center gap-1.5 rounded-lg bg-red-50 px-2.5 py-2 text-xs font-medium text-red-700 transition-colors hover:bg-red-100"
+                  >
+                    <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
+                    {calendar.overdueCount} overdue event{calendar.overdueCount > 1 ? 's' : ''}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </Card>
 
-        {/* Controls breakdown */}
-        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4">
-          <h2 className="text-sm font-semibold text-slate-900 mb-3">Control Status</h2>
-          <div className="space-y-2.5">
-            {[
-              { label: 'Implemented',         value: controls.implemented,         color: 'bg-green-500' },
-              { label: 'Partially Implemented',value: controls.partiallyImplemented, color: 'bg-amber-400' },
-              { label: 'Not Implemented',      value: controls.notImplemented,       color: 'bg-red-500' },
-              { label: 'Planned',              value: controls.planned,              color: 'bg-blue-400' },
-              { label: 'Not Applicable',       value: controls.notApplicable,        color: 'bg-slate-300' },
-            ].map(({ label, value, color }) => {
+        <Card>
+          <CardHeader title="Control Status" description={`${controls.total} controls in scope`} />
+          <div className="mt-4 space-y-3">
+            {CONTROL_BANDS.map(({ key, label, bar }) => {
+              const value = controls[key] ?? 0;
               const pct = controls.total > 0 ? (value / controls.total) * 100 : 0;
               return (
-                <div key={label}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-slate-600">{label}</span>
-                    <span className="font-medium text-slate-900">{value}</span>
+                <div key={key}>
+                  <div className="mb-1 flex items-baseline justify-between gap-2 text-xs">
+                    <span className="truncate text-slate-600">{label}</span>
+                    <span data-numeric className="shrink-0 font-semibold text-slate-900">
+                      {value}
+                      <span className="ml-1 font-normal text-slate-400">{Math.round(pct)}%</span>
+                    </span>
                   </div>
-                  <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
-                    <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className={cn('h-full rounded-full transition-[width] duration-500 ease-out', bar)}
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
+        </Card>
       </div>
 
-      {/* Bottom row: expiry urgent + recent activity */}
-      <div className="grid grid-cols-1 gap-5 shrink-0 lg:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Urgent Expirations</h2>
-            <button onClick={() => navigate('/expiry')} className="text-xs text-blue-600 hover:text-blue-800">View all</button>
-          </div>
-          <ExpiryWidget
-            items={expiry.urgentItems}
-            expiringSoon={expiry.expiringSoon}
-            expired={expiry.expired}
+      {/* Expiring items + evidence activity */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <Card>
+          <CardHeader
+            title="Urgent Expirations"
+            action={<ViewAll onClick={() => navigate('/expiry')} />}
           />
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Recent Evidence Activity</h2>
-            <button onClick={() => navigate('/evidence')} className="text-xs text-blue-600 hover:text-blue-800">View all</button>
+          <div className="mt-4">
+            <ExpiryWidget
+              items={expiry.urgentItems}
+              expiringSoon={expiry.expiringSoon}
+              expired={expiry.expired}
+            />
           </div>
-          <ActivityFeed events={recentActivity} />
-        </div>
+        </Card>
+
+        <Card>
+          <CardHeader
+            title="Recent Evidence Activity"
+            action={<ViewAll onClick={() => navigate('/evidence')} />}
+          />
+          <div className="mt-4">
+            <ActivityFeed events={recentActivity} />
+          </div>
+        </Card>
       </div>
 
       {/* Insight panels. Rendered after the existing summary so the page still
@@ -239,6 +305,6 @@ export function DashboardPage() {
         score={complianceScore.overall}
         frameworks={frameworks}
       />
-    </div>
+    </PageShell>
   );
 }
