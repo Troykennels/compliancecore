@@ -33,6 +33,21 @@ export const organizationApi = {
     );
   },
 
+  /**
+   * Downloads every record the organisation holds as a ZIP.
+   *
+   * responseType blob because this is binary, not JSON — the default parser
+   * would corrupt the archive. The long timeout matches the server: a mature
+   * tenant has a lot of rows, and the default 30s would abort a legitimate
+   * export mid-stream.
+   */
+  exportAll() {
+    return apiClient.get<Blob>('/organizations/export', {
+      responseType: 'blob',
+      timeout: 300_000,
+    });
+  },
+
   getScoping() {
     return apiClient.get<ApiResponse<ScopingResponse>>('/organizations/scoping');
   },

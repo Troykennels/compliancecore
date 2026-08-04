@@ -4,6 +4,7 @@ import { useOrganizationProfile } from '@/features/organizations/hooks/use-organ
 import { CompanyProfileForm } from '@/features/organizations/components/company-profile-form';
 import { LogoUpload } from '@/features/organizations/components/logo-upload';
 import { ScopingQuestionnaire } from '@/features/organizations/components/scoping-questionnaire';
+import { DataExport } from '@/features/organizations/components/data-export';
 
 export function SettingsOrgPage(): JSX.Element {
   const { data: org, isLoading, isError } = useOrganizationProfile();
@@ -11,6 +12,22 @@ export function SettingsOrgPage(): JSX.Element {
   return (
     <SettingsLayout>
       <div className="space-y-6">
+        {/* Data portability. Placed on the organisation page rather than buried
+            in an admin corner: being able to leave with your records is a
+            property of the organisation, and customers evaluating us will look
+            for it. */}
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-200 px-6 py-4">
+            <h2 className="text-base font-semibold text-slate-900">Your Data</h2>
+            <p className="mt-0.5 text-sm text-slate-500">
+              Export everything you have stored here, at any time.
+            </p>
+          </div>
+          <div className="p-6">
+            <DataExport />
+          </div>
+        </section>
+
         {/* Compliance scope. Revisitable because the answers go stale — taking
             card payments or opening an EU office changes what applies. */}
         <section className="rounded-xl border border-slate-200 bg-white shadow-sm">

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { organizationService } from './organization.service';
+import { streamOrganizationExport } from './export.service';
 import { ok } from '../../lib/response';
 
 export const organizationController = {
@@ -39,6 +40,27 @@ export const organizationController = {
       const result = await organizationService.completeOnboarding(req.user!.tenantId!);
       ok(res, req, result);
     } catch (err) {
+      next(err);
+    }
+  },
+
+  // ── Full data export ──────────────────────────────────────────────────────
+
+  async exportAll(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      await streamOrganizationExport(res, {
+        tenantId: req.tenant!.id,
+        schemaName: req.tenant!.schemaName,
+        requestedBy: req.user!.email,
+      });
+    } catch (err) {
+      // Once the ZIP starts streaming the status line is already committed, so
+      // the error handler cannot turn it into a clean 500 — only an unstarted
+      // export can be reported normally.
+      if (res.headersSent) {
+        res.destroy();
+        return;
+      }
       next(err);
     }
   },
