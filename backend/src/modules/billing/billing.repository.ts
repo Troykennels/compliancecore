@@ -150,19 +150,33 @@ export async function initBillingTables(): Promise<void> {
     )
   `);
 
-  // Seed default plans
+  // Seed default plans.
+  //
+  // Prices here must match database/migrations/010_pricing_ngn_2026.sql, which
+  // applies the same figures to databases that already existed. This branch only
+  // ever runs on a fresh install — ON CONFLICT DO NOTHING means an existing row
+  // is never overwritten, so an owner's edits in the console survive a reboot.
+  //
+  // Annual is 10x monthly across the self-service tiers: two months free.
+  //
+  // Enterprise and MSP are shown as "Contact Sales" in the UI. Their prices stay
+  // above zero on purpose — createSubscription and updateSubscription treat a
+  // zero-priced plan as free, so zeroing them would let anyone assign themselves
+  // Enterprise without paying.
   await prisma.$executeRawUnsafe(`
     INSERT INTO global.subscription_plans
-      (name, slug, description, price_monthly, price_yearly, max_users, max_frameworks, max_evidence_gb, max_branches, max_departments, features, sort_order)
+      (name, slug, description, price_monthly, price_yearly, currency, max_users, max_frameworks, max_evidence_gb, max_branches, max_departments, features, sort_order)
     VALUES
-      ('Starter', 'starter', 'Perfect for small teams getting started with compliance', 0, 0, 3, 2, 1, 1, 5,
+      ('Starter', 'starter', 'For small teams putting their first framework in place', 25000, 250000, 'NGN', 3, 2, 1, 1, 5,
        '["2 compliance frameworks","3 team members","1 GB evidence storage","Community support","Basic audit trail"]', 1),
-      ('Professional', 'professional', 'For growing organisations with serious compliance needs', 99, 990, 15, 5, 10, 5, 20,
+      ('Professional', 'professional', 'For growing organisations with serious compliance needs', 85000, 850000, 'NGN', 15, 5, 10, 5, 20,
        '["5 compliance frameworks","15 team members","10 GB evidence storage","Email support","Full audit trail","Custom controls","Scheduled reports","AI tools"]', 2),
-      ('Enterprise', 'enterprise', 'Unlimited compliance management for large organisations', 299, 2990, NULL, NULL, NULL, NULL, NULL,
-       '["Unlimited frameworks","Unlimited team members","Unlimited storage","Priority support","SSO / SCIM","Custom branding","API access","Data residency choice","Dedicated CSM"]', 3),
-      ('MSP', 'msp', 'Managed service provider plan for multi-client management', 499, 4990, NULL, NULL, NULL, NULL, NULL,
-       '["All Enterprise features","Multi-tenant management","White-label portal","Client reporting dashboard","Bulk onboarding","Volume discounts"]', 4)
+      ('Business', 'business', 'For established organisations running several frameworks at once', 180000, 1800000, 'NGN', 50, NULL, 50, 15, 50,
+       '["Unlimited compliance frameworks","50 team members","50 GB evidence storage","Priority email support","Full audit trail","Custom controls","Scheduled reports","AI tools","Approval workflows","Digital signatures"]', 3),
+      ('Enterprise', 'enterprise', 'Unlimited compliance management for large organisations', 480000, 4800000, 'NGN', NULL, NULL, NULL, NULL, NULL,
+       '["Unlimited frameworks","Unlimited team members","Unlimited storage","Priority support","SSO / SCIM","Custom branding","API access","Data residency choice","Dedicated CSM"]', 4),
+      ('MSP', 'msp', 'Managed service provider plan for multi-client management', 800000, 8000000, 'NGN', NULL, NULL, NULL, NULL, NULL,
+       '["All Enterprise features","Multi-tenant management","White-label portal","Client reporting dashboard","Bulk onboarding","Volume discounts"]', 5)
     ON CONFLICT (slug) DO NOTHING
   `);
 

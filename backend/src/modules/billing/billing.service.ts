@@ -267,7 +267,19 @@ export async function updateSubscription(
         (dto.planId !== undefined && dto.planId !== existing.planId) ||
         (dto.billingCycle !== undefined && dto.billingCycle !== existing.billingCycle);
 
-      if (isUpgrade && targetPrice > 0 && targetPrice > currentPrice) {
+      // "Cheaper" only means something when both figures are in the same
+      // currency. Comparing 299 USD against 85,000 NGN as bare numbers reads the
+      // more expensive plan as a downgrade and hands it over free — which is
+      // exactly what happened once the self-service tiers moved to naira while
+      // Enterprise stayed in dollars.
+      //
+      // No FX conversion here on purpose: a security guard must not depend on a
+      // rate lookup that can be stale or unreachable. When the currencies differ
+      // we simply decline to call it a downgrade, and payment is required.
+      const comparable = targetPlan.currency === currentPlan?.currency;
+      const costsMore = comparable ? targetPrice > currentPrice : true;
+
+      if (isUpgrade && targetPrice > 0 && costsMore) {
         throw new AppError(
           `Changing to ${targetPlan.name} requires payment. Start checkout to complete the upgrade.`,
           402,

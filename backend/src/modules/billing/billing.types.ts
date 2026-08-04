@@ -1,5 +1,14 @@
 // ── Primitives ─────────────────────────────────────────────────────────────────
-export type PlanSlug = 'starter' | 'professional' | 'enterprise' | 'msp';
+export type PlanSlug = 'starter' | 'professional' | 'business' | 'enterprise' | 'msp';
+
+/**
+ * Plans sold by conversation rather than checkout.
+ *
+ * Presentation only — these still carry a real price so the paid-plan guard in
+ * createSubscription/updateSubscription keeps blocking self-assignment. The UI
+ * shows "Contact Sales" instead of a figure and a Subscribe button.
+ */
+export const CONTACT_SALES_PLANS: readonly PlanSlug[] = ['enterprise', 'msp'];
 export type BillingCycle = 'monthly' | 'yearly';
 export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled' | 'paused';
 export type InvoiceStatus = 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';

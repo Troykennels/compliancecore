@@ -10,9 +10,35 @@ import type { BillingCycle, SubscriptionPlan } from '../types/billing.types';
 
 const PLAN_HIGHLIGHT: Record<string, boolean> = { professional: true };
 
+/**
+ * Plans sold by conversation rather than self-service checkout.
+ *
+ * Presentation only. These plans still carry a real price server-side, which is
+ * what stops anyone assigning themselves Enterprise for free — a zero-priced
+ * plan is treated as free by the subscription guard.
+ */
+const CONTACT_SALES_PLANS = new Set(['enterprise', 'msp']);
+
+const SALES_EMAIL = 'info@orionsoftlimited.com';
+
 function fmt(amount: number, currency = 'USD'): string {
   if (amount === 0) return 'Free';
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
+  // en-NG renders ₦ correctly; en-US falls back to "NGN 25,000".
+  const locale = currency === 'NGN' ? 'en-NG' : 'en-US';
+  return new Intl.NumberFormat(locale, {
+    style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+/**
+ * Months saved by paying annually, rounded to the nearest whole month.
+ *
+ * Computed from the prices actually on screen rather than the plan's base
+ * currency, so the claim always matches the figures beside it.
+ */
+function monthsFreeOnAnnual(monthly: number, yearly: number): number {
+  if (monthly <= 0 || yearly <= 0) return 0;
+  return Math.round((monthly * 12 - yearly) / monthly);
 }
 
 function PlanCard({
@@ -42,6 +68,11 @@ function PlanCard({
     : cycle === 'monthly' ? plan.priceMonthly : plan.priceYearly;
   const highlight = PLAN_HIGHLIGHT[plan.slug];
 
+  const contactSales = CONTACT_SALES_PLANS.has(plan.slug);
+  const monthlyShown = row ? row.priceMonthly : plan.priceMonthly;
+  const yearlyShown  = row ? row.priceYearly  : plan.priceYearly;
+  const monthsFree   = monthsFreeOnAnnual(monthlyShown, yearlyShown);
+
   return (
     <div
       className={`relative flex flex-col rounded-2xl border-2 p-6 transition-all ${
@@ -69,16 +100,32 @@ function PlanCard({
       </div>
 
       <div className="mb-6">
-        <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-extrabold text-slate-900">{fmt(price, displayCurrency)}</span>
-          {price > 0 && (
-            <span className="text-sm text-slate-500">/{cycle === 'monthly' ? 'month' : 'year'}</span>
-          )}
-        </div>
-        {cycle === 'yearly' && plan.priceYearly > 0 && plan.priceMonthly > 0 && (
-          <p className="mt-1 text-xs text-emerald-600 font-medium">
-            Save {Math.round((1 - plan.priceYearly / (plan.priceMonthly * 12)) * 100)}% vs monthly
-          </p>
+        {contactSales ? (
+          <>
+            <div className="text-3xl font-extrabold text-slate-900">Contact Sales</div>
+            <p className="mt-1 text-xs text-slate-500">
+              Priced to your organisation. Talk to us about scope and volume.
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-extrabold text-slate-900">{fmt(price, displayCurrency)}</span>
+              {price > 0 && (
+                <span className="text-sm text-slate-500">/{cycle === 'monthly' ? 'month' : 'year'}</span>
+              )}
+            </div>
+            {cycle === 'yearly' && monthsFree > 0 && (
+              <p className="mt-1 text-xs font-medium text-emerald-600">
+                {monthsFree} month{monthsFree === 1 ? '' : 's'} free vs paying monthly
+              </p>
+            )}
+            {cycle === 'monthly' && monthsFree > 0 && (
+              <p className="mt-1 text-xs text-slate-500">
+                {fmt(yearlyShown, displayCurrency)}/year — {monthsFree} month{monthsFree === 1 ? '' : 's'} free
+              </p>
+            )}
+          </>
         )}
       </div>
 
@@ -98,19 +145,30 @@ function PlanCard({
         <div className="flex justify-between"><span>Storage</span><span className="font-semibold">{plan.maxEvidenceGb != null ? `${plan.maxEvidenceGb} GB` : 'Unlimited'}</span></div>
       </div>
 
-      <button
-        disabled={current || loading}
-        onClick={() => onSelect(plan)}
-        className={`w-full rounded-xl py-2.5 text-sm font-bold transition-colors ${
-          current
-            ? 'bg-slate-100 text-slate-400 cursor-default'
-            : highlight
-            ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-            : 'bg-slate-900 text-white hover:bg-slate-700'
-        } disabled:opacity-60`}
-      >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : current ? 'Current Plan' : 'Select Plan'}
-      </button>
+      {contactSales ? (
+        // Opens the customer's mail client rather than starting checkout: these
+        // plans are quoted, not self-served.
+        <a
+          href={`mailto:${SALES_EMAIL}?subject=${encodeURIComponent(`${plan.name} plan enquiry`)}`}
+          className="block w-full rounded-xl bg-slate-900 py-2.5 text-center text-sm font-bold text-white transition-colors hover:bg-slate-700"
+        >
+          Contact Sales
+        </a>
+      ) : (
+        <button
+          disabled={current || loading}
+          onClick={() => onSelect(plan)}
+          className={`w-full rounded-xl py-2.5 text-sm font-bold transition-colors ${
+            current
+              ? 'bg-slate-100 text-slate-400 cursor-default'
+              : highlight
+              ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+              : 'bg-slate-900 text-white hover:bg-slate-700'
+          } disabled:opacity-60`}
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : current ? 'Current Plan' : 'Select Plan'}
+        </button>
+      )}
     </div>
   );
 }
