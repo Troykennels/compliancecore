@@ -79,6 +79,15 @@ export interface OrgFormatters {
   formatDateTimeMedium: Formatter;
   /** "Dec 2025" — billing periods, where the day is noise. */
   formatMonthYear: Formatter;
+  /**
+   * "2025-12-31" in the organisation's timezone — for grouping, not display.
+   *
+   * Calendars and any other day-bucketing must key on this rather than the
+   * browser's date. An event at 00:30 in Lagos is still the previous day in New
+   * York, so a browser-derived key files it under a different cell for each
+   * viewer looking at the same record.
+   */
+  toDayKey: (value: string | Date | null | undefined) => string | null;
   /** "14:05" in the organisation's timezone. */
   formatTime: Formatter;
   timezone: string;
@@ -118,6 +127,12 @@ export function makeOrgFormatters(timezone: string, dateFormat: DateFormat): Org
     formatDateMedium:     (v, fallback = '—') => fmt(v, 'medium', fallback),
     formatDateTimeMedium: (v, fallback = '—') => fmt(v, 'mediumTime', fallback),
     formatMonthYear:      (v, fallback = '—') => fmt(v, 'monthYear', fallback),
+    toDayKey: (v) => {
+      const date = toDate(v);
+      if (!date) return null;
+      const p = extract(date, safeZone);
+      return `${p.year}-${p.month}-${p.day}`;
+    },
     formatTime:           (v, fallback = '—') => fmt(v, 'time', fallback),
     timezone: safeZone,
     dateFormat,

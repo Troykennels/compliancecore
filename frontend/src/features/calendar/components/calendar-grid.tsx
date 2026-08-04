@@ -5,6 +5,7 @@ import {
   addMonths, subMonths, format, parseISO,
 } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useOrgFormat } from '@/lib/org-format';
 import type { CalendarEvent } from '../types/calendar.types';
 
 interface CalendarGridProps {
@@ -16,6 +17,7 @@ interface CalendarGridProps {
 const MAX_VISIBLE_PER_DAY = 3;
 
 export function CalendarGrid({ events, onDayClick, onEventClick }: CalendarGridProps) {
+  const fmt = useOrgFormat();
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const days = useMemo(() => {
@@ -24,16 +26,25 @@ export function CalendarGrid({ events, onDayClick, onEventClick }: CalendarGridP
     return eachDayOfInterval({ start, end });
   }, [currentMonth]);
 
+  // Events are instants, so their calendar day depends on the timezone you read
+  // them in. Bucketing by the browser's date puts an event created at 00:30 in
+  // Lagos on the previous day for a reviewer in New York — the same record
+  // landing on different cells for different people. Key on the organisation's
+  // timezone so everyone sees it on the day it actually happened.
+  //
+  // The grid cells themselves stay as they are: they represent wall-clock
+  // calendar days rather than instants, so converting them would shift the whole
+  // month.
   const eventsByDay = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
     for (const e of events) {
-      const key = format(parseISO(e.startDate), 'yyyy-MM-dd');
+      const key = fmt.toDayKey(e.startDate) ?? format(parseISO(e.startDate), 'yyyy-MM-dd');
       const list = map.get(key) ?? [];
       list.push(e);
       map.set(key, list);
     }
     return map;
-  }, [events]);
+  }, [events, fmt]);
 
   return (
     <div className="flex flex-col h-full">

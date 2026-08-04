@@ -50,6 +50,56 @@ jobs:
       - name: Test (unit + integration)
         run: npm test
 
+      # Boots the built API against the service Postgres and walks the real
+      # customer journey — register, onboard, scope, adopt, then every module's
+      # detail and write route. Unit tests never caught the class of bug this
+      # does: five POST endpoints returning 500 while every page still loaded.
+      - name: E2E journey
+        env:
+          NODE_ENV: test
+          PORT: 3002
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/compliancecore?schema=global
+          # No Redis in CI: the in-memory fallback is enough for one process, and
+          # the journey does not exercise queues.
+          REDIS_URL: redis://localhost:6379
+          ENABLE_REDIS: 'false'
+          FRONTEND_URL: http://localhost:5173
+          # Throwaway credentials. Real ones are never needed — the journey
+          # treats an unconfigured Groq or Paystack as expected, not a failure.
+          ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+          COOKIE_SECRET: ci-cookie-secret-that-is-long-enough-32
+          SIGNATURE_SECRET: ci-signature-secret-that-is-long-enough
+          SMTP_HOST: localhost
+          SMTP_USER: ci
+          SMTP_PASS: ci
+          AWS_ACCESS_KEY_ID: ci
+          AWS_SECRET_ACCESS_KEY: ci
+          AWS_S3_BUCKET: ci-bucket
+          GROQ_API_KEY: ci-not-a-real-key
+        run: |
+          # RS256 keypair generated per run; nothing secret is committed.
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /tmp/jwt.pem 2>/dev/null
+          openssl rsa -in /tmp/jwt.pem -pubout -out /tmp/jwt.pub 2>/dev/null
+          export JWT_PRIVATE_KEY_BASE64=$(base64 -w0 /tmp/jwt.pem)
+          export JWT_PUBLIC_KEY_BASE64=$(base64 -w0 /tmp/jwt.pub)
+
+          node scripts/migrate.mjs --seed
+          node scripts/migrate-tenants.mjs
+
+          node dist/server.js &
+          SERVER_PID=$!
+          for i in $(seq 1 40); do
+            curl -sf http://127.0.0.1:3002/health >/dev/null && break
+            sleep 2
+          done
+
+          set +e
+          node scripts/e2e-journey.mjs
+          RESULT=$?
+          set -e
+          kill $SERVER_PID 2>/dev/null || true
+          exit $RESULT
+
   frontend:
     name: Frontend · lint, typecheck & build
     runs-on: ubuntu-latest
