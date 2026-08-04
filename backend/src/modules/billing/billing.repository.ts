@@ -167,16 +167,16 @@ export async function initBillingTables(): Promise<void> {
     INSERT INTO global.subscription_plans
       (name, slug, description, price_monthly, price_yearly, currency, max_users, max_frameworks, max_evidence_gb, max_branches, max_departments, features, sort_order)
     VALUES
-      ('Starter', 'starter', 'For small teams putting their first framework in place', 25000, 250000, 'NGN', 3, 2, 1, 1, 5,
-       '["2 compliance frameworks","3 team members","1 GB evidence storage","Community support","Basic audit trail"]', 1),
-      ('Professional', 'professional', 'For growing organisations with serious compliance needs', 85000, 850000, 'NGN', 15, 5, 10, 5, 20,
-       '["5 compliance frameworks","15 team members","10 GB evidence storage","Email support","Full audit trail","Custom controls","Scheduled reports","AI tools"]', 2),
-      ('Business', 'business', 'For established organisations running several frameworks at once', 180000, 1800000, 'NGN', 50, NULL, 50, 15, 50,
-       '["Unlimited compliance frameworks","50 team members","50 GB evidence storage","Priority email support","Full audit trail","Custom controls","Scheduled reports","AI tools","Approval workflows","Digital signatures"]', 3),
+      ('Starter', 'starter', 'For small teams putting their first framework in place', 25000, 250000, 'NGN', 5, 3, 5, 1, 5,
+       '["5 team members","3 compliance frameworks","5 GB evidence storage","Compliance dashboard","Compliance calendar","Tasks","Expiry tracker","Basic audit trail","Email notifications"]', 1),
+      ('Professional', 'professional', 'For growing organisations with serious compliance needs', 85000, 850000, 'NGN', 25, 10, 50, 5, 20,
+       '["25 team members","10 compliance frameworks","50 GB evidence storage","Everything in Starter","Risk register","Vendor management","Evidence hub","Incident management","AI assistant","Scheduled reports","Approval workflows","Digital signatures","Executive dashboard","Analytics"]', 2),
+      ('Business', 'business', 'For established organisations running several frameworks across multiple locations', 180000, 1800000, 'NGN', 100, NULL, 250, NULL, NULL,
+       '["100 team members","Unlimited compliance frameworks","250 GB evidence storage","Everything in Professional","Departments","Branches","Multi-location support","Advanced analytics","API access","Priority support","Executive reporting","AI assistant","Vendor portal","Risk management","Workflow automation"]', 3),
       ('Enterprise', 'enterprise', 'Unlimited compliance management for large organisations', 480000, 4800000, 'NGN', NULL, NULL, NULL, NULL, NULL,
-       '["Unlimited frameworks","Unlimited team members","Unlimited storage","Priority support","SSO / SCIM","Custom branding","API access","Data residency choice","Dedicated CSM"]', 4),
+       '["Unlimited users","Unlimited compliance frameworks","Unlimited evidence storage","Everything in Business","Single sign-on (SSO)","SCIM user provisioning","Dedicated support","Full API access","White-label branding","Dedicated customer success manager","Custom deployment"]', 4),
       ('MSP', 'msp', 'Managed service provider plan for multi-client management', 800000, 8000000, 'NGN', NULL, NULL, NULL, NULL, NULL,
-       '["All Enterprise features","Multi-tenant management","White-label portal","Client reporting dashboard","Bulk onboarding","Volume discounts"]', 5)
+       '["Unlimited client organisations","White-label client portal","Multi-client dashboard","Bulk client onboarding","Tenant management","Client billing","Client reporting","Everything in Enterprise"]', 5)
     ON CONFLICT (slug) DO NOTHING
   `);
 
