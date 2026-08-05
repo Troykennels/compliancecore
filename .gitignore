@@ -43,3 +43,6 @@ backend/node_modules/.prisma/
 # Local generated deploy secrets
 deploy-secrets.local.env
 *.local.env
+
+# Vite writes these while resolving its config; they are per-run temp files.
+vite.config.ts.timestamp-*.mjs
