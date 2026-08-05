@@ -3,6 +3,18 @@ import type { User, TenantMembership, Session, RefreshToken, MfaCredential } fro
 
 // ─── User ─────────────────────────────────────────────────────────────────────
 
+/** Replaces the pending verification token, for a resend. */
+export async function setEmailVerificationToken(
+  userId: string,
+  tokenHash: string,
+  expiresAt: Date,
+): Promise<void> {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { emailVerificationTokenHash: tokenHash, emailVerificationExpiresAt: expiresAt },
+  });
+}
+
 export async function findUserByEmail(email: string): Promise<User | null> {
   return prisma.user.findFirst({
     where: { email: email.toLowerCase(), deletedAt: null },

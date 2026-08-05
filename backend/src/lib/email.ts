@@ -98,6 +98,68 @@ async function send(to: string, subject: string, html: string): Promise<void> {
   }
 }
 
+/**
+ * What the mail transport is actually configured to do, for diagnosis.
+ *
+ * Every send is best-effort and swallows its own errors, which is right — a
+ * failed email must not fail a registration — but it also means a completely
+ * broken mail setup is invisible unless somebody reads the logs. Boot-time
+ * logging and the owner-only test endpoint both use this.
+ */
+export function emailTransportStatus(): {
+  transport: 'brevo-http' | 'smtp';
+  from: string;
+  ready: boolean;
+  warning: string | null;
+} {
+  const from = env.EMAIL_FROM;
+
+  if (useHttpApi) {
+    return { transport: 'brevo-http', from, ready: true, warning: null };
+  }
+
+  return {
+    transport: 'smtp',
+    from,
+    ready: Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS),
+    // Named explicitly because this exact configuration has already cost this
+    // deployment a full day: valid credentials, verified sender, and every
+    // send still timing out because the platform blocks outbound port 587.
+    warning:
+      'Sending over SMTP. Managed hosts (Railway, Render, Fly) commonly block outbound '
+      + 'port 587, in which case every email fails with ETIMEDOUT and nothing arrives. '
+      + 'Set BREVO_API_KEY to send over HTTPS instead.',
+  };
+}
+
+/**
+ * Sends a real email and REPORTS THE FAILURE, unlike every other send here.
+ *
+ * Used only by the owner-only diagnostic endpoint. Its whole purpose is to
+ * surface the provider's own message — "sender not verified", "invalid API
+ * key", "connection timeout" — which is the one piece of information that
+ * identifies the problem, and which the fire-and-forget path deliberately
+ * hides.
+ */
+export async function sendDiagnosticEmail(to: string): Promise<void> {
+  const status = emailTransportStatus();
+  const html = `
+    <p>This is a ComplianceCore test email.</p>
+    <p>If you are reading it, outbound email is working.</p>
+    <table style="border-collapse:collapse">
+      <tr><td><strong>Transport</strong></td><td>${status.transport}</td></tr>
+      <tr><td><strong>From</strong></td><td>${status.from}</td></tr>
+      <tr><td><strong>Sent</strong></td><td>${new Date().toISOString()}</td></tr>
+    </table>`;
+
+  // Deliberately NOT wrapped in the swallowing `send`.
+  if (useHttpApi) {
+    await sendViaHttpApi(to, 'ComplianceCore email test', html);
+  } else {
+    await transporter.sendMail({ from: env.EMAIL_FROM, to, subject: 'ComplianceCore email test', html });
+  }
+}
+
 export async function sendVerificationEmail(
   to: string,
   firstName: string,

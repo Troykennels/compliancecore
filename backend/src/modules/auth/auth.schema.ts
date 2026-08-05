@@ -24,6 +24,10 @@ export const verifyEmailSchema = z.object({
   token: z.string().length(64, 'Invalid verification token'),
 });
 
+export const resendVerificationSchema = z.object({
+  email: z.string().email().toLowerCase(),
+});
+
 export const forgotPasswordSchema = z.object({
   email: z.string().email().toLowerCase(),
 });

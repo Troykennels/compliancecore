@@ -103,6 +103,15 @@ router.post(
   settingsController.rotateWebhookSecret,
 );
 
+// ── Email diagnostics ─────────────────────────────────────────────────────────
+// Every email in the app is fire-and-forget and swallows its own errors, so a
+// broken mail setup has no symptom except customers not receiving anything.
+// These two make it answerable in seconds instead of requiring log access:
+// what transport is configured, and what the provider says when we actually
+// try. Owner only — it reveals configuration and can send mail.
+router.get('/email/status', requireRole('owner'), settingsController.getEmailStatus);
+router.post('/email/test', requireRole('owner'), settingsController.sendTestEmail);
+
 // ── Notifications ─────────────────────────────────────────────────────────────
 router.get(
   '/notifications',

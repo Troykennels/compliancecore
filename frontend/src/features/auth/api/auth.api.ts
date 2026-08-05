@@ -39,6 +39,9 @@ export const authApi = {
   verifyEmail: async (token: string) =>
     apiClient.get<ApiResponse<{ message: string }>>(`/auth/verify-email?token=${token}`),
 
+  resendVerification: async (email: string) =>
+    apiClient.post<ApiResponse<{ message: string }>>('/auth/resend-verification', { email }),
+
   forgotPassword: async (data: ForgotPasswordRequest) =>
     apiClient.post<ApiResponse<{ message: string }>>('/auth/forgot-password', data),
 

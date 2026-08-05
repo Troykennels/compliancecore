@@ -74,6 +74,41 @@ export async function register(input: RegisterInput): Promise<{ message: string 
 
 // ─── Email Verification ────────────────────────────────────────────────────────
 
+/**
+ * Issues a fresh verification link.
+ *
+ * There was no way to do this. Registration sends the mail fire-and-forget and
+ * swallows any failure, so anyone whose email did not arrive — a transient
+ * provider error, a spam filter, a typo they want to retry past — was stuck
+ * permanently: unable to verify, unable to log in, and unable to re-register
+ * because the address was already taken.
+ *
+ * The response is identical whether or not the address exists, for the same
+ * reason register's is: this endpoint is unauthenticated, so a different answer
+ * would confirm which addresses hold accounts.
+ */
+export async function resendVerificationEmail(email: string): Promise<{ message: string }> {
+  const SAME_ANSWER = {
+    message: 'If that address needs verifying, a new link is on its way.',
+  };
+
+  const user = await repo.findUserByEmail(email);
+  if (!user || user.emailVerifiedAt) return SAME_ANSWER;
+
+  // A new token each time, so an older link that may have leaked stops working.
+  const { raw, hash } = generateSecureToken();
+  await repo.setEmailVerificationToken(
+    user.id,
+    hash,
+    new Date(Date.now() + 24 * 60 * 60 * 1000),
+  );
+
+  void sendVerificationEmail(user.email, user.firstName ?? '', raw);
+  logger.info({ userId: user.id }, 'Verification email resent');
+
+  return SAME_ANSWER;
+}
+
 export async function verifyEmail(rawToken: string): Promise<{ message: string }> {
   const tokenHash = sha256(rawToken);
   const user = await repo.findUserByVerificationToken(tokenHash);
@@ -378,7 +413,17 @@ export async function forgotPassword(email: string): Promise<{ message: string }
   // Always return success to prevent email enumeration
   const message = 'If an account exists for this email, a password reset link has been sent.';
 
-  if (!user || !user.emailVerifiedAt) return { message };
+  // Unverified accounts are NOT excluded.
+  //
+  // They used to be, silently, which created a second dead end for the exact
+  // person most likely to be here: someone whose verification email never
+  // arrived, trying password reset as a way in. They got the same reassuring
+  // "a link has been sent" and nothing ever came.
+  //
+  // It weakens nothing. The reset link goes to the address itself, so using it
+  // proves control of that inbox — the very thing verification establishes.
+  // resetPassword therefore also marks the address verified.
+  if (!user) return { message };
 
   const { raw, hash } = generateSecureToken();
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
@@ -402,6 +447,14 @@ export async function resetPassword(input: ResetPasswordInput): Promise<{ messag
 
   const passwordHash = await hashPassword(input.password);
   await repo.resetPassword(user.id, passwordHash);
+
+  // Completing a reset proves control of the mailbox, which is exactly what
+  // verification establishes — so an account that was never verified becomes
+  // verified here rather than leaving the person able to sign in nowhere.
+  if (!user.emailVerifiedAt) {
+    await repo.setEmailVerified(user.id);
+    logger.info({ userId: user.id }, 'Email verified via completed password reset');
+  }
 
   // Invalidate all sessions on password reset for security. The refresh tokens
   // were already revoked here; the access tokens were not, so anyone holding

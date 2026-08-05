@@ -11,7 +11,29 @@ export function EmailVerificationPage(): JSX.Element {
   const token = searchParams.get('token');
   const [state, setState] = useState<State>('verifying');
   const [errorMessage, setErrorMessage] = useState('');
+  const [resendEmail, setResendEmail] = useState('');
+  const [resending, setResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
   const called = useRef(false); // prevent double invocation in React 18 StrictMode
+
+  async function handleResend(e: React.FormEvent) {
+    e.preventDefault();
+    setResending(true);
+    setResendMessage('');
+    try {
+      const res = await authApi.resendVerification(resendEmail);
+      setResendMessage(res.data.data?.message ?? 'If that address needs verifying, a new link is on its way.');
+    } catch (err) {
+      const message = (err as { response?: { data?: { error?: { message: string } } } })
+        .response?.data?.error?.message;
+      // Surfaces the rate-limit message rather than a generic failure, so
+      // someone who has just requested three links is told to wait rather than
+      // left retrying.
+      setResendMessage(message ?? 'Could not send right now. Please try again shortly.');
+    } finally {
+      setResending(false);
+    }
+  }
 
   useEffect(() => {
     if (!token || called.current) return;
@@ -71,23 +93,42 @@ export function EmailVerificationPage(): JSX.Element {
 
           {state === 'error' && (
             <>
-              <XCircle className="mx-auto h-12 w-12 text-rose-500" />
+              <XCircle className="mx-auto h-12 w-12 text-red-500" />
               <h1 className="text-xl font-semibold text-slate-900">Verification failed</h1>
               <p className="text-sm text-slate-600">{errorMessage}</p>
-              <div className="space-y-3">
-                <Link
-                  to={PATHS.LOGIN}
-                  className="block text-sm text-indigo-600 hover:underline"
-                >
-                  Return to sign in
-                </Link>
-                <p className="text-xs text-slate-400">
-                  Need a new link?{' '}
-                  <Link to={PATHS.LOGIN} className="text-indigo-600 hover:underline">
-                    Sign in to request another
-                  </Link>
-                </p>
-              </div>
+
+              {/* A real resend, not a link back to sign-in. The previous copy
+                  said "sign in to request another", which is a dead end: you
+                  cannot sign in until you have verified, so anyone whose link
+                  expired or never arrived had nowhere to go. */}
+              <form onSubmit={handleResend} className="space-y-2 pt-2 text-left">
+                <label htmlFor="resend-email" className="block text-xs font-medium text-slate-700">
+                  Send a new verification link
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    id="resend-email"
+                    type="email"
+                    required
+                    value={resendEmail}
+                    onChange={(e) => setResendEmail(e.target.value)}
+                    placeholder="you@company.com"
+                    className="h-9 min-w-0 flex-1 rounded-lg border border-slate-300 px-3 text-sm"
+                  />
+                  <button
+                    type="submit"
+                    disabled={resending}
+                    className="h-9 shrink-0 rounded-lg bg-brand-600 px-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
+                  >
+                    {resending ? 'Sending…' : 'Resend'}
+                  </button>
+                </div>
+                {resendMessage && <p className="text-xs text-slate-500">{resendMessage}</p>}
+              </form>
+
+              <Link to={PATHS.LOGIN} className="block pt-2 text-sm text-brand-600 hover:underline">
+                Return to sign in
+              </Link>
             </>
           )}
         </div>

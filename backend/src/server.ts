@@ -15,6 +15,7 @@ import { startFxMonitorWorker, scheduleFxMonitorJob } from './jobs/fx-monitor.jo
 import { startSubscriptionReminderWorker, scheduleSubscriptionReminderJob } from './jobs/subscription-reminder.job';
 import { startTenantPurgeWorker, scheduleTenantPurgeJob } from './jobs/tenant-purge.job';
 import { initBillingTables } from './modules/billing/billing.repository';
+import { emailTransportStatus } from './lib/email';
 
 async function bootstrap(): Promise<void> {
   // Verify database and Redis connectivity before accepting traffic
@@ -26,6 +27,20 @@ async function bootstrap(): Promise<void> {
   const workers: Worker[] = [];
 
   await initBillingTables();
+
+  // Say out loud how mail will be sent. Every email in this app is
+  // fire-and-forget and swallows its own errors — correct, because a failed
+  // send must not fail a registration, but it also means a completely broken
+  // mail setup produces no symptom except silence and a confused customer who
+  // never got their verification link. One line at boot makes it checkable.
+  const mail = emailTransportStatus();
+  if (!mail.ready) {
+    logger.error({ transport: mail.transport, from: mail.from }, 'EMAIL IS NOT CONFIGURED — no mail will be delivered');
+  } else if (mail.warning) {
+    logger.warn({ transport: mail.transport, from: mail.from }, `Email: ${mail.warning}`);
+  } else {
+    logger.info({ transport: mail.transport, from: mail.from }, 'Email transport ready');
+  }
 
   if (env.ENABLE_REDIS) {
     // The shared client is created with lazyConnect, but importing the routers

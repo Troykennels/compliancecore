@@ -145,6 +145,15 @@ export async function verifyEmail(req: Request, res: Response, next: NextFunctio
   }
 }
 
+export async function resendVerification(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const result = await service.resendVerificationEmail(req.body.email);
+    ok(res, req, result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 // ─── Refresh Token ────────────────────────────────────────────────────────────
 
 export async function refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {

@@ -57,6 +57,17 @@ const mfaLimiter = makeRateLimiter({
 router.post('/register', registerLimiter, validate(schema.registerSchema), controller.register);
 router.get('/verify-email', validate(schema.verifyEmailSchema, 'query'), controller.verifyEmail);
 
+// Without this, anyone whose verification email did not arrive was stuck for
+// good: unable to verify, unable to log in, and unable to re-register because
+// the address was already taken. Shares the registration limiter, since it
+// sends the same mail and is the obvious thing to abuse for mailbombing.
+router.post(
+  '/resend-verification',
+  registerLimiter,
+  validate(schema.resendVerificationSchema),
+  controller.resendVerification,
+);
+
 // Login
 router.post('/login', loginLimiter, validate(schema.loginSchema), controller.login);
 

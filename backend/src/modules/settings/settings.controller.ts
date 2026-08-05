@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { settingsService } from './settings.service';
 import { ok, created, noContent } from '../../lib/response';
+import { emailTransportStatus, sendDiagnosticEmail } from '../../lib/email';
 
 export const settingsController = {
   // ── Team ───────────────────────────────────────────────────────────────────
@@ -145,6 +146,47 @@ export const settingsController = {
         req.params.id,
       );
       ok(res, req, result);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // ── Email diagnostics ──────────────────────────────────────────────────────
+
+  async getEmailStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      ok(res, req, emailTransportStatus());
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
+   * Sends a real email to the caller and reports what happened.
+   *
+   * Returns 200 with `{ sent: false, error }` rather than throwing, because the
+   * error text IS the answer — "sender not verified", "invalid API key",
+   * "connection timeout" each point at a different fix, and a bare 500 points
+   * at none of them.
+   */
+  async sendTestEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const to = String(req.body?.to ?? req.user!.email);
+      const status = emailTransportStatus();
+      try {
+        await sendDiagnosticEmail(to);
+        ok(res, req, { sent: true, to, ...status, error: null });
+      } catch (err) {
+        const e = err as { message?: string; code?: string; responseCode?: number; response?: string };
+        ok(res, req, {
+          sent: false,
+          to,
+          ...status,
+          error: `${e.code ?? ''} ${e.responseCode ?? ''} ${e.response ?? e.message ?? 'unknown error'}`
+            .replace(/\s+/g, ' ')
+            .trim(),
+        });
+      }
     } catch (err) {
       next(err);
     }
