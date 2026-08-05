@@ -47,7 +47,10 @@ export function CalendarGrid({ events, onDayClick, onEventClick }: CalendarGridP
   }, [events, fmt]);
 
   return (
-    <div className="flex flex-col h-full">
+    // min-h-full, not h-full: the grid must be free to grow past the viewport
+    // so the scroll container above it has something to scroll, while still
+    // filling the space on a tall screen.
+    <div className="flex min-h-full flex-col">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <button
@@ -67,8 +70,9 @@ export function CalendarGrid({ events, onDayClick, onEventClick }: CalendarGridP
         </button>
       </div>
 
-      {/* Day-of-week labels */}
-      <div className="grid grid-cols-7 mb-1">
+      {/* Day-of-week labels. Sticky, because the grid scrolls now and a column
+          of dates with no day names above it is unreadable. */}
+      <div className="sticky top-0 z-10 mb-1 grid grid-cols-7 bg-slate-50">
         {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d) => (
           <div key={d} className="py-1 text-center text-xs font-medium text-slate-500 uppercase tracking-wide">
             {d}

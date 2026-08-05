@@ -139,7 +139,12 @@ export function CalendarPage() {
           </button>
         </div>
       ) : view === 'month' ? (
-        <div className="flex-1 overflow-hidden">
+        // Scrolls, rather than clipping. A month can run to six week rows and
+        // each cell holds a stack of events, so the grid needs ~600px before
+        // the page header and filters are counted — more than a laptop viewport
+        // has. With overflow-hidden the last weeks of the month were simply
+        // cut off and there was no way to reach them.
+        <div className="flex-1 overflow-y-auto">
           <CalendarGrid
             events={events}
             onDayClick={(date) => openCreate(date)}

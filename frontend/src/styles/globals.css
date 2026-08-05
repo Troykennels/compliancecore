@@ -211,7 +211,9 @@
      which on the sidebar and inside dialogs read as a hard line dividing the
      layout rather than as a control. */
   ::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--muted-foreground) / 0.25);
+    /* Quiet, but it still has to be findable — a bar you cannot see reads as
+       "this does not scroll", which is how a clipped calendar goes unnoticed. */
+    background-color: hsl(var(--muted-foreground) / 0.35);
     border-radius: 9999px;
     border: 2px solid transparent;
     background-clip: content-box;
