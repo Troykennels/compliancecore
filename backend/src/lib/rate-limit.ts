@@ -14,27 +14,32 @@ import { env } from '../config/env';
 // out everyone, because one person fumbling a password consumed the global
 // allowance.
 //
-// The platform edge APPENDS the peer it sees to X-Forwarded-For, so the entry
-// to trust is the RIGHTMOST one — the only entry written by our own proxy.
+// Resolves the end user's IP for rate-limit bucketing.
 //
-// This previously took the leftmost, which the caller controls completely. A
-// request carrying `X-Forwarded-For: 1.2.3.4` arrives at the app as
-// "1.2.3.4, <real client>", so reading the left gave the attacker a fresh
-// bucket per request just by varying the header. That made the limits on login,
-// MFA challenge, registration and password reset decorative: unlimited password
-// guessing, and an unthrottled oracle against a 6-digit TOTP code.
+// `req.ip` is the right answer, and the only one that adapts to the deployment:
+// app.ts sets `trust proxy` to the number of proxies in front of us, and
+// Express then walks X-Forwarded-For inward by exactly that many hops. It is
+// neither forgeable (anything the client injects is left of the trusted hops)
+// nor topology-dependent.
 //
-// Forging cannot beat the rightmost entry, because anything the client sends is
-// pushed left when the edge appends. A legitimate client sends no header at
-// all, so for them the two are identical and nothing changes.
+// Reading the header by hand went wrong in both directions. Taking the LEFTMOST
+// entry trusted whatever the caller sent, so an attacker got a fresh bucket per
+// request just by varying the header — unlimited password guessing. Taking the
+// RIGHTMOST, which I changed it to, assumed a single proxy hop; with two, the
+// rightmost entry is the platform's own internal address, identical for every
+// visitor. That collapses the whole internet into one bucket, and the first
+// symptom is real users being told "too many registration attempts" because
+// three other people signed up that hour.
+//
+// The header is consulted only as a fallback for the case where req.ip is
+// somehow unavailable, and then from the left, since without trust-proxy
+// context there is no better guess.
 function clientIp(req: Request): string {
+  if (req.ip) return req.ip;
+
   const xff = req.headers['x-forwarded-for'];
-  const raw = Array.isArray(xff) ? xff.join(',') : xff;
-  const entries = raw?.split(',').map((s) => s.trim()).filter(Boolean) ?? [];
-  const candidate = entries[entries.length - 1];
-  // Fall back to req.ip (and finally a constant) so a missing header degrades
-  // gracefully rather than throwing.
-  return candidate || req.ip || 'unknown';
+  const raw = Array.isArray(xff) ? xff[0] : xff;
+  return raw?.split(',')[0]?.trim() || 'unknown';
 }
 
 // Shared rate-limiter factory backed by Redis.
@@ -54,6 +59,9 @@ export function makeRateLimiter(
     // req.ip is unreliable behind this proxy chain (see clientIp), and the
     // built-in check only inspects req.ip — it would flag a correct setup here
     // and log on every request.
+    // express-rate-limit's own warning assumes you have not configured
+    // `trust proxy`. app.ts does, so the check would fire on every request
+    // against a correct setup.
     validate: { trustProxy: false, xForwardedForHeader: false },
     // When Redis is disabled (local dev), fall back to the default in-process
     // MemoryStore so auth routes still rate-limit without a Redis server.

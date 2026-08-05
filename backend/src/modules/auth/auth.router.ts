@@ -16,16 +16,33 @@ const loginLimiter = makeRateLimiter({
   skipSuccessfulRequests: true,
 });
 
+// Three an hour was too tight for the legitimate case this product is sold
+// into: one person setting up accounts for several colleagues from one office
+// address hits it immediately, and the only signal they get is a flat refusal
+// on the very first thing they try to do. Ten still stops automated signup
+// abuse, which is what the limit is actually for.
 const registerLimiter = makeRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 3,
-  message: { data: null, error: { code: 'TOO_MANY_REQUESTS', message: 'Too many registration attempts.' } },
+  max: 10,
+  message: {
+    data: null,
+    error: {
+      code: 'TOO_MANY_REQUESTS',
+      message: 'Too many sign-up attempts from this network. Please try again in an hour.',
+    },
+  },
 });
 
 const passwordLimiter = makeRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 3,
-  message: { data: null, error: { code: 'TOO_MANY_REQUESTS', message: 'Too many password reset requests.' } },
+  max: 5,
+  message: {
+    data: null,
+    error: {
+      code: 'TOO_MANY_REQUESTS',
+      message: 'Too many password reset requests. Please try again in an hour.',
+    },
+  },
 });
 
 const mfaLimiter = makeRateLimiter({
