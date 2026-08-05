@@ -19,7 +19,14 @@ export interface DepartmentWithRelations extends Department {
   parentDepartmentName: string | null;
   headUserName: string | null;
   headUserEmail: string | null;
-  memberCount: number;
+  // memberCount removed. The list query counted the whole ORGANISATION for
+  // every department — the subquery never referenced the department at all — so
+  // six departments in a 40-person org each reported 40, while the detail query
+  // hard-coded 0 and disagreed with it. Nothing rendered the field, so it was a
+  // wrong number nobody saw.
+  //
+  // A real count needs a link between a membership and a department, which the
+  // schema does not have. Worth adding as a feature; not worth faking here.
 }
 
 // Recursive tree node for the hierarchy view

@@ -55,12 +55,7 @@ export const departmentsRepository = {
            b.name as "branchName",
            pd.name as "parentDepartmentName",
            (u.first_name || ' ' || u.last_name) as "headUserName",
-           u.email as "headUserEmail",
-           (SELECT COUNT(*)::int FROM global.tenant_memberships tm
-            JOIN global.tenants t ON t.id = tm.tenant_id
-            WHERE tm.is_active = TRUE
-              AND tm.deleted_at IS NULL
-              AND t.schema_name = current_schema()) as "memberCount"
+           u.email as "headUserEmail"
          FROM departments d
          LEFT JOIN branches b ON b.id = d.branch_id AND b.deleted_at IS NULL
          LEFT JOIN departments pd ON pd.id = d.parent_department_id AND pd.deleted_at IS NULL
@@ -94,8 +89,7 @@ export const departmentsRepository = {
         b.name as "branchName",
         pd.name as "parentDepartmentName",
         (u.first_name || ' ' || u.last_name) as "headUserName",
-        u.email as "headUserEmail",
-        0 as "memberCount"
+        u.email as "headUserEmail"
       FROM departments d
       LEFT JOIN branches b  ON b.id  = d.branch_id            AND b.deleted_at  IS NULL
       LEFT JOIN departments pd ON pd.id = d.parent_department_id AND pd.deleted_at IS NULL

@@ -20,3 +20,15 @@ export async function adoptFramework(req: Request, res: Response) {
   const data = await frameworksService.adopt(req.tenant!.schemaName, req.params.id, actor(req));
   created(res, req, data);
 }
+
+/**
+ * True when this framework's controls are already in the tenant.
+ *
+ * Used by the plan-limit guard so a re-adoption — which is idempotent and adds
+ * nothing — is not refused just because the tenant is at its framework limit.
+ */
+export async function isFrameworkAlreadyAdopted(req: Request): Promise<boolean> {
+  const schemaName = req.tenant?.schemaName;
+  if (!schemaName || !req.params.id) return false;
+  return frameworksService.isAdopted(schemaName, req.params.id);
+}

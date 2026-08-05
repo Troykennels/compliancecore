@@ -37,3 +37,49 @@ async function countInTenantTable(req: Request, table: 'branches' | 'departments
 
 export const countBranches = (req: Request): Promise<number> => countInTenantTable(req, 'branches');
 export const countDepartments = (req: Request): Promise<number> => countInTenantTable(req, 'departments');
+
+/**
+ * Distinct frameworks the tenant has adopted.
+ *
+ * Counted from the controls table rather than a join table: adopting a
+ * framework is what creates its controls, so this is the same thing a customer
+ * means by "how many frameworks am I running".
+ */
+export async function countAdoptedFrameworks(req: Request): Promise<number> {
+  const schemaName = req.tenant?.schemaName;
+  if (!schemaName) return 0;
+  return withTenantSchema(schemaName, async (tx) => {
+    const rows = (await tx.$queryRawUnsafe(
+      `SELECT COUNT(DISTINCT framework_id)::int AS n
+         FROM controls
+        WHERE deleted_at IS NULL AND framework_id IS NOT NULL`,
+    )) as Array<{ n: number }>;
+    return rows[0]?.n ?? 0;
+  });
+}
+
+/**
+ * Evidence storage in use, in whole GB, rounded down.
+ *
+ * Rounded DOWN on purpose: a tenant on a 5 GB plan holding 5.4 GB counts as 5
+ * and is blocked from adding more, rather than being told they are already over
+ * a limit they were allowed to reach.
+ */
+export async function countEvidenceGb(req: Request): Promise<number> {
+  const schemaName = req.tenant?.schemaName;
+  if (!schemaName) return 0;
+  return withTenantSchema(schemaName, async (tx) => {
+    // Summed over VERSIONS, not evidence records: the bytes live on
+    // evidence_versions, and every version is a real object in S3 that the
+    // tenant is actually consuming. Versions belonging to soft-deleted evidence
+    // are excluded, since deleting an item should give the space back.
+    const rows = (await tx.$queryRawUnsafe(
+      `SELECT COALESCE(SUM(v.file_size_bytes), 0)::bigint AS bytes
+         FROM evidence_versions v
+         JOIN evidence e ON e.id = v.evidence_id
+        WHERE e.deleted_at IS NULL`,
+    )) as Array<{ bytes: bigint | string }>;
+    const bytes = Number(rows[0]?.bytes ?? 0);
+    return Math.floor(bytes / (1024 ** 3));
+  });
+}

@@ -3,6 +3,7 @@ import { X, CheckCheck, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useMarkRead, useDismissNotification } from '../hooks/use-notifications';
 import type { Notification, NotificationPriority } from '../api/notifications.api';
+import { toAppPath } from '../lib/action-url';
 
 const PRIORITY_CONFIG: Record<NotificationPriority, { dot: string; badge: string; label: string }> = {
   critical: { dot: 'bg-red-500',    badge: 'bg-red-100 text-red-700',    label: 'Critical' },
@@ -80,11 +81,11 @@ export function NotificationPanel({ notifications, unreadCount, onMarkAllRead }:
                     Mark read
                   </button>
                 )}
-                {n.actionUrl && (
+                {toAppPath(n.actionUrl) && (
                   <button
                     type="button"
-                    onClick={() => navigate(n.actionUrl!)}
-                    className="text-[11px] text-blue-600 hover:text-blue-800 font-medium"
+                    onClick={() => navigate(toAppPath(n.actionUrl)!)}
+                    className="text-2xs font-medium text-brand-600 hover:text-brand-700"
                   >
                     View
                   </button>

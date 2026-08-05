@@ -216,8 +216,39 @@ async function fireChainStep(
   ruleName: string,
   metadata: Record<string, unknown>,
 ) {
+  /**
+   * Where an escalation notification should take you.
+   *
+   * This used to build an ABSOLUTE url from APP_URL — an env var this service
+   * does not even define, so it fell back to a hard-coded localhost:5173 in
+   * production — and pluralised by appending "s", which produced "/policys/".
+   * Between the wrong origin and the wrong word, the link never resolved.
+   *
+   * It now points at the module's list page, which is a route that definitely
+   * exists. Per-record detail routes are declared in paths.ts but several have
+   * no matching <Route>, so linking straight to a record would land the user on
+   * the dashboard with no explanation of what was escalated.
+   */
+  function entityPath(entityType: string): string {
+    const LIST_PATHS: Record<string, string> = {
+      control: '/controls',
+      policy: '/policies',
+      risk: '/risks',
+      vendor: '/vendors',
+      audit: '/audits',
+      task: '/tasks',
+      evidence: '/evidence',
+      incident: '/incidents',
+      approval: '/approvals',
+      training: '/training',
+      expiry_item: '/expiry',
+      calendar_event: '/calendar',
+    };
+    return LIST_PATHS[entityType] ?? '/dashboard';
+  }
+
   const entityTitle = (metadata.title ?? metadata.name ?? `${entity.entityType} ${entity.entityId}`) as string;
-  const entityUrl = `${process.env.APP_URL ?? 'http://localhost:5173'}/${entity.entityType.replace('_', '-')}s/${entity.entityId}`;
+  const entityUrl = entityPath(entity.entityType);
 
   switch (step.action) {
     case 'notify': {

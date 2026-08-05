@@ -4,6 +4,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { useUnreadCount, useNotifications, useMarkRead, useMarkAllRead, useDismissNotification } from '../hooks/use-notifications';
 import type { Notification } from '../api/notifications.api';
 import { useNavigate } from 'react-router-dom';
+import { toAppPath } from '../lib/action-url';
 
 const PRIORITY_DOT: Record<string, string> = {
   critical: 'bg-red-500',
@@ -21,7 +22,8 @@ function NotificationRow({ n, onRead, onDismiss }: {
 
   function handleClick() {
     if (!n.readAt) onRead(n.id);
-    if (n.actionUrl) navigate(n.actionUrl);
+    const path = toAppPath(n.actionUrl);
+    if (path) navigate(path);
   }
 
   return (

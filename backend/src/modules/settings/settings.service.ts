@@ -19,6 +19,7 @@ import {
 } from './settings.schema';
 import { email as emailClient } from '../../lib/email';
 import { generateSecureToken, sha256 } from '../../lib/crypto';
+import { revokeUserTokens } from '../../lib/token-revocation';
 
 type Actor = { id: string; email: string; role: string | null; tenantId: string | null };
 
@@ -121,7 +122,15 @@ const teamService = {
       throw new ForbiddenError('Only owners can assign the owner role.');
     }
 
-    return settingsRepository.updateMemberRole(membershipId, input.role);
+    const updated = await settingsRepository.updateMemberRole(membershipId, input.role);
+
+    // Role and permissions are baked into the access token, so a demotion did
+    // nothing until the token expired: an admin dropped to viewer kept writing
+    // as an admin for up to fifteen minutes. Forcing a re-issue makes the new
+    // role take effect on their next request.
+    await revokeUserTokens(membership.userId, `role changed to ${input.role}`);
+
+    return updated;
   },
 
   async removeMember(tenantId: string, membershipId: string, actor: Actor) {
@@ -146,6 +155,12 @@ const teamService = {
     }
 
     await settingsRepository.deactivateMember(membershipId);
+
+    // Deactivating the membership row alone did not end the session. A person
+    // who had just been removed — the one case where you most want access to
+    // stop immediately — kept full read and write on the tenant until their
+    // token expired.
+    await revokeUserTokens(membership.userId, 'removed from organisation');
   },
 };
 

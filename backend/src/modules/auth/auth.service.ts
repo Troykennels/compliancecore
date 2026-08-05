@@ -32,6 +32,7 @@ import {
 } from '../../lib/errors';
 import { getPermissionsForRole } from '../../middleware/rbac.middleware';
 import { logger } from '../../lib/logger';
+import { revokeUserTokens } from '../../lib/token-revocation';
 import * as repo from './auth.repository';
 import type {
   LoginResult, MfaSetupResult, SessionInfo, UserPublic, TenantSummary, UserRole,
@@ -358,6 +359,11 @@ export async function logout(
 export async function logoutAllSessions(userId: string, currentJti: string, currentExp: number): Promise<void> {
   await repo.revokeAllUserSessions(userId);
   await repo.revokeAllUserRefreshTokens(userId);
+  // Blacklisting only the caller's own jti made "log out everywhere" log out
+  // exactly one device — the one you were already using. Every OTHER live
+  // access token, including the stolen one that made you press the button,
+  // kept working.
+  await revokeUserTokens(userId, 'logged out of all sessions');
   const ttl = Math.max(0, currentExp - Math.floor(Date.now() / 1000));
   if (ttl > 0) {
     await redis.setex(REDIS_KEYS.revokedToken(currentJti), ttl, '1');
@@ -397,9 +403,13 @@ export async function resetPassword(input: ResetPasswordInput): Promise<{ messag
   const passwordHash = await hashPassword(input.password);
   await repo.resetPassword(user.id, passwordHash);
 
-  // Invalidate all sessions on password reset for security
+  // Invalidate all sessions on password reset for security. The refresh tokens
+  // were already revoked here; the access tokens were not, so anyone holding
+  // one kept up to 15 more minutes of access to an account that had just been
+  // recovered from them.
   await repo.revokeAllUserSessions(user.id);
   await repo.revokeAllUserRefreshTokens(user.id);
+  await revokeUserTokens(user.id, 'password reset');
 
   return { message: 'Password has been reset successfully. Please log in.' };
 }
@@ -421,7 +431,17 @@ export async function changePassword(
   const newHash = await hashPassword(input.newPassword);
   await repo.updatePassword(userId, newHash);
 
-  return { message: 'Password changed successfully.' };
+  // Changing your password is the standard response to "someone else may be in
+  // my account", and it used to revoke nothing: an attacker holding a stolen
+  // refresh token kept rotating it indefinitely, and their access token stayed
+  // valid. resetPassword already did this; this path did not.
+  await repo.revokeAllUserSessions(userId);
+  await repo.revokeAllUserRefreshTokens(userId);
+  await revokeUserTokens(userId, 'password changed');
+
+  return {
+    message: 'Password changed. You have been signed out on all other devices.',
+  };
 }
 
 // ─── MFA Setup ────────────────────────────────────────────────────────────────

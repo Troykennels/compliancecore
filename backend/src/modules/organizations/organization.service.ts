@@ -133,6 +133,18 @@ export const organizationService = {
     return org;
   },
 
+  /**
+   * Every user with a live membership, so erasure can end their sessions rather
+   * than leaving them holding a token for an organisation that no longer exists.
+   */
+  async listMemberUserIds(tenantId: string): Promise<string[]> {
+    const rows = await prisma.tenantMembership.findMany({
+      where: { tenantId, deletedAt: null },
+      select: { userId: true },
+    });
+    return rows.map((r) => r.userId);
+  },
+
   async updateProfile(
     tenantId: string,
     input: UpdateOrganizationInput,

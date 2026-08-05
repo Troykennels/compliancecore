@@ -13,6 +13,7 @@ import { startScheduledReportsWorker, scheduleReportsJob } from './jobs/schedule
 import { startBillingRenewalWorker, scheduleBillingRenewalJob } from './jobs/billing-renewal.job';
 import { startFxMonitorWorker, scheduleFxMonitorJob } from './jobs/fx-monitor.job';
 import { startSubscriptionReminderWorker, scheduleSubscriptionReminderJob } from './jobs/subscription-reminder.job';
+import { startTenantPurgeWorker, scheduleTenantPurgeJob } from './jobs/tenant-purge.job';
 import { initBillingTables } from './modules/billing/billing.repository';
 
 async function bootstrap(): Promise<void> {
@@ -74,6 +75,10 @@ async function bootstrap(): Promise<void> {
     workers.push(startSubscriptionReminderWorker());
     await scheduleSubscriptionReminderJob();
     logger.info('Subscription reminder worker started');
+
+    workers.push(startTenantPurgeWorker());
+    await scheduleTenantPurgeJob();
+    logger.info('Tenant purge worker started');
   } else {
     logger.warn('ENABLE_REDIS=false — cache is in-memory and background workers/queues are OFF (local dev only)');
   }

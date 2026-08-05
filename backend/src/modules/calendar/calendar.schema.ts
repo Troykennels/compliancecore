@@ -32,6 +32,11 @@ export const listCalendarEventsSchema = z.object({
   assignedTo: uuidSchema.optional(),
   frameworkId: uuidSchema.optional(),
   priority:   z.enum(['critical','high','medium','low']).optional(),
+  // The month grid wants a whole month at once, so the default is generous
+  // compared with other lists — but it is a limit, where before there was none
+  // and the endpoint returned every event the tenant had ever had.
+  limit:      z.coerce.number().int().min(1).max(1000).default(500),
+  offset:     z.coerce.number().int().min(0).default(0),
 });
 
 export type CreateCalendarEventInput = z.infer<typeof createCalendarEventSchema>;

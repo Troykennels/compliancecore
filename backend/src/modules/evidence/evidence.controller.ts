@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { z } from 'zod';
 import { ok, created, noContent } from '../../lib/response';
 import { evidenceService } from './evidence.service';
 
@@ -211,8 +212,16 @@ export async function retryOcr(req: Request, res: Response) {
 
 // ── Audit Trail ───────────────────────────────────────────────────────────────
 
+// `limit` is interpolated straight into the SQL downstream, so a bare Number()
+// was not enough: `?limit=-1` errored, and `?limit=abc` produced NaN, which
+// binds as NULL — and LIMIT NULL means NO LIMIT, so the whole event history for
+// that item came back. Coerced and capped like every other list endpoint.
+const auditTrailQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+});
+
 export async function getAuditTrail(req: Request, res: Response) {
-  const limit = req.query.limit ? Number(req.query.limit) : 50;
+  const { limit } = auditTrailQuerySchema.parse(req.query);
   const data = await evidenceService.getAuditTrail(req.tenant!.schemaName, req.params.id, limit);
   ok(res, req, data);
 }

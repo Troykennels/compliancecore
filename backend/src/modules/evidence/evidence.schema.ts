@@ -97,7 +97,15 @@ export const createShareSchema = z.object({
   shareType:       z.enum(['link', 'email']).optional().default('link'),
   recipientEmail:  z.string().email().max(255).optional().nullable(),
   expiresAt:       z.coerce.date().min(new Date(), 'Expiry must be in the future').optional().nullable(),
-  password:        z.string().min(4).max(100).optional().nullable(),
+  // Eight, not four. This guards a link that leaves the product entirely —
+  // forwarded in mail, sitting in browser history — and protects compliance
+  // evidence at the other end. Four characters is a PIN, and a short one.
+  password: z
+    .string()
+    .min(8, 'Share password must be at least 8 characters')
+    .max(100)
+    .optional()
+    .nullable(),
 });
 
 export const accessShareSchema = z.object({

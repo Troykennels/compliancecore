@@ -77,9 +77,19 @@ export function enforceEntitlement(): RequestHandler {
 export function enforceLimit(
   metric: LimitMetric,
   countCurrent: (req: Request) => Promise<number>,
+  opts?: {
+    /**
+     * Skips the check when this request does not actually consume allowance —
+     * re-adopting a framework the tenant already has, for instance, which is
+     * idempotent. Without it, an at-limit tenant could not repeat a harmless
+     * no-op action.
+     */
+    skipIf?: (req: Request) => Promise<boolean>;
+  },
 ): RequestHandler {
   return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     try {
+      if (opts?.skipIf && (await opts.skipIf(req))) return next();
       // Same fallback as the counters: some routers authenticate without
       // running resolveTenant, so req.tenant may be absent even though the
       // caller clearly belongs to a tenant.

@@ -47,6 +47,17 @@ export const calendarRepository = {
 
     const where = conditions.join(' AND ');
 
+    // Every other list endpoint paginates; this one returned the entire
+    // compliance_calendar_events table on every request, each row joined
+    // against global.users. On a tenant with a few years of history that is a
+    // large response built and serialised for a screen that shows one month.
+    //
+    // Numeric-coerced rather than interpolated raw: these reach the SQL string
+    // directly, so they must not be able to carry anything but a number. The
+    // total is already returned alongside, so the client can page.
+    const limit = Math.min(Math.max(Number(filters.limit) || 500, 1), 1000);
+    const offset = Math.max(Number(filters.offset) || 0, 0);
+
     const [rows, countRows] = await Promise.all([
       tx.$queryRawUnsafe<Record<string, unknown>[]>(`
         SELECT
@@ -64,6 +75,7 @@ export const calendarRepository = {
         LEFT JOIN global.users u ON u.id = e.assigned_to
         WHERE ${where}
         ORDER BY e.start_date ASC
+        LIMIT ${limit} OFFSET ${offset}
       `, ...params),
       tx.$queryRawUnsafe<[{ count: bigint }]>(
         `SELECT COUNT(*) FROM compliance_calendar_events e WHERE ${where}`, ...params,

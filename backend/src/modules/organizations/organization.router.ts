@@ -7,7 +7,7 @@ import { validate } from '../../middleware/validate.middleware';
 import { makeRateLimiter } from '../../lib/rate-limit';
 import { asyncHandler } from '../../lib/asyncHandler';
 import { organizationController } from './organization.controller';
-import { updateOrganizationSchema, createOrganizationSchema } from './organization.schema';
+import { updateOrganizationSchema, createOrganizationSchema, requestErasureSchema } from './organization.schema';
 
 const router = Router();
 
@@ -70,6 +70,27 @@ router.get(
     },
   }),
   asyncHandler(organizationController.exportAll),
+);
+
+// ── Erasure ─────────────────────────────────────────────────────────────────
+// Owner only, and the caller must type the organisation's name to confirm.
+// There was previously no deletion path at all, which left the product unable
+// to honour a GDPR Art.17 / NDPA erasure request.
+//
+// Deliberately NOT behind enforceEntitlement: a customer whose subscription has
+// lapsed is exactly the one most likely to want their data removed, and
+// refusing on the grounds that they stopped paying would be indefensible.
+router.delete(
+  '/',
+  requireRole('owner'),
+  validate(requestErasureSchema),
+  asyncHandler(organizationController.requestErasure),
+);
+
+router.post(
+  '/restore',
+  requireRole('owner'),
+  asyncHandler(organizationController.cancelErasure),
 );
 
 // ── Compliance scoping questionnaire ────────────────────────────────────────

@@ -117,7 +117,9 @@ export async function createEvent(
       const [row] = await prisma.$queryRawUnsafe<any[]>(`
         INSERT INTO escalation_events(rule_id,entity_type,entity_id,next_escalation_at,metadata)
         VALUES($1::uuid,$2,$3::uuid,$4::timestamptz,$5::jsonb)
-        ON CONFLICT(rule_id,entity_type,entity_id,status) DO NOTHING
+        -- Targets the partial index from template 013. The inferred target must
+        -- match the index predicate, so the WHERE clause is required here too.
+        ON CONFLICT(rule_id,entity_type,entity_id) WHERE status = 'active' DO NOTHING
         RETURNING id
       `, ruleId, entityType, entityId, nextEscalationAt ?? null, JSON.stringify(metadata));
       return row?.id as string;

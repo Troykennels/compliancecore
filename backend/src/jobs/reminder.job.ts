@@ -80,7 +80,11 @@ async function processExpiryReminders(schemaName: string, tenantId: string): Pro
           priority:         daysUntil <= 7 ? 'critical' as const : daysUntil <= 30 ? 'high' as const : 'medium' as const,
           referenceType:    'expiry_item',
           referenceId:      item.id,
-          actionUrl:        `${env.FRONTEND_URL}/expiry`,
+          // Relative. React Router treats a string that does not start with
+          // "/" as a path relative to the CURRENT route, so an absolute URL
+          // stored here resolved to nonsense like
+          // "/dashboard/http:/host/expiry" and dumped the user on the catch-all.
+          actionUrl:        '/expiry',
         });
 
         // Send email if owner email is available. Fire-and-forget; failures
@@ -150,7 +154,7 @@ async function processCalendarReminders(schemaName: string): Promise<void> {
           priority:         event.priority,
           referenceType:    'calendar_event',
           referenceId:      event.id,
-          actionUrl:        `${env.FRONTEND_URL}/calendar`,
+          actionUrl:        '/calendar',
         });
       }
 

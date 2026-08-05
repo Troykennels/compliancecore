@@ -24,6 +24,11 @@ class InMemoryRedis {
   async exists(...keys: string[]): Promise<number> {
     return keys.reduce((n, k) => n + (this.live(k) ? 1 : 0), 0);
   }
+  // Needed by the token-revocation cutoff, which stores a timestamp rather
+  // than a presence flag.
+  async get(key: string): Promise<string | null> {
+    return this.live(key) ? (this.store.get(key)?.value ?? null) : null;
+  }
   async connect(): Promise<void> { /* no-op */ }
   async quit(): Promise<'OK'> { this.store.clear(); return 'OK'; }
   on(): this { return this; }
@@ -63,6 +68,11 @@ redisForQueues.on('error', (err: Error) => {
 // Keys
 export const REDIS_KEYS = {
   revokedToken: (jti: string) => `revoked_token:${jti}`,
+  // Cut-off timestamp: every access token this user was issued BEFORE this
+  // moment is refused. Blacklisting by jti only ever works for the token in
+  // your own hand, which is why removing a member or changing a password left
+  // their other tokens working until natural expiry.
+  userTokensRevokedBefore: (userId: string) => `tokens_revoked_before:${userId}`,
   complianceScore: (tenantId: string, frameworkId: string) =>
     `compliance:score:${tenantId}:${frameworkId}`,
   dashboardSummary: (tenantId: string) => `dashboard:summary:${tenantId}`,

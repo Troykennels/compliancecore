@@ -13,6 +13,25 @@ export const frameworksService = {
     );
   },
 
+  /**
+   * Whether this framework's controls are already present.
+   *
+   * The plan-limit guard uses this so re-adopting is never refused: adoption is
+   * idempotent, so repeating it consumes no allowance and blocking it would
+   * just look broken.
+   */
+  async isAdopted(schemaName: string, frameworkId: string): Promise<boolean> {
+    return withTenantSchema(schemaName, async (tx) => {
+      const rows = (await tx.$queryRawUnsafe(
+        `SELECT 1 FROM controls
+          WHERE framework_id = $1::uuid AND deleted_at IS NULL
+          LIMIT 1`,
+        frameworkId,
+      )) as unknown[];
+      return rows.length > 0;
+    });
+  },
+
   async getById(schemaName: string, id: string) {
     const framework = await withTenantSchema(schemaName, (tx) =>
       frameworksRepository.findById(tx, id),

@@ -17,7 +17,8 @@ export interface DepartmentWithRelations extends Department {
   parentDepartmentName: string | null;
   headUserName: string | null;
   headUserEmail: string | null;
-  memberCount: number;
+  // Removed: the API's count was the whole organisation for every department.
+  // Nothing displayed it. Restoring it needs a membership-to-department link.
 }
 
 export interface DepartmentTreeNode extends Department {

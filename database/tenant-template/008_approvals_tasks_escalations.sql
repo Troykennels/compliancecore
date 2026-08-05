@@ -259,8 +259,11 @@ CREATE TABLE IF NOT EXISTS escalation_events (
     next_escalation_at  TIMESTAMPTZ,
     resolved_at         TIMESTAMPTZ,
     metadata            JSONB       DEFAULT '{}',
-    created_at          TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(rule_id, entity_type, entity_id, status)
+    created_at          TIMESTAMPTZ DEFAULT NOW()
+    -- Uniqueness is a PARTIAL index (see 013), not a table constraint. Putting
+    -- the mutable `status` column in the key enforced "one row per status"
+    -- rather than "one active escalation", which permanently wedged the second
+    -- occurrence on any entity.
 );
 
 CREATE INDEX IF NOT EXISTS idx_escalation_events_status          ON escalation_events(status);

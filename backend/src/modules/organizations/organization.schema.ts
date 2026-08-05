@@ -6,6 +6,17 @@ const TIMEZONES = Intl.supportedValuesOf
   ? Intl.supportedValuesOf('timeZone')
   : ['UTC']; // fallback for environments without Intl.supportedValuesOf
 
+/**
+ * Erasure confirmation.
+ *
+ * The organisation's name has to be typed back. It is the standard guard for an
+ * action that cannot be undone, and it is the only thing standing between a
+ * mis-click and a customer's entire compliance archive.
+ */
+export const requestErasureSchema = z.object({
+  confirmName: z.string().min(1, 'Type the organisation name to confirm deletion'),
+});
+
 export const updateOrganizationSchema = z.object({
   name: z
     .string()

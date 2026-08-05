@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import { verifyAccessToken } from '../lib/jwt';
 import { redis, REDIS_KEYS } from '../config/redis';
+import { isTokenRevoked } from '../lib/token-revocation';
 import { UnauthorizedError } from '../lib/errors';
 
 export function authenticate(): RequestHandler {
@@ -23,6 +24,14 @@ export function authenticate(): RequestHandler {
     const isRevoked = await redis.exists(REDIS_KEYS.revokedToken(payload.jti));
     if (isRevoked) {
       return next(new UnauthorizedError('Token has been revoked'));
+    }
+
+    // Per-user cut-off. The jti list above only ever covers the token its owner
+    // handed back at logout; this is what actually ends a session someone else
+    // is holding — a removed member, a demoted admin, or an attacker after the
+    // victim changes their password.
+    if (await isTokenRevoked(payload.sub, payload.iat)) {
+      return next(new UnauthorizedError('Session is no longer valid. Please sign in again.'));
     }
 
     req.user = {

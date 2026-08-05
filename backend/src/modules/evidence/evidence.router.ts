@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { resolveTenant } from '../../middleware/tenant.middleware';
-import { enforceEntitlement } from '../../middleware/entitlement.middleware';
+import { enforceEntitlement, enforceLimit } from '../../middleware/entitlement.middleware';
+import { countEvidenceGb } from '../../lib/usage-counts';
 import { requirePermission } from '../../middleware/rbac.middleware';
 import { validate, validateQuery } from '../../middleware/validate.middleware';
 import { asyncHandler } from '../../lib/asyncHandler';
+import { makeRateLimiter } from '../../lib/rate-limit';
 import {
   initiateUploadSchema,
   confirmUploadSchema,
@@ -29,8 +31,33 @@ const router = Router();
 // ── Public share access ───────────────────────────────────────────────────────
 // No authentication — anyone with the share token can access if valid.
 // The `tenant` query param identifies which schema to query.
+//
+// This is the only unauthenticated route that reaches a tenant schema, and it
+// had no throttle at all. A password-protected share could be attacked at any
+// rate the attacker liked, and since share passwords may be as short as four
+// characters, that is minutes of work for a presigned download of the evidence.
+// Each attempt also costs a bcrypt compare and a tenant transaction, so the
+// same endpoint was a cheap way to load the database from the open internet.
+//
+// Keyed on the share token, not the caller: a token under attack is throttled
+// no matter how many addresses the attempts come from, and one share being
+// hammered never blocks a different, legitimate recipient.
+const shareAccessLimiter = makeRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  keyGenerator: (req) => `share:${req.params.token ?? 'unknown'}`,
+  message: {
+    data: null,
+    error: {
+      code: 'TOO_MANY_REQUESTS',
+      message: 'Too many attempts for this link. Please try again later.',
+    },
+  },
+});
+
 router.post(
   '/shared/:token',
+  shareAccessLimiter,
   validate(accessShareSchema),
   asyncHandler(ctrl.accessShare),
 );
@@ -80,9 +107,14 @@ router.get(
   asyncHandler(ctrl.listEvidence),
 );
 
+// Storage is the other allowance the pricing page sells upgrades on, and it was
+// displayed but never enforced — a 5 GB plan could store unbounded evidence, at
+// our S3 cost. Checked here, at the point a presigned URL is issued, because
+// after that the bytes land in S3 whether we like it or not.
 router.post(
   '/upload',
   requirePermission('evidence:write'),
+  enforceLimit('evidenceGb', countEvidenceGb),
   validate(initiateUploadSchema),
   asyncHandler(ctrl.initiateUpload),
 );
