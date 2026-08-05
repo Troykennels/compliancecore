@@ -37,6 +37,25 @@ export function RegisterPage(): JSX.Element {
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
+  const [resending, setResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
+
+  async function handleResend() {
+    setResending(true);
+    setResendMessage('');
+    try {
+      await authApi.resendVerification(registeredEmail);
+      setResendMessage(`Sent again to ${registeredEmail}. It usually arrives within a minute.`);
+    } catch (err) {
+      const message = (err as { response?: { data?: { error?: { message: string } } } })
+        .response?.data?.error?.message;
+      // Shows the rate-limit text rather than a generic failure, so someone who
+      // has already asked several times is told to wait instead of retrying.
+      setResendMessage(message ?? 'Could not send just now. Please try again shortly.');
+    } finally {
+      setResending(false);
+    }
+  }
 
   const {
     register,
@@ -73,10 +92,27 @@ export function RegisterPage(): JSX.Element {
             Click the link to activate your account.
           </p>
           <p className="text-xs text-slate-400">The link expires in 24 hours.</p>
-          <Link
-            to={PATHS.LOGIN}
-            className="block text-sm text-indigo-600 hover:underline"
-          >
+
+          {/* The resend belongs HERE, on the screen you are actually looking at
+              when the email does not arrive. It was previously only on the
+              verification page, which you can only reach by clicking a link —
+              so the one person who needed it could never get to it. */}
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-left">
+            <p className="text-xs text-slate-600">
+              Nothing after a minute or two? Check your spam folder, then send it again.
+            </p>
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending}
+              className="mt-2 text-sm font-semibold text-brand-600 hover:underline disabled:opacity-60"
+            >
+              {resending ? 'Sending…' : 'Resend verification email'}
+            </button>
+            {resendMessage && <p className="mt-1.5 text-xs text-slate-500">{resendMessage}</p>}
+          </div>
+
+          <Link to={PATHS.LOGIN} className="block text-sm text-brand-600 hover:underline">
             Return to sign in
           </Link>
         </div>

@@ -127,10 +127,13 @@ console.log(JSON.stringify({
   verificationLink: link,
 }, null, 2));
 
-// Registration must not block on the mail send.
-console.log(registerMs < 1500
-  ? `register returned in ${registerMs}ms — not blocked on SMTP`
-  : `WARNING: register took ${registerMs}ms — may be waiting on the mail send`);
+// The question is not how long registration took — the first request after a
+// boot pays for bcrypt and a cold connection pool — but whether the response
+// waited for the mail. If the email lands AFTER the response, it did not.
+const gap = deliveryMs - registerMs;
+console.log(gap >= 0
+  ? `mail delivered ${gap}ms after the response — the send is off the request path`
+  : `WARNING: response returned ${-gap}ms after the mail — registration is blocking on the send`);
 
 // ── The other flows that must send mail ─────────────────────────────────────
 const flows = [{ name: 'verification (register)', ok: hasLink, ms: deliveryMs }];
@@ -153,6 +156,14 @@ async function check(name, fn, expect) {
     subject: subj,
   });
 }
+
+// Registering the SAME address again. This used to return "check your email"
+// and send nothing at all, so anyone whose first email went missing and simply
+// signed up again waited forever. It is the single most likely reason a real
+// user reports "registered fine, no email".
+await check('re-register same address', () => post('/api/auth/register', {
+  email, password: 'MailTest123!', firstName: 'Mail', lastName: 'Test',
+}), /verify-email\?token=[a-f0-9]{64}/);
 
 // Resend verification — the escape hatch for exactly the situation reported.
 await check('resend verification', () => post('/api/auth/resend-verification', { email }),

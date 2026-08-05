@@ -42,10 +42,36 @@ import type { RegisterInput, LoginInput, ResetPasswordInput, ChangePasswordInput
 // ─── Register ─────────────────────────────────────────────────────────────────
 
 export async function register(input: RegisterInput): Promise<{ message: string }> {
+  // Identical response whether or not the address exists, so this endpoint
+  // cannot be used to discover who has an account.
+  const SAME_ANSWER = {
+    message: 'If this email is not registered, you will receive a verification link.',
+  };
+
   const existing = await repo.findUserByEmail(input.email);
   if (existing) {
-    // Respond with the same message regardless to avoid email enumeration
-    return { message: 'If this email is not registered, you will receive a verification link.' };
+    // An existing but UNVERIFIED account gets its link re-sent.
+    //
+    // This used to return the success message and send nothing at all, which
+    // is a trap rather than a safeguard: the person whose first verification
+    // email went missing signs up again with the same address, is told to
+    // check their inbox, and waits forever. Every retry is a silent no-op, and
+    // they cannot use a different address because they want THAT one.
+    //
+    // Re-sending leaks nothing new — the response is unchanged, and the mail
+    // goes only to the address itself, which is where a verification link was
+    // already sent when the account was created.
+    if (!existing.emailVerifiedAt) {
+      const { raw, hash } = generateSecureToken();
+      await repo.setEmailVerificationToken(
+        existing.id,
+        hash,
+        new Date(Date.now() + 24 * 60 * 60 * 1000),
+      );
+      void sendVerificationEmail(existing.email, existing.firstName ?? '', raw);
+      logger.info({ userId: existing.id }, 'Re-sent verification for existing unverified account');
+    }
+    return SAME_ANSWER;
   }
 
   const passwordHash = await hashPassword(input.password);
