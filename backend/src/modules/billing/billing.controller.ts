@@ -2,6 +2,11 @@ import type { Request, Response } from 'express';
 import * as service from './billing.service';
 import { getEntitlement as resolveEntitlement } from '../../lib/entitlements';
 import * as fxReview from './fx-review.service';
+import { prisma } from '../../config/database';
+import { logger } from '../../lib/logger';
+import { AppError, NotFoundError, ValidationError } from '../../lib/errors';
+import { requestErasure, cancelErasure } from '../../lib/tenant-erasure';
+import { revokeUserTokens } from '../../lib/token-revocation';
 
 const tid = (req: Request): string => req.user!.tenantId!;
 
@@ -154,6 +159,76 @@ export async function adminUpdateCoupon(req: Request, res: Response) {
 export async function adminGetAllTenantBilling(_req: Request, res: Response) {
   const data = await service.adminGetAllTenantBilling();
   res.json({ success: true, data });
+}
+
+/**
+ * Schedules a customer's organisation for erasure, from the operator console.
+ *
+ * Requires the organisation's exact name in the body — the same confirmation an
+ * owner types to delete their own. An operator acting on a list of similarly
+ * named tenants is if anything MORE likely to pick the wrong row than someone
+ * deleting the single organisation they work in.
+ */
+export async function adminDeleteTenant(req: Request, res: Response) {
+  const tenantId = req.params.id;
+
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { id: true, name: true, deletedAt: true },
+  });
+  if (!tenant) throw new NotFoundError('Organization', tenantId);
+
+  // Refuse to erase the tenant the operator is currently signed in to. Doing it
+  // from this screen is almost certainly a misclick, and it would revoke their
+  // own session mid-action — including their access to this console.
+  if (req.user?.tenantId === tenantId) {
+    throw new AppError(
+      'This is the organisation you are signed in to. Delete it from its own Settings page if you really mean to.',
+      400,
+      'CANNOT_DELETE_OWN_TENANT',
+    );
+  }
+
+  if (tenant.deletedAt) {
+    throw new AppError('That organisation is already scheduled for deletion.', 409, 'ALREADY_SCHEDULED');
+  }
+
+  const typed = String(req.body?.confirmName ?? '').trim().toLowerCase();
+  if (typed !== tenant.name.trim().toLowerCase()) {
+    throw new ValidationError(
+      'The name you typed does not match that organisation. Nothing has been deleted.',
+    );
+  }
+
+  const { purgeAfter } = await requestErasure(tenantId);
+
+  // End every member's session now, rather than leaving them with a token for
+  // an organisation they can no longer reach.
+  const members = await prisma.tenantMembership.findMany({
+    where: { tenantId, deletedAt: null },
+    select: { userId: true },
+  });
+  await Promise.all(members.map((m) => revokeUserTokens(m.userId, 'organisation deleted by operator')));
+
+  logger.warn(
+    { tenantId, tenant: tenant.name, actor: req.user?.email, purgeAfter },
+    'Operator scheduled tenant erasure',
+  );
+
+  res.json({ success: true, data: { message: `${tenant.name} scheduled for deletion.`, purgeAfter } });
+}
+
+export async function adminRestoreTenant(req: Request, res: Response) {
+  const restored = await cancelErasure(req.params.id);
+  if (!restored) {
+    throw new AppError(
+      'That organisation is not scheduled for deletion, or its data has already been erased.',
+      409,
+      'NOT_RESTORABLE',
+    );
+  }
+  logger.warn({ tenantId: req.params.id, actor: req.user?.email }, 'Operator restored tenant');
+  res.json({ success: true, data: { message: 'Organisation restored.' } });
 }
 
 export async function adminGetInvoices(req: Request, res: Response) {

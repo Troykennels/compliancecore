@@ -67,4 +67,14 @@ router.get('/admin/invoices/:id/download', requireSuperadmin, validateUuidParam(
 router.patch('/admin/subscriptions/:id', requireSuperadmin, validateUuidParam('id'), asyncHandler(ctrl.adminUpdateSubscription));
 router.patch('/admin/invoices/:id', requireSuperadmin, validateUuidParam('id'), asyncHandler(ctrl.adminUpdateInvoice));
 
+// Erasing a customer's organisation from the operator console.
+//
+// The owner of an organisation can already delete their own. This is the other
+// half: closing an account on request, or clearing out an abandoned trial,
+// without anyone touching the database by hand. Same two-step erasure — access
+// stops now, data goes after the grace window — so an operator mis-click is
+// recoverable for 30 days rather than instant and final.
+router.delete('/admin/tenants/:id', requireSuperadmin, validateUuidParam('id'), asyncHandler(ctrl.adminDeleteTenant));
+router.post('/admin/tenants/:id/restore', requireSuperadmin, validateUuidParam('id'), asyncHandler(ctrl.adminRestoreTenant));
+
 export { router as billingRouter };

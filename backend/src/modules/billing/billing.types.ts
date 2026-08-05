@@ -258,6 +258,10 @@ export interface TenantBillingRow {
   totalInvoiced: number;
   totalPaid: number;
   currency: string;
+  /** Set once erasure has been requested; the tenant is already inaccessible. */
+  deletedAt: string | null;
+  /** When the data is permanently destroyed. Restorable until then. */
+  purgeAfter: string | null;
 }
 
 export interface InvoiceListFilter {

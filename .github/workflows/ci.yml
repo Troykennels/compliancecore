@@ -104,6 +104,13 @@ jobs:
             node scripts/security-checks.mjs
             RESULT=$?
           fi
+          # Tenant erasure from the operator console. Almost every assertion is
+          # a refusal — wrong name, wrong role, own tenant — because what is
+          # being deleted is a customer's entire compliance archive.
+          if [ $RESULT -eq 0 ]; then
+            node scripts/admin-tenant-checks.mjs
+            RESULT=$?
+          fi
           set -e
           kill $SERVER_PID 2>/dev/null || true
           exit $RESULT

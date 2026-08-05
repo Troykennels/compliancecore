@@ -12,9 +12,10 @@ import {
 } from '../hooks/use-billing';
 import { billingApi } from '../api/billing.api';
 import type {
-  CreatePlanDto, CreateCouponDto, PlanSlug,
+  CreatePlanDto, CreateCouponDto, PlanSlug, TenantBillingRow,
 } from '../types/billing.types';
 import { useOrgFormat } from '@/lib/org-format';
+import { apiClient } from '@/lib/api-client';
 
 // ── Tab definitions ────────────────────────────────────────────────────────────
 type Tab = 'plans' | 'pricing' | 'coupons' | 'tenants' | 'invoices';
@@ -363,6 +364,44 @@ function TenantsTab() {
   const fmt = useOrgFormat();
   const { data: tenants = [], isLoading, isError, refetch } = useAdminTenantBilling();
   const [search, setSearch] = useState('');
+  const [deleting, setDeleting] = useState<TenantBillingRow | null>(null);
+  const [confirmName, setConfirmName] = useState('');
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  async function confirmDelete() {
+    if (!deleting) return;
+    setBusyId(deleting.tenantId);
+    try {
+      const res = await apiClient.delete(`/billing/admin/tenants/${deleting.tenantId}`, {
+        data: { confirmName },
+      });
+      toast.success(res.data?.data?.message ?? 'Organisation scheduled for deletion.');
+      setDeleting(null);
+      setConfirmName('');
+      refetch();
+    } catch (err) {
+      const message = (err as { response?: { data?: { error?: { message: string } } } })
+        .response?.data?.error?.message;
+      toast.error(message ?? 'Could not delete that organisation.');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function restore(t: TenantBillingRow) {
+    setBusyId(t.tenantId);
+    try {
+      await apiClient.post(`/billing/admin/tenants/${t.tenantId}/restore`);
+      toast.success(`${t.tenantName} restored.`);
+      refetch();
+    } catch (err) {
+      const message = (err as { response?: { data?: { error?: { message: string } } } })
+        .response?.data?.error?.message;
+      toast.error(message ?? 'Could not restore that organisation.');
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   const filtered = tenants.filter((t) =>
     !search || t.tenantName.toLowerCase().includes(search.toLowerCase()) || t.tenantSlug.toLowerCase().includes(search.toLowerCase()),
@@ -398,14 +437,28 @@ function TenantsTab() {
               <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Next Invoice</th>
               <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Total Invoiced</th>
               <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Total Paid</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">
+                <span className="sr-only">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
             {filtered.map((t) => (
-              <tr key={t.tenantId} className="hover:bg-slate-50">
+              <tr
+                key={t.tenantId}
+                // A tenant awaiting erasure is still listed — it has to be, or
+                // there is no way to confirm or undo it — but it must not read
+                // as a live customer.
+                className={t.deletedAt ? 'bg-red-50/60' : 'hover:bg-slate-50'}
+              >
                 <td className="px-4 py-3">
                   <p className="font-semibold text-slate-900">{t.tenantName}</p>
-                  <p className="text-xs text-slate-400 font-mono">{t.tenantSlug}</p>
+                  <p className="font-mono text-xs text-slate-400">{t.tenantSlug}</p>
+                  {t.deletedAt && (
+                    <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-2xs font-semibold text-red-700">
+                      Erasing{t.purgeAfter ? ` · data goes ${fmt.formatDate(t.purgeAfter)}` : ''}
+                    </p>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-xs text-slate-600 capitalize">{t.planName ?? '—'}</td>
                 <td className="px-4 py-3 text-center">
@@ -427,6 +480,26 @@ function TenantsTab() {
                 <td className="px-4 py-3 text-right text-xs font-medium text-emerald-700">
                   {t.currency} {t.totalPaid.toFixed(2)}
                 </td>
+                <td className="px-4 py-3 text-right">
+                  {t.deletedAt ? (
+                    <button
+                      type="button"
+                      onClick={() => restore(t)}
+                      disabled={busyId === t.tenantId}
+                      className="text-xs font-semibold text-brand-600 hover:underline disabled:opacity-50"
+                    >
+                      {busyId === t.tenantId ? 'Restoring…' : 'Restore'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setDeleting(t)}
+                      className="text-xs font-semibold text-red-600 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -435,6 +508,67 @@ function TenantsTab() {
           <p className="py-12 text-center text-sm text-slate-400">No tenants found</p>
         )}
       </div>
+
+      {deleting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/50"
+            onClick={() => { setDeleting(null); setConfirmName(''); }}
+            aria-hidden="true"
+          />
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            className="relative z-10 w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl"
+          >
+            <h3 className="text-base font-semibold text-slate-900">
+              Delete {deleting.tenantName}?
+            </h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+              Everyone in this organisation loses access immediately and billing stops.
+              Their data is kept for <strong>30 days</strong> so it can be restored, then
+              permanently erased.
+            </p>
+            {deleting.totalPaid > 0 && (
+              // Worth stating plainly: this is a paying customer, not an
+              // abandoned trial, and that should give an operator pause.
+              <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                This organisation has paid {deleting.currency} {deleting.totalPaid.toFixed(2)}.
+              </p>
+            )}
+            <label htmlFor="admin-confirm" className="mt-4 block text-xs font-medium text-slate-700">
+              Type <strong>{deleting.tenantName}</strong> to confirm
+            </label>
+            <input
+              id="admin-confirm"
+              value={confirmName}
+              onChange={(e) => setConfirmName(e.target.value)}
+              autoComplete="off"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => { setDeleting(null); setConfirmName(''); }}
+                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={
+                  busyId === deleting.tenantId
+                  || confirmName.trim().toLowerCase() !== deleting.tenantName.trim().toLowerCase()
+                }
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {busyId === deleting.tenantId ? 'Deleting…' : 'Delete organisation'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

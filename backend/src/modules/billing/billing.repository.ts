@@ -1257,6 +1257,7 @@ export async function findAllTenantBilling(): Promise<TenantBillingRow[]> {
       p.name AS plan_name, p.slug AS plan_slug,
       s.status AS subscription_status, s.billing_cycle, s.current_period_end,
       s.next_invoice_amount, s.currency,
+      t.deleted_at, t.purge_after,
       COALESCE(inv_agg.total_invoiced, 0) AS total_invoiced,
       COALESCE(inv_agg.total_paid, 0) AS total_paid
     FROM global.tenants t
@@ -1270,8 +1271,11 @@ export async function findAllTenantBilling(): Promise<TenantBillingRow[]> {
       WHERE status != 'void'
       GROUP BY tenant_id
     ) inv_agg ON inv_agg.tenant_id = t.id
-    WHERE t.deleted_at IS NULL
-    ORDER BY t.name ASC
+    -- Soft-deleted tenants are INCLUDED. Filtering them out hid exactly the
+    -- rows an operator needs to see: an organisation scheduled for erasure
+    -- vanished from the console, so there was no way to confirm it, and no way
+    -- to restore it inside the grace window.
+    ORDER BY t.deleted_at NULLS FIRST, t.name ASC
   `) as unknown[];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1288,6 +1292,8 @@ export async function findAllTenantBilling(): Promise<TenantBillingRow[]> {
     totalInvoiced: Number(r.total_invoiced),
     totalPaid: Number(r.total_paid),
     currency: r.currency ?? 'USD',
+    deletedAt: r.deleted_at ? String(r.deleted_at) : null,
+    purgeAfter: r.purge_after ? String(r.purge_after) : null,
   }));
 }
 

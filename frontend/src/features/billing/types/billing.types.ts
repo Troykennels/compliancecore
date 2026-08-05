@@ -150,6 +150,10 @@ export interface TenantBillingRow {
   totalInvoiced: number;
   totalPaid: number;
   currency: string;
+  /** Set once erasure is scheduled; the organisation is already inaccessible. */
+  deletedAt: string | null;
+  /** When the data is permanently destroyed. Restorable until then. */
+  purgeAfter: string | null;
 }
 
 // DTOs
