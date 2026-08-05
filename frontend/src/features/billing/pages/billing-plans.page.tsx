@@ -6,6 +6,7 @@ import { usePublicPlans, useSubscription, useCreateSubscription, useUpdateSubscr
 import { billingApi } from '../api/billing.api';
 import { paymentsApi, type PlanPrice } from '../api/payments.api';
 import { PATHS } from '@/routes/paths';
+import { SUPPORT_EMAIL, supportMailto } from '@/config/contact';
 import type { BillingCycle, SubscriptionPlan } from '../types/billing.types';
 
 const PLAN_HIGHLIGHT: Record<string, boolean> = { professional: true };
@@ -19,7 +20,7 @@ const PLAN_HIGHLIGHT: Record<string, boolean> = { professional: true };
  */
 const CONTACT_SALES_PLANS = new Set(['enterprise', 'msp']);
 
-const SALES_EMAIL = 'info@orionsoftlimited.com';
+const SALES_EMAIL = SUPPORT_EMAIL;
 
 function fmt(amount: number, currency = 'USD'): string {
   if (amount === 0) return 'Free';
@@ -484,9 +485,13 @@ export function BillingPlansPage(): JSX.Element {
         ))}
       </div>
 
+      {/* Stated from the selected currency rather than hard-coded. This read
+          "All prices in USD" while every plan was priced in naira. */}
       <p className="mt-8 text-center text-xs text-slate-400">
-        All prices in USD. Enterprise and MSP plans available via{' '}
-        <a href="mailto:sales@orionsoft.com" className="text-indigo-600 hover:underline">sales@orionsoft.com</a>.
+        All prices in {currency}. Enterprise and MSP plans available via{' '}
+        <a href={supportMailto('Enterprise / MSP plan enquiry')} className="text-brand-600 hover:underline">
+          {SUPPORT_EMAIL}
+        </a>.
         Cancel anytime.
       </p>
     </div>

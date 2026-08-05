@@ -9,10 +9,12 @@ import {
   ShieldCheck,
   Mail,
   ArrowRight,
+  Bell,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PATHS } from '@/routes/paths';
+import { supportMailto } from '@/config/contact';
 
 type LiveIntegration = {
   name: string;
@@ -135,9 +137,15 @@ export function IntegrationsPage(): JSX.Element {
 
         {/* Coming soon */}
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500">
             Coming soon
           </h2>
+          {/* Says what "coming soon" means here, rather than leaving a customer
+              to guess whether it is next week or hypothetical. */}
+          <p className="mb-3 text-sm text-slate-500">
+            These are on the roadmap and are not built yet. Tell us which one you
+            need and it moves up the list — we will let you know when it ships.
+          </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {COMING_SOON_INTEGRATIONS.map((integration) => {
               const Icon = integration.icon;
@@ -163,14 +171,17 @@ export function IntegrationsPage(): JSX.Element {
                   <p className="mt-1 flex-1 text-sm text-slate-500">
                     {integration.description}
                   </p>
-                  <button
-                    type="button"
-                    disabled
-                    aria-disabled="true"
-                    className="mt-4 inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-400"
+                  {/* A dead "Not available yet" button is a dead end: the one
+                      person who actually wants Slack has no way to say so, and
+                      we never learn which of these to build first. Asking is
+                      something the page CAN do today, so it does it. */}
+                  <a
+                    href={supportMailto(`Integration request: ${integration.name}`)}
+                    className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
                   >
-                    Not available yet
-                  </button>
+                    <Bell className="h-4 w-4" />
+                    Request this integration
+                  </a>
                 </div>
               );
             })}

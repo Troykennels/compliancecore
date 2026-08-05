@@ -2,6 +2,7 @@ import PDFDocument from 'pdfkit';
 import { withTenantSchema } from '../../lib/prisma';
 import { prisma } from '../../config/database';
 import { NotFoundError, AppError, ConflictError } from '../../lib/errors';
+import { SUPPORT_EMAIL } from '../../config/contact';
 import * as repo from './billing.repository';
 import type {
   SubscriptionPlan, Subscription, BillingOverview, UsageSummary,
@@ -553,7 +554,7 @@ export function generateInvoicePdf(invoice: Invoice): Promise<Buffer> {
     doc.fillColor(C.slate).fontSize(28).font('Helvetica-Bold').text('INVOICE', 50, 70, { align: 'right', width: W });
 
     doc.fillColor(C.muted).fontSize(9).font('Helvetica').text('Orion Soft Limited', 50, 97);
-    doc.text('compliance@orionsoft.com', 50, 109);
+    doc.text(SUPPORT_EMAIL, 50, 109);
 
     // Invoice meta box
     const metaX = doc.page.width - 220;
@@ -625,7 +626,7 @@ export function generateInvoicePdf(invoice: Invoice): Promise<Buffer> {
     // Footer
     doc.rect(50, 790, W, 1).fill(C.border);
     doc.fillColor(C.muted).fontSize(8).font('Helvetica')
-      .text('ComplianceCore — Confidential. Questions? billing@orionsoft.com', 50, 800, { width: W, align: 'center' });
+      .text(`ComplianceCore — Confidential. Questions? ${SUPPORT_EMAIL}`, 50, 800, { width: W, align: 'center' });
 
     doc.end();
   });

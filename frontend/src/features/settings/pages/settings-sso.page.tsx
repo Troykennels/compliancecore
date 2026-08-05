@@ -1,5 +1,6 @@
 import { SettingsLayout } from '../components/settings-layout';
 import { Lock } from 'lucide-react';
+import { supportMailto } from '@/config/contact';
 
 export function SettingsSsoPage(): JSX.Element {
   return (
@@ -21,8 +22,8 @@ export function SettingsSsoPage(): JSX.Element {
             Contact sales to enable SSO for your organisation.
           </p>
           <a
-            href="mailto:sales@orionsoft.com"
-            className="mt-4 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+            href={supportMailto('SSO enquiry — Enterprise plan')}
+            className="mt-4 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
           >
             Contact Sales
           </a>

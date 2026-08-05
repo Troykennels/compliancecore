@@ -3,6 +3,7 @@ import { redisForQueues } from '../config/redis';
 import { prisma } from '../config/database';
 import { logger } from '../lib/logger';
 import { email as emailClient } from '../lib/email';
+import { SUPPORT_EMAIL } from '../config/contact';
 
 const QUEUE_NAME = 'billing-renewal';
 
@@ -64,7 +65,7 @@ async function processDueSubscription(row: DueRow): Promise<void> {
           <h2>Subscription Cancelled</h2>
           <p>Your <strong>${row.plan_name}</strong> subscription for <strong>${row.tenant_name}</strong> has been cancelled as requested.</p>
           <p>You had access until ${new Date(row.current_period_end).toLocaleDateString('en-GB')}.</p>
-          <p>To reactivate, please visit your billing settings or contact <a href="mailto:billing@orionsoft.com">billing@orionsoft.com</a>.</p>
+          <p>To reactivate, please visit your billing settings or contact <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>.</p>
         `,
       });
     } catch (err) {
@@ -175,7 +176,7 @@ async function processDueSubscription(row: DueRow): Promise<void> {
         <tr><td><strong>Invoice</strong></td><td>${inv.number}</td></tr>
       </table>
       <p><strong>Your access continues for the next 7 days.</strong> Please update your payment method in billing settings to avoid interruption. After that your account becomes read-only — you will always keep access to your compliance records.</p>
-      <p>Questions? Contact <a href="mailto:billing@orionsoft.com">billing@orionsoft.com</a></p>`,
+      <p>Questions? Contact <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></p>`,
   });
 }
 

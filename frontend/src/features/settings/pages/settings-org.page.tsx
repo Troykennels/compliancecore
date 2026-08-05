@@ -5,6 +5,7 @@ import { CompanyProfileForm } from '@/features/organizations/components/company-
 import { LogoUpload } from '@/features/organizations/components/logo-upload';
 import { ScopingQuestionnaire } from '@/features/organizations/components/scoping-questionnaire';
 import { DataExport } from '@/features/organizations/components/data-export';
+import { SUPPORT_EMAIL, supportMailto } from '@/config/contact';
 
 export function SettingsOrgPage(): JSX.Element {
   const { data: org, isLoading, isError } = useOrganizationProfile();
@@ -92,20 +93,21 @@ export function SettingsOrgPage(): JSX.Element {
                 <p className="text-xs text-slate-500 mt-0.5">
                   Permanently deleting an organisation and all its data is handled manually to
                   prevent accidental loss. Email{' '}
-                  <a href="mailto:support@orionsoft.com" className="text-indigo-600 hover:underline">
-                    support@orionsoft.com
+                  <a href={supportMailto('Organisation deletion request')} className="text-brand-600 hover:underline">
+                    {SUPPORT_EMAIL}
                   </a>{' '}
                   to request deletion.
                 </p>
               </div>
-              <button
-                type="button"
-                disabled
-                title="Contact support@orionsoft.com to delete your organisation"
-                className="cursor-not-allowed rounded-md border border-slate-200 px-4 py-2 text-sm font-medium text-slate-400"
+              {/* A real link, not a disabled button: the action IS to send an
+                  email, so the control should do it rather than sit greyed out
+                  telling you to do it yourself. */}
+              <a
+                href={supportMailto('Organisation deletion request')}
+                className="shrink-0 rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
               >
                 Contact Support
-              </button>
+              </a>
             </div>
           </section>
         )}
