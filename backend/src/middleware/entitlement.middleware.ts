@@ -47,6 +47,12 @@ export function enforceEntitlement(): RequestHandler {
       const ent = await getEntitlement(tenantId);
       req.entitlement = ent;
 
+      // The platform owner is not a customer of the platform. Without this,
+      // ORION SOFT's own account is billed like any tenant: nagged to
+      // subscribe, and eventually blocked from writing to the very product it
+      // operates — including while investigating a customer's problem.
+      if (req.user?.isSuperadmin) return next();
+
       if (!WRITE_METHODS.has(req.method)) return next();
       if (ALWAYS_ALLOWED.some((p) => req.originalUrl.startsWith(p))) return next();
       if (ent.canWrite) return next();
@@ -96,6 +102,10 @@ export function enforceLimit(
       const tenantId = req.tenant?.id ?? req.user?.tenantId;
       const ent = req.entitlement ?? (tenantId ? await getEntitlement(tenantId) : null);
       if (!ent) return next();
+
+      // Same reasoning as enforceEntitlement: plan allowances are a commercial
+      // construct, and the operator of the platform is not buying from it.
+      if (req.user?.isSuperadmin) return next();
 
       const limit = ent.limits[metric];
       if (limit === null) return next();

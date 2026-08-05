@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -34,6 +34,9 @@ export function OnboardingPage() {
   const { user, setAuth } = useAuthStore();
   const [submitting, setSubmitting] = useState(false);
   const [step, setStep] = useState<'organization' | 'scoping'>('organization');
+  // Latched the instant step 1 succeeds, so the redirect guard above cannot
+  // fire on the render that sits between the store update and the step change.
+  const leavingStepOne = useRef(false);
 
   const {
     register,
@@ -41,10 +44,18 @@ export function OnboardingPage() {
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-  // Already onboarded — nothing to do here. Skipped once we are mid-flow, because
-  // creating the organisation marks onboarding complete and would otherwise
-  // redirect the user away from step 2 the moment step 1 succeeded.
-  if (user?.onboardingCompletedAt && step === 'organization') {
+  // Already onboarded — nothing to do here. Skipped once we are mid-flow,
+  // because creating the organisation marks onboarding complete and would
+  // otherwise redirect the user away from step 2 the moment step 1 succeeded.
+  //
+  // Guarded on a REF, not on `step`. setAuth writes to the Zustand store, which
+  // re-renders through useSyncExternalStore — and that render can land before
+  // the setStep('scoping') queued right after it has been applied. On that one
+  // render onboardingCompletedAt is already true while step is still
+  // 'organization', the condition below fires, and the user is bounced to the
+  // dashboard having never been shown the scoping questions. A ref assignment
+  // is synchronous, so it is visible to every subsequent render immediately.
+  if (user?.onboardingCompletedAt && step === 'organization' && !leavingStepOne.current) {
     return <Navigate to={PATHS.DASHBOARD} replace />;
   }
 
@@ -65,6 +76,10 @@ export function OnboardingPage() {
         // stranding the user on this screen.
         if (code !== 'ALREADY_ONBOARDED') throw err;
       }
+
+      // Latched BEFORE the store update below, because that update is what
+      // makes the redirect guard eligible to fire.
+      leavingStepOne.current = true;
 
       // 2. Refresh the session so the new access token carries the tenant id
       //    and the updated onboarding state, then hydrate the store.

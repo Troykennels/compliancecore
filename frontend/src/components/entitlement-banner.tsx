@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, Clock, Lock } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { useAuthStore } from '@/stores/auth.store';
 import { PATHS } from '@/routes/paths';
 
 export interface Entitlement {
@@ -25,6 +26,12 @@ export interface Entitlement {
  * paid account is just noise.
  */
 export function EntitlementBanner(): JSX.Element | null {
+  // The platform owner is not a customer. Showing them "your subscription has
+  // expired — choose a plan" on their own product is both wrong and alarming,
+  // and the API now exempts them from enforcement too, so the banner would be
+  // warning about a restriction that does not apply.
+  const isSuperadmin = useAuthStore((s) => s.user?.isSuperadmin);
+
   const { data: ent } = useQuery<Entitlement | null>({
     queryKey: ['billing', 'entitlement'],
     queryFn: async () => (await apiClient.get('/billing/entitlement')).data.data,
@@ -34,6 +41,7 @@ export function EntitlementBanner(): JSX.Element | null {
     retry: false,
   });
 
+  if (isSuperadmin) return null;
   if (!ent || ent.state === 'active') return null;
 
   const days = ent.daysRemaining ?? 0;
