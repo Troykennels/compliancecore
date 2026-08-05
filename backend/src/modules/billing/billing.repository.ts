@@ -280,6 +280,23 @@ export async function initBillingTables(): Promise<void> {
     `CREATE INDEX IF NOT EXISTS idx_payment_tx_tenant ON global.payment_transactions (tenant_id, created_at DESC)`,
   );
 
+  // Records which expiry warnings have gone out. Without it the daily job would
+  // re-send the same "3 days left" email every morning until the date passed,
+  // which trains customers to ignore exactly the message that matters.
+  //
+  // The unique constraint IS the dedupe: the insert either claims the slot or
+  // affects no rows, so two workers racing cannot both send.
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS global.subscription_reminders (
+      id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      subscription_id UUID NOT NULL,
+      period_end      TIMESTAMPTZ NOT NULL,
+      threshold_days  INTEGER NOT NULL,
+      sent_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT uq_subscription_reminder UNIQUE (subscription_id, period_end, threshold_days)
+    )
+  `);
+
   await applyPricingCorrection();
 
   _initialized = true;
@@ -1009,6 +1026,63 @@ export async function saveAuthorization(input: {
     input.authorizationCode,
     input.email,
   );
+}
+
+/**
+ * Subscriptions whose access ends within `withinDays`, with everything the
+ * reminder needs to write a useful email.
+ *
+ * `expires_at` is the trial end while a trial is running and the period end
+ * otherwise — the same rule getEntitlement applies, so the warning date always
+ * matches the date access actually stops.
+ *
+ * `has_card` decides which of two very different emails to send: "we will
+ * charge you on the 14th" versus "we cannot renew you and access will stop".
+ */
+export async function findExpiringSubscriptions(withinDays: number): Promise<Array<{
+  id: string; tenant_id: string; tenant_name: string; owner_email: string | null;
+  plan_name: string; status: string; billing_cycle: string; currency: string;
+  expires_at: Date; is_trial: boolean; amount: number; has_card: boolean;
+}>> {
+  return prisma.$queryRawUnsafe(`
+    SELECT s.id, s.tenant_id, t.name AS tenant_name,
+           (SELECT u.email FROM global.users u
+              JOIN global.tenant_memberships m ON m.user_id = u.id
+             WHERE m.tenant_id = s.tenant_id AND m.role = 'owner' AND m.deleted_at IS NULL
+             LIMIT 1) AS owner_email,
+           p.name AS plan_name, s.status, s.billing_cycle, s.currency,
+           CASE WHEN s.status = 'trial' AND s.trial_ends_at IS NOT NULL
+                THEN s.trial_ends_at ELSE s.current_period_end END AS expires_at,
+           (s.status = 'trial') AS is_trial,
+           s.next_invoice_amount AS amount,
+           EXISTS (SELECT 1 FROM global.payment_methods pm
+                    WHERE pm.tenant_id = s.tenant_id AND pm.is_active
+                      AND pm.is_reusable AND pm.authorization_code IS NOT NULL) AS has_card
+      FROM global.subscriptions s
+      JOIN global.tenants t ON t.id = s.tenant_id
+      JOIN global.subscription_plans p ON p.id = s.plan_id
+     WHERE s.status IN ('trial', 'active')
+       AND s.cancel_at_period_end = false
+       AND t.deleted_at IS NULL
+       AND (CASE WHEN s.status = 'trial' AND s.trial_ends_at IS NOT NULL
+                 THEN s.trial_ends_at ELSE s.current_period_end END)
+             BETWEEN NOW() AND NOW() + ($1 || ' days')::interval
+  `, String(withinDays));
+}
+
+/**
+ * Claims one reminder slot. Returns false when this exact warning has already
+ * been sent, so the caller simply skips.
+ */
+export async function claimReminder(
+  subscriptionId: string, periodEnd: Date, thresholdDays: number,
+): Promise<boolean> {
+  const affected = await prisma.$executeRawUnsafe(`
+    INSERT INTO global.subscription_reminders (subscription_id, period_end, threshold_days)
+    VALUES ($1::uuid, $2::timestamptz, $3::int)
+    ON CONFLICT (subscription_id, period_end, threshold_days) DO NOTHING
+  `, subscriptionId, periodEnd, thresholdDays);
+  return affected > 0;
 }
 
 /** The instrument the renewal job should charge, if the tenant has one. */

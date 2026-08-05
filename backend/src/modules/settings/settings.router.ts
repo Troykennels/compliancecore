@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { requirePermission, requireRole } from '../../middleware/rbac.middleware';
 import { validate } from '../../middleware/validate.middleware';
-import { enforceLimit } from '../../middleware/entitlement.middleware';
+import { enforceEntitlement, enforceLimit } from '../../middleware/entitlement.middleware';
 import { countUsers } from '../../lib/usage-counts';
 import { settingsController } from './settings.controller';
 import {
@@ -18,6 +18,11 @@ import {
 const router = Router();
 
 router.use(authenticate());
+// An expired organisation could still invite team members, mint API keys and
+// create webhooks, because this router was one of only two that never applied
+// the subscription check. Reads stay open, as everywhere else, and accepting an
+// invitation is exempt (see ALWAYS_ALLOWED).
+router.use(enforceEntitlement());
 
 // ── Team ─────────────────────────────────────────────────────────────────────
 router.get('/team/members', settingsController.listMembers);

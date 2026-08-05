@@ -16,6 +16,14 @@ const ALWAYS_ALLOWED = [
   '/api/billing/subscription',
   '/api/billing/payment-methods',
   '/api/auth',
+  // Joining an organisation is how a person becomes able to act at all, and the
+  // org's own state will govern what they can do once inside. Blocking the
+  // acceptance itself just strands them on a broken link.
+  '/api/settings/team/members/accept-invite',
+  // Starting a NEW organisation must not be blocked by an old one that lapsed.
+  // A new tenant gets its own trial, and the alternative is telling someone
+  // they cannot become a customer again because they stopped being one.
+  '/api/organizations/onboarding',
 ];
 
 /**
@@ -27,7 +35,12 @@ const ALWAYS_ALLOWED = [
  */
 export function enforceEntitlement(): RequestHandler {
   return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
-    const tenantId = req.tenant?.id;
+    // Falls back to the token's tenant, matching enforceLimit. The settings and
+    // organizations routers authenticate without running resolveTenant, so
+    // req.tenant is absent there even though the caller plainly belongs to a
+    // tenant — reading only req.tenant meant this silently allowed everything
+    // on exactly those two routers.
+    const tenantId = req.tenant?.id ?? req.user?.tenantId;
     if (!tenantId) return next();
 
     try {

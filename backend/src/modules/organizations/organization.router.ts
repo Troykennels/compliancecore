@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { requirePermission, requireRole } from '../../middleware/rbac.middleware';
 import { resolveTenant } from '../../middleware/tenant.middleware';
+import { enforceEntitlement } from '../../middleware/entitlement.middleware';
 import { validate } from '../../middleware/validate.middleware';
 import { makeRateLimiter } from '../../lib/rate-limit';
 import { asyncHandler } from '../../lib/asyncHandler';
@@ -20,9 +21,14 @@ router.post('/', validate(createOrganizationSchema), organizationController.crea
 router.get('/profile', organizationController.getProfile);
 
 // PATCH /api/organizations/profile
+//
+// Applied per-route rather than to the whole router: creating an organisation
+// and completing onboarding must stay open, or someone whose old org lapsed
+// could never start a new one.
 router.patch(
   '/profile',
   requirePermission('org:write'),
+  enforceEntitlement(),
   validate(updateOrganizationSchema),
   organizationController.updateProfile,
 );
@@ -70,6 +76,11 @@ router.get(
 // GET is readable by anyone who can read the org, so the dashboard can surface
 // "you have not scoped your programme yet". Saving is an org:write action.
 router.get('/scoping', organizationController.getScoping);
-router.post('/scoping', requirePermission('org:write'), organizationController.saveScoping);
+router.post(
+  '/scoping',
+  requirePermission('org:write'),
+  enforceEntitlement(),
+  organizationController.saveScoping,
+);
 
 export default router;
