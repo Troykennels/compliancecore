@@ -7,7 +7,9 @@ export interface ReportFilter {
 }
 
 export interface ComplianceKpis {
-  overallScore: number;
+  /** null when nothing is in scope yet — NOT 0. A brand-new organisation has
+   *  not scored zero, it has not been scored. */
+  overallScore: number | null;
   totalControls: number;
   implementedControls: number;
   partiallyImplementedControls: number;
@@ -24,7 +26,8 @@ export interface ComplianceKpis {
 
 export interface ScoreTrendPoint {
   date: string;
-  score: number;
+  /** null on days with no snapshot — a gap in the line, not a drop to zero. */
+  score: number | null;
 }
 
 export interface ControlsBreakdown {

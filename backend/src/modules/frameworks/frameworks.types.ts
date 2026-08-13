@@ -48,3 +48,35 @@ export interface AdoptResult {
   skipped: number;
   source: 'library' | 'categories';
 }
+
+/**
+ * What removing a framework would actually cost this tenant.
+ *
+ * Adoption copies a control library into the tenant, and from that moment the
+ * controls are where the real work accumulates — statuses, owners, notes,
+ * review dates, linked evidence. Removal has to be able to tell the difference
+ * between "adopted by accident five minutes ago" and "eight months of audit
+ * preparation", because those deserve very different amounts of friction.
+ *
+ * `touched` is the count that matters: controls somebody has actually done
+ * something to. When it is zero the removal is genuinely free.
+ */
+export interface UnadoptImpact {
+  frameworkId: string;
+  frameworkName: string;
+  /** Live controls this framework put in the tenant. */
+  controls: number;
+  /** Of those, how many show any sign of work. */
+  touched: number;
+  /** The specific signals, so the confirmation can say what is at stake. */
+  implemented: number;
+  withOwner: number;
+  withNotes: number;
+  withEvidence: number;
+}
+
+export interface UnadoptResult {
+  /** Controls soft-deleted. They keep their rows, so this is reversible. */
+  removed: number;
+  frameworkName: string;
+}

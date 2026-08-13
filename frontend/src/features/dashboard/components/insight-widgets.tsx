@@ -217,7 +217,12 @@ export function FrameworkProgress({
       ) : (
         <ul className="space-y-3">
           {frameworks.slice(0, 6).map((f) => {
-            const pct = Math.round(f.score ?? 0);
+            // null means nothing measurable in this framework yet — every control
+            // is not-applicable, or there are none. Rounding that to 0 paints a
+            // red bar and reads as "you have implemented nothing", which is a
+            // different and much worse claim than "there is nothing to measure".
+            const unscored = f.score === null;
+            const pct = unscored ? 0 : Math.round(f.score as number);
             return (
               <li key={f.frameworkName ?? 'unmapped'}>
                 <div className="flex items-baseline justify-between gap-2">
@@ -228,12 +233,16 @@ export function FrameworkProgress({
                 </div>
                 <div className="mt-1 flex items-center gap-2">
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
-                    <div
-                      className={`h-full rounded-full ${pct >= 70 ? 'bg-emerald-500' : pct >= 40 ? 'bg-amber-400' : 'bg-rose-400'}`}
-                      style={{ width: `${Math.max(pct, 2)}%` }}
-                    />
+                    {!unscored && (
+                      <div
+                        className={`h-full rounded-full ${pct >= 70 ? 'bg-emerald-500' : pct >= 40 ? 'bg-amber-400' : 'bg-rose-400'}`}
+                        style={{ width: `${Math.max(pct, 2)}%` }}
+                      />
+                    )}
                   </div>
-                  <span className="w-9 shrink-0 text-right text-xs font-semibold tabular-nums text-slate-900">{pct}%</span>
+                  <span className="w-9 shrink-0 text-right text-xs font-semibold tabular-nums text-slate-900">
+                    {unscored ? '—' : `${pct}%`}
+                  </span>
                 </div>
               </li>
             );

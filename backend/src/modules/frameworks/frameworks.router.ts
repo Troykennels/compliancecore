@@ -28,4 +28,26 @@ router.post(
   asyncHandler(ctrl.adoptFramework),
 );
 
+/*
+  Removing an adopted framework.
+
+  QA's only outright failure: adoption was a one-way door, so a framework picked
+  by mistake could only be undone by contacting support. No allowance guard here
+  — giving a seat back is never something to ration — but `controls:delete`
+  rather than `controls:write`, because this withdraws a whole control set from
+  the organisation's compliance scope and that is a heavier act than editing one.
+
+  DELETE on the same path that adopts it, so the pair reads as one toggle.
+*/
+router.get(
+  '/:id/adopt/impact',
+  requirePermission('controls:read'),
+  asyncHandler(ctrl.getUnadoptImpact),
+);
+router.delete(
+  '/:id/adopt',
+  requirePermission('controls:delete'),
+  asyncHandler(ctrl.unadoptFramework),
+);
+
 export default router;

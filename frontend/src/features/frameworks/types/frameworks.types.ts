@@ -47,3 +47,26 @@ export interface AdoptResult {
   skipped: number;
   source: 'library' | 'categories';
 }
+
+/**
+ * What removing a framework would cost.
+ *
+ * `touched` is the number the confirmation turns on: zero means the framework
+ * was adopted and never worked on, which is the "adopted it by mistake" case,
+ * and that should cost one click and no lecture.
+ */
+export interface UnadoptImpact {
+  frameworkId:   string;
+  frameworkName: string;
+  controls:      number;
+  touched:       number;
+  implemented:   number;
+  withOwner:     number;
+  withNotes:     number;
+  withEvidence:  number;
+}
+
+export interface UnadoptResult {
+  removed:       number;
+  frameworkName: string;
+}

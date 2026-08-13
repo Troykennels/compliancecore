@@ -169,6 +169,85 @@ export const frameworksRepository = {
     return new Set(rows.map((r) => r.controlRef));
   },
 
+  /**
+   * What removing this framework would cost, counted in one pass.
+   *
+   * `touched` deliberately errs towards caution: anything other than a control
+   * still sitting at its adoption defaults counts as work. A false positive
+   * costs the user one extra confirmation click; a false negative silently
+   * discards somebody's audit preparation.
+   *
+   * Evidence is joined through the polymorphic evidence_links table, which is
+   * how the Evidence Hub attaches a document to a control.
+   */
+  async unadoptImpact(tx: Tx, frameworkId: string): Promise<{
+    controls: number; touched: number; implemented: number;
+    withOwner: number; withNotes: number; withEvidence: number;
+  }> {
+    const rows = await tx.$queryRaw<Record<string, unknown>[]>`
+      WITH scoped AS (
+        SELECT
+          c.id,
+          c.implementation_status <> 'not_implemented'                   AS is_implemented,
+          c.owner_id IS NOT NULL                                         AS has_owner,
+          (COALESCE(NULLIF(TRIM(c.implementation_notes), ''), NULLIF(TRIM(c.testing_notes), '')) IS NOT NULL)
+                                                                         AS has_notes,
+          (c.last_reviewed_at IS NOT NULL OR c.due_date IS NOT NULL)     AS has_dates,
+          EXISTS (
+            SELECT 1 FROM evidence_links el
+             WHERE el.linked_type = 'control' AND el.linked_id = c.id
+          )                                                              AS has_evidence
+        FROM controls c
+        WHERE c.framework_id = ${frameworkId}::uuid AND c.deleted_at IS NULL
+      )
+      SELECT
+        COUNT(*)::int                                      AS "controls",
+        COUNT(*) FILTER (
+          WHERE is_implemented OR has_owner OR has_notes OR has_dates OR has_evidence
+        )::int                                             AS "touched",
+        COUNT(*) FILTER (WHERE is_implemented)::int        AS "implemented",
+        COUNT(*) FILTER (WHERE has_owner)::int             AS "withOwner",
+        COUNT(*) FILTER (WHERE has_notes)::int             AS "withNotes",
+        COUNT(*) FILTER (WHERE has_evidence)::int          AS "withEvidence"
+      FROM scoped
+    `;
+    const r = rows[0] ?? {};
+    return {
+      controls:     Number(r.controls ?? 0),
+      touched:      Number(r.touched ?? 0),
+      implemented:  Number(r.implemented ?? 0),
+      withOwner:    Number(r.withOwner ?? 0),
+      withNotes:    Number(r.withNotes ?? 0),
+      withEvidence: Number(r.withEvidence ?? 0),
+    };
+  },
+
+  /**
+   * Remove a framework's controls from the tenant.
+   *
+   * SOFT delete, and that is the whole design. A hard delete would take the
+   * control rows out from under everything that points at them by id — evidence
+   * links, tasks, approvals, audit findings — none of which are real foreign
+   * keys, because they are polymorphic. Setting deleted_at leaves every one of
+   * those rows intact and resolvable, keeps the audit trail honest about what
+   * was once in scope, and means an accidental removal is recoverable by an
+   * operator with a single UPDATE rather than from a backup.
+   *
+   * It also frees the plan allowance for nothing extra: countAdoptedFrameworks
+   * counts DISTINCT framework_id WHERE deleted_at IS NULL, so the seat is
+   * released the moment this runs.
+   */
+  async softDeleteFrameworkControls(tx: Tx, frameworkId: string, actorId: string): Promise<number> {
+    return tx.$executeRaw`
+      UPDATE controls
+         SET deleted_at = NOW(),
+             updated_at = NOW(),
+             updated_by = ${actorId}::uuid
+       WHERE framework_id = ${frameworkId}::uuid
+         AND deleted_at IS NULL
+    `;
+  },
+
   // Insert one starter control from a framework category. ON CONFLICT DO NOTHING
   // guards against any partial unique index on control_ref; the service also
   // pre-filters via existingControlRefs. Returns 1 if a row was inserted, else 0.

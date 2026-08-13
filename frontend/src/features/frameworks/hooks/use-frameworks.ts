@@ -41,3 +41,46 @@ export function useAdoptFramework() {
     onError: errorMessage('Failed to adopt framework.'),
   });
 }
+
+/**
+ * Removing an adopted framework.
+ *
+ * QA found adoption was a one-way door — a framework chosen by mistake could
+ * only be undone by contacting support. This is the way back.
+ *
+ * The 409 the server raises when controls carry real work is NOT surfaced as an
+ * error. It is the answer to a question the dialog is in the middle of asking:
+ * it carries the itemised impact, and the caller turns it into a warning and
+ * offers to proceed. Toasting it as a failure would be actively misleading —
+ * nothing failed, and the user's next move is to confirm.
+ */
+export function useUnadoptFramework() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, force }: { id: string; force?: boolean }) =>
+      frameworksApi.unadopt(id, force).then((r) => r.data.data),
+    onSuccess: (result) => {
+      qc.invalidateQueries({ queryKey: frameworkKeys.all });
+      // Removal withdraws controls from scope, so every view derived from them —
+      // the controls list, the compliance score, the dashboard — is now stale.
+      qc.invalidateQueries({ queryKey: ['controls'] });
+      qc.invalidateQueries({ queryKey: ['compliance-score'] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      toast.success(
+        `Removed ${result?.frameworkName ?? 'framework'} — ${result?.removed ?? 0} controls withdrawn from scope`,
+      );
+    },
+    // Deliberately no onError toast: the caller inspects the 409 and asks the
+    // user to confirm. See the component.
+  });
+}
+
+/** The cost of removing a framework, fetched only while a dialog is open. */
+export function useUnadoptImpact(id: string | null) {
+  return useQuery({
+    queryKey: [...frameworkKeys.all, id, 'unadopt-impact'],
+    queryFn:  () => frameworksApi.unadoptImpact(id!).then((r) => r.data.data),
+    enabled:  Boolean(id),
+    staleTime: 0,
+  });
+}

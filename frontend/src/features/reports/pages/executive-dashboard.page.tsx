@@ -156,8 +156,12 @@ function DateRangePicker({
 
 // ── Score trend chart ──────────────────────────────────────────────────────────
 
-function ScoreTrendChart({ data }: { data: Array<{ date: string; score: number }> }) {
-  if (!data.length) return <EmptyChart />;
+function ScoreTrendChart({ data }: { data: Array<{ date: string; score: number | null }> }) {
+  // A day with no snapshot has a null score, and Recharts renders null as a
+  // break in the line — which is the truth. Coercing it to 0 would draw a cliff
+  // to the floor and back on days the job simply did not run, and that fake
+  // crash is indistinguishable from a real one on a board report.
+  if (!data.some((d) => d.score !== null)) return <EmptyChart />;
   const sampled = data.filter((_, i) => i % Math.max(1, Math.floor(data.length / 30)) === 0);
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -540,11 +544,21 @@ export function ExecutiveDashboardPage() {
   const pdf   = useDownloadPdf(filter);
   const excel = useDownloadExcel(filter);
 
-  const scoreColor = data
-    ? data.kpis.overallScore >= 80 ? 'green'
-    : data.kpis.overallScore >= 60 ? 'amber'
-    : 'red'
-    : 'blue';
+  /*
+    An unscored organisation is grey, not red.
+
+    `overallScore` is null when nothing is in scope yet — no framework adopted,
+    so no controls to measure. It used to arrive here as 0 (the query coalesced
+    it), which painted the headline KPI red and read as "you are failing" to a
+    board looking at an account that had simply not started. Null now survives
+    the whole way, and this is where it stops being a number.
+  */
+  const score = data?.kpis.overallScore ?? null;
+  const scoreColor = !data || score === null
+    ? 'blue'
+    : score >= 80 ? 'green'
+    : score >= 60 ? 'amber'
+    : 'red';
 
   return (
     <div className="h-full overflow-y-auto bg-slate-50 print:overflow-visible print:bg-white">
@@ -640,8 +654,11 @@ export function ExecutiveDashboardPage() {
           </div>
         ) : data ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <KpiCard icon={TrendingUp} label="Compliance Score" value={`${data.kpis.overallScore}%`}
-              sub={`${data.kpis.implementedControls} of ${data.kpis.totalControls} controls`}
+            <KpiCard icon={TrendingUp} label="Compliance Score"
+              value={score === null ? '—' : `${score}%`}
+              sub={score === null
+                ? 'Not scored — adopt a framework'
+                : `${data.kpis.implementedControls} of ${data.kpis.totalControls} controls`}
               color={scoreColor} />
             <KpiCard icon={ShieldCheck} label="Implemented Controls" value={data.kpis.implementedControls}
               sub={`${data.kpis.notImplementedControls} not implemented`}

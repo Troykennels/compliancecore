@@ -105,9 +105,22 @@ export async function generateExecutivePdf(
     const { from, to } = resolveDateRange(filter);
     doc.text(`Period: ${from.toDateString()} — ${to.toDateString()}`, 50, 130);
 
-    // KPI strip on cover
+    /*
+      KPI strip on cover.
+
+      The score is nullable, and on this page that matters more than anywhere
+      else in the product. This is the board pack. An organisation that has not
+      adopted a framework yet has no score — printing "0%" in red across the
+      cover of a document that goes to a board tells them they have failed
+      comprehensively at something they have not started. Unscored is grey and
+      says so.
+    */
+    const score = data.kpis.overallScore;
+    const scoreText  = score === null ? 'Not scored' : `${score}%`;
+    const scoreColour = score === null ? SLATE : score >= 80 ? GREEN : score >= 60 ? AMBER : RED;
+
     const kpiY = 220;
-    kpiBox(50,  kpiY, 'Compliance Score',    `${data.kpis.overallScore}%`, '', data.kpis.overallScore >= 80 ? GREEN : data.kpis.overallScore >= 60 ? AMBER : RED);
+    kpiBox(50,  kpiY, 'Compliance Score',    scoreText, score === null ? 'no framework adopted' : '', scoreColour);
     kpiBox(175, kpiY, 'Controls Implemented', data.kpis.implementedControls, `of ${data.kpis.totalControls} total`, BLUE);
     kpiBox(300, kpiY, 'Overdue Tasks',        data.kpis.overdueTasks, `${data.kpis.openTasks} open`, data.kpis.overdueTasks > 0 ? RED : GREEN);
     kpiBox(425, kpiY, 'Expiring Soon (30d)',  data.kpis.expiringIn30Days, `${data.kpis.expiredItems} expired`, data.kpis.expiringIn30Days > 0 ? AMBER : GREEN);
@@ -119,7 +132,7 @@ export async function generateExecutivePdf(
     doc.moveDown(0.5);
 
     sectionHeader('Key Performance Indicators');
-    row('Overall Compliance Score',    `${data.kpis.overallScore}%`);
+    row('Overall Compliance Score',    scoreText);
     row('Total Controls',              data.kpis.totalControls);
     row('Implemented Controls',        `${data.kpis.implementedControls} (${data.kpis.totalControls ? Math.round(data.kpis.implementedControls / data.kpis.totalControls * 100) : 0}%)`);
     row('Partially Implemented',       data.kpis.partiallyImplementedControls);
@@ -244,7 +257,9 @@ export async function generateExecutiveExcel(
   addHeader(s1, ['Metric', 'Value']);
 
   const kpiRows: [string, string | number][] = [
-    ['Overall Compliance Score',    `${data.kpis.overallScore}%`],
+    // "Not scored" rather than 0%, for the same reason as the PDF: a spreadsheet
+    // cell reading 0 will be charted, averaged and quoted as a real measurement.
+    ['Overall Compliance Score',    data.kpis.overallScore === null ? 'Not scored' : `${data.kpis.overallScore}%`],
     ['Total Controls',              data.kpis.totalControls],
     ['Implemented Controls',        data.kpis.implementedControls],
     ['Partially Implemented',       data.kpis.partiallyImplementedControls],

@@ -21,6 +21,29 @@ export async function adoptFramework(req: Request, res: Response) {
   created(res, req, data);
 }
 
+/** What removing this framework would cost. Read-only; drives the confirmation. */
+export async function getUnadoptImpact(req: Request, res: Response) {
+  const data = await frameworksService.unadoptImpact(req.tenant!.schemaName, req.params.id);
+  ok(res, req, data);
+}
+
+/**
+ * Remove an adopted framework.
+ *
+ * `force` arrives as a query string because this is a DELETE and bodies on
+ * DELETE are poorly supported by proxies and by some HTTP clients. Only the
+ * literal string 'true' counts — `?force=false`, `?force=0` and a bare `?force`
+ * must not be enough to wave away a confirmation that exists to protect
+ * somebody's audit evidence.
+ */
+export async function unadoptFramework(req: Request, res: Response) {
+  const force = req.query.force === 'true';
+  const data = await frameworksService.unadopt(
+    req.tenant!.schemaName, req.params.id, actor(req), { force },
+  );
+  ok(res, req, data);
+}
+
 /**
  * True when this framework's controls are already in the tenant.
  *

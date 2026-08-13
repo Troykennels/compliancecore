@@ -43,10 +43,18 @@ export async function getKpis(schemaName: string): Promise<ComplianceKpis> {
       FROM expiry_items WHERE deleted_at IS NULL
     `);
 
+    /*
+      No COALESCE. A null overall_score means "there is nothing to score yet" —
+      no framework adopted, no controls in scope — and turning that into 0 tells
+      an organisation that has not started that it has comprehensively failed.
+      It reached the board pack, where the same 0 was printed in red.
+
+      Null travels all the way to the renderer, which says "Not scored".
+    */
     const [sRow] = await p.$queryRawUnsafe<any[]>(`
-      SELECT COALESCE(overall_score, 0) AS score
+      SELECT overall_score AS score
       FROM compliance_score_snapshots ORDER BY snapshot_date DESC LIMIT 1
-    `).catch(() => [{ score: 0 }]);
+    `).catch(() => [{ score: null }]);
 
     const [aRow] = await p.$queryRawUnsafe<any[]>(`
       SELECT COUNT(*)::int AS pending FROM approval_requests
@@ -54,7 +62,7 @@ export async function getKpis(schemaName: string): Promise<ComplianceKpis> {
     `).catch(() => [{ pending: 0 }]);
 
     return {
-      overallScore:                  Number(sRow?.score ?? 0),
+      overallScore:                  sRow?.score == null ? null : Number(sRow.score),
       totalControls:                 cRow?.total ?? 0,
       implementedControls:           cRow?.implemented ?? 0,
       partiallyImplementedControls:  cRow?.partial ?? 0,
@@ -84,7 +92,10 @@ export async function getScoreTrend(
       WHERE snapshot_date BETWEEN $1::timestamptz AND $2::timestamptz
       ORDER BY snapshot_date ASC
     `, dateFrom.toISOString(), dateTo.toISOString());
-    return rows.map((r) => ({ date: r.date, score: Number(r.score ?? 0) }));
+    // Same reasoning as the KPI above: a day with no score is a gap in the
+    // line, not a day the organisation scored zero. Plotting it as 0 draws a
+    // cliff on the trend chart that never happened.
+    return rows.map((r) => ({ date: r.date, score: r.score == null ? null : Number(r.score) }));
   });
 }
 

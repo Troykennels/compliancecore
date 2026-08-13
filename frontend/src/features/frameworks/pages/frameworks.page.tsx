@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import {
   Library, Eye, Download, Loader2, Layers, CheckCircle2,
-  AlertTriangle, RefreshCw, MapPin, Building2, ShieldCheck,
+  AlertTriangle, RefreshCw, MapPin, Building2, ShieldCheck, Trash2,
 } from 'lucide-react';
 import { useFrameworks, useAdoptFramework } from '../hooks/use-frameworks';
 import { FrameworkDetailModal } from '../components/framework-detail-modal';
+import { RemoveFrameworkDialog } from '../components/remove-framework-dialog';
 import type { Framework } from '../types/frameworks.types';
 import { SkeletonCard } from '@/components/ui';
 
@@ -12,6 +13,9 @@ export function FrameworksPage(): JSX.Element {
   const { data, isLoading, isError, refetch } = useFrameworks();
   const { mutate: adopt, isPending: isAdopting, variables: adoptingId } = useAdoptFramework();
   const [detailId, setDetailId] = useState<string | null>(null);
+  // The framework queued for removal. QA found adoption was a one-way door;
+  // this is the way back.
+  const [removing, setRemoving] = useState<Framework | null>(null);
 
   const frameworks = data ?? [];
 
@@ -45,6 +49,7 @@ export function FrameworksPage(): JSX.Element {
                 framework={fw}
                 onView={() => setDetailId(fw.id)}
                 onAdopt={() => adopt(fw.id)}
+                onRemove={() => setRemoving(fw)}
                 isAdopting={isAdopting && adoptingId === fw.id}
               />
             ))}
@@ -55,6 +60,14 @@ export function FrameworksPage(): JSX.Element {
       {detailId && (
         <FrameworkDetailModal frameworkId={detailId} onClose={() => setDetailId(null)} />
       )}
+
+      {removing && (
+        <RemoveFrameworkDialog
+          frameworkId={removing.id}
+          frameworkName={removing.shortName || removing.name}
+          onClose={() => setRemoving(null)}
+        />
+      )}
     </div>
   );
 }
@@ -63,10 +76,11 @@ interface CardProps {
   framework: Framework;
   onView: () => void;
   onAdopt: () => void;
+  onRemove: () => void;
   isAdopting: boolean;
 }
 
-function FrameworkCard({ framework, onView, onAdopt, isAdopting }: CardProps): JSX.Element {
+function FrameworkCard({ framework, onView, onAdopt, onRemove, isAdopting }: CardProps): JSX.Element {
   const isAdopted = framework.adoptedControlCount > 0;
 
   return (
@@ -131,7 +145,13 @@ function FrameworkCard({ framework, onView, onAdopt, isAdopting }: CardProps): J
         )}
       </div>
 
-      {/* Actions */}
+      {/* Actions.
+
+          Remove only appears once a framework is actually adopted — there is
+          nothing to undo before that, and an always-present delete button on a
+          catalogue card invites exactly the misclick this whole feature exists
+          to recover from. It stays a quiet icon button rather than a third full
+          -width control: undoing a mistake should be findable, not prominent. */}
       <div className="mt-4 flex items-center gap-2">
         <button
           onClick={onView}
@@ -147,6 +167,16 @@ function FrameworkCard({ framework, onView, onAdopt, isAdopting }: CardProps): J
           {isAdopting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           {isAdopted ? 'Re-adopt' : 'Adopt'}
         </button>
+        {isAdopted && (
+          <button
+            onClick={onRemove}
+            title={`Remove ${framework.shortName || framework.name} from your compliance scope`}
+            aria-label={`Remove ${framework.shortName || framework.name}`}
+            className="inline-flex shrink-0 items-center justify-center rounded-md border border-slate-300 px-3 py-2 text-slate-500 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
       </div>
     </div>
   );
