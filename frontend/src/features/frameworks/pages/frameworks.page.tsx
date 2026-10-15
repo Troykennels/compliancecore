@@ -99,7 +99,7 @@ function FrameworkCard({ framework, onView, onAdopt, onRemove, isAdopting }: Car
         </div>
         {framework.version && (
           <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-            v{framework.version}
+            {framework.version.startsWith('v') ? framework.version : `v${framework.version}`}
           </span>
         )}
       </div>

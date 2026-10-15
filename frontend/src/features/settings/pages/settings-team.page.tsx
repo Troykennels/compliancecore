@@ -105,10 +105,10 @@ export function SettingsTeamPage(): JSX.Element {
           <table className="w-full text-sm">
             <thead className="border-b border-slate-200 bg-slate-50">
               <tr>
-                <th className="px-6 py-3 text-left font-medium text-slate-500">Member</th>
-                <th className="px-6 py-3 text-left font-medium text-slate-500">Role</th>
-                <th className="px-6 py-3 text-left font-medium text-slate-500">Status</th>
-                <th className="px-6 py-3 text-left font-medium text-slate-500">Joined</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">Member</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">Role</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">Status</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">Joined</th>
                 {canManage && (
                   <th className="px-4 py-3 text-right font-medium text-slate-500">Actions</th>
                 )}
@@ -119,7 +119,7 @@ export function SettingsTeamPage(): JSX.Element {
                 const isMe = member.userId === currentUser?.id;
                 return (
                   <tr key={member.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700 flex-shrink-0">
                           {(member.firstName?.[0] ?? member.email[0]).toUpperCase()}
@@ -139,7 +139,7 @@ export function SettingsTeamPage(): JSX.Element {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4">
                       {canManage && !isMe && member.role !== 'owner' ? (
                         <div className="relative inline-block">
                           <select
@@ -161,7 +161,7 @@ export function SettingsTeamPage(): JSX.Element {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4">
                       {member.emailVerifiedAt ? (
                         <div className="flex items-center gap-1 text-xs text-emerald-600">
                           <CheckCircle2 className="h-3.5 w-3.5" /> Active
@@ -172,7 +172,7 @@ export function SettingsTeamPage(): JSX.Element {
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-xs text-slate-500">
+                    <td className="px-4 py-4 text-xs text-slate-500">
                       {member.joinedAt
                         ? fmt.formatDate(member.joinedAt)
                         : '—'}
