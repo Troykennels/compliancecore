@@ -5,6 +5,7 @@ import { useUnreadCount, useNotifications, useMarkRead, useMarkAllRead, useDismi
 import type { Notification } from '../api/notifications.api';
 import { useNavigate } from 'react-router-dom';
 import { toAppPath } from '../lib/action-url';
+import DeviceAlerts from './device-alerts';
 
 const PRIORITY_DOT: Record<string, string> = {
   critical: 'bg-red-500',
@@ -100,6 +101,7 @@ export function NotificationBell() {
           </div>
 
           {/* List */}
+          <DeviceAlerts />
           <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-slate-400">

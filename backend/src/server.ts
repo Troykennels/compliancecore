@@ -16,6 +16,7 @@ import { startSubscriptionReminderWorker, scheduleSubscriptionReminderJob } from
 import { startTenantPurgeWorker, scheduleTenantPurgeJob } from './jobs/tenant-purge.job';
 import { initBillingTables } from './modules/billing/billing.repository';
 import { emailTransportStatus } from './lib/email';
+import { startPushDelivery } from './modules/notifications/push.service';
 
 async function bootstrap(): Promise<void> {
   // Verify database and Redis connectivity before accepting traffic
@@ -27,6 +28,7 @@ async function bootstrap(): Promise<void> {
   const workers: Worker[] = [];
 
   await initBillingTables();
+  const stopPushDelivery = startPushDelivery();
 
   // Say out loud how mail will be sent. Every email in this app is
   // fire-and-forget and swallows its own errors — correct, because a failed
@@ -114,6 +116,7 @@ async function bootstrap(): Promise<void> {
       // new ones, so a deploy never kills a job mid-processing.
       await Promise.allSettled(workers.map((w) => w.close()));
       logger.info('Workers drained');
+      stopPushDelivery();
       await prisma.$disconnect();
       await redis.quit();
       if (env.ENABLE_REDIS) await redisForQueues.quit();

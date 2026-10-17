@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/api-client';
+import { stopDeviceAlerts } from '@/lib/device-alerts';
 import type { ApiResponse } from '@/types/api';
 import type {
   LoginRequest,
@@ -26,7 +27,10 @@ export const authApi = {
   completeMfaWithBackupCode: async (data: MfaBackupCodeRequest) =>
     apiClient.post<ApiResponse<LoginResponse>>('/auth/mfa/challenge/backup', data),
 
-  logout: async () => apiClient.post<ApiResponse<{ message: string }>>('/auth/logout'),
+  logout: async () => {
+    await stopDeviceAlerts(endpoint => apiClient.delete('/notifications/push',{data:{endpoint},timeout:3000})).catch(()=>{});
+    return apiClient.post<ApiResponse<{ message: string }>>('/auth/logout');
+  },
 
   logoutAll: async () => apiClient.post<ApiResponse<{ message: string }>>('/auth/logout-all'),
 
