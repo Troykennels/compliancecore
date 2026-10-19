@@ -1,3 +1,4 @@
+import { adminSignups, updateSignupFollowup } from './signup-report';
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { requirePermission, requireSuperadmin } from '../../middleware/rbac.middleware';
@@ -61,6 +62,8 @@ router.get('/admin/coupons', requireSuperadmin, asyncHandler(ctrl.adminGetCoupon
 router.post('/admin/coupons', requireSuperadmin, asyncHandler(ctrl.adminCreateCoupon));
 router.patch('/admin/coupons/:id', requireSuperadmin, validateUuidParam('id'), asyncHandler(ctrl.adminUpdateCoupon));
 
+router.get('/admin/signups', requireSuperadmin, asyncHandler(adminSignups));
+router.patch('/admin/signups/:id', requireSuperadmin, validateUuidParam('id'), asyncHandler(updateSignupFollowup));
 router.get('/admin/tenants', requireSuperadmin, asyncHandler(ctrl.adminGetAllTenantBilling));
 router.get('/admin/invoices', requireSuperadmin, asyncHandler(ctrl.adminGetInvoices));
 router.get('/admin/invoices/:id/download', requireSuperadmin, validateUuidParam('id'), asyncHandler(ctrl.adminDownloadInvoicePdf));

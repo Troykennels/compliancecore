@@ -1,3 +1,4 @@
+import { SignupDirectory } from '../components/signup-directory';
 import { useState } from 'react';
 import {
   ShieldAlert, Tag, Building2, FileText, Plus, Edit2, ToggleLeft, ToggleRight,
@@ -18,8 +19,9 @@ import { useOrgFormat } from '@/lib/org-format';
 import { apiClient } from '@/lib/api-client';
 
 // ── Tab definitions ────────────────────────────────────────────────────────────
-type Tab = 'plans' | 'pricing' | 'coupons' | 'tenants' | 'invoices';
+type Tab = 'signups' | 'plans' | 'pricing' | 'coupons' | 'tenants' | 'invoices';
 const TABS: Array<{ id: Tab; label: string; icon: JSX.Element }> = [
+  { id: 'signups', label: 'Signups & trials', icon: <Building2 className="h-4 w-4" /> },
   { id: 'plans',   label: 'Plans',    icon: <ShieldAlert className="h-4 w-4" /> },
   { id: 'pricing', label: 'Pricing',  icon: <TrendingUp className="h-4 w-4" /> },
   { id: 'coupons', label: 'Coupons',  icon: <Tag className="h-4 w-4" /> },
@@ -664,7 +666,7 @@ function AdminInvoicesTab() {
 
 // ── Main page ──────────────────────────────────────────────────────────────────
 export function BillingAdminPage(): JSX.Element {
-  const [tab, setTab] = useState<Tab>('plans');
+  const [tab, setTab] = useState<Tab>('signups');
 
   return (
     <div className="mx-auto max-w-6xl p-6 space-y-6">
@@ -679,7 +681,7 @@ export function BillingAdminPage(): JSX.Element {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200">
+      <div className="flex flex-wrap border-b border-slate-200">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -695,6 +697,7 @@ export function BillingAdminPage(): JSX.Element {
         ))}
       </div>
 
+      {tab === 'signups' && <SignupDirectory />}
       {tab === 'plans'    && <PlansTab />}
       {tab === 'pricing'  && <PricingTab />}
       {tab === 'coupons'  && <CouponsTab />}
