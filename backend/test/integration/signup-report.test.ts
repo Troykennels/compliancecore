@@ -30,6 +30,9 @@ describe.skipIf(!url)('platform signup and trial directory', () => {
     await client.query(`INSERT INTO global.tenant_memberships(user_id,tenant_id,role) VALUES ($1,$2,'owner')`, [prospect,tenant]);
     const plan = (await client.query(`SELECT id FROM global.subscription_plans WHERE slug='professional'`)).rows[0].id;
     await client.query(`INSERT INTO global.subscriptions(tenant_id,plan_id,status,billing_cycle,current_period_start,current_period_end,trial_ends_at,next_invoice_amount,currency) VALUES ($1,$2,'trial','monthly',NOW()-interval '20 days',NOW()-interval '6 days',NOW()-interval '6 days',85000,'NGN')`, [tenant,plan]);
+    const granted = (await client.query(`INSERT INTO global.tenants(name,slug,schema_name,updated_at) VALUES ('Granted Access Fixture','granted-fixture','tenant_'||repeat('e',32),NOW()) RETURNING id`)).rows[0].id;
+    await client.query(`INSERT INTO global.tenant_memberships(user_id,tenant_id,role) VALUES ($1,$2,'owner')`,[owner,granted]);
+    await client.query(`INSERT INTO global.subscriptions(tenant_id,plan_id,status,billing_cycle,current_period_start,current_period_end,trial_ends_at,next_invoice_amount,currency) VALUES ($1,$2,'trial','monthly',NOW()-interval '20 days',NOW()+interval '30 days',NOW()-interval '6 days',85000,'NGN')`,[granted,plan]);
     const { requireSuperadmin } = await import('../../src/middleware/rbac.middleware');
     const { adminSignups, updateSignupFollowup } = await import('../../src/modules/billing/signup-report');
     const { asyncHandler } = await import('../../src/lib/asyncHandler');

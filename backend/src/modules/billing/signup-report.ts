@@ -16,7 +16,7 @@ const stages: Record<string, string> = {
   unverified: 'u.email_verified_at IS NULL',
   incomplete: "u.email_verified_at IS NOT NULL AND NOT EXISTS (SELECT 1 FROM global.tenant_memberships m JOIN global.tenants t ON t.id=m.tenant_id WHERE m.user_id=u.id AND m.deleted_at IS NULL AND t.deleted_at IS NULL)",
   trial: "EXISTS (SELECT 1 FROM global.tenant_memberships m JOIN global.tenants t ON t.id=m.tenant_id JOIN global.subscriptions s ON s.tenant_id=t.id WHERE m.user_id=u.id AND m.deleted_at IS NULL AND t.deleted_at IS NULL AND s.status='trial' AND s.trial_ends_at>NOW())",
-  expired_trial: "EXISTS (SELECT 1 FROM global.tenant_memberships m JOIN global.tenants t ON t.id=m.tenant_id JOIN global.subscriptions s ON s.tenant_id=t.id WHERE m.user_id=u.id AND m.deleted_at IS NULL AND t.deleted_at IS NULL AND s.status='trial' AND s.trial_ends_at<=NOW())",
+  expired_trial: "EXISTS (SELECT 1 FROM global.tenant_memberships m JOIN global.tenants t ON t.id=m.tenant_id JOIN global.subscriptions s ON s.tenant_id=t.id WHERE m.user_id=u.id AND m.deleted_at IS NULL AND t.deleted_at IS NULL AND s.status='trial' AND s.trial_ends_at<=NOW() AND (s.current_period_end IS NULL OR s.current_period_end<=NOW()))",
 };
 export async function listSignups(query: Record<string, unknown>) {
   const page = Number(query.page ?? 1), pageSize = Number(query.pageSize ?? 50);
