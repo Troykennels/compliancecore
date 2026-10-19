@@ -16,6 +16,8 @@ const TEST_DB = process.env.TEST_DATABASE_URL;
 const backendDir = path.resolve(__dirname, '../..');
 
 const sendRawEmail = vi.fn().mockResolvedValue(undefined);
+vi.mock('bullmq', () => ({ Queue: class {}, Worker: class {} }));
+vi.mock('../../src/config/redis', () => ({ redisForQueues: {} }));
 vi.mock('../../src/lib/email', () => ({ email: { sendRawEmail: (...a: unknown[]) => sendRawEmail(...a) } }));
 
 describe.skipIf(!TEST_DB)('subscription expiry reminders', () => {
@@ -125,6 +127,12 @@ describe.skipIf(!TEST_DB)('subscription expiry reminders', () => {
          (tenant_id, type, label, provider, authorization_code, authorization_email,
           is_reusable, is_default, is_active)
        VALUES ($1::uuid,'card','Visa','paystack','AUTH_x','p@e.com',true,true,true)`, [tenantId]);
+    const { encrypt } = await import('../../src/lib/crypto');
+    await client.query(
+      `INSERT INTO global.recurring_consents
+         (tenant_id,enabled,authorization_enc,email,amount,currency,plan_id,cycle,consent_at)
+       VALUES ($1,true,$2,'p@e.com',85000,'NGN',$3,'monthly',NOW())`,
+      [tenantId, encrypt('AUTH_x'), planId]);
 
     await run();
     const { subject, html } = sendRawEmail.mock.calls[0][0];
@@ -139,7 +147,20 @@ describe.skipIf(!TEST_DB)('subscription expiry reminders', () => {
     await run();
     const { subject, html } = sendRawEmail.mock.calls[0][0];
     expect(subject).toContain('Action needed');
-    expect(html).toContain('no saved payment method');
+    expect(html).toContain('Automatic renewal is not enabled');
+  }, 60_000);
+
+  it('does not promise a debit for a saved card without recurring consent', async () => {
+    await makeSubscription({ status: 'active', daysOut: 3 });
+    await client.query(
+      `INSERT INTO global.payment_methods
+         (tenant_id,type,label,provider,authorization_code,authorization_email,is_reusable,is_default,is_active)
+       VALUES ($1,'card','Visa','paystack','AUTH_x','p@e.com',true,true,true)`, [tenantId]);
+    await run();
+    const { subject, html } = sendRawEmail.mock.calls[0][0];
+    expect(subject).toContain('Action needed');
+    expect(html).toContain('Automatic renewal is not enabled');
+    expect(html).not.toContain('We will charge');
   }, 60_000);
 
   it('ignores subscriptions that are not near expiry, or already cancelled', async () => {

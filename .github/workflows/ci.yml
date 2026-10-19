@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   backend:
-    name: Backend · typecheck, build & test
+    name: Backend Â· typecheck, build & test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -25,14 +25,14 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: compliancecore
+          POSTGRES_DB: compliance_renewal_task_ci
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres -d compliancecore"
+          --health-cmd "pg_isready -U postgres -d compliance_renewal_task_ci"
           --health-interval 10s --health-timeout 5s --health-retries 10
     env:
-      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/compliancecore?schema=global
+      TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/compliance_renewal_task_ci?schema=global
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -51,20 +51,20 @@ jobs:
         run: npm test
 
       # Boots the built API against the service Postgres and walks the real
-      # customer journey — register, onboard, scope, adopt, then every module's
+      # customer journey â€” register, onboard, scope, adopt, then every module's
       # detail and write route. Unit tests never caught the class of bug this
       # does: five POST endpoints returning 500 while every page still loaded.
       - name: E2E journey
         env:
           NODE_ENV: test
           PORT: 3002
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/compliancecore?schema=global
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/compliance_renewal_task_ci?schema=global
           # No Redis in CI: the in-memory fallback is enough for one process, and
           # the journey does not exercise queues.
           REDIS_URL: redis://localhost:6379
           ENABLE_REDIS: 'false'
           FRONTEND_URL: http://localhost:5173
-          # Throwaway credentials. Real ones are never needed — the journey
+          # Throwaway credentials. Real ones are never needed â€” the journey
           # treats an unconfigured Groq or Paystack as expected, not a failure.
           ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
           COOKIE_SECRET: ci-cookie-secret-that-is-long-enough-32
@@ -105,7 +105,7 @@ jobs:
             RESULT=$?
           fi
           # Tenant erasure from the operator console. Almost every assertion is
-          # a refusal — wrong name, wrong role, own tenant — because what is
+          # a refusal â€” wrong name, wrong role, own tenant â€” because what is
           # being deleted is a customer's entire compliance archive.
           if [ $RESULT -eq 0 ]; then
             node scripts/admin-tenant-checks.mjs
@@ -116,7 +116,7 @@ jobs:
           exit $RESULT
 
   frontend:
-    name: Frontend · lint, typecheck & build
+    name: Frontend Â· lint, typecheck & build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -140,7 +140,7 @@ jobs:
           VITE_API_URL: https://api.compliancecore.io
 
   docker:
-    name: Docker · build images (no push)
+    name: Docker Â· build images (no push)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

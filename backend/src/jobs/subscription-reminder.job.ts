@@ -148,13 +148,13 @@ function compose(row: Expiring, days: number): { subject: string; html: string }
     html: `
       <h2>We cannot renew your subscription</h2>
       <p><strong>${row.plan_name}</strong> for <strong>${row.tenant_name}</strong> ends on
-         <strong>${when}</strong>, and there is no saved payment method to renew it with.</p>
-      <p>Add a payment method or choose a plan before then to avoid interruption.
+         <strong>${when}</strong>. Automatic renewal is not enabled for this subscription.</p>
+      <p>Choose a plan and approve automatic renewal at checkout before then to avoid interruption.
          After it ends you keep a 7-day grace period, and then the account
          becomes read-only.</p>
       <p><a href="${plansUrl}"
             style="display:inline-block;background:#0F56C9;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">
-         Add a payment method</a></p>
+         Review renewal options</a></p>
       ${footer}`,
   };
 }
