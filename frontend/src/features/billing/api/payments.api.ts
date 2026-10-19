@@ -30,6 +30,9 @@ export const paymentsApi = {
   // Unauthenticated: tells the UI whether to offer payment at all, and in which
   // currencies. A deployment with no Paystack keys returns configured:false, and
   // the plans page falls back to plain plan switching.
+  recurring: async (): Promise<{enabled:boolean;last4?:string;amount?:number;currency?:string;cycle?:string}> => (await apiClient.get('/payments/recurring')).data.data,
+  cancelRecurring: async () => (await apiClient.post('/payments/recurring/cancel')).data.data,
+
   getConfig: async (): Promise<PaymentConfig> =>
     (await apiClient.get('/payments/config')).data.data,
 
@@ -40,6 +43,7 @@ export const paymentsApi = {
     planId: string;
     currency: string;
     billingCycle: 'monthly' | 'yearly';
+    recurringConsent?: boolean;
   }): Promise<CheckoutResult> =>
     (await apiClient.post('/payments/checkout', dto)).data.data,
 

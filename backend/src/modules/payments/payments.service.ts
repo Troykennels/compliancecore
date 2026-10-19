@@ -43,6 +43,7 @@ export async function createCheckout(input: {
   planId: string;
   currency: string;
   billingCycle: BillingCycle;
+  recurringConsent?: boolean;
 }): Promise<{ authorizationUrl: string; reference: string; amount: number; currency: string }> {
   if (!isPaystackConfigured()) {
     throw new AppError('Payments are not configured on this deployment.', 503, 'PAYMENTS_UNCONFIGURED');
@@ -91,6 +92,8 @@ export async function createCheckout(input: {
     currency,
     amount,
   });
+
+  if (input.recurringConsent) await repo.recordConsent(reference);
 
   const result = await initializeTransaction({
     email: input.email,
@@ -222,6 +225,10 @@ async function applyPaidTransaction(
   // failing here would leave a paid customer without access.
   if (authorization?.authorization_code && authorization.reusable && payerEmail) {
     try {
+      if (claimed.recurringConsent) {
+        const { rememberConsent } = await import('./recurring.service');
+        await rememberConsent(reference, authorization, payerEmail);
+      }
       await billingRepo.saveAuthorization({
         tenantId: claimed.tenantId,
         authorizationCode: authorization.authorization_code,
@@ -285,12 +292,17 @@ export async function confirmByReference(tenantId: string, reference: string) {
   // for — another organisation's payment references.
   if (tx.tenantId !== tenantId) throw new NotFoundError('Payment', reference);
 
+  if (reference.startsWith('CCR-')) {
+    const { reconcileRenewal } = await import('./recurring.service');
+    const outcome = await reconcileRenewal(reference);
+    return { status:outcome.status==='paid'?'success':'pending',alreadyApplied:tx.status==='success' };
+  }
   if (tx.status === 'success') return { status: 'success' as const, alreadyApplied: true };
 
   const verified = await verifyTransaction(reference);
 
   if (verified.status !== 'success') {
-    await repo.markTransactionFailed(reference, verified.status === 'abandoned' ? 'abandoned' : 'failed', verified.status);
+    if (['failed','abandoned'].includes(verified.status)) await repo.markTransactionFailed(reference, verified.status === 'abandoned' ? 'abandoned' : 'failed', verified.status);
     return { status: verified.status, alreadyApplied: false };
   }
 
@@ -361,11 +373,17 @@ export async function handleWebhook(rawBody: Buffer, signature: string | undefin
     return;
   }
 
+  if (reference.startsWith('CCR-')) {
+    const { reconcileRenewal } = await import('./recurring.service');
+    await reconcileRenewal(reference);
+    return;
+  }
+
   // Re-verify server-side rather than trusting the webhook body, then check the
   // amount before granting anything.
   const verified = await verifyTransaction(reference);
   if (verified.status !== 'success') {
-    await repo.markTransactionFailed(reference, 'failed', verified.status);
+    if (['failed','abandoned'].includes(verified.status)) await repo.markTransactionFailed(reference, 'failed', verified.status);
     return;
   }
 

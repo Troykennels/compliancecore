@@ -80,11 +80,13 @@ async function processDueSubscription(row: DueRow): Promise<void> {
   const newEnd = advancePeriod(newStart, cycle);
   const dueDate = new Date(newStart.getTime() + 7 * 86400_000);
 
-  const basePlan = { priceMonthly: Number(row.price_monthly), priceYearly: Number(row.price_yearly) } as Parameters<typeof calcBasePrice>[0];
+  const { findPlanPrice } = await import('../modules/payments/payments.repository');
+  const price = await findPlanPrice(row.plan_id,row.currency);
+  const basePlan = { priceMonthly: Number(price?.priceMonthly ?? row.price_monthly), priceYearly: Number(price?.priceYearly ?? row.price_yearly) } as Parameters<typeof calcBasePrice>[0];
   const basePrice = calcBasePrice(basePlan, cycle);
   const nextAmount = applyDiscount(basePrice, Number(row.discount_percent), Number(row.discount_fixed));
 
-  const inv = await repo.createInvoice({
+  const inv = await ensureRenewalInvoice({
     tenantId: row.tenant_id,
     subscriptionId: row.id,
     amountDue: nextAmount,
@@ -126,11 +128,13 @@ async function processDueSubscription(row: DueRow): Promise<void> {
     planName: row.plan_name,
     planId: row.plan_id,
     cycle,
+    subscriptionId: row.id,
+    periodEnd: row.current_period_end,
   });
 
   if (outcome.status === 'paid') {
-    await advanceSubscription(row.id, newStart, newEnd, nextAmount);
-    await repo.markInvoicePaid(inv.id, nextAmount, outcome.paidAt);
+    // Collection verifies and settles the payment, invoice and period atomically.
+    if (!outcome.paidAt) return;
     logger.info(
       { subscriptionId: row.id, invoiceId: inv.id, tenant: row.tenant_name, amount: nextAmount },
       'Subscription renewed and charged',
@@ -155,10 +159,11 @@ async function processDueSubscription(row: DueRow): Promise<void> {
   // seven days of full access with a prompt, then read-only. Reads are never
   // blocked: this is compliance evidence, and locking someone out of their own
   // audit records over a failed card is worse than the leverage it buys.
-  await prisma.$executeRawUnsafe(
-    `UPDATE global.subscriptions SET status = 'past_due', next_invoice_amount = $1, updated_at = NOW() WHERE id = $2::uuid`,
-    nextAmount, row.id,
+  const affected = await prisma.$executeRawUnsafe(
+    `UPDATE global.subscriptions SET status = 'past_due', next_invoice_amount = $1, updated_at = NOW() WHERE id = $2::uuid AND date_trunc('milliseconds',current_period_end)=$3::timestamptz AND status<>'cancelled'`,
+    nextAmount, row.id, row.current_period_end,
   );
+  if (!affected) return;
 
   logger.warn(
     { subscriptionId: row.id, invoiceId: inv.id, tenant: row.tenant_name, reason: outcome.reason },
@@ -166,7 +171,7 @@ async function processDueSubscription(row: DueRow): Promise<void> {
   );
 
   await sendRenewalEmail(ownerEmail, {
-    subject: `Action needed: we couldn't renew your subscription`,
+    subject: `Action needed: your subscription renewal`,
     heading: "We couldn't take payment",
     body: `
       <p>We tried to renew your <strong>${row.plan_name}</strong> subscription for <strong>${row.tenant_name}</strong> but the payment did not go through.</p>
@@ -175,7 +180,7 @@ async function processDueSubscription(row: DueRow): Promise<void> {
         <tr><td><strong>Amount Due</strong></td><td>${row.currency} ${nextAmount.toFixed(2)}</td></tr>
         <tr><td><strong>Invoice</strong></td><td>${inv.number}</td></tr>
       </table>
-      <p><strong>Your access continues for the next 7 days.</strong> Please update your payment method in billing settings to avoid interruption. After that your account becomes read-only — you will always keep access to your compliance records.</p>
+      <p><strong>The grace allowance ends seven days after your paid period ends.</strong> Please update your payment method in billing settings to avoid interruption. After that your account becomes read-only — you will always keep access to your compliance records.</p>
       <p>Questions? Contact <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></p>`,
   });
 }
@@ -191,82 +196,28 @@ async function advanceSubscription(
   `, start, end, nextAmount, subscriptionId);
 }
 
-type ChargeOutcome =
-  | { status: 'paid'; paidAt: Date }
-  | { status: 'unpaid'; reason: string };
-
-/**
- * Charges the tenant's stored card for a renewal.
- *
- * Every failure mode is deliberately non-throwing and returns a reason, so one
- * declined card cannot abort the nightly run for everyone behind it.
- */
-async function chargeForRenewal(input: {
-  tenantId: string;
-  invoiceId: string;
-  amount: number;
-  currency: string;
-  planName: string;
-  planId: string;
-  cycle: 'monthly' | 'yearly';
-}): Promise<ChargeOutcome> {
-  const { isPaystackConfigured, chargeAuthorization } = await import('../modules/payments/paystack.client');
-  const paymentsRepo = await import('../modules/payments/payments.repository');
-  const repo = await import('../modules/billing/billing.repository');
-
-  if (!isPaystackConfigured()) {
-    return { status: 'unpaid', reason: 'Payments are not configured on this deployment.' };
-  }
-
-  const auth = await repo.findChargeableAuthorization(input.tenantId);
-  if (!auth) {
-    return {
-      status: 'unpaid',
-      reason: 'No saved payment method. The card used at checkout could not be stored for reuse.',
-    };
-  }
-
-  // Recorded before the call, so a charge that succeeds at Paystack but fails
-  // to return to us is still reconcilable from the reference rather than lost.
-  const reference = `CCR-${input.tenantId.slice(0, 8)}-${Date.now().toString(36).toUpperCase()}`;
-  await paymentsRepo.createTransaction({
-    reference,
-    tenantId: input.tenantId,
-    userId: null,
-    planId: input.planId,
-    billingCycle: input.cycle,
-    currency: input.currency,
-    amount: input.amount,
+async function ensureRenewalInvoice(input: {
+  tenantId:string; subscriptionId?:string; amountDue:number; currency:string;
+  billingPeriodStart:Date; billingPeriodEnd:Date; dueDate:Date; lineItems:unknown[];
+}): Promise<{id:string;number:string}> {
+  return prisma.$transaction(async tx => {
+    await tx.$queryRawUnsafe(`SELECT id FROM global.subscriptions WHERE id=$1::uuid FOR UPDATE`, input.subscriptionId);
+    const existing = await tx.$queryRawUnsafe<Array<{id:string;number:string}>>(`SELECT id,number FROM global.invoices WHERE subscription_id=$1::uuid AND billing_period_start=$2::timestamptz AND status<>'void' ORDER BY created_at LIMIT 1`,input.subscriptionId,input.billingPeriodStart);
+    if (existing[0]) return existing[0];
+    const rows = await tx.$queryRawUnsafe<Array<{id:string;number:string}>>(`INSERT INTO global.invoices(tenant_id,subscription_id,amount_due,currency,billing_period_start,billing_period_end,due_date,line_items)
+      VALUES($1::uuid,$2::uuid,$3,$4,$5::timestamptz,$6::timestamptz,$7::timestamptz,$8::jsonb) RETURNING id,number`,input.tenantId,input.subscriptionId,input.amountDue,input.currency,input.billingPeriodStart,input.billingPeriodEnd,input.dueDate,JSON.stringify(input.lineItems));
+    return rows[0];
   });
+}
 
-  try {
-    const result = await chargeAuthorization({
-      authorizationCode: auth.authorizationCode,
-      email: auth.email,
-      amountMajor: input.amount,
-      currency: input.currency,
-      reference,
-      metadata: { tenantId: input.tenantId, invoiceId: input.invoiceId, kind: 'renewal' },
-    });
-
-    // A declined card comes back as HTTP 200 with status 'failed', so the body
-    // has to be inspected — a non-throwing call is not proof of payment.
-    if (result.status !== 'success') {
-      await paymentsRepo.markTransactionFailed(reference, 'failed', result.gateway_response ?? result.status);
-      return { status: 'unpaid', reason: result.gateway_response ?? 'The payment was declined.' };
-    }
-
-    const paidAt = result.paid_at ? new Date(result.paid_at) : new Date();
-    await paymentsRepo.claimTransaction(reference, result.reference ?? reference, paidAt);
-    return { status: 'paid', paidAt };
-  } catch (err) {
-    // Provider unreachable or erroring — our problem, not the customer's, but
-    // the outcome is the same: nothing was collected, so nothing is granted.
-    // The job runs again tomorrow and BullMQ retries this run three times.
-    await paymentsRepo.markTransactionFailed(reference, 'failed', (err as Error).message).catch(() => {});
-    logger.error({ err, tenantId: input.tenantId }, 'Renewal charge failed at the provider');
-    return { status: 'unpaid', reason: 'We could not reach the payment provider.' };
-  }
+async function chargeForRenewal(input: {
+  tenantId:string; invoiceId:string; amount:number; currency:string; planName:string;
+  planId:string; cycle:'monthly'|'yearly'; subscriptionId:string; periodEnd:Date;
+}) {
+  const { isPaystackConfigured } = await import('../modules/payments/paystack.client');
+  if (!isPaystackConfigured()) return { status:'unpaid' as const,reason:'Payments are not configured.' };
+  const { collectRenewal } = await import('../modules/payments/recurring.service');
+  return collectRenewal(input);
 }
 
 async function sendRenewalEmail(
@@ -301,7 +252,7 @@ async function getTenantOwnerEmail(tenantId: string): Promise<string> {
 /** Exported so the renewal path can be tested without a scheduler or Redis. */
 export async function processRenewals(): Promise<void> {
   const cutoff = new Date();
-  cutoff.setHours(cutoff.getHours() + 24); // subscriptions ending within 24h
+  // Collect only once the paid period actually ends.
 
   const { findDueSubscriptions } = await import('../modules/billing/billing.repository');
   const due = await findDueSubscriptions(cutoff);

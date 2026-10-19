@@ -297,6 +297,8 @@ export async function initBillingTables(): Promise<void> {
     )
   `);
 
+  const { initRecurringTables } = await import('../payments/recurring.service');
+  await initRecurringTables();
   await applyPricingCorrection();
 
   _initialized = true;
@@ -1057,7 +1059,8 @@ export async function findExpiringSubscriptions(withinDays: number): Promise<Arr
            s.next_invoice_amount AS amount,
            EXISTS (SELECT 1 FROM global.payment_methods pm
                     WHERE pm.tenant_id = s.tenant_id AND pm.is_active
-                      AND pm.is_reusable AND pm.authorization_code IS NOT NULL) AS has_card
+                      AND pm.is_reusable AND pm.authorization_code IS NOT NULL
+                      AND EXISTS (SELECT 1 FROM global.recurring_consents rc WHERE rc.tenant_id=s.tenant_id AND rc.enabled AND rc.amount=s.next_invoice_amount AND rc.plan_id=s.plan_id AND rc.cycle=s.billing_cycle AND rc.currency=s.currency)) AS has_card
       FROM global.subscriptions s
       JOIN global.tenants t ON t.id = s.tenant_id
       JOIN global.subscription_plans p ON p.id = s.plan_id

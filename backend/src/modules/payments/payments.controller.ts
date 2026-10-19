@@ -8,6 +8,7 @@ const checkoutSchema = z.object({
   planId: z.string().uuid('planId must be a valid UUID'),
   currency: z.string().length(3, 'currency must be a 3-letter ISO code'),
   billingCycle: z.enum(['monthly', 'yearly']).default('monthly'),
+  recurringConsent: z.boolean().default(false),
 });
 
 export async function getConfig(_req: Request, res: Response): Promise<void> {
@@ -29,6 +30,7 @@ export async function createCheckout(req: Request, res: Response): Promise<void>
     planId: parsed.data.planId,
     currency: parsed.data.currency,
     billingCycle: parsed.data.billingCycle,
+    recurringConsent: parsed.data.recurringConsent,
   });
   created(res, req, result);
 }
@@ -60,4 +62,13 @@ export async function paystackWebhook(req: Request, res: Response): Promise<void
   if (!raw) throw new ValidationError('Missing raw request body for signature verification.');
   await service.handleWebhook(raw, req.header('x-paystack-signature'));
   res.status(200).json({ received: true });
+}
+
+export async function getRecurring(req:Request,res:Response): Promise<void> {
+  const { recurringStatus } = await import('./recurring.service');
+  ok(res,req,await recurringStatus(req.tenant!.id));
+}
+export async function cancelRecurring(req:Request,res:Response): Promise<void> {
+  const { cancelRecurring } = await import('./recurring.service');
+  ok(res,req,await cancelRecurring(req.tenant!.id));
 }

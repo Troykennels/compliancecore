@@ -26,12 +26,15 @@ const backendDir = path.resolve(__dirname, '../..');
 
 // Controlled per test, so one stub covers success, decline and provider error.
 const chargeStub = vi.fn();
+const verifyStub = vi.fn();
+vi.mock('bullmq', () => ({ Queue:class {}, Worker:class {} }));
+vi.mock('../../src/config/redis', () => ({redisForQueues:{}}));
 
 vi.mock('../../src/modules/payments/paystack.client', () => ({
   isPaystackConfigured: () => true,
   chargeAuthorization: (...args: unknown[]) => chargeStub(...args),
   initializeTransaction: vi.fn(),
-  verifyTransaction: vi.fn(),
+  verifyTransaction: (...args:unknown[])=>verifyStub(...args),
   verifyWebhookSignature: () => false,
 }));
 
@@ -46,6 +49,8 @@ describe.skipIf(!TEST_DB)('billing renewal collects payment', () => {
   let planId: string;
 
   beforeAll(async () => {
+    const target = new URL(TEST_DB!);
+    if (target.hostname!=='127.0.0.1' || !target.pathname.startsWith('/compliance_renewal_task_')) throw Error('Dedicated local disposable database required');
     process.env.DATABASE_URL = TEST_DB;
     client = new pg.Client({ connectionString: TEST_DB });
     await client.connect();
@@ -65,11 +70,20 @@ describe.skipIf(!TEST_DB)('billing renewal collects payment', () => {
   }, 120_000);
 
   afterAll(async () => {
+    const {prisma}=await import('../../src/config/database');
+    await prisma.$disconnect();
     await client?.end();
   });
 
   beforeEach(async () => {
     chargeStub.mockReset();
+    verifyStub.mockReset();
+    verifyStub.mockImplementation(async(reference:string)=>{
+      const sent=chargeStub.mock.calls.find(call=>call[0].reference===reference)?.[0];
+      const result=await chargeStub.mock.results[chargeStub.mock.calls.findIndex(call=>call[0].reference===reference)]?.value;
+      if(!result)throw Error('provider pending');
+      return {...result,reference,customer:{email:sent?.email},authorization:null};
+    });
     await client.query(`DELETE FROM global.payment_transactions`);
     await client.query(`DELETE FROM global.invoices`);
     await client.query(`DELETE FROM global.payment_methods`);
@@ -90,7 +104,7 @@ describe.skipIf(!TEST_DB)('billing renewal collects payment', () => {
          (tenant_id, plan_id, status, billing_cycle, current_period_start, current_period_end,
           next_invoice_amount, currency)
        VALUES ($1::uuid, $2::uuid, 'active', 'monthly',
-               NOW() - interval '30 days', NOW() + interval '2 hours', 85000, 'NGN')`,
+               NOW() - interval '30 days', NOW() - interval '2 hours', 85000, 'NGN')`,
       [tenantId, planId],
     );
   });
@@ -100,7 +114,7 @@ describe.skipIf(!TEST_DB)('billing renewal collects payment', () => {
     await processRenewals();
   }
 
-  async function saveCard() {
+  async function saveCard(consent=true) {
     await client.query(
       `INSERT INTO global.payment_methods
          (tenant_id, type, label, last4, provider, authorization_code, authorization_email,
@@ -109,6 +123,11 @@ describe.skipIf(!TEST_DB)('billing renewal collects payment', () => {
                'payer@example.com', true, true, true)`,
       [tenantId],
     );
+    if(consent) {
+      const {encrypt}=await import('../../src/lib/crypto');
+      await client.query(`INSERT INTO global.recurring_consents(tenant_id,enabled,authorization_enc,email,amount,currency,plan_id,cycle,consent_at)
+        VALUES($1,true,$2,'payer@example.com',85000,'NGN',$3,'monthly',now())`,[tenantId,encrypt('AUTH_test123'),planId]);
+    }
   }
 
   async function subscription() {
@@ -187,7 +206,7 @@ describe.skipIf(!TEST_DB)('billing renewal collects payment', () => {
       [tenantId],
     );
     expect(tx.rows[0].status).toBe('failed');
-    expect(tx.rows[0].failure_reason).toContain('Insufficient funds');
+    expect(tx.rows[0].failure_reason).toBe('failed');
   }, 60_000);
 
   it('does NOT extend the period when there is no stored card', async () => {
@@ -203,6 +222,7 @@ describe.skipIf(!TEST_DB)('billing renewal collects payment', () => {
 
   it('rolls a zero-priced plan forward without charging', async () => {
     await client.query(`UPDATE global.subscription_plans SET price_monthly = 0 WHERE id = $1::uuid`, [planId]);
+    await client.query(`UPDATE global.plan_prices SET price_monthly = 0 WHERE plan_id = $1::uuid AND currency='NGN'`,[planId]);
     try {
       const before = await subscription();
       await runRenewal();
@@ -214,6 +234,33 @@ describe.skipIf(!TEST_DB)('billing renewal collects payment', () => {
         .toBeGreaterThan(new Date(before.current_period_end).getTime());
     } finally {
       await client.query(`UPDATE global.subscription_plans SET price_monthly = 85000 WHERE id = $1::uuid`, [planId]);
+      await client.query(`UPDATE global.plan_prices SET price_monthly = 85000 WHERE plan_id = $1::uuid AND currency='NGN'`,[planId]);
     }
   }, 60_000);
+  it('does not debit an old saved card without explicit consent',async()=>{
+    await saveCard(false);
+    const before=await subscription();
+    await runRenewal();
+    expect(chargeStub).not.toHaveBeenCalled();
+    expect(+new Date((await subscription()).current_period_end)).toBe(+new Date(before.current_period_end));
+  });
+  it('does not send a second debit after an uncertain provider response',async()=>{
+    await saveCard();
+    chargeStub.mockRejectedValue(Error('timeout after send'));
+    await runRenewal();
+    await runRenewal();
+    expect(chargeStub).toHaveBeenCalledTimes(1);
+    const invoices=await client.query('SELECT count(*) FROM global.invoices WHERE tenant_id=$1',[tenantId]);
+    expect(Number(invoices.rows[0].count)).toBe(1);
+  });
+  it('concurrent workers claim one charge and one extension',async()=>{
+    await saveCard();
+    chargeStub.mockImplementation(async()=>{await new Promise(r=>setTimeout(r,100));return {status:'success',amount:8500000,currency:'NGN',paid_at:new Date().toISOString()};});
+    await Promise.all([runRenewal(),runRenewal(),runRenewal()]);
+    expect(chargeStub).toHaveBeenCalledTimes(1);
+    const payments=await client.query("SELECT count(*) FROM global.payment_transactions WHERE tenant_id=$1 AND status='success'",[tenantId]);
+    expect(Number(payments.rows[0].count)).toBe(1);
+    expect((await subscription()).status).toBe('active');
+  });
+
 });

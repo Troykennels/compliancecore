@@ -31,6 +31,9 @@ paymentsRouter.post('/checkout', requirePermission('billing:write'), asyncHandle
 // underlying claim is idempotent, so a refresh cannot double-apply a payment.
 paymentsRouter.get('/confirm', requirePermission('billing:read'), asyncHandler(ctrl.confirmPayment));
 
+paymentsRouter.get('/recurring', requirePermission('billing:read'), asyncHandler(ctrl.getRecurring));
+paymentsRouter.post('/recurring/cancel', requirePermission('billing:write'), asyncHandler(ctrl.cancelRecurring));
+
 paymentsRouter.get('/', requirePermission('billing:read'), asyncHandler(ctrl.listPayments));
 
 export default paymentsRouter;

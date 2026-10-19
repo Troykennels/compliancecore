@@ -58,6 +58,7 @@ export interface PaymentTransaction {
   amount: number;
   status: 'pending' | 'success' | 'failed' | 'abandoned';
   processedAt: Date | null;
+  recurringConsent?: boolean;
 }
 
 function mapTx(r: any): PaymentTransaction {
@@ -71,6 +72,7 @@ function mapTx(r: any): PaymentTransaction {
     currency: String(r.currency).trim(),
     amount: Number(r.amount),
     status: r.status,
+    recurringConsent: !!r.recurring_consent,
     processedAt: r.processed_at ? new Date(r.processed_at) : null,
   };
 }
@@ -158,4 +160,8 @@ export async function listTransactionsByTenant(tenantId: string, limit = 50): Pr
     tenantId,
   )) as any[];
   return rows.map(mapTx);
+}
+
+export async function recordConsent(reference:string): Promise<void> {
+  await prisma.$executeRawUnsafe(`UPDATE global.payment_transactions SET recurring_consent=true,consent_at=now() WHERE reference=$1 AND status='pending'`,reference);
 }

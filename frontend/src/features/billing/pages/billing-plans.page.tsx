@@ -185,6 +185,9 @@ export function BillingPlansPage(): JSX.Element {
 
   const [cycle, setCycle] = useState<BillingCycle>('monthly');
   const [currency, setCurrency] = useState<string>('NGN');
+  const [recurringConsent,setRecurringConsent] = useState(false);
+  const [recurringEnabled,setRecurringEnabled] = useState(false);
+  useEffect(() => { paymentsApi.recurring().then(x=>setRecurringEnabled(x.enabled)).catch(()=>{}); }, []);
   const [payError, setPayError] = useState<string | null>(null);
   const [couponInput, setCouponInput] = useState('');
   const [showCoupon, setShowCoupon] = useState(false);
@@ -294,6 +297,7 @@ export function BillingPlansPage(): JSX.Element {
           planId: plan.id,
           currency,
           billingCycle: cycle,
+          recurringConsent,
         });
         // Full navigation, not client-side routing: this is Paystack's domain.
         window.location.href = checkout.authorizationUrl;
@@ -416,6 +420,12 @@ export function BillingPlansPage(): JSX.Element {
           </div>
         )}
 
+        <div className="mt-4 mx-auto max-w-xl rounded-lg border border-slate-200 p-4 text-left text-sm">
+          <label className="flex items-start gap-2"><input type="checkbox" checked={recurringConsent} onChange={e=>setRecurringConsent(e.target.checked)} />
+            <span>Automatically renew the plan I select at its displayed {cycle} price, including my agreed discount, using my approved payment method. A changed plan or price needs fresh approval. Up to two retries, at least 24 hours apart, after a confirmed decline. I can cancel future deductions here.</span>
+          </label>
+          {recurringEnabled && <button type="button" className="mt-3 text-red-700 underline" onClick={async()=>{try{await paymentsApi.cancelRecurring();setRecurringEnabled(false);}catch{setPayError('Could not cancel automatic renewal. Please try again.');}}}>Cancel automatic renewal</button>}
+        </div>
         {/* Coupon toggle */}
         <div className="mt-4 flex justify-center">
           {!showCoupon ? (
