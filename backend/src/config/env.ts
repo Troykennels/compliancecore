@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 const schema = z.object({
+  RENEWAL_DASHBOARD_API_KEY: z.string().default(''),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().default(3002),
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),

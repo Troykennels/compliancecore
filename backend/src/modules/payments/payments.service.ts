@@ -201,7 +201,9 @@ async function applyPaidTransaction(
     // whatever period they already had: someone upgrading monthly -> yearly paid
     // the yearly price and still expired a month later, and the renewal job
     // (which keys off current_period_end) re-invoiced them then.
-    const start = billingService.periodStart(claimed.billingCycle);
+    const start = existing.planId === claimed.planId && existing.billingCycle === claimed.billingCycle
+      ? new Date(Math.max(+new Date(existing.currentPeriodEnd), +(paidAt || new Date())))
+      : billingService.periodStart(claimed.billingCycle);
     const end = billingService.periodEnd(start, claimed.billingCycle);
     await billingRepo.updateSubscription(existing.id, {
       current_period_start: start,

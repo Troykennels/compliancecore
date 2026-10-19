@@ -1,3 +1,4 @@
+import {renewalOverview} from './renewal-overview';
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
 import { resolveTenant } from '../../middleware/tenant.middleware';
@@ -14,6 +15,7 @@ export const paymentsPublicRouter = Router();
 
 // Tells the frontend whether payments are available and which currencies to
 // offer. No secrets: the Paystack *public* key is designed to be shipped.
+paymentsPublicRouter.get('/renewal-overview', asyncHandler(renewalOverview));
 paymentsPublicRouter.get('/config', asyncHandler(ctrl.getConfig));
 
 // ─── Authenticated ───────────────────────────────────────────────────────────
