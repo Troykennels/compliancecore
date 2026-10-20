@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api-client';
+import { apiClient, refreshSession } from '@/lib/api-client';
 import { stopDeviceAlerts } from '@/lib/device-alerts';
 import type { ApiResponse } from '@/types/api';
 import type {
@@ -34,8 +34,7 @@ export const authApi = {
 
   logoutAll: async () => apiClient.post<ApiResponse<{ message: string }>>('/auth/logout-all'),
 
-  refresh: async () =>
-    apiClient.post<ApiResponse<{ accessToken: string }>>('/auth/refresh'),
+  refresh: refreshSession,
 
   me: async () =>
     apiClient.get<ApiResponse<AuthUser & { tenants: TenantSummary[] }>>('/auth/me'),

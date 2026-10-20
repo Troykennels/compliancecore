@@ -1,5 +1,6 @@
-import axios, { type AxiosInstance, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosInstance, type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 import { env } from '@/config/env';
+import type { ApiResponse } from '@/types/api';
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: `${env.VITE_API_URL}/api`,
@@ -21,6 +22,22 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 // ─── Response Interceptor: silent token refresh on 401 ────────────────────
 
 let isRefreshing = false;
+let pendingRefresh: Promise<AxiosResponse<ApiResponse<{ accessToken: string }>>> | null = null;
+
+// Startup, explicit refresh and the 401 interceptor must share a rotation.
+// Concurrent rotations can otherwise replay the same single-use cookie.
+export function refreshSession(): Promise<AxiosResponse<ApiResponse<{ accessToken: string }>>> {
+  if (!pendingRefresh) {
+    pendingRefresh = axios.post<ApiResponse<{ accessToken: string }>>(
+      `${env.VITE_API_URL}/api/auth/refresh`, {},
+      { withCredentials: true, timeout: 30_000 },
+    ).then(response => {
+      setAccessToken(response.data.data.accessToken);
+      return response;
+    }).finally(() => { pendingRefresh = null; });
+  }
+  return pendingRefresh;
+}
 let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = [];
 
 function processQueue(error: unknown, token: string | null): void {
@@ -37,6 +54,7 @@ apiClient.interceptors.response.use(
     // register, refresh, mfa, forgot/reset password) or for public endpoints
     // like the shared-evidence link — there a 401 is meaningful (e.g. "password
     // required") and the calling page must surface it inline.
+    if (!originalRequest) return Promise.reject(error);
     const url = originalRequest.url ?? '';
     const isPublicEndpoint = url.includes('/auth/') || url.includes('/evidence/shared/');
 
@@ -54,6 +72,7 @@ apiClient.interceptors.response.use(
         return new Promise((resolve, reject) => {
           failedQueue.push({
             resolve: (token) => {
+              originalRequest._retry = true;
               originalRequest.headers.Authorization = `Bearer ${token}`;
               resolve(apiClient(originalRequest));
             },
@@ -66,11 +85,7 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await axios.post(
-          `${env.VITE_API_URL}/api/auth/refresh`,
-          {},
-          { withCredentials: true },
-        );
+        const { data } = await refreshSession();
         const newToken: string = data.data.accessToken;
         setAccessToken(newToken);
         processQueue(null, newToken);

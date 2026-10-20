@@ -9,6 +9,7 @@ import { PATHS } from '@/routes/paths';
 import { organizationApi } from '../api/organization.api';
 import { ScopingQuestionnaire } from '../components/scoping-questionnaire';
 import { authApi } from '@/features/auth/api/auth.api';
+import { setAccessToken } from '@/lib/api-client';
 
 const ORG_SIZES = ['1-10', '11-50', '51-200', '201-500', '501-1000', '1001+'] as const;
 
@@ -62,17 +63,19 @@ export function OnboardingPage() {
   const onSubmit = async (values: FormValues) => {
     setSubmitting(true);
     try {
+      let organizationId: string | undefined;
       // 1. Create the organization (provisions the tenant schema server-side).
       //    Slow by nature — it builds every per-tenant table — so a dropped
       //    response does not mean the organisation was not created. The API
       //    treats a repeat call as idempotent and returns the existing org.
       try {
-        await organizationApi.create(values);
+        const created = await organizationApi.create(values);
+        organizationId = created.data.data.organization.id;
       } catch (err) {
         const code = (err as { response?: { data?: { error?: { code?: string } } } })
           ?.response?.data?.error?.code;
         // An older API still answers a retry with 409. The organisation exists,
-        // so carry on and pick it up in the session refresh below rather than
+        // so carry on and select it using the existing session below rather than
         // stranding the user on this screen.
         if (code !== 'ALREADY_ONBOARDED') throw err;
       }
@@ -81,10 +84,19 @@ export function OnboardingPage() {
       // makes the redirect guard eligible to fire.
       leavingStepOne.current = true;
 
-      // 2. Refresh the session so the new access token carries the tenant id
-      //    and the updated onboarding state, then hydrate the store.
-      const refreshRes = await authApi.refresh();
-      const accessToken = refreshRes.data.data.accessToken;
+      // Select the new membership with the current authenticated session.
+      // Creating an organisation does not require rotating a refresh cookie;
+      // that extra rotation stranded successful setups when cookies were
+      // unavailable or another request had already rotated the token.
+      if (!organizationId) {
+        const existing = await authApi.me();
+        organizationId = existing.data.data.tenants[0]?.id;
+      }
+      if (!organizationId) throw new Error('Your organization could not be selected. Please retry setup.');
+      const selected = await authApi.switchTenant(organizationId);
+      const { accessToken, activeTenant } = selected.data.data;
+      // /me must use the new tenant token, not the pre-onboarding token.
+      setAccessToken(accessToken);
       const meRes = await authApi.me();
       const u = meRes.data.data;
       setAuth(
@@ -101,7 +113,7 @@ export function OnboardingPage() {
           mfaEnabled: u.mfaEnabled,
         },
         accessToken,
-        u.tenants[0] ?? null,
+        activeTenant,
         u.tenants,
       );
 
