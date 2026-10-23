@@ -17,7 +17,8 @@ export async function checkoutQuote(input: { tenantId: string; planId: string; c
   const sub = await billingRepo.findSubscriptionByTenant(input.tenantId);
   const contracted = !previewOnly && sub && sub.status !== 'trial' && sub.planId === plan.id && sub.billingCycle === input.billingCycle && sub.currency === currency && sub.nextInvoiceAmount > 0;
   const base = input.billingCycle === 'yearly' ? price.priceYearly : price.priceMonthly;
-  const subscriptionAmount = contracted ? sub.nextInvoiceAmount : sub?.currency === currency ? applyDiscount(base,sub.discountPercent,sub.discountFixed) : base;
+  // An agreed discount belongs to the current plan, not an arbitrary upgrade.
+  const subscriptionAmount = contracted ? sub.nextInvoiceAmount : sub?.planId === plan.id && sub.currency === currency ? applyDiscount(base,sub.discountPercent,sub.discountFixed) : base;
   const onboardingFee = onboardingRequired ? price.onboardingFee : 0;
   return { planId:plan.id,planName:plan.name,currency,billingCycle:input.billingCycle,subscriptionAmount,onboardingFee,total:Math.round((subscriptionAmount+onboardingFee)*100)/100,onboardingRequired,previewOnly };
 }

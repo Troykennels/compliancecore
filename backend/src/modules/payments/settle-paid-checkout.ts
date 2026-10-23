@@ -28,7 +28,11 @@ export async function settlePaidCheckout(reference: string, providerRef: string 
     if (sub) {
       await tx.$executeRawUnsafe(`UPDATE global.subscriptions SET plan_id=$2::uuid,status='active',billing_cycle=$3,
         current_period_start=$4::timestamptz,current_period_end=$5::timestamptz,trial_ends_at=NULL,cancelled_at=NULL,
-        cancel_at_period_end=false,next_invoice_amount=$6,currency=$7,updated_at=now() WHERE id=$1::uuid`,
+        cancel_at_period_end=false,next_invoice_amount=$6,
+        coupon_id=CASE WHEN plan_id=$2::uuid AND currency=$7 THEN coupon_id ELSE NULL END,
+        discount_percent=CASE WHEN plan_id=$2::uuid AND currency=$7 THEN discount_percent ELSE 0 END,
+        discount_fixed=CASE WHEN plan_id=$2::uuid AND currency=$7 THEN discount_fixed ELSE 0 END,
+        currency=$7,updated_at=now() WHERE id=$1::uuid`,
         sub.id,payment.plan_id,payment.billing_cycle,start,end,subscriptionAmount,payment.currency);
     } else {
       const created = await tx.$queryRawUnsafe<any[]>(`INSERT INTO global.subscriptions

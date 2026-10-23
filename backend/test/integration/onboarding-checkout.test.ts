@@ -56,6 +56,16 @@ describe.skipIf(!DB)('commercial onboarding and recurring subscription settlemen
   it('rejects a stale payment summary before contacting the provider',async()=>{
     const input=await customer();await expect(service.createCheckout({...input,expectedTotal:40000})).rejects.toThrow('summary changed');expect(mocks.initialize).not.toHaveBeenCalled();
   });
+  it('keeps a plan discount from reducing an upgrade or its later renewals',async()=>{
+    const input=await customer();
+    await c.query(`INSERT INTO global.subscriptions(tenant_id,plan_id,status,billing_cycle,current_period_start,current_period_end,discount_percent,next_invoice_amount,currency) VALUES($1,$2,'trial','monthly',now(),now()+interval '14 days',50,20000,'NGN')`,[input.tenantId,input.planId]);
+    const upgrade={...input,planId:plans.professional};
+    expect(await quote(upgrade)).toMatchObject({subscriptionAmount:85000,onboardingFee:2000000,total:2085000});
+    const checkout=await service.createCheckout(upgrade);mocks.verify.mockResolvedValue(verified(checkout.reference,checkout.amount,input.email));await service.confirmByReference(input.tenantId,checkout.reference);
+    const sub=(await c.query('SELECT discount_percent,discount_fixed,coupon_id,next_invoice_amount FROM global.subscriptions WHERE tenant_id=$1',[input.tenantId])).rows[0];
+    expect(Number(sub.discount_percent)).toBe(0);expect(Number(sub.discount_fixed)).toBe(0);expect(sub.coupon_id).toBeNull();expect(Number(sub.next_invoice_amount)).toBe(85000);
+    expect(await quote({...upgrade,billingCycle:'yearly'})).toMatchObject({subscriptionAmount:850000,onboardingFee:0,total:850000});
+  });
   it('reuses a pending first checkout instead of creating another onboarding charge',async()=>{
     const input=await customer();const first=await service.createCheckout(input),second=await service.createCheckout(input);
     expect(second.reference).toBe(first.reference);expect(mocks.initialize).toHaveBeenCalledTimes(1);
