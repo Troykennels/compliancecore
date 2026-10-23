@@ -155,13 +155,13 @@ export async function getFrameworkCoverage(schemaName: string): Promise<Framewor
                SUM(CASE WHEN c.implementation_status = 'implemented' THEN 1 ELSE 0 END)::numeric
                / COUNT(c.id) * 100, 1)
         END                                                                                 AS coverage_percent
-      FROM frameworks f
-      LEFT JOIN controls c ON c.framework_id = f.id AND c.deleted_at IS NULL
-      WHERE f.deleted_at IS NULL
+      FROM framework_data.frameworks f
+      JOIN controls c ON c.framework_id = f.id AND c.deleted_at IS NULL
+      WHERE f.is_active = TRUE
       GROUP BY f.id, f.name, f.short_name, f.code
       ORDER BY coverage_percent DESC
       LIMIT 10
-    `).catch(() => [] as any[]);
+    `);
     return rows.map((r) => ({
       frameworkId:         r.framework_id,
       frameworkName:       r.framework_name,

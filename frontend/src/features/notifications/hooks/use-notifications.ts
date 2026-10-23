@@ -13,7 +13,7 @@ export function useNotifications(params: { unreadOnly?: boolean; page?: number; 
     queryKey: notifKeys.list(params),
     queryFn: () => notificationsApi.list(params).then((r) => r.data.data!),
     placeholderData: (prev) => prev,
-    refetchInterval: 60_000,
+    refetchInterval: 15_000,
   });
 }
 

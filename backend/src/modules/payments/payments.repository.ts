@@ -11,11 +11,12 @@ export interface PlanPrice {
   currency: string;
   priceMonthly: number;
   priceYearly: number;
+  onboardingFee: number;
 }
 
 export async function findPlanPrice(planId: string, currency: string): Promise<PlanPrice | null> {
   const rows = (await prisma.$queryRawUnsafe(
-    `SELECT plan_id, currency, price_monthly, price_yearly
+    `SELECT plan_id, currency, price_monthly, price_yearly, onboarding_fee
        FROM global.plan_prices
       WHERE plan_id = $1::uuid AND currency = UPPER($2) AND is_active
       LIMIT 1`,
@@ -29,12 +30,13 @@ export async function findPlanPrice(planId: string, currency: string): Promise<P
     currency: String(r.currency).trim(),
     priceMonthly: Number(r.price_monthly),
     priceYearly: Number(r.price_yearly),
+    onboardingFee: Number(r.onboarding_fee || 0),
   };
 }
 
 export async function listPlanPrices(planId: string): Promise<PlanPrice[]> {
   const rows = (await prisma.$queryRawUnsafe(
-    `SELECT plan_id, currency, price_monthly, price_yearly
+    `SELECT plan_id, currency, price_monthly, price_yearly, onboarding_fee
        FROM global.plan_prices WHERE plan_id = $1::uuid AND is_active ORDER BY currency`,
     planId,
   )) as any[];
@@ -43,6 +45,7 @@ export async function listPlanPrices(planId: string): Promise<PlanPrice[]> {
     currency: String(r.currency).trim(),
     priceMonthly: Number(r.price_monthly),
     priceYearly: Number(r.price_yearly),
+    onboardingFee: Number(r.onboarding_fee || 0),
   }));
 }
 
@@ -56,6 +59,8 @@ export interface PaymentTransaction {
   billingCycle: 'monthly' | 'yearly';
   currency: string;
   amount: number;
+  onboardingFee: number;
+  subscriptionAmount: number;
   status: 'pending' | 'success' | 'failed' | 'abandoned';
   processedAt: Date | null;
   recurringConsent?: boolean;
@@ -71,6 +76,8 @@ function mapTx(r: any): PaymentTransaction {
     billingCycle: r.billing_cycle,
     currency: String(r.currency).trim(),
     amount: Number(r.amount),
+    onboardingFee: Number(r.onboarding_fee || 0),
+    subscriptionAmount: Number(r.subscription_amount ?? r.amount),
     status: r.status,
     recurringConsent: !!r.recurring_consent,
     processedAt: r.processed_at ? new Date(r.processed_at) : null,
@@ -85,11 +92,13 @@ export async function createTransaction(input: {
   billingCycle: string;
   currency: string;
   amount: number;
+  onboardingFee?: number;
+  subscriptionAmount?: number;
 }): Promise<PaymentTransaction> {
   const rows = (await prisma.$queryRawUnsafe(
     `INSERT INTO global.payment_transactions
-       (reference, tenant_id, user_id, plan_id, billing_cycle, currency, amount)
-     VALUES ($1, $2::uuid, $3::uuid, $4::uuid, $5, UPPER($6), $7)
+       (reference, tenant_id, user_id, plan_id, billing_cycle, currency, amount, onboarding_fee, subscription_amount)
+     VALUES ($1, $2::uuid, $3::uuid, $4::uuid, $5, UPPER($6), $7, $8, $9)
      RETURNING *`,
     input.reference,
     input.tenantId,
@@ -98,6 +107,8 @@ export async function createTransaction(input: {
     input.billingCycle,
     input.currency,
     input.amount,
+    input.onboardingFee ?? 0,
+    input.subscriptionAmount ?? input.amount,
   )) as any[];
   return mapTx(rows[0]);
 }

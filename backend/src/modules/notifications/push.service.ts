@@ -73,7 +73,7 @@ async function sendDevice(device: Device, test = false) {
           id: "test",
           title: "ComplianceCore alerts are working",
           body: "This alert can arrive even when ComplianceCore is closed.",
-          action_url: "/app/notifications",
+          action_url: "/notifications",
         },
       ]
     : await withTenantSchema(
@@ -105,7 +105,7 @@ async function sendDevice(device: Device, test = false) {
         {
           title: n.title,
           body: n.body || undefined,
-          url: n.action_url || "/app/notifications",
+          url: n.action_url || "/notifications",
           tag: n.id,
         },
         keys,
@@ -145,7 +145,7 @@ export function startPushDelivery() {
       await init();
       const devices = await prisma.$queryRaw<
         Device[]
-      >`SELECT d.* FROM orion_push.compliance_devices d JOIN global.tenants t ON t.schema_name=d.schema_name JOIN global.users u ON u.id=d.user_id JOIN global.tenant_memberships m ON m.tenant_id=t.id AND m.user_id=u.id WHERE t.is_active=TRUE AND t.deleted_at IS NULL AND u.is_active=TRUE AND u.deleted_at IS NULL`;
+      >`SELECT d.* FROM orion_push.compliance_devices d JOIN global.tenants t ON t.schema_name=d.schema_name JOIN global.users u ON u.id=d.user_id JOIN global.tenant_memberships m ON m.tenant_id=t.id AND m.user_id=u.id WHERE t.is_active=TRUE AND t.deleted_at IS NULL AND u.is_active=TRUE AND u.deleted_at IS NULL AND m.is_active=TRUE AND m.deleted_at IS NULL`;
       for (const device of devices)
         await sendDevice(device).catch((e) =>
           logger.warn({ err: e }, "Device push processing failed"),

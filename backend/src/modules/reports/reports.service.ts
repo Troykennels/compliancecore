@@ -206,7 +206,7 @@ export async function generateExecutivePdf(
 
     // ── Footer ────────────────────────────────────────────────────────────────
     doc.fillColor(MUTED).fontSize(8)
-      .text('ComplianceCore — Confidential', 50, 800, { width: W, align: 'center' });
+      .text('ComplianceCore by ORION SOFT LIMITED — Confidential', 50, 800, { width: W, align: 'center' });
 
     doc.end();
   });
@@ -220,7 +220,7 @@ export async function generateExecutiveExcel(
 ): Promise<Buffer> {
   const data = await getExecutiveDashboard(schemaName, filter);
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'ComplianceCore';
+  wb.creator = 'ComplianceCore by ORION SOFT LIMITED';
   wb.created = new Date();
 
   const BLUE_FILL: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2563EB' } };

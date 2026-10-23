@@ -40,7 +40,7 @@ export async function rememberConsent(reference: string, auth: { authorization_c
         email=EXCLUDED.email,amount=EXCLUDED.amount,currency=EXCLUDED.currency,plan_id=EXCLUDED.plan_id,
         cycle=EXCLUDED.cycle,last4=EXCLUDED.last4,consent_at=EXCLUDED.consent_at,cancelled_at=NULL
       WHERE global.recurring_consents.cancelled_at IS NULL OR global.recurring_consents.cancelled_at < EXCLUDED.consent_at`,
-    payment.tenant_id, encrypt(auth.authorization_code), email, payment.amount, String(payment.currency).trim(), payment.plan_id, payment.billing_cycle, auth.last4, payment.consent_at);
+    payment.tenant_id, encrypt(auth.authorization_code), email, payment.subscription_amount ?? payment.amount, String(payment.currency).trim(), payment.plan_id, payment.billing_cycle, auth.last4, payment.consent_at);
   });
 }
 

@@ -3,16 +3,24 @@ import { z } from 'zod';
 import * as service from './payments.service';
 import { ValidationError } from '../../lib/errors';
 import { ok, created } from '../../lib/response';
+import { checkoutQuote } from './checkout-quote';
 
 const checkoutSchema = z.object({
   planId: z.string().uuid('planId must be a valid UUID'),
   currency: z.string().length(3, 'currency must be a 3-letter ISO code'),
   billingCycle: z.enum(['monthly', 'yearly']).default('monthly'),
   recurringConsent: z.boolean().default(false),
+  expectedTotal: z.number().finite().positive().optional(),
 });
 
 export async function getConfig(_req: Request, res: Response): Promise<void> {
   ok(res, _req, service.getPublicConfig());
+}
+
+export async function getCheckoutQuote(req: Request, res: Response): Promise<void> {
+  const parsed = checkoutSchema.safeParse(req.body);
+  if (!parsed.success) throw new ValidationError(parsed.error.issues.map(i=>i.message).join(', '));
+  ok(res,req,await checkoutQuote({ ...parsed.data,tenantId:req.tenant!.id }));
 }
 
 export async function createCheckout(req: Request, res: Response): Promise<void> {
@@ -31,6 +39,7 @@ export async function createCheckout(req: Request, res: Response): Promise<void>
     currency: parsed.data.currency,
     billingCycle: parsed.data.billingCycle,
     recurringConsent: parsed.data.recurringConsent,
+    expectedTotal: parsed.data.expectedTotal,
   });
   created(res, req, result);
 }

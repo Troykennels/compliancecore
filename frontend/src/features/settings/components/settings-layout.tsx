@@ -75,9 +75,9 @@ export function SettingsLayout({ children }: Props): JSX.Element {
           </aside>
 
           {/* Page Content */}
-          <main className="min-w-0 flex-1">
+          <section className="min-w-0 flex-1">
             {children}
-          </main>
+          </section>
         </div>
       </div>
     </div>

@@ -41,8 +41,12 @@ function formatInvoiceAmount(currency: string): (amount: number) => string {
 
 function advancePeriod(date: Date, cycle: BillingCycle): Date {
   const d = new Date(date);
-  if (cycle === 'yearly') d.setFullYear(d.getFullYear() + 1);
-  else d.setMonth(d.getMonth() + 1);
+  const day = d.getUTCDate();
+  d.setUTCDate(1);
+  if (cycle === 'yearly') d.setUTCFullYear(d.getUTCFullYear() + 1);
+  else d.setUTCMonth(d.getUTCMonth() + 1);
+  const last = new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,0)).getUTCDate();
+  d.setUTCDate(Math.min(day,last));
   return d;
 }
 

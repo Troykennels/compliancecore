@@ -12,6 +12,7 @@ export interface PlanPrice {
   currency: string;
   priceMonthly: number;
   priceYearly: number;
+  onboardingFee?: number;
 }
 
 export interface CheckoutResult {
@@ -20,6 +21,10 @@ export interface CheckoutResult {
   amount: number;
   currency: string;
 }
+export interface CheckoutQuote {
+  planId:string;planName:string;currency:string;billingCycle:'monthly'|'yearly';
+  subscriptionAmount:number;onboardingFee:number;total:number;onboardingRequired:boolean;previewOnly:boolean;
+}
 
 export interface ConfirmResult {
   status: string;
@@ -27,6 +32,7 @@ export interface ConfirmResult {
 }
 
 export const paymentsApi = {
+  checkoutQuote: async (dto:{planId:string;currency:string;billingCycle:'monthly'|'yearly'}):Promise<CheckoutQuote> => (await apiClient.post('/payments/checkout-quote',dto)).data.data,
   // Unauthenticated: tells the UI whether to offer payment at all, and in which
   // currencies. A deployment with no Paystack keys returns configured:false, and
   // the plans page falls back to plain plan switching.
@@ -44,6 +50,7 @@ export const paymentsApi = {
     currency: string;
     billingCycle: 'monthly' | 'yearly';
     recurringConsent?: boolean;
+    expectedTotal?: number;
   }): Promise<CheckoutResult> =>
     (await apiClient.post('/payments/checkout', dto)).data.data,
 

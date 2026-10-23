@@ -28,6 +28,7 @@ paymentsRouter.get('/plans/:planId/prices', requirePermission('billing:read'), a
 // Starting a checkout commits the organisation to a charge, so it needs write
 // permission — not merely the ability to view billing.
 paymentsRouter.post('/checkout', requirePermission('billing:write'), asyncHandler(ctrl.createCheckout));
+paymentsRouter.post('/checkout-quote', requirePermission('billing:read'), asyncHandler(ctrl.getCheckoutQuote));
 
 // Called when Paystack redirects the browser back. Safe to hit repeatedly: the
 // underlying claim is idempotent, so a refresh cannot double-apply a payment.

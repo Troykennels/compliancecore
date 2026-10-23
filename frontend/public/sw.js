@@ -7,9 +7,10 @@ self.addEventListener("push", event => {
   try { data = event.data ? event.data.json() : {}; } catch { data = {}; }
   const raw = data.url || "/notifications";
   let url; try { url = new URL(raw, self.location.origin); } catch { url = new URL('/notifications', self.location.origin); }
+  if (url.pathname === '/app' || url.pathname.startsWith('/app/')) url.pathname = url.pathname.slice(4) || '/dashboard';
   const target = url.origin === self.location.origin ? url.href : self.location.origin + "/notifications";
   event.waitUntil(self.registration.showNotification(data.title || "New update", {
-    body: data.body || "Open the app to see your update.", data: { url: target },
+    body: data.body || "Open ComplianceCore to see your update.", data: { url: target }, icon: '/push-icon-192.png', badge: '/push-icon-192.png',
     tag: data.tag || undefined, renotify: !!data.tag, silent: false, vibrate: [200, 100, 200],
   }).then(async () => {
     const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });

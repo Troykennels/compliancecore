@@ -19,7 +19,13 @@ export function toAppPath(actionUrl: string | null | undefined): string | null {
   if (!trimmed) return null;
 
   // Already an in-app path.
-  if (trimmed.startsWith('/')) return trimmed;
+  if (trimmed.startsWith('/')) {
+    try {
+      const url = new URL(trimmed, window.location.origin);
+      if (url.origin !== window.location.origin) return null;
+      return `${url.pathname.replace(/^\/app(?=\/|$)/, '') || '/dashboard'}${url.search}${url.hash}`;
+    } catch { return null; }
+  }
 
   // Absolute URL: keep only the part after the origin. Anything pointing at a
   // different host is not ours to navigate to internally, so it is dropped
@@ -27,10 +33,10 @@ export function toAppPath(actionUrl: string | null | undefined): string | null {
   try {
     const url = new URL(trimmed);
     if (url.origin !== window.location.origin) return null;
-    return `${url.pathname}${url.search}${url.hash}`;
+    return `${url.pathname.replace(/^\/app(?=\/|$)/, '') || '/dashboard'}${url.search}${url.hash}`;
   } catch {
     // Not a URL and not a path — a bare word like "expiry". Treat it as a path
     // so it at least resolves from the root rather than the current route.
-    return `/${trimmed.replace(/^\/+/, '')}`;
+    return /^[a-z][a-z0-9/-]*(?:[?#].*)?$/i.test(trimmed) ? `/${trimmed}` : null;
   }
 }

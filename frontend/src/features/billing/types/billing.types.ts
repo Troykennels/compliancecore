@@ -1,4 +1,4 @@
-export type PlanSlug = 'starter' | 'professional' | 'enterprise' | 'msp';
+export type PlanSlug = 'starter' | 'professional' | 'business' | 'enterprise' | 'msp';
 export type BillingCycle = 'monthly' | 'yearly';
 export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled' | 'paused';
 export type InvoiceStatus = 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
@@ -13,6 +13,7 @@ export interface SubscriptionPlan {
   description: string;
   priceMonthly: number;
   priceYearly: number;
+  onboardingFee?: number;
   currency: string;
   maxUsers: number | null;
   maxFrameworks: number | null;

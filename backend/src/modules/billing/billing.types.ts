@@ -24,6 +24,7 @@ export interface SubscriptionPlan {
   description: string;
   priceMonthly: number;
   priceYearly: number;
+  onboardingFee?: number;
   currency: string;
   maxUsers: number | null;
   maxFrameworks: number | null;

@@ -4,7 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { usePublicPlans, useSubscription, useCreateSubscription, useUpdateSubscription, useApplyCoupon, useRemoveCoupon } from '../hooks/use-billing';
 import { billingApi } from '../api/billing.api';
-import { paymentsApi, type PlanPrice } from '../api/payments.api';
+import { paymentsApi, type PlanPrice, type CheckoutQuote } from '../api/payments.api';
 import { PATHS } from '@/routes/paths';
 import { SUPPORT_EMAIL, supportMailto } from '@/config/contact';
 import type { BillingCycle, SubscriptionPlan } from '../types/billing.types';
@@ -73,6 +73,7 @@ function PlanCard({
   const monthlyShown = row ? row.priceMonthly : plan.priceMonthly;
   const yearlyShown  = row ? row.priceYearly  : plan.priceYearly;
   const monthsFree   = monthsFreeOnAnnual(monthlyShown, yearlyShown);
+  const onboarding = row ? row.onboardingFee : plan.onboardingFee;
 
   return (
     <div
@@ -84,7 +85,7 @@ function PlanCard({
           : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'
       }`}
     >
-      {highlight && (
+      {highlight && !current && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <span className="rounded-full bg-indigo-600 px-3 py-0.5 text-xs font-bold text-white">Most Popular</span>
         </div>
@@ -101,6 +102,7 @@ function PlanCard({
       </div>
 
       <div className="mb-6">
+        {contactSales && <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Starting from {fmt(price, displayCurrency)} / {cycle === 'monthly' ? 'month' : 'year'}</p>}
         {contactSales ? (
           <>
             <div className="text-3xl font-extrabold text-slate-900">Contact Sales</div>
@@ -130,6 +132,11 @@ function PlanCard({
         )}
       </div>
 
+      <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-600">
+        <p className="font-semibold text-slate-900">{onboarding ? `${fmt(onboarding,displayCurrency)} one-time onboarding${contactSales ? ' minimum' : ''}` : 'Onboarding by quotation'}</p>
+        <p className="mt-1">Paid with your first subscription. Subsequent renewals cover the subscription only.</p>
+      </div>
+
       <ul className="mb-6 space-y-2 flex-1">
         {plan.features.map((f) => (
           <li key={f} className="flex items-start gap-2 text-sm text-slate-700">
@@ -157,17 +164,17 @@ function PlanCard({
         </a>
       ) : (
         <button
-          disabled={current || loading}
+          disabled={loading}
           onClick={() => onSelect(plan)}
           className={`w-full rounded-xl py-2.5 text-sm font-bold transition-colors ${
             current
-              ? 'bg-slate-100 text-slate-400 cursor-default'
+              ? 'bg-emerald-700 text-white hover:bg-emerald-800'
               : highlight
               ? 'bg-indigo-600 text-white hover:bg-indigo-700'
               : 'bg-slate-900 text-white hover:bg-slate-700'
           } disabled:opacity-60`}
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : current ? 'Current Plan' : 'Select Plan'}
+          {loading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : current ? 'Renew current plan' : 'Review payment'}
         </button>
       )}
     </div>
@@ -194,6 +201,9 @@ export function BillingPlansPage(): JSX.Element {
   const [couponValidation, setCouponValidation] = useState<{ valid: boolean; message: string; discount?: number } | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [selectingPlanId, setSelectingPlanId] = useState<string | null>(null);
+  const [quote, setQuote] = useState<CheckoutQuote | null>(null);
+  const [reviewPlan,setReviewPlan] = useState<SubscriptionPlan | null>(null);
+  useEffect(()=>{setQuote(null);setReviewPlan(null);},[cycle,currency]);
 
   const { data: paymentConfig } = useQuery({
     queryKey: ['payments', 'config'],
@@ -256,6 +266,10 @@ export function BillingPlansPage(): JSX.Element {
     if (!couponInput) return;
     setValidatingCoupon(true);
     try {
+      if (!subscription || subscription.currency !== 'NGN' || currency !== 'NGN' || cycle !== subscription.billingCycle) {
+        setCouponValidation({valid:false,message:'Coupons apply to your current NGN subscription and billing cycle. Contact Orion Soft Limited for a new-plan discount.'});
+        return;
+      }
       // Validate against the plan the user is (or would be) on, at the selected cycle's
       // real price — not a hardcoded plan/amount.
       const targetPlan =
@@ -267,9 +281,10 @@ export function BillingPlansPage(): JSX.Element {
         : 0;
       const res = await billingApi.validateCoupon(couponInput, targetPlan?.slug ?? 'professional', targetPrice);
       const v = res.data.data;
+      if(v.valid){await applyCoupon.mutateAsync(couponInput);setQuote(null);setReviewPlan(null);}
       setCouponValidation({
         valid: v.valid,
-        message: v.message,
+        message: v.valid ? 'Applied to your current subscription. Review payment again to see the updated amount. Onboarding is not discounted.' : v.message,
         discount: v.discountedAmount ?? undefined,
       });
     } catch {
@@ -280,6 +295,17 @@ export function BillingPlansPage(): JSX.Element {
   }
 
   async function handleSelectPlan(plan: SubscriptionPlan) {
+    setSelectingPlanId(plan.id); setPayError(null); setQuote(null);
+    try {
+      const summary = await paymentsApi.checkoutQuote({planId:plan.id,currency,billingCycle:cycle});
+      setReviewPlan(plan); setQuote(summary);
+      requestAnimationFrame(()=>document.getElementById('payment-summary')?.focus());
+    } catch (err) {
+      setPayError((err as {response?:{data?:{error?:{message?:string}}}})?.response?.data?.error?.message || 'Could not prepare your payment summary. Try again.');
+    } finally { setSelectingPlanId(null); }
+  }
+
+  async function beginPayment(plan: SubscriptionPlan) {
     setSelectingPlanId(plan.id);
     setPayError(null);
     try {
@@ -292,12 +318,14 @@ export function BillingPlansPage(): JSX.Element {
         : planPrices[plan.id]?.find((p) => p.currency === currency);
       const amount = price ? (cycle === 'yearly' ? price.priceYearly : price.priceMonthly) : 0;
 
-      if (paymentConfig?.configured && amount > 0) {
+      if (quote && quote.total>0 && !paymentConfig?.configured) throw new Error('Online payments are unavailable. Contact Orion Soft Limited for payment arrangements.');
+      if (paymentConfig?.configured && (quote?.total ?? amount) > 0) {
         const checkout = await paymentsApi.createCheckout({
           planId: plan.id,
           currency,
           billingCycle: cycle,
           recurringConsent,
+          expectedTotal: quote?.total,
         });
         // Full navigation, not client-side routing: this is Paystack's domain.
         window.location.href = checkout.authorizationUrl;
@@ -306,9 +334,6 @@ export function BillingPlansPage(): JSX.Element {
 
       if (subscription) {
         await updateSub.mutateAsync({ planId: plan.id, billingCycle: cycle });
-        if (couponInput && couponValidation?.valid) {
-          await applyCoupon.mutateAsync(couponInput);
-        }
       } else {
         await createSub.mutateAsync({
           planId: plan.id,
@@ -324,7 +349,7 @@ export function BillingPlansPage(): JSX.Element {
       // enabled on the account), so show it rather than a generic string.
       const msg =
         (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
-      setPayError(msg ?? 'Could not start checkout. Please try again.');
+      setPayError(msg ?? (err instanceof Error ? err.message : 'Could not start checkout. Please try again.'));
     } finally {
       setSelectingPlanId(null);
     }
@@ -374,7 +399,7 @@ export function BillingPlansPage(): JSX.Element {
               }`}
             >
               {c === 'monthly' ? 'Monthly' : 'Yearly'}
-              {c === 'yearly' && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs font-bold text-emerald-700">Save 20%</span>}
+              {c === 'yearly' && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs font-bold text-emerald-700">2 months free</span>}
             </button>
           ))}
         </div>
@@ -433,7 +458,7 @@ export function BillingPlansPage(): JSX.Element {
               onClick={() => setShowCoupon(true)}
               className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 font-medium"
             >
-              <Tag className="h-4 w-4" /> Have a coupon code?
+              <Tag className="h-4 w-4" /> Apply a coupon to your current subscription
             </button>
           ) : (
             <div className="flex items-center gap-2">
@@ -494,6 +519,18 @@ export function BillingPlansPage(): JSX.Element {
           />
         ))}
       </div>
+      {quote && reviewPlan && <section id="payment-summary" tabIndex={-1} aria-label="Review payment" className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-5 outline-none focus:ring-2 focus:ring-indigo-500">
+        <h2 className="text-lg font-bold text-slate-900">Review {quote.planName} payment</h2>
+        {quote.previewOnly && <p className="mt-2 text-sm text-indigo-800">Illustrative first-payment quote. This demonstration workspace cannot make payments.</p>}
+        <dl className="mt-4 space-y-2 text-sm">
+          <div className="flex justify-between gap-4"><dt>One-time onboarding</dt><dd className="font-semibold">{quote.onboardingFee ? fmt(quote.onboardingFee,quote.currency) : 'Already covered / not due'}</dd></div>
+          <div className="flex justify-between gap-4"><dt>{quote.billingCycle === 'yearly' ? '12 months · price of 10' : 'First month / renewal'}</dt><dd className="font-semibold">{fmt(quote.subscriptionAmount,quote.currency)}</dd></div>
+          <div className="flex justify-between gap-4 border-t border-indigo-200 pt-3 text-base font-bold"><dt>Total payable now</dt><dd>{fmt(quote.total,quote.currency)}</dd></div>
+        </dl>
+        <p className="mt-3 text-xs text-slate-600">Future {quote.billingCycle === 'yearly' ? 'annual' : 'monthly'} renewal: {fmt(quote.subscriptionAmount,quote.currency)}. The onboarding fee is paid once. Your subscription begins after verified payment.</p>
+        <p className="mt-2 text-xs text-slate-600">Automatic renewal is optional and follows the consent selected above. It never includes the onboarding fee.</p>
+        <div className="mt-4 flex flex-wrap gap-3"><button disabled={!!selectingPlanId || quote.previewOnly} onClick={()=>beginPayment(reviewPlan)} className="rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{quote.previewOnly ? 'Demo quote — payment disabled' : selectingPlanId ? 'Preparing secure checkout…' : 'Continue to secure payment'}</button><button disabled={!!selectingPlanId} onClick={()=>{setQuote(null);setReviewPlan(null);}} className="rounded-lg border border-indigo-200 px-4 py-2 text-sm">Cancel</button></div>
+      </section>}
 
       {/* Stated from the selected currency rather than hard-coded. This read
           "All prices in USD" while every plan was priced in naira. */}
@@ -502,7 +539,7 @@ export function BillingPlansPage(): JSX.Element {
         <a href={supportMailto('Enterprise / MSP plan enquiry')} className="text-brand-600 hover:underline">
           {SUPPORT_EMAIL}
         </a>.
-        Cancel anytime.
+        Annual prepayment covers 12 months for the price of 10. Onboarding is a separate one-time implementation fee, collected with the first subscription. Enterprise/MSP scope is confirmed by quotation. Statutory audit or certification fees are separate.
       </p>
     </div>
   );

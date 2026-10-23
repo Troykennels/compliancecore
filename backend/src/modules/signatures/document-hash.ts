@@ -24,8 +24,8 @@ const SIGNABLE: Record<string, { table: string; columns: string[] }> = {
   control:  { table: 'controls', columns: ['id', 'control_ref', 'title', 'description', 'implementation_status', 'implementation_notes'] },
   risk:     { table: 'risks',    columns: ['id', 'title', 'description', 'category', 'inherent_score', 'residual_score', 'treatment', 'status', 'mitigation_plan'] },
   vendor:   { table: 'vendors',  columns: ['id', 'name', 'description', 'category', 'risk_level', 'status', 'data_processed', 'services_provided'] },
-  audit:    { table: 'audits',   columns: ['id', 'title', 'description', 'status'] },
-  training: { table: 'trainings', columns: ['id', 'title', 'description', 'status'] },
+  audit:    { table: 'audits',   columns: ['id', 'title', 'scope', 'summary', 'status'] },
+  training: { table: 'training_programs', columns: ['id', 'title', 'description', 'status'] },
   // Evidence is signed against the immutable checksum of its stored file rather
   // than its mutable metadata — that is what an auditor actually cares about.
   evidence: { table: 'evidence', columns: ['id', 'title', 'status'] },

@@ -7,6 +7,13 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '../config/env';
+import { AppError } from './errors';
+
+function requireStorageEndpoint(): void {
+  if (env.AWS_REGION === 'auto' && !env.AWS_S3_ENDPOINT) {
+    throw new AppError('Evidence storage is awaiting its S3 endpoint. Contact Orion Soft Limited to complete storage setup.',503,'STORAGE_UNCONFIGURED');
+  }
+}
 
 const s3 = new S3Client({
   region: env.AWS_REGION,
@@ -98,12 +105,14 @@ export async function generateUploadUrl(
   fileKey: string,
   mimeType: string,
 ): Promise<{ uploadUrl: string; expiresAt: Date }> {
+  requireStorageEndpoint();
   const command = new PutObjectCommand({
     Bucket:      BUCKET,
     Key:         fileKey,
     ContentType: mimeType,
-    // Server-side encryption at rest
-    ServerSideEncryption: 'AES256',
+    // AWS supports the explicit SSE-S3 header. S3-compatible providers such as
+    // Railway implement a different supported API and reject that AWS option.
+    ...(!env.AWS_S3_ENDPOINT ? {ServerSideEncryption: 'AES256' as const} : {}),
   });
 
   const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 900 }); // 15 min
@@ -118,6 +127,7 @@ export async function generateDownloadUrl(
   expiresInSeconds = 3600,
   contentType?: string,
 ): Promise<string> {
+  requireStorageEndpoint();
   const encodedName = encodeURIComponent(fileName);
   // Force the response Content-Type so the browser never sniffs the bytes into
   // an executable type. Attachments are always served as an opaque octet-stream

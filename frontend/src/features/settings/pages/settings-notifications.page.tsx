@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { settingsApi } from '../api/settings.api';
 import { SettingsLayout } from '../components/settings-layout';
 import type { NotificationSettings } from '../types/settings.types';
+import DeviceAlerts from '@/features/notifications/components/device-alerts';
 
 const EMAIL_ALERT_LABELS: Record<keyof NotificationSettings['emailAlerts'], string> = {
   controlDue:         'Control task due soon',
@@ -53,6 +54,7 @@ export function SettingsNotificationsPage(): JSX.Element {
   return (
     <SettingsLayout>
       <div className="space-y-4">
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm"><DeviceAlerts /></section>
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />

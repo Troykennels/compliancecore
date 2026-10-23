@@ -300,6 +300,7 @@ export async function initBillingTables(): Promise<void> {
   const { initRecurringTables } = await import('../payments/recurring.service');
   await initRecurringTables();
   await applyPricingCorrection();
+  await (await import('./commercial-pricing')).initCommercialPricing();
 
   _initialized = true;
   logger.info('Billing tables initialised');
@@ -507,6 +508,7 @@ function mapPlan(r: any): SubscriptionPlan {
     description: r.description ?? '',
     priceMonthly: Number(r.price_monthly),
     priceYearly: Number(r.price_yearly),
+    onboardingFee: Number(r.onboarding_fee || 0),
     currency: r.currency,
     maxUsers: r.max_users ?? null,
     maxFrameworks: r.max_frameworks ?? null,

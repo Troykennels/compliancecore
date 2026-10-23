@@ -18,8 +18,9 @@ export function SettingsSsoPage(): JSX.Element {
           </div>
           <h3 className="text-base font-semibold text-slate-900">SSO Configuration</h3>
           <p className="mt-2 max-w-sm text-sm text-slate-500">
-            SAML 2.0 and OIDC SSO configuration is available on the Enterprise plan.
-            Contact sales to enable SSO for your organisation.
+            Single sign-on is not configured on this deployment. Identity-provider
+            integration requires a separate assessment, implementation and acceptance test.
+            Contact Orion Soft Limited to agree the scope before purchasing SSO.
           </p>
           <a
             href={supportMailto('SSO enquiry — Enterprise plan')}

@@ -6,6 +6,7 @@ import type { Notification } from '../api/notifications.api';
 import { useNavigate } from 'react-router-dom';
 import { toAppPath } from '../lib/action-url';
 import DeviceAlerts from './device-alerts';
+import { useNotificationSound } from '../hooks/use-notification-sound';
 
 const PRIORITY_DOT: Record<string, string> = {
   critical: 'bg-red-500',
@@ -56,6 +57,7 @@ export function NotificationBell() {
   const navigate        = useNavigate();
   const { data: count } = useUnreadCount();
   const { data }        = useNotifications({ limit: 15 });
+  useNotificationSound(data?.notifications);
   const markRead        = useMarkRead();
   const markAll         = useMarkAllRead();
   const dismiss         = useDismissNotification();
@@ -86,7 +88,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 z-50 w-80 rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
+        <div className="absolute right-0 top-11 z-50 w-80 max-w-[calc(100vw-24px)] rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
           {/* Dropdown header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <span className="text-sm font-semibold text-slate-900">Notifications</span>

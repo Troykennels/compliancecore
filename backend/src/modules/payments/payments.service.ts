@@ -1,4 +1,8 @@
 import crypto from 'node:crypto';
+import { prisma } from '../../config/database';
+import { checkoutQuote } from './checkout-quote';
+import { settlePaidCheckout } from './settle-paid-checkout';
+import { reserveCheckout } from './reserve-checkout';
 import { env } from '../../config/env';
 import { logger } from '../../lib/logger';
 import { AppError, NotFoundError, ValidationError } from '../../lib/errors';
@@ -44,6 +48,7 @@ export async function createCheckout(input: {
   currency: string;
   billingCycle: BillingCycle;
   recurringConsent?: boolean;
+  expectedTotal?: number;
 }): Promise<{ authorizationUrl: string; reference: string; amount: number; currency: string }> {
   if (!isPaystackConfigured()) {
     throw new AppError('Payments are not configured on this deployment.', 503, 'PAYMENTS_UNCONFIGURED');
@@ -62,15 +67,10 @@ export async function createCheckout(input: {
     throw new ValidationError(`Plan "${plan.name}" has no price set for ${currency}.`);
   }
 
-  const basePrice = input.billingCycle === 'yearly' ? price.priceYearly : price.priceMonthly;
-
-  // Honour any discount already on the subscription. Without this a coupon
-  // holder is charged the full list price at checkout while their subscription
-  // reports the discounted amount as due — i.e. billed more than they owe.
-  const sub = await billingRepo.findSubscriptionByTenant(input.tenantId);
-  const amount = sub
-    ? billingService.applyDiscount(basePrice, sub.discountPercent, sub.discountFixed)
-    : basePrice;
+  const quote = await checkoutQuote(input);
+  if (quote.previewOnly) throw new AppError('This is a demonstration workspace. Use your own organisation for a real purchase.',403,'DEMO_WORKSPACE');
+  const amount = quote.total;
+  if (input.expectedTotal !== undefined && Math.round(input.expectedTotal*100)!==Math.round(amount*100)) throw new AppError('The payment summary changed. Review the latest amount before continuing.',409,'QUOTE_CHANGED');
 
   if (amount <= 0) {
     // Nothing to collect — either a free plan or a discount that covers the
@@ -83,7 +83,7 @@ export async function createCheckout(input: {
   // checkout for the same plan never collides with an in-flight attempt.
   const reference = `cc_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
 
-  await repo.createTransaction({
+  const resumed = await reserveCheckout({
     reference,
     tenantId: input.tenantId,
     userId: input.userId,
@@ -91,7 +91,11 @@ export async function createCheckout(input: {
     billingCycle: input.billingCycle,
     currency,
     amount,
+    onboardingFee: quote.onboardingFee,
+    subscriptionAmount: quote.subscriptionAmount,
+    recurringConsent: input.recurringConsent,
   });
+  if (resumed) return resumed;
 
   if (input.recurringConsent) await repo.recordConsent(reference);
 
@@ -112,49 +116,10 @@ export async function createCheckout(input: {
       planName: plan.name,
       billingCycle: input.billingCycle,
     },
-  });
+  }).catch(async err => { await repo.markTransactionFailed(reference,'failed','Checkout initialization did not return a payment link'); throw err; });
 
+  await prisma.$executeRawUnsafe(`UPDATE global.payment_transactions SET authorization_url=$2 WHERE reference=$1`,reference,result.authorization_url);
   return { authorizationUrl: result.authorization_url, reference, amount, currency };
-}
-
-/**
- * Records a payment against the customer's ledger.
- *
- * Prefers the outstanding invoice the payment was raised for; if there is none
- * — an in-period upgrade, say, where updateSubscription raises no invoice — a
- * paid invoice is written so the revenue is still recorded rather than lost.
- */
-async function settleInvoiceFor(
-  claimed: { tenantId: string; amount: number; currency: string; planId: string; billingCycle: string },
-  paidAt: Date,
-): Promise<void> {
-  const open = await billingRepo.findOpenInvoice(claimed.tenantId);
-  if (open) {
-    await billingRepo.markInvoicePaid(open.id, claimed.amount, paidAt);
-    return;
-  }
-
-  const sub = await billingRepo.findSubscriptionByTenant(claimed.tenantId);
-  const plan = await billingRepo.findPlanById(claimed.planId);
-  const start = sub ? new Date(sub.currentPeriodStart) : paidAt;
-  const end = sub ? new Date(sub.currentPeriodEnd) : paidAt;
-
-  const invoice = await billingRepo.createInvoice({
-    tenantId: claimed.tenantId,
-    subscriptionId: sub?.id,
-    amountDue: claimed.amount,
-    currency: claimed.currency,
-    billingPeriodStart: start,
-    billingPeriodEnd: end,
-    dueDate: paidAt,
-    lineItems: [{
-      description: `${plan?.name ?? 'Subscription'} — ${claimed.billingCycle} subscription`,
-      quantity: 1,
-      unitAmount: claimed.amount,
-      amount: claimed.amount,
-    }],
-  });
-  await billingRepo.markInvoicePaid(invoice.id, claimed.amount, paidAt);
 }
 
 /**
@@ -175,49 +140,8 @@ async function applyPaidTransaction(
   // the token rather than guessed from the tenant's membership later.
   payerEmail?: string | null,
 ): Promise<{ applied: boolean }> {
-  const claimed = await repo.claimTransaction(reference, providerRef, paidAt);
-  if (!claimed) {
-    logger.info({ reference }, 'Payment already processed or not pending — ignoring');
-    return { applied: false };
-  }
-
-  const existing = await billingRepo.findSubscriptionByTenant(claimed.tenantId);
-
-  if (existing) {
-    // paidUpgrade: the charge for this exact plan and cycle has already been
-    // verified with the provider above, so this is the one place allowed to
-    // move a tenant onto a more expensive plan.
-    await billingService.updateSubscription(
-      claimed.tenantId,
-      { planId: claimed.planId, billingCycle: claimed.billingCycle, status: 'active' } as never,
-      { paidUpgrade: true },
-    );
-
-    // Grant the period that was actually paid for.
-    //
-    // updateSubscription deliberately does not move current_period_start/end —
-    // an admin correcting a plan mid-period should not hand out free service.
-    // But a *payment* buys a fresh term, and without this the customer keeps
-    // whatever period they already had: someone upgrading monthly -> yearly paid
-    // the yearly price and still expired a month later, and the renewal job
-    // (which keys off current_period_end) re-invoiced them then.
-    const start = existing.planId === claimed.planId && existing.billingCycle === claimed.billingCycle
-      ? new Date(Math.max(+new Date(existing.currentPeriodEnd), +(paidAt || new Date())))
-      : billingService.periodStart(claimed.billingCycle);
-    const end = billingService.periodEnd(start, claimed.billingCycle);
-    await billingRepo.updateSubscription(existing.id, {
-      current_period_start: start,
-      current_period_end: end,
-    });
-  } else {
-    // Payment already taken, so no trial: starting one here would delay the
-    // first real invoice and misreport revenue.
-    await billingService.createSubscription(
-      claimed.tenantId,
-      { planId: claimed.planId, billingCycle: claimed.billingCycle },
-      { paidUpgrade: true },
-    );
-  }
+  const claimed = await settlePaidCheckout(reference, providerRef, paidAt ?? new Date());
+  if (!claimed) return { applied: false };
 
   // Keep the card so the subscription can actually recur. Without this the
   // renewal job has nothing to charge and the customer silently gets the plan
@@ -245,16 +169,6 @@ async function applyPaidTransaction(
     } catch (err) {
       logger.error({ err, reference }, 'Could not store payment authorization — renewals will need re-entry');
     }
-  }
-
-  // Settle the ledger. createSubscription raises an invoice for a paid plan
-  // with amount_paid = 0, and nothing ever marked it paid — so a paying
-  // customer kept an open invoice showing the full balance due, and revenue
-  // reconciliation reported nothing collected.
-  try {
-    await settleInvoiceFor(claimed, paidAt ?? new Date());
-  } catch (err) {
-    logger.error({ err, reference }, 'Could not settle invoice for payment');
   }
 
   logger.info(
@@ -332,7 +246,7 @@ function assertAmountMatches(
   reference: string,
 ): void {
   const expectedMinor = Math.round(tx.amount * 100);
-  if (paidMinor < expectedMinor || paidCurrency.toUpperCase() !== tx.currency.toUpperCase()) {
+  if (paidMinor !== expectedMinor || paidCurrency.toUpperCase() !== tx.currency.toUpperCase()) {
     logger.error(
       { reference, expectedMinor, paidMinor, expected: tx.currency, paid: paidCurrency },
       'Payment amount/currency mismatch — refusing to activate',
