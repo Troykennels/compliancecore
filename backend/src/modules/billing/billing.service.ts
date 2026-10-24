@@ -1,8 +1,8 @@
-import PDFDocument from 'pdfkit';
+import { generateInvoicePdf } from './invoice-pdf';
+export { generateInvoicePdf } from './invoice-pdf';
 import { withTenantSchema } from '../../lib/prisma';
 import { prisma } from '../../config/database';
 import { NotFoundError, AppError, ConflictError } from '../../lib/errors';
-import { SUPPORT_EMAIL } from '../../config/contact';
 import * as repo from './billing.repository';
 import type {
   SubscriptionPlan, Subscription, BillingOverview, UsageSummary,
@@ -23,20 +23,6 @@ function calcBasePrice(plan: SubscriptionPlan, cycle: BillingCycle): number {
 function applyDiscount(base: number, pct: number, fixed: number): number {
   const afterPct = base * (1 - pct / 100);
   return Math.max(0, afterPct - fixed);
-}
-
-/**
- * Formats a money amount for an invoice in the currency it was raised in.
- *
- * PDFKit's standard fonts are WinAnsi-encoded and have no glyph for ₦, so the
- * naira symbol would render as a blank box on the very document a customer
- * files for tax. The ISO code is used instead — unambiguous, and it renders
- * everywhere.
- */
-function formatInvoiceAmount(currency: string): (amount: number) => string {
-  const code = (currency || 'NGN').toUpperCase();
-  return (amount: number) =>
-    `${code} ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function advancePeriod(date: Date, cycle: BillingCycle): Date {
@@ -538,104 +524,6 @@ export async function getBillingOverview(tenantId: string): Promise<BillingOverv
 }
 
 // ── Invoice PDF ────────────────────────────────────────────────────────────────
-const C = { indigo: '#4F46E5', slate: '#1E293B', muted: '#64748B', border: '#E2E8F0', white: '#FFFFFF', green: '#10B981', red: '#EF4444' };
-
-export function generateInvoicePdf(invoice: Invoice): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: 'A4', margin: 50 });
-    const chunks: Buffer[] = [];
-    doc.on('data', (c: Buffer) => chunks.push(c));
-    doc.on('end', () => resolve(Buffer.concat(chunks)));
-    doc.on('error', reject);
-
-    const W = doc.page.width - 100;
-
-    // Header bar
-    doc.rect(50, 50, W, 4).fill(C.indigo);
-
-    // Logo text + title
-    doc.fillColor(C.indigo).fontSize(20).font('Helvetica-Bold').text('ComplianceCore', 50, 70);
-    doc.fillColor(C.slate).fontSize(28).font('Helvetica-Bold').text('INVOICE', 50, 70, { align: 'right', width: W });
-
-    doc.fillColor(C.muted).fontSize(9).font('Helvetica').text('Orion Soft Limited', 50, 97);
-    doc.text(SUPPORT_EMAIL, 50, 109);
-
-    // Invoice meta box
-    const metaX = doc.page.width - 220;
-    doc.rect(metaX, 90, 170, 80).fill('#F8FAFC');
-    doc.fillColor(C.muted).fontSize(8).text('Invoice Number', metaX + 10, 100);
-    doc.fillColor(C.slate).fontSize(9).font('Helvetica-Bold').text(invoice.number, metaX + 10, 111);
-    doc.fillColor(C.muted).fontSize(8).font('Helvetica').text('Date', metaX + 10, 128);
-    doc.fillColor(C.slate).fontSize(9).font('Helvetica-Bold').text(new Date(invoice.createdAt).toLocaleDateString('en-GB'), metaX + 10, 139);
-    doc.fillColor(C.muted).fontSize(8).font('Helvetica').text('Due Date', metaX + 10, 156);
-    doc.fillColor(C.slate).fontSize(9).font('Helvetica-Bold').text(new Date(invoice.dueDate).toLocaleDateString('en-GB'), metaX + 10, 167);
-
-    // Status badge
-    const statusColor = invoice.status === 'paid' ? C.green : invoice.status === 'void' ? C.muted : C.indigo;
-    doc.rect(metaX + 90, 100, 70, 18).fill(statusColor);
-    doc.fillColor(C.white).fontSize(8).font('Helvetica-Bold')
-      .text(invoice.status.toUpperCase(), metaX + 90, 105, { width: 70, align: 'center' });
-
-    // Billing period
-    doc.fillColor(C.muted).fontSize(8).font('Helvetica').text(
-      `Billing period: ${new Date(invoice.billingPeriodStart).toLocaleDateString('en-GB')} – ${new Date(invoice.billingPeriodEnd).toLocaleDateString('en-GB')}`,
-      50, 185,
-    );
-
-    doc.moveTo(50, 200).lineTo(50 + W, 200).stroke(C.border);
-
-    // Line items table header
-    let y = 215;
-    doc.rect(50, y, W, 20).fill('#F1F5F9');
-    doc.fillColor(C.muted).fontSize(8).font('Helvetica-Bold');
-    doc.text('Description', 60, y + 6);
-    doc.text('Qty', 370, y + 6, { width: 40, align: 'right' });
-    doc.text('Unit Price', 420, y + 6, { width: 60, align: 'right' });
-    doc.text('Amount', 490, y + 6, { width: 60, align: 'right' });
-    y += 25;
-
-    // Every figure on this document used a hard-coded "$", so a ₦850,000
-    // invoice was issued to the customer reading "$850,000.00" — a ~1600x
-    // misstatement on a document used as an accounting and tax record. The
-    // amount is formatted in the currency the invoice was actually raised in.
-    const money = formatInvoiceAmount(invoice.currency);
-
-    doc.font('Helvetica').fillColor(C.slate).fontSize(9);
-    for (const item of invoice.lineItems) {
-      doc.text(item.description, 60, y, { width: 300 });
-      doc.text(String(item.quantity), 370, y, { width: 40, align: 'right' });
-      doc.text(money(item.unitAmount), 405, y, { width: 75, align: 'right' });
-      doc.text(money(item.amount), 480, y, { width: 70, align: 'right' });
-      y += 18;
-      doc.moveTo(50, y).lineTo(50 + W, y).stroke(C.border);
-      y += 5;
-    }
-
-    // Totals
-    y += 10;
-    doc.fillColor(C.muted).fontSize(9).text('Subtotal', 380, y, { width: 95, align: 'right' });
-    doc.fillColor(C.slate).font('Helvetica-Bold').text(money(invoice.amountDue), 480, y, { width: 70, align: 'right' });
-    y += 16;
-    doc.fillColor(C.muted).font('Helvetica').text('Amount Paid', 380, y, { width: 95, align: 'right' });
-    doc.fillColor(invoice.amountPaid > 0 ? C.green : C.muted).font('Helvetica-Bold')
-      .text(money(invoice.amountPaid), 480, y, { width: 70, align: 'right' });
-    y += 6;
-    doc.rect(380, y, 170, 1).fill(C.border);
-    y += 8;
-    doc.fillColor(C.slate).font('Helvetica-Bold').fontSize(11).text('Balance Due', 380, y, { width: 95, align: 'right' });
-    const balance = Math.max(0, invoice.amountDue - invoice.amountPaid);
-    doc.fillColor(balance > 0 ? C.indigo : C.green).fontSize(11)
-      .text(money(balance), 480, y, { width: 70, align: 'right' });
-
-    // Footer
-    doc.rect(50, 790, W, 1).fill(C.border);
-    doc.fillColor(C.muted).fontSize(8).font('Helvetica')
-      .text(`ComplianceCore — Confidential. Questions? ${SUPPORT_EMAIL}`, 50, 800, { width: W, align: 'center' });
-
-    doc.end();
-  });
-}
-
 // ── Admin ──────────────────────────────────────────────────────────────────────
 export async function adminGetAllTenantBilling() {
   return repo.findAllTenantBilling();

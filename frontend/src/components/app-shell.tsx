@@ -1,3 +1,4 @@
+import { CiDemoGuide } from './ci-demo-guide';
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -541,11 +542,11 @@ export function AppShell() {
         {/* Subscription state. Outside <main> so it stays visible while a page
             scrolls, and renders nothing at all on a healthy subscription. */}
         <EntitlementBanner />
-        {activeTenant?.slug === 'orionsoftlimited-demo' && (
+        {activeTenant?.slug === 'orionsoftlimited-demo' && (activeTenant.name.includes('C&I') ? <CiDemoGuide /> : (
           <div className="border-b border-indigo-100 bg-indigo-50 px-4 py-2 text-xs text-indigo-900 sm:px-5">
             <strong>Orion presentation demo</strong><span className="ml-2">Fictional sample records. Draft invoices are examples; no payment is required.</span>
           </div>
-        )}
+        ))}
 
         {/* Page content. overflow-y-auto so pages that don't manage their own
             scroll still scroll. The inner Suspense keeps the sidebar/topbar
