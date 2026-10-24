@@ -1,0 +1,88 @@
+name: Guide and signing acceptance
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/guide-acceptance.yml'
+      - 'frontend/scripts/verify-guide-billing-signing.mjs'
+      - 'backend/scripts/verify-signing-preview.mjs'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: guide-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: compliance_test
+          POSTGRES_DB: compliance_renewal_task_presentation_20261023
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ['55443:5432']
+        options: >-
+          --health-cmd "pg_isready -U compliance_test -d compliance_renewal_task_presentation_20261023"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: |
+          npm ci --prefix backend
+          npm ci --prefix frontend
+      - name: Build API and initialise isolated database
+        working-directory: backend
+        run: |
+          npm run build
+          node scripts/presentation-local.mjs scripts/migrate.mjs --seed
+      - name: Start isolated API and synthetic object storage
+        working-directory: backend
+        run: |
+          node scripts/presentation-local.mjs scripts/start-presentation-fixture.mjs >/tmp/guide-api.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3008/health/live >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          echo 'Isolated API did not become ready'; exit 1
+      - name: Prepare fictional presentation data and verify signing permissions
+        working-directory: backend
+        run: |
+          node scripts/presentation-local.mjs scripts/provision-presentation-demo.mjs
+          node scripts/presentation-local.mjs scripts/tailor-ci-demo.mjs
+          node scripts/presentation-local.mjs scripts/verify-signing-preview.mjs
+      - name: Build web application for isolated API
+        working-directory: frontend
+        env:
+          VITE_API_URL: http://127.0.0.1:3008
+        run: npm run build
+      - name: Install browser and start web preview
+        working-directory: frontend
+        run: |
+          npx playwright install --with-deps msedge
+          node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 5178 >/tmp/guide-web.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:5178/login >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          echo 'Web preview did not become ready'; exit 1
+      - name: Verify desktop and touch signing, guide and billing
+        working-directory: frontend
+        run: node scripts/verify-guide-billing-signing.mjs
+      - name: Retain scoped verification results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: guide-signing-results
+          path: verification/guide-billing-20261024/
+          retention-days: 3
+          if-no-files-found: ignore

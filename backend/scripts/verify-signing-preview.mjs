@@ -19,8 +19,8 @@ try{
  await request('PATCH',`/policies/${policy.id}`,owner.accessToken,{content:'Changed after preview'});
  await request('POST','/signatures',owner.accessToken,{documentType:'policy',documentId:policy.id,documentHash:preview.documentHash},409);
  assert.equal((await request('GET',`/signatures/document/policy/${policy.id}`,owner.accessToken)).length,0);
- for(const type of ['__proto__','constructor','invoice'])await request('GET',`/signatures/document/${type}/${policy.id}/preview`,owner.accessToken,undefined,400);
- await request('GET',`/signatures/document/policy/${crypto.randomUUID()}/preview`,owner.accessToken,undefined,400);
+ for(const type of ['__proto__','constructor','invoice'])await request('GET',`/signatures/document/${type}/${policy.id}/preview`,owner.accessToken,undefined,422);
+ await request('GET',`/signatures/document/policy/${crypto.randomUUID()}/preview`,owner.accessToken,undefined,422);
  viewer=crypto.randomUUID();const email=`guide-check-${viewer}@example.invalid`,password=crypto.randomBytes(18).toString('base64url')+'Aa1!';
  await client.query(`INSERT INTO global.users(id,email,password_hash,first_name,last_name,email_verified_at,is_active,onboarding_completed_at,updated_at) VALUES($1,$2,$3,'Guide','Fixture',now(),true,now(),now())`,[viewer,email,await bcrypt.hash(password,10)]);
  await client.query(`INSERT INTO global.tenant_memberships(tenant_id,user_id,role,is_active,joined_at) VALUES($1,$2,'viewer',true,now())`,[access.tenantId,viewer]);
@@ -35,6 +35,9 @@ try{
  await fs.mkdir('../verification/guide-billing-20261024',{recursive:true});await fs.writeFile('../verification/guide-billing-20261024/signing-api-results.json',JSON.stringify(checks,null,2));
 }finally{
  if(policy)await request('DELETE',`/policies/${policy.id}`,owner.accessToken,undefined,200).catch(()=>{});
- if(viewer){await client.query(`DELETE FROM global.users WHERE id=$1 AND email LIKE 'guide-check-%@example.invalid'`,[viewer]);}
+ if(viewer){
+  await client.query(`UPDATE global.tenant_memberships SET is_active=false,deleted_at=now() WHERE user_id=$1 AND tenant_id=$2`,[viewer,access.tenantId]);
+  await client.query(`UPDATE global.users SET is_active=false,updated_at=now() WHERE id=$1 AND email LIKE 'guide-check-%@example.invalid'`,[viewer]);
+ }
  await client.end();
 }
