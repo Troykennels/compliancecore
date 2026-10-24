@@ -96,46 +96,34 @@ function PlanCard({
         </div>
       )}
 
-      <div className="mb-4">
+      <div className="mb-5 min-h-[4.5rem]">
         <h3 className="text-lg font-bold text-slate-900">{plan.name}</h3>
-        <p className="mt-1 text-xs text-slate-500">{plan.description}</p>
+        <p className="mt-1 text-xs leading-relaxed text-slate-500">{plan.description}</p>
       </div>
 
-      <div className="mb-6">
-        {contactSales && <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Starting from {fmt(price, displayCurrency)} / {cycle === 'monthly' ? 'month' : 'year'}</p>}
-        {contactSales ? (
-          <>
-            <div className="text-3xl font-extrabold text-slate-900">Contact Sales</div>
-            <p className="mt-1 text-xs text-slate-500">
-              Priced to your organisation. Talk to us about scope and volume.
-            </p>
-          </>
-        ) : (
-          <>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-extrabold text-slate-900">{fmt(price, displayCurrency)}</span>
-              {price > 0 && (
-                <span className="text-sm text-slate-500">/{cycle === 'monthly' ? 'month' : 'year'}</span>
-              )}
-            </div>
-            {cycle === 'yearly' && monthsFree > 0 && (
-              <p className="mt-1 text-xs font-medium text-emerald-600">
-                {monthsFree} month{monthsFree === 1 ? '' : 's'} free vs paying monthly
-              </p>
-            )}
-            {cycle === 'monthly' && monthsFree > 0 && (
-              <p className="mt-1 text-xs text-slate-500">
-                {fmt(yearlyShown, displayCurrency)}/year — {monthsFree} month{monthsFree === 1 ? '' : 's'} free
-              </p>
-            )}
-          </>
-        )}
-      </div>
+      <section aria-label={`${plan.name} onboarding fee`} className="mb-4 rounded-xl bg-slate-900 p-4 text-white">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-indigo-200">One-time onboarding</p>
+        <p className="mt-2 break-words text-[clamp(1.35rem,2vw,1.875rem)] font-extrabold leading-tight">
+          {onboarding != null ? fmt(onboarding, displayCurrency) : 'By quotation'}
+        </p>
+        <p className="mt-2 text-xs text-slate-200">{contactSales ? 'Starting fee; final scope by quotation' : 'Paid once to set up your organisation'}</p>
+      </section>
 
-      <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-600">
-        <p className="font-semibold text-slate-900">{onboarding ? `${fmt(onboarding,displayCurrency)} one-time onboarding${contactSales ? ' minimum' : ''}` : 'Onboarding by quotation'}</p>
-        <p className="mt-1">Paid with your first subscription. Subsequent renewals cover the subscription only.</p>
-      </div>
+      <section aria-label={`${plan.name} subscription`} className="mb-5 rounded-xl border border-slate-200 p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Recurring subscription</p>
+        <p className="mt-2 text-xl font-bold text-slate-900">
+          {contactSales && <span className="mr-1 text-xs font-medium text-slate-500">From</span>}
+          {fmt(price, displayCurrency)}<span className="ml-1 text-xs font-normal text-slate-500">/{cycle === 'monthly' ? 'month' : 'year'}</span>
+        </p>
+        <p className="mt-2 text-xs leading-relaxed text-slate-500">
+          {cycle === 'yearly' && monthsFree > 0 ? `12 months for the price of ${12 - monthsFree}.` : 'Renewals cover the subscription only.'}
+          {cycle === 'monthly' && monthsFree > 0 && ` Annual option: ${fmt(yearlyShown, displayCurrency)} for 12 months.`}
+        </p>
+      </section>
+      <p className="mb-5 text-xs leading-relaxed text-slate-600">
+        {contactSales ? 'Onboarding and your first subscription are quoted together.' : 'Onboarding and your first subscription are paid together.'}
+        {' '}Onboarding is not charged again on renewal. {contactSales ? 'Contact Sales to agree your scope and total.' : 'Review payment for your exact total.'}
+      </p>
 
       <ul className="mb-6 space-y-2 flex-1">
         {plan.features.map((f) => (
@@ -489,6 +477,8 @@ export function BillingPlansPage(): JSX.Element {
         )}
       </div>
 
+      <p className="mb-4 text-center text-sm text-slate-600">New here? <Link to="/guide#billing" className="font-semibold text-indigo-700 underline">Read the onboarding and subscription guide</Link>.</p>
+
       {/* Plan grid */}
       {subscription && (
         <div className="mb-4 flex items-center gap-2 rounded-lg bg-blue-50 border border-blue-200 px-4 py-2.5 text-sm text-blue-700">
@@ -505,7 +495,7 @@ export function BillingPlansPage(): JSX.Element {
         </div>
       )}
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {plans.map((plan) => (
           <PlanCard
             key={plan.id}

@@ -29,7 +29,7 @@ export function SignatureBadge({ signatureId, compact = false }: SignatureBadgeP
     );
   }
 
-  const isValid = result.isValid;
+  const isValid = result.valid;
   const sig = result.signature;
 
   if (compact) {

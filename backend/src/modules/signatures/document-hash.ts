@@ -49,7 +49,12 @@ export async function resolveDocumentHash(
   documentType: string,
   documentId: string,
 ): Promise<string> {
-  const spec = SIGNABLE[documentType];
+  return (await previewSignableDocument(schemaName, documentType, documentId)).documentHash;
+}
+
+/** The reviewed fields and their digest are read in the same tenant transaction. */
+export async function previewSignableDocument(schemaName: string, documentType: string, documentId: string) {
+  const spec = Object.hasOwn(SIGNABLE, documentType) ? SIGNABLE[documentType] : undefined;
   if (!spec) {
     throw new ValidationError(
       `Documents of type "${documentType}" cannot be signed. Signable types: ${signableTypes().join(', ')}.`,
@@ -83,6 +88,11 @@ export async function resolveDocumentHash(
       canonical.push(['file_version', versions[0]?.version_number ?? null]);
     }
 
-    return digest(canonical);
+    return {
+      documentType, documentId,
+      title: String(row.title ?? row.name ?? row.control_ref ?? documentType),
+      documentHash: digest(canonical),
+      fields: canonical.map(([name, value]) => ({ name: String(name), value })),
+    };
   });
 }

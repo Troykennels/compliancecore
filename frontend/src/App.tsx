@@ -21,6 +21,7 @@ const lazyPage = <T extends Record<string, React.ComponentType<unknown>>>(
   name: keyof T,
 ) => lazy(() => loader().then((m) => ({ default: m[name] })));
 
+const GuidePage = lazyPage(() => import('./features/guide/guide.page'), 'GuidePage');
 const LoginPage = lazyPage(() => import('./features/auth/pages/login.page'), 'LoginPage');
 const RegisterPage = lazyPage(() => import('./features/auth/pages/register.page'), 'RegisterPage');
 const ForgotPasswordPage = lazyPage(() => import('./features/auth/pages/forgot-password.page'), 'ForgotPasswordPage');
@@ -143,6 +144,7 @@ export default function App(): JSX.Element {
               {/* App shell wraps all authenticated pages (sidebar + topbar) */}
               <Route element={<AppShell />}>
                 <Route path={PATHS.DASHBOARD}    element={<DashboardPage />} />
+                <Route path={PATHS.GUIDE} element={<GuidePage />} />
                 <Route path={PATHS.CONTROLS}     element={<ControlsPage />} />
                 <Route path={PATHS.FRAMEWORKS}   element={<FrameworksPage />} />
                 <Route path={PATHS.EVIDENCE}     element={<EvidencePage />} />

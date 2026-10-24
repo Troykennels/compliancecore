@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { signaturesApi } from '../api/signatures.api';
 import type { SignatureFilters, CreateSignatureDto } from '../types/signatures.types';
+import { isAxiosError } from 'axios';
 
 export const signatureKeys = {
   all:     ['signatures'] as const,
@@ -44,7 +45,7 @@ export function useCreateSignature() {
       qc.invalidateQueries({ queryKey: signatureKeys.all });
       toast.success('Digital signature created.');
     },
-    onError: () => toast.error('Failed to create signature.'),
+    onError: (error) => toast.error(isAxiosError(error) ? error.response?.data?.error?.message || 'Could not sign. Reload the preview and try again.' : 'Could not sign. Please try again.'),
   });
 }
 

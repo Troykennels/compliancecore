@@ -29,9 +29,9 @@ export interface SignatureCertificate {
 }
 
 export interface VerifySignatureResult {
-  isValid:    boolean;
+  valid:      boolean;
   signature:  DigitalSignature;
-  message:    string;
+  reason:     string;
 }
 
 export interface CreateSignatureDto {
@@ -41,7 +41,12 @@ export interface CreateSignatureDto {
    *  stored record and rejects a supplied value that no longer matches, so a
    *  stale page cannot sign a version the user never saw. */
   documentHash?:         string;
-  signatureImageBase64?: string;
+  signatureImage?: string;
+}
+
+export interface SignaturePreview {
+  documentType: string; documentId: string; title: string; documentHash: string;
+  fields: { name: string; value: unknown }[];
 }
 
 export interface SignatureFilters {

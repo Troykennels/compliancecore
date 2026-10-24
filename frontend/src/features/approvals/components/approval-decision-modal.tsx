@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { SignaturePad } from '@/features/signatures/components/signature-pad';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,63 +25,39 @@ interface ApprovalDecisionModalProps {
 
 export function ApprovalDecisionModal({ open, onClose, requestId, step }: ApprovalDecisionModalProps) {
   const decide = useDecideApproval(requestId);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const isDrawing = useRef(false);
+  const [signatureImage, setSignatureImage] = useState<string>();
+  const [formError, setFormError] = useState('');
 
   const { register, watch, handleSubmit, reset } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
 
   useEffect(() => {
-    if (open) reset({ decision: 'approved', comments: '', useSignature: false });
-  }, [open, reset]);
-
-  // Canvas drawing
-  function startDraw(e: React.MouseEvent) {
-    isDrawing.current = true;
-    const ctx = canvasRef.current?.getContext('2d');
-    if (!ctx) return;
-    const rect = canvasRef.current!.getBoundingClientRect();
-    ctx.beginPath();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-  }
-  function draw(e: React.MouseEvent) {
-    if (!isDrawing.current) return;
-    const ctx = canvasRef.current?.getContext('2d');
-    if (!ctx) return;
-    const rect = canvasRef.current!.getBoundingClientRect();
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-    ctx.strokeStyle = '#1E293B';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-  }
-  function endDraw() { isDrawing.current = false; }
-  function clearCanvas() {
-    const ctx = canvasRef.current?.getContext('2d');
-    if (!ctx || !canvasRef.current) return;
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-  }
+    if (open) { reset({ decision: 'approved', comments: '', useSignature: step.requireSignature }); setSignatureImage(undefined); setFormError(''); }
+  }, [open, reset, step.requireSignature]);
 
   const useSignature = watch('useSignature');
 
   const onSubmit = async (values: FormValues) => {
+    setFormError('');
+    if (step.requireSignature && values.decision === 'approved' && (!values.useSignature || !signatureImage)) { setFormError('Draw your signature before recording this decision.'); return; }
+    if (values.decision !== 'approved' && !values.comments?.trim()) { setFormError('Explain your decision in the comments.'); return; }
     let signatureImageBase64: string | undefined;
     let documentHash: string | undefined;
 
     if (values.useSignature && step.requireSignature) {
-      signatureImageBase64 = canvasRef.current?.toDataURL('image/png');
+      signatureImageBase64 = signatureImage;
       const content = `${requestId}:${step.id}:${values.decision}`;
       documentHash = await sha256(content);
     }
 
-    await decide.mutateAsync({
+    try { await decide.mutateAsync({
       decision:             values.decision as ApprovalDecision,
       comments:             values.comments || undefined,
       signatureImageBase64,
       documentHash,
     });
-    onClose();
+    onClose(); } catch { setFormError('Could not save the decision. Your details are still here; review the message and try again.'); }
   };
 
   if (!open) return null;
@@ -147,30 +124,19 @@ export function ApprovalDecisionModal({ open, onClose, requestId, step }: Approv
             {step.requireSignature && (
               <div>
                 <label className="flex items-center gap-2 cursor-pointer mb-2 text-sm text-slate-700">
-                  <input type="checkbox" {...register('useSignature')} className="h-4 w-4 rounded border-slate-300" />
+                  <input type="checkbox" {...register('useSignature', { onChange: () => setSignatureImage(undefined) })} className="h-4 w-4 rounded border-slate-300" />
                   Add digital signature
                 </label>
                 {useSignature && (
                   <div>
-                    <canvas
-                      ref={canvasRef}
-                      width={420}
-                      height={120}
-                      className="w-full rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 cursor-crosshair"
-                      onMouseDown={startDraw}
-                      onMouseMove={draw}
-                      onMouseUp={endDraw}
-                      onMouseLeave={endDraw}
-                    />
-                    <button type="button" onClick={clearCanvas} className="mt-1 text-xs text-slate-500 hover:text-slate-700">
-                      Clear signature
-                    </button>
+                    <SignaturePad onChange={setSignatureImage} />
                   </div>
                 )}
               </div>
             )}
           </div>
 
+          {formError && <p role="alert" className="px-6 pb-3 text-sm text-red-700">{formError}</p>}
           <div className="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4 shrink-0">
             <button type="button" onClick={onClose} className="rounded-md px-4 py-2 text-sm text-slate-600 hover:bg-slate-100">Cancel</button>
             <button

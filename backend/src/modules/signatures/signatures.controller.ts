@@ -3,6 +3,7 @@ import { z } from 'zod';
 import * as service from './signatures.service';
 import { validate } from '../../lib/validate';
 import { AppError } from '../../lib/errors';
+import { previewSignableDocument } from './document-hash';
 
 const listSigSchema = z.object({
   isValid: z.preprocess((v) => v === 'true' ? true : v === 'false' ? false : undefined, z.boolean().optional()),
@@ -38,6 +39,12 @@ export async function getDocumentSignatures(req: Request, res: Response) {
   const { type, id } = req.params;
   const sigs = await service.getDocumentSignatures(req.tenant!.schemaName, type, id);
   res.json({ success: true, data: sigs });
+}
+
+export async function previewDocument(req: Request, res: Response) {
+  const id = z.string().uuid().parse(req.params.id);
+  const preview = await previewSignableDocument(req.tenant!.schemaName, req.params.type, id);
+  res.json({ success: true, data: preview });
 }
 
 export async function createSignature(req: Request, res: Response) {

@@ -18,6 +18,7 @@ export function CiDemoGuide() {
           </div>
         ))}
       </div>
+      <p className="mt-3"><Link to="/guide" className="font-semibold underline">Open the complete user guide</Link> for setup, billing, daily work and signatures.</p>
       <p className="mt-3 leading-relaxed">Suggested tour: <Link to="/expiry" className="underline">renewals</Link> → <Link to="/tasks" className="underline">owner actions</Link> → <Link to="/evidence" className="underline">evidence</Link> → <Link to="/approvals" className="underline">review decision</Link> → <Link to="/reports" className="underline">management report</Link>. Example automations are disabled; this demo does not connect to vehicles, vessels, payroll or tracking devices.</p>
     </details>
   );

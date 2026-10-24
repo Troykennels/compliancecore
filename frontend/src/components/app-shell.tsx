@@ -7,7 +7,7 @@ import {
   ChevronDown, Building2, GitBranch, Calendar, Clock, ChevronsLeft,
   ChevronsRight, FileArchive, CheckSquare, ShieldAlert, ListChecks, Sparkles, PieChart,
   CreditCard, Loader2, ScrollText, Flame, Store, ClipboardCheck, GraduationCap,
-  Library, TrendingUp, Plug, Siren, Menu, X, Check,
+  Library, TrendingUp, Plug, Siren, Menu, X, Check, BookOpen,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth.store';
@@ -31,6 +31,7 @@ interface NavGroup {
 const NAV_GROUPS: NavGroup[] = [
   {
     items: [
+      { label: 'My Guide', to: PATHS.GUIDE, icon: <BookOpen className="h-4 w-4" /> },
       { label: 'Dashboard',         to: PATHS.DASHBOARD,          icon: <LayoutDashboard className="h-4 w-4" /> },
     ],
   },

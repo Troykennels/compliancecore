@@ -11,6 +11,7 @@ export const PATHS = {
 
   // Core app
   DASHBOARD: '/dashboard',
+  GUIDE: '/guide',
   FRAMEWORKS: '/frameworks',
   CONTROLS: '/controls',
   CONTROL_DETAIL: (id: string) => `/controls/${id}`,

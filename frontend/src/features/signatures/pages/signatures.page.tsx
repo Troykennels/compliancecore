@@ -1,10 +1,18 @@
 import { useState } from 'react';
 import { ShieldCheck, ShieldX, RotateCcw, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useOrgFormat } from '@/lib/org-format';
+import { Link } from 'react-router-dom';
+import { useAuthStore } from '@/stores/auth.store';
+import { signaturesApi } from '../api/signatures.api';
+import { SignDocumentDialog } from '../components/sign-document-dialog';
 import { useSignatures, useRevokeSignature } from '../hooks/use-signatures';
 
 export function SignaturesPage() {
   const fmt = useOrgFormat();
+  const role = useAuthStore(state => state.activeTenant?.role);
+  const canManage = !!role && ['owner','admin','compliance_manager','msp_admin'].includes(role);
+  const canSign = canManage || role === 'control_owner';
+  const [showSign,setShowSign] = useState(false);
   const [validFilter, setValidFilter] = useState<'all' | 'valid' | 'revoked'>('all');
   const [page, setPage] = useState(1);
   const [revokeTarget, setRevokeTarget] = useState<string | null>(null);
@@ -26,10 +34,15 @@ export function SignaturesPage() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-6">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
         <h1 className="text-xl font-bold text-slate-900">Digital Signatures</h1>
-        <p className="text-sm text-slate-500 mt-0.5">HMAC-SHA256 tamper-evident audit trail of all signed documents</p>
+        <p className="mt-1 max-w-xl text-sm text-slate-500">Sign a reviewed document and keep a record of the signer, time and document snapshot.</p>
+        <Link to="/guide#signatures" className="mt-2 inline-block text-xs font-medium text-indigo-700 underline">How to add and verify a signature</Link>
+        </div>
+        {canSign && <button onClick={()=>setShowSign(true)} className="rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white">Sign a document</button>}
       </div>
+      {showSign && <SignDocumentDialog onClose={()=>setShowSign(false)} />}
 
       {/* Filters */}
       <div className="flex items-center gap-3 mb-5">
@@ -66,13 +79,15 @@ export function SignaturesPage() {
         <div className="rounded-xl border border-dashed border-slate-300 py-16 text-center">
           <ShieldCheck className="h-10 w-10 text-slate-300 mx-auto mb-2" />
           <p className="text-sm text-slate-500">No signatures found</p>
+          {canSign && <button onClick={()=>setShowSign(true)} className="mt-3 text-sm font-medium text-indigo-700 underline">Sign your first document</button>}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">Document</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">Signed By</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">Signed At</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">Document Hash</th>
@@ -94,9 +109,11 @@ export function SignaturesPage() {
                       </span>
                     )}
                   </td>
+                  <td className="px-4 py-3 text-xs capitalize text-slate-700">{sig.documentType.replace(/_/g,' ')}</td>
                   <td className="px-4 py-3">
                     <p className="font-medium text-slate-900 text-xs">{sig.certificateData?.signerName ?? sig.signerName ?? '—'}</p>
                     <p className="text-slate-400 text-[11px]">{sig.certificateData?.signerEmail}</p>
+                    {sig.signatureImage?.startsWith('data:image/png;base64,') && <img src={sig.signatureImage} alt="Drawn signature mark" className="mt-2 max-h-12 max-w-32 rounded border border-slate-100 bg-white object-contain" />}
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-600">
                     {fmt.formatDateTime(sig.signedAt)}
@@ -108,7 +125,8 @@ export function SignaturesPage() {
                     <span className="font-mono text-[11px] text-slate-500">{sig.signatureHash ? `${sig.signatureHash.slice(0, 16)}…` : '—'}</span>
                   </td>
                   <td className="px-4 py-3">
-                    {sig.isValid && (
+                    <VerifyButton id={sig.id} />
+                    {sig.isValid && canManage && (
                       <button
                         onClick={() => setRevokeTarget(sig.id)}
                         className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
@@ -148,6 +166,7 @@ export function SignaturesPage() {
             <p className="text-xs text-slate-500 mb-3">Provide a reason for revocation. This action will be permanently logged.</p>
             <textarea
               value={revokeReason}
+              maxLength={500}
               onChange={(e) => setRevokeReason(e.target.value)}
               rows={3}
               placeholder="e.g. Signed in error, document version superseded"
@@ -163,7 +182,7 @@ export function SignaturesPage() {
               <button
                 onClick={async () => {
                   if (!revokeReason.trim()) return;
-                  await revoke.mutateAsync({ id: revokeTarget, reason: revokeReason.trim() });
+                  try { await revoke.mutateAsync({ id: revokeTarget, reason: revokeReason.trim() }); } catch { return; }
                   setRevokeTarget(null);
                   setRevokeReason('');
                 }}
@@ -178,4 +197,9 @@ export function SignaturesPage() {
       )}
     </div>
   );
+}
+
+function VerifyButton({ id }: { id: string }) {
+  const [message,setMessage]=useState(''),[pending,setPending]=useState(false);
+  return <div className="mb-1 min-w-28"><button disabled={pending} className="text-xs font-medium text-indigo-700 underline disabled:opacity-50" onClick={async()=>{setPending(true);setMessage('');try{const result=(await signaturesApi.verify(id)).data.data;setMessage(result.valid?'Verified — authentic snapshot':result.reason||'Could not verify this signature');}catch{setMessage('Verification unavailable. Try again.');}finally{setPending(false);}}}>{pending?'Verifying…':'Verify'}</button>{message&&<p role="status" className="mt-1 max-w-48 text-xs text-slate-600">{message}</p>}</div>;
 }

@@ -5,9 +5,13 @@ import type {
   VerifySignatureResult,
   SignatureFilters,
   SignaturesListResponse,
+  SignaturePreview,
 } from '../types/signatures.types';
 
 export const signaturesApi = {
+  preview(type: string, id: string) {
+    return apiClient.get<{ data: SignaturePreview }>(`/signatures/document/${type}/${id}/preview`);
+  },
   create(dto: CreateSignatureDto) {
     return apiClient.post<{ data: DigitalSignature }>('/signatures', dto);
   },
