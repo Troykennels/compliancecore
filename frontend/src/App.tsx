@@ -10,7 +10,6 @@ import { ErrorBoundary } from './components/error-boundary';
 import { authApi } from './features/auth/api/auth.api';
 import { ProtectedRoute, PublicOnlyRoute } from './routes/protected.routes';
 import { AppShell } from './components/app-shell';
-import { IdleTimeout } from './components/idle-timeout';
 import { PATHS } from './routes/paths';
 
 // Route-level code-splitting: each page is its own lazy chunk so the initial
@@ -122,7 +121,6 @@ export default function App(): JSX.Element {
         <AuthInitialiser>
           {/* Inside the router (it navigates) and outside Routes (it must run on
               every authenticated page, not per-route). */}
-          <IdleTimeout />
           <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* Public-only: redirect to dashboard if already logged in */}
