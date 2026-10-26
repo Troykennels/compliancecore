@@ -17,4 +17,4 @@ Verification:
 - No records deleted, password reset, customer charge or external message sent.
 
 Limit:
-The latest full live browser sweep has not passed. It encountered loading timeouts and an earlier sign-in interruption. API checks do not establish that every browser interaction is fault-free. A targeted browser rerun is in progress.
+The latest full live browser sweep has not passed. It encountered loading timeouts and an earlier sign-in interruption. API checks do not establish that every browser interaction is fault-free. The targeted rerun reached the audit and participant screens before a test-selector error; a subsequent full rerun timed out waiting for the dashboard after sign-in. Full browser approval remains outstanding.
