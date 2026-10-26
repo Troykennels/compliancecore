@@ -1,0 +1,10 @@
+{
+  "published": true,
+  "url": "https://compliancecore-sand.vercel.app/",
+  "frontendDeployment": "dpl_D1zkgkajtwDLW435FucDPcLZCapZ",
+  "backendDeployment": "675f699e-fcc8-4a92-ac00-6a3d2626e464",
+  "source": "4c9b978",
+  "verifiedAt": "2026-10-26T15:24:00.676Z",
+  "previousFrontend": "dpl_5HBMxnVZ3mQig21mwaEKq5wq7xBc",
+  "previousBackend": "20c5e45f-f9b7-4dfd-a8bd-120598537396"
+}

@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "base": "http://127.0.0.1:5173",
+  "checks": [
+    {
+      "width": 1440,
+      "check": "Colourful summary, real control totals and next assessment steps"
+    },
+    {
+      "width": 1440,
+      "check": "Optional history expands and collapses"
+    },
+    {
+      "width": 1440,
+      "check": "Grouped navigation opens report and dismisses phone drawer"
+    },
+    {
+      "width": 1440,
+      "check": "Reload retains sign-in"
+    },
+    {
+      "width": 390,
+      "check": "Colourful summary, real control totals and next assessment steps"
+    },
+    {
+      "width": 390,
+      "check": "Optional history expands and collapses"
+    },
+    {
+      "width": 390,
+      "check": "Grouped navigation opens report and dismisses phone drawer"
+    },
+    {
+      "width": 390,
+      "check": "Reload retains sign-in"
+    }
+  ],
+  "pageErrors": [],
+  "serverErrors": []
+}
