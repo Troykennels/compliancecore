@@ -1,7 +1,8 @@
 // Applies proposed migrations only to the isolated restored copy, then compares
 // every original column/row. Never connects to the live database.
 import fs from 'node:fs/promises';import pg from 'pg';import path from 'node:path';import assert from 'node:assert/strict';
-const receipt=JSON.parse(await fs.readFile('../verification/compliance-step2-20261026/cloud-backup-restore.json','utf8'));assert.equal(receipt.passed,true);const name=receipt.localRestoreDatabase;assert.match(name,/^compliance_cloud_restore_[a-f0-9]{10}$/);
+const receiptDir=process.argv.find(v=>v.startsWith('--receipt-dir='))?.slice(14)??'../verification/compliance-step2-20261026';
+const receipt=JSON.parse(await fs.readFile(path.join(receiptDir,'cloud-backup-restore.json'),'utf8'));assert.equal(receipt.passed,true);const name=receipt.localRestoreDatabase;assert.match(name,/^compliance_cloud_restore_[a-f0-9]{10}$/);
 const c=new pg.Client({connectionString:'postgresql://compliance_restore@127.0.0.1:55444/'+name});await c.connect();
 const quote=v=>'"'+v.replaceAll('"','""')+'"';
 try{
@@ -18,5 +19,5 @@ try{
  await c.query('BEGIN');await apply();await c.query('COMMIT');
  const after=(await c.query(statements.join(' UNION ALL '))).rows.sort(order);for(let i=0;i<before.length;i++)assert.ok(JSON.stringify(after[i])===JSON.stringify(before[i]),'Migration preservation mismatch in '+before[i].s+'.'+before[i].t);
  const result={passed:true,scope:'Isolated PostgreSQL18 restored copy only; live database unchanged',originalTablesPreserved:tables.length,originalRowsPreserved:before.reduce((n,r)=>n+r.n,0),tenantsMigrated:schemas.length,globalMigration:'014_global_compliance_history.sql',tenantTemplates:sql.length,dryRunRolledBack:true,originalColumnsAndRowsUnchanged:true,newStructuresAndMetadataOnly:true};
- await fs.writeFile('../verification/compliance-step2-20261026/restored-cloud-migration-results.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+ await fs.writeFile(path.join(receiptDir,'restored-cloud-migration-results.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result));
 }catch(error){await c.query('ROLLBACK').catch(()=>{});console.error('Restored-copy migration check failed:',error.message);process.exitCode=1;}finally{await c.end();}

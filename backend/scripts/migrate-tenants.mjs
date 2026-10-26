@@ -29,7 +29,7 @@ const DRY_RUN = process.argv.includes('--dry-run');
 const VALIDATE = process.argv.includes('--validate'); // execute and roll back, including DDL
 const requestedSchema=process.argv.find(v=>v.startsWith('--schema='))?.slice(9);
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL = process.env.PROVISIONING_DATABASE_URL ?? process.env.DATABASE_URL;
 if (!DATABASE_URL) {
   console.error('[tenants] DATABASE_URL is required');
   process.exit(1);

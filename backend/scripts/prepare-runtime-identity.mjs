@@ -14,7 +14,7 @@ try{
   const password=crypto.randomBytes(36).toString('base64url');const create=(await c.query("SELECT format('CREATE ROLE %I LOGIN PASSWORD %L NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT',$1::text,$2::text) sql",[role,password])).rows[0].sql;
   await c.query('BEGIN');try{await c.query(create);await c.query(sql);await c.query('COMMIT');}catch(e){await c.query('ROLLBACK');throw e;}
   const runtime=new URL(source);runtime.username=role;runtime.password=password;
-  const dir=path.join(process.env.LOCALAPPDATA??process.cwd(),'OrionSoft/compliance-workflow-20261026');await fs.mkdir(dir,{recursive:true});
+  const dir=process.env.RUNTIME_IDENTITY_OUTPUT_DIR??path.join(process.env.LOCALAPPDATA??process.cwd(),'OrionSoft/compliance-workflow-20261026');await fs.mkdir(dir,{recursive:true});
   await fs.writeFile(path.join(dir,'runtime-identity.private.json'),JSON.stringify({DATABASE_URL:runtime.href,PROVISIONING_DATABASE_URL:source.href,RUNTIME_DATABASE_ROLE:role}));
   console.log(JSON.stringify({applied:true,role,tenants:schemas.length,credentialsSavedPrivately:true,production:!local}));
  }
