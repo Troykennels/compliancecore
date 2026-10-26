@@ -31,3 +31,13 @@ Internal workflow sign-off is not external certification, legal compliance or pr
 Deployment uses additive tenant template `014_framework_implementation.sql`. Existing business rows and prices are not migrated or relabelled. The prior idle-timeout component remains removed; app-page cache headers now require revalidation while versioned assets remain immutable. A tab already executing old JavaScript must be refreshed to load the new release.
 
 Verification receipts are in `verification/framework-workflow-20261026/`. They distinguish isolated API/browser acceptance from read-only public checks. The pre-release PostgreSQL 18 row snapshot and fingerprints are stored privately outside Git; the local PostgreSQL 17 `pg_dump` attempt was version-incompatible and is not a valid backup. The consistent row snapshot includes column metadata and requires the matching schema/migration source for restoration; it is not represented as a native dump or a completed restore exercise.
+
+## Release verification — 26 October 2026
+
+Application source `ce883bd` is live at https://compliancecore-sand.vercel.app/. Railway deployment `061436ed-252d-43b2-8254-327328be1795` is SUCCESS. Vercel deployment `dpl_AcP5Gt7yJyx8tmFLAuWi59Y7Xmgb` is Ready, promoted and independently resolved through the public demo alias. Public HTML requires cache revalidation. Production health and implementation overview returned HTTP 200.
+
+Local builds and focused ESLint passed; 39 unit tests, 22 isolated implementation acceptance checks, and the full HTTP journey (117 successful requests, four expected refusals, no server errors) passed. GitHub's backend, frontend and Docker CI jobs passed. The existing automatic provider deployment jobs still fail; this release was deployed and verified through the authenticated operator CLIs rather than treating those jobs as successful.
+
+The 13-step workspace, SoA export, blocked premature certification, absence of the idle prompt and responsive layout passed on the actual demo at 1440 and 390 pixels, with no JavaScript page errors. Independent session checks at both widths verified login after an aged login page, 35 minutes of simulated authenticated inactivity, refresh-cookie restoration, guide access, explicit logout and protected-route rejection after logout. The live test allows a disabled sign-off button when no plan exists; the isolated owner test additionally asserts that self-approval is not offered.
+
+Read-only before/after fingerprints matched across all 143 checked existing business tables. The three additive tables were present in all 11 current tenant schemas. Task-owned local API, Vite and PostgreSQL services were stopped after verification; the isolated fixtures and private row snapshot were retained.

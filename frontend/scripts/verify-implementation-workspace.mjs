@@ -30,7 +30,9 @@ try{for(const width of [1440,390]){
  if(fixture){await page.getByRole('button',{name:'Draft a policy for this framework'}).click();assert.deepEqual(await page.getByLabel('Policy linked frameworks').evaluate(el=>[...el.selectedOptions].map(o=>o.value)),[fixture.frameworkId]);await page.getByLabel('Policy owner').waitFor();await page.getByRole('button',{name:'Cancel',exact:true}).click();}
  await choose('evidence','Attach current evidence');
  if(fixture){await page.getByRole('button',{name:'Attach evidence',exact:true}).first().click();await page.getByRole('heading',{name:'Show proof of this safeguard'}).waitFor();await page.getByLabel('Saved evidence for this control').waitFor();await page.getByRole('button',{name:'Close',exact:true}).click();}
- await choose('signoff','Independent implementation sign-off');assert.equal(await page.getByRole('button',{name:'Request independent review'}).isDisabled(),true);assert.equal(await page.getByRole('button',{name:'Sign off implementation'}).count(),0);
+ await choose('signoff','Independent implementation sign-off');assert.equal(await page.getByRole('button',{name:'Request independent review'}).isDisabled(),true);
+ const signoff=page.getByRole('button',{name:'Sign off implementation'});
+ if(fixture)assert.equal(await signoff.count(),0);else if(await signoff.count())assert.equal(await signoff.isDisabled(),true);
  await choose('certification','External certification');assert.equal(await page.getByRole('link',{name:'Open external audits',exact:true}).count(),0);await page.getByText('Complete all preceding steps',{exact:false}).waitFor();
  await page.screenshot({path:path.join(out,`${live?'live':'local'}-certification-${width}.png`),fullPage:true});
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);assert.deepEqual(errors,[]);
