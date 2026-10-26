@@ -113,6 +113,19 @@ try{
   const state=await implementationService.get(schema,iso.id,owner);summary.seedVersion=3;summary.frameworkStatus=state.status;summary.frameworkGates=state.gates.map(g=>({key:g.key,done:g.done}));summary.passed=true;
   await fs.mkdir('../verification/demo-refresh-20261026',{recursive:true});await fs.writeFile('../verification/demo-refresh-20261026/'+(restored?'restored-demo-refresh.json':'online-demo-refresh.json'),JSON.stringify(summary,null,2));console.log(JSON.stringify(summary));
  }
+ // Older fictional seeds used completed statuses without the new review proof.
+ // Keep their records, but return unsupported claims to the appropriate workflow.
+ phase='legacy demo consistency';
+ await c.query('SELECT set_config(\'app.current_user_id\',$1,false),set_config(\'app.current_user_role\',\'owner\',false)',[owner.id]);
+ const resetTraining=await c.query(`UPDATE ${q('training_records')} SET status='assigned',completed_at=NULL WHERE status='completed' AND completion_evidence_version_id IS NULL`);
+ const legacyPolicies=(await c.query(`SELECT id FROM ${q('policies')} WHERE deleted_at IS NULL AND status='published' AND content NOT LIKE '%Current demonstration workflow%'`)).rows;
+ for(const p of legacyPolicies)await policiesService.update(schema,p.id,{status:'draft'},owner);
+ const legacyAudits=(await c.query(`SELECT id FROM ${q('audits')} WHERE deleted_at IS NULL AND status='completed' AND report_evidence_version_id IS NULL`)).rows;
+ for(const a of legacyAudits)await auditsService.update(schema,a.id,{status:'in_progress'},owner);
+ const legacyFindings=(await c.query(`SELECT id FROM ${q('audit_findings')} WHERE status IN ('resolved','accepted') AND closure_evidence_version_id IS NULL`)).rows;
+ for(const f of legacyFindings)await auditsService.updateFinding(schema,f.id,{status:'open'},owner);
+ const consistency={passed:true,restored,trainingReturnedForVerification:resetTraining.rowCount,policiesReturnedToDraft:legacyPolicies.length,auditsReturnedForReview:legacyAudits.length,findingsReopened:legacyFindings.length,recordsDeleted:0};
+ await fs.writeFile('../verification/demo-refresh-20261026/'+(restored?'restored':'online')+'-demo-consistency.json',JSON.stringify(consistency,null,2));console.log(JSON.stringify(consistency));
 }catch(error){console.error('Managed demo refresh failed at '+phase+': '+error.message);process.exitCode=1;}
 finally{await c.query("SELECT pg_advisory_unlock(hashtext('managed-demo-step2-refresh'))").catch(()=>{});await c.end();await prisma.$disconnect();}
 process.exit(process.exitCode??0);
