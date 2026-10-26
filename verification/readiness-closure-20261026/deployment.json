@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "sourceCommit": "61e5004e300c80213041f387d0125418a670ab0e",
+  "frontendDeploymentId": "dpl_3PR6TpP735zkKUA3pgz6vD8F6kMb",
+  "backendDeploymentId": "1b5df67e-8fe4-41fa-976b-041fe1074db5",
+  "canonicalUrl": "https://compliancecore-sand.vercel.app",
+  "apiUrl": "https://compliancecore-api-production.up.railway.app",
+  "verifiedAt": "2026-10-26T22:26:57.245Z",
+  "checks": [
+    "Deployment metadata is available",
+    "Published frontend is ready",
+    "Frontend matches the verified source commit",
+    "Canonical alias metadata is available",
+    "Canonical domain is assigned to this deployment",
+    "Public sign-in page responds successfully",
+    "Public JavaScript entry loads",
+    "Live API health succeeds",
+    "Existing demo credentials remain valid",
+    "Updated audit API responds",
+    "Live audit API includes current report-review metadata"
+  ],
+  "retries": [
+    {
+      "path": "/assets/index-D47yoCAB.js",
+      "error": "TimeoutError"
+    },
+    {
+      "path": "/assets/index-D47yoCAB.js",
+      "error": "TimeoutError"
+    }
+  ]
+}

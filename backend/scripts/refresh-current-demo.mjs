@@ -113,6 +113,25 @@ try{
   const state=await implementationService.get(schema,iso.id,owner);summary.seedVersion=3;summary.frameworkStatus=state.status;summary.frameworkGates=state.gates.map(g=>({key:g.key,done:g.done}));summary.passed=true;
   await fs.mkdir('../verification/demo-refresh-20261026',{recursive:true});await fs.writeFile('../verification/demo-refresh-20261026/'+(restored?'restored-demo-refresh.json':'online-demo-refresh.json'),JSON.stringify(summary,null,2));console.log(JSON.stringify(summary));
  }
+ // Version four demonstrates the current audit and participant screens without
+ // replacing retained proof or re-completing existing records.
+ phase='current readiness examples';
+ const {trainingService}=await import('../dist/modules/training/training.service.js');
+ const {createTrainingSchema,assignTrainingRecordsSchema}=await import('../dist/modules/training/training.schema.js');
+ const currentAuditTitle='Demo: quarterly evidence review - awaiting independent review';
+ let currentAudit=await existing('audits','title=$1 AND deleted_at IS NULL',[currentAuditTitle]);
+ if(!currentAudit)currentAudit=await auditsService.create(schema,createAuditSchema.parse({title:currentAuditTitle,auditType:'internal',status:'in_progress',ownerId:owner.id,startDate:today,endDate:day(14),scope:disclaimer+' Review the fictional policy receipts, training assignments and sample access workpapers. This is a limited internal review, not certification.',summary:'Work in progress: the owner collects the report and supporting proof. A different authorised reviewer must check the current report before the audit can be completed.'}),owner);
+ const currentTrainingTitle='Demo: evidence handling and independent review';
+ let currentTraining=await existing('training_programs','title=$1 AND deleted_at IS NULL',[currentTrainingTitle]);
+ if(!currentTraining)currentTraining=await trainingService.create(schema,createTrainingSchema.parse({title:currentTrainingTitle,description:disclaimer+' Open Participants and assignments to see who is assigned. Use Training proof to record attendance or assessment evidence and have it checked by an authorised person other than the participant. An assignment alone does not prove completion.',category:'Compliance awareness',provider:'Fictional internal demonstration',isMandatory:true,ownerId:owner.id,status:'active'}),owner);
+ const participantRows=await trainingService.listRecords(schema,currentTraining.id);
+ const missingParticipants=[owner.id,reviewer.id].filter(id=>!participantRows.some(r=>(r.userId??r.user_id)===id));
+ if(missingParticipants.length)await trainingService.assignRecords(schema,currentTraining.id,assignTrainingRecordsSchema.parse({userIds:missingParticipants,dueDate:day(14),status:'assigned'}),owner);
+ await c.query('UPDATE global.presentation_demos SET seed_version=GREATEST(seed_version,4) WHERE demo_key=$1 AND tenant_id=$2',['orionsoftlimited',tenantId]);
+ const readiness={passed:true,seedVersion:4,restored,auditAwaitingReview:currentAudit.id,trainingProgramme:currentTraining.id,newAssignments:missingParticipants.length,recordsDeleted:0,passwordChanged:false,retainedEvidenceReplaced:false};
+ await fs.mkdir('../verification/readiness-closure-20261026',{recursive:true});
+ await fs.writeFile('../verification/readiness-closure-20261026/demo-account-update.json',JSON.stringify(readiness,null,2));
+ console.log(JSON.stringify(readiness));
  // Older fictional seeds used completed statuses without the new review proof.
  // Keep their records, but return unsupported claims to the appropriate workflow.
  phase='legacy demo consistency';

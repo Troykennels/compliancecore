@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "nonDemoTablesUnchanged": 520,
+  "customerContractsUnchanged": 10,
+  "scope": "All original columns of non-demo tenant tables and customer commercial terms"
+}
