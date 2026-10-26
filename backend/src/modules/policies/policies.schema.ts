@@ -21,6 +21,7 @@ export const createPolicySchema = z.object({
 export const updatePolicySchema = createPolicySchema.partial();
 
 export const listPoliciesSchema = z.object({
+  frameworkId: uuidSchema.optional(),
   page:         z.coerce.number().int().min(1).optional().default(1),
   limit:        z.coerce.number().int().min(1).max(200).optional().default(50),
   status:       statusEnum.optional(),

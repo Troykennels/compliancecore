@@ -47,6 +47,7 @@ export const policiesRepository = {
     if (status) { conditions.push(`p.status = $${idx++}`); params.push(status); }
     if (documentType) { conditions.push(`p.document_type = $${idx++}`); params.push(documentType); }
     if (ownerId) { conditions.push(`p.owner_id = $${idx++}::uuid`); params.push(ownerId); }
+    if (filters.frameworkId) { conditions.push(`($${idx}::text=ANY(p.framework_ids) OR EXISTS(SELECT 1 FROM framework_data.frameworks f WHERE f.id=$${idx}::uuid AND f.code=ANY(p.framework_ids)))`);params.push(filters.frameworkId);idx++; }
     if (q) {
       conditions.push(`(p.title ILIKE $${idx} OR p.description ILIKE $${idx})`);
       params.push(`%${q}%`);
@@ -168,8 +169,6 @@ export const policiesRepository = {
     const result = await tx.$executeRaw`
       UPDATE policies SET
         status      = 'published',
-        approved_at = NOW(),
-        approved_by = ${actorId}::uuid,
         updated_by  = ${actorId}::uuid,
         updated_at  = NOW()
       WHERE id = ${id}::uuid AND deleted_at IS NULL

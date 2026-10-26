@@ -7,9 +7,17 @@ import { cn } from '@/lib/utils';
 import type { Policy } from '../types/policies.types';
 import { DOCUMENT_TYPE_CONFIG, POLICY_STATUS_CONFIG } from '../types/policies.types';
 import { useCreatePolicy, useUpdatePolicy } from '../hooks/use-policies';
+import { useImplementationMembers } from '@/features/frameworks/implementation';
+import { useFrameworks } from '@/features/frameworks/hooks/use-frameworks';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
+import type { ApiResponse } from '@/types/api';
+import { useAuthStore } from '@/stores/auth.store';
 
 const schema = z.object({
   title:         z.string().min(1, 'Title is required').max(500),
+  ownerId:       z.string().optional(),
+  frameworkIds:  z.array(z.string()).default([]),
   description:   z.string().max(5000).optional(),
   documentType:  z.enum(['policy', 'procedure', 'standard', 'guideline']).default('policy'),
   status:        z.enum(['draft', 'in_review', 'approved', 'published', 'archived']).default('draft'),
@@ -24,10 +32,13 @@ interface Props {
   open: boolean;
   onClose: () => void;
   policy?: Policy; // if set, editing; otherwise creating
+  initialFrameworkId?: string;
 }
 
 const DEFAULTS: FormValues = {
   title:         '',
+  ownerId:       '',
+  frameworkIds:  [],
   description:   '',
   documentType:  'policy',
   status:        'draft',
@@ -36,7 +47,12 @@ const DEFAULTS: FormValues = {
   tags:          '',
 };
 
-export function PolicyFormModal({ open, onClose, policy }: Props): JSX.Element | null {
+export function PolicyFormModal({ open, onClose, policy, initialFrameworkId }: Props): JSX.Element | null {
+  const role=useAuthStore(s=>s.activeTenant?.role);
+  const canWrite=['owner','admin','compliance_manager','msp_admin'].includes(role??'');
+  const {data:members=[]}=useImplementationMembers(open);
+  const {data:frameworks=[]}=useFrameworks();
+  const {data:versions=[]}=useQuery({queryKey:['policies',policy?.id,'versions'],queryFn:()=>apiClient.get<ApiResponse<Array<{version_number:number;content:string|null;change_note:string|null;created_at:string}>>>(`/policies/${policy!.id}/versions`).then(r=>r.data.data),enabled:open&&Boolean(policy?.id)});
   const isEditing = !!policy;
   const { mutate: create, isPending: isCreating } = useCreatePolicy();
   const { mutate: update, isPending: isUpdating } = useUpdatePolicy();
@@ -57,21 +73,26 @@ export function PolicyFormModal({ open, onClose, policy }: Props): JSX.Element |
     if (policy) {
       reset({
         title:         policy.title,
+        ownerId:       policy.ownerId ?? '',
+        frameworkIds:  policy.frameworkIds,
         description:   policy.description ?? '',
         documentType:  policy.documentType,
-        status:        policy.status,
+        status:        ['approved','published'].includes(policy.status) ? 'draft' : policy.status,
         content:       policy.content ?? '',
         reviewDueDate: policy.reviewDueDate ? policy.reviewDueDate.slice(0, 10) : '',
         tags:          policy.tags.join(', '),
       });
     } else {
-      reset(DEFAULTS);
+      reset({...DEFAULTS,frameworkIds:initialFrameworkId?[initialFrameworkId]:[]});
     }
-  }, [open, policy, reset]);
+  }, [open, policy, reset, initialFrameworkId]);
 
   const onSubmit = (values: FormValues) => {
+    if(!canWrite)return;
     const input = {
       title:         values.title,
+      ownerId:       values.ownerId || null,
+      frameworkIds:  values.frameworkIds,
       description:   values.description || null,
       documentType:  values.documentType,
       status:        values.status,
@@ -135,7 +156,7 @@ export function PolicyFormModal({ open, onClose, policy }: Props): JSX.Element |
 
               <FormField label="Status" error={errors.status?.message}>
                 <select {...register('status')} className={inputClass(false)}>
-                  {Object.entries(POLICY_STATUS_CONFIG).map(([value, cfg]) => (
+                  {Object.entries(POLICY_STATUS_CONFIG).filter(([value])=>!['approved','published'].includes(value) && (isEditing||value==='draft')).map(([value, cfg]) => (
                     <option key={value} value={value}>{cfg.label}</option>
                   ))}
                 </select>
@@ -144,6 +165,8 @@ export function PolicyFormModal({ open, onClose, policy }: Props): JSX.Element |
               <FormField label="Review Due Date" error={errors.reviewDueDate?.message}>
                 <input type="date" {...register('reviewDueDate')} className={inputClass(false)} />
               </FormField>
+              <FormField label="Responsible owner"><select aria-label="Policy owner" {...register('ownerId')} className={inputClass(false)}><option value="">Select an active member</option>{members.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select></FormField>
+              <FormField label="Linked frameworks"><select multiple aria-label="Policy linked frameworks" {...register('frameworkIds')} className={inputClass(false)}>{frameworks.map(f=><option key={f.id} value={f.id}>{f.shortName||f.name}</option>)}</select></FormField>
 
               <FormField label="Tags" error={errors.tags?.message}>
                 <input
@@ -156,6 +179,7 @@ export function PolicyFormModal({ open, onClose, policy }: Props): JSX.Element |
               <FormField label="Content" error={errors.content?.message} className="col-span-2">
                 <textarea {...register('content')} rows={6} className={cn(inputClass(false), 'resize-none')} />
               </FormField>
+              {policy&&<details className="col-span-2 rounded-lg border border-slate-200 p-3"><summary className="cursor-pointer text-sm font-semibold">Saved policy versions ({versions.length})</summary>{versions.map(v=><details key={v.version_number} className="mt-2 border-t pt-2"><summary className="cursor-pointer text-xs">Version {v.version_number} · {new Date(v.created_at).toLocaleDateString()} · {v.change_note}</summary><pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-words text-xs">{v.content||'No content recorded.'}</pre></details>)}</details>}
             </div>
           </div>
 
@@ -170,7 +194,7 @@ export function PolicyFormModal({ open, onClose, policy }: Props): JSX.Element |
             </button>
             <button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || !canWrite}
               className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
             >
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}

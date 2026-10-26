@@ -51,11 +51,18 @@ export const frameworksService = {
   // control per category — better than adopting nothing, and clearly reported
   // via `source` so the UI can say so rather than implying full coverage.
   async adopt(schemaName: string, id: string, actor: Actor): Promise<AdoptResult> {
+    if (!['owner', 'admin', 'compliance_manager', 'msp_admin'].includes(actor.role ?? '')) {
+      throw new AppError('An organisation administrator or compliance manager must start the implementation.', 403, 'FORBIDDEN');
+    }
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
+      await tx.$queryRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))::text', 'framework-implementation:' + id);
+      const plans = await tx.$queryRawUnsafe<unknown[]>('SELECT 1 FROM framework_implementations WHERE framework_id=$1::uuid', id);
+      if (!plans.length) throw new AppError('Record the scope, objective, accountable owner and target date before starting implementation.', 409, 'SCOPE_REQUIRED');
 
       const framework = await frameworksRepository.findById(tx, id);
       if (!framework) throw new NotFoundError('Framework not found.');
+      if (!framework.isActive || !framework.controls.length) throw new AppError('This framework does not have an active published control library. It can be reviewed in the catalogue but cannot yet be implemented.', 409, 'LIBRARY_REQUIRED');
 
       const existing = await frameworksRepository.existingControlRefs(tx, id);
 
@@ -89,6 +96,8 @@ export const frameworksService = {
         });
       }
 
+      await tx.$executeRawUnsafe("UPDATE framework_implementations SET status='in_progress',review_hash=NULL,updated_at=NOW() WHERE framework_id=$1::uuid", id);
+      await tx.$executeRawUnsafe("INSERT INTO framework_implementation_events(framework_id,actor_id,action,note) VALUES($1::uuid,$2::uuid,'implementation_started',$3)", id, actor.id, `${created} controls prepared; ${skipped} existing records retained`);
       return { created, skipped, source };
     });
   },

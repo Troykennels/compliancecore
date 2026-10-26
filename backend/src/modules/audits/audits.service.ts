@@ -1,6 +1,7 @@
 import { withTenantSchema } from '../../lib/prisma';
 import { setAuditSessionVars } from '../../middleware/audit.middleware';
-import { NotFoundError } from '../../lib/errors';
+import { AppError, NotFoundError } from '../../lib/errors';
+import { implementationService } from '../frameworks/implementation.service';
 import { auditsRepository } from './audits.repository';
 import type {
   CreateAuditInput,
@@ -28,6 +29,10 @@ export const auditsService = {
   },
 
   async create(schemaName: string, input: CreateAuditInput, actor: Actor) {
+    if(input.auditType==='certification') {
+      const implementation=(await implementationService.overview(schemaName,actor)).find(x=>[x.framework.id,x.framework.code].includes(input.frameworkRef??''));
+      if(implementation?.status!=='implemented')throw new AppError('Complete the framework implementation and obtain independent sign-off before creating its certification assessment.',409,'IMPLEMENTATION_REQUIRED');
+    }
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
       const { id } = await auditsRepository.create(tx, { ...input, createdBy: actor.id });
@@ -36,6 +41,11 @@ export const auditsService = {
   },
 
   async update(schemaName: string, id: string, input: UpdateAuditInput, actor: Actor) {
+    const before=await this.getById(schemaName,id);
+    if((input.auditType??before.auditType)==='certification') {
+      const implementation=(await implementationService.overview(schemaName,actor)).find(x=>[x.framework.id,x.framework.code].includes(input.frameworkRef??before.frameworkRef??''));
+      if(implementation?.status!=='implemented')throw new AppError('A current signed-off implementation is required for this certification assessment.',409,'IMPLEMENTATION_REQUIRED');
+    }
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
       const ok = await auditsRepository.update(tx, id, { ...input, updatedBy: actor.id });

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { ImplementationOverview } from '@/features/frameworks/components/implementation-overview';
 import {
   ShieldCheck, AlertTriangle, Calendar, Bell,
   CheckCircle, BarChart2, ArrowRight,
@@ -114,9 +115,10 @@ export function DashboardPage() {
   return (
     <PageShell width="wide">
       <PageHeader
-        title="Dashboard"
+        title="Organisation assurance overview"
         description={`Compliance overview — ${fmt.formatDateMedium(new Date())}`}
       />
+      <ImplementationOverview />
 
       {/* Headline metrics. Single column on a phone: two 3xl figures side by
           side at 375px truncate into meaninglessness. */}

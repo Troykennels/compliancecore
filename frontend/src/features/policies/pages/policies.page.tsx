@@ -1,11 +1,13 @@
 import { useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useAuthStore } from '@/stores/auth.store';
 import { parseISO, isPast } from 'date-fns';
 import {
   Plus, Search, FileText, MoreHorizontal, Pencil, Trash2, Send,
   AlertTriangle, RefreshCw, ChevronLeft, ChevronRight, AlertCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { usePolicies, useDeletePolicy, usePublishPolicy } from '../hooks/use-policies';
+import { usePolicies, useDeletePolicy, usePublishPolicy, useApprovePolicy } from '../hooks/use-policies';
 import { PolicyFormModal } from '../components/policy-form-modal';
 import type { Policy, PolicyStatus } from '../types/policies.types';
 import { DOCUMENT_TYPE_CONFIG, POLICY_STATUS_CONFIG } from '../types/policies.types';
@@ -14,7 +16,13 @@ import { SkeletonTable } from '@/components/ui';
 
 const PAGE_SIZE = 20;
 
-export function PoliciesPage(): JSX.Element {
+export function PoliciesPage(): JSX.Element {
+  const [routeParams]=useSearchParams();
+  const user=useAuthStore(s=>s.user);
+  const role=useAuthStore(s=>s.activeTenant?.role);
+  const canWrite=['owner','admin','compliance_manager','msp_admin'].includes(role??'');
+  const {mutate:approvePolicy}=useApprovePolicy();
+
   const fmt = useOrgFormat();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<PolicyStatus | ''>('');
@@ -25,6 +33,7 @@ export function PoliciesPage(): JSX.Element {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const { data, isLoading, isError, refetch } = usePolicies({
+    frameworkId:routeParams.get('frameworkId')||undefined,
     q: search || undefined,
     status: statusFilter || undefined,
     page,
@@ -71,6 +80,7 @@ export function PoliciesPage(): JSX.Element {
           </div>
           <button
             onClick={openCreate}
+            disabled={!canWrite}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
@@ -78,6 +88,7 @@ export function PoliciesPage(): JSX.Element {
           </button>
         </div>
 
+        <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3 text-sm text-indigo-950">Draft → independent approval → publication → scheduled review. A changed approved policy returns to draft. <Link className="font-semibold underline" to={routeParams.get('frameworkId')?`/frameworks?framework=${routeParams.get('frameworkId')}`:'/frameworks'}>Return to implementation steps</Link></div>
         {/* Filters */}
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <div className="relative">
@@ -104,7 +115,7 @@ export function PoliciesPage(): JSX.Element {
         </div>
 
         {/* Table */}
-        <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white overflow-x-auto shadow-sm">
           {isLoading ? (
             <SkeletonTable rows={8} columns={7} />
           ) : isError ? (
@@ -180,9 +191,10 @@ export function PoliciesPage(): JSX.Element {
                                 onClick={() => { openEdit(policy); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                               >
-                                <Pencil className="h-4 w-4" /> Edit
+                                <Pencil className="h-4 w-4" /> {canWrite?'Edit':'View'}
                               </button>
-                              {policy.status !== 'published' && (
+                              {canWrite&&policy.status==='in_review'&&policy.ownerId!==user?.id&&policy.createdBy!==user?.id&&policy.updatedBy!==user?.id&&<button className="flex w-full items-center gap-2 px-3 py-2 text-sm text-indigo-700 hover:bg-slate-50" onClick={()=>{approvePolicy(policy.id);setMenuOpenId(null);}}>Approve policy</button>}
+                              {canWrite&&policy.status === 'approved' && (
                                 <button
                                   onClick={() => { publishPolicy(policy.id); setMenuOpenId(null); }}
                                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
@@ -240,6 +252,7 @@ export function PoliciesPage(): JSX.Element {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         policy={editingPolicy}
+        initialFrameworkId={routeParams.get('frameworkId')||undefined}
       />
 
       {/* Delete confirmation */}

@@ -46,6 +46,7 @@ export interface CreatePolicyInput {
 export type UpdatePolicyInput = Partial<CreatePolicyInput>;
 
 export interface PolicyFilters {
+  frameworkId?: string;
   page?:         number;
   limit?:        number;
   status?:       PolicyStatus;

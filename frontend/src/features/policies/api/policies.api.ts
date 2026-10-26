@@ -28,6 +28,7 @@ export const policiesApi = {
   publish(id: string) {
     return apiClient.post<ApiResponse<Policy>>(`/policies/${id}/publish`);
   },
+  approve(id:string) {return apiClient.post<ApiResponse<Policy>>(`/policies/${id}/approve`);},
 
   remove(id: string) {
     return apiClient.delete(`/policies/${id}`);

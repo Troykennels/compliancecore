@@ -1,5 +1,6 @@
-import { X, Loader2, Layers, Download, AlertTriangle } from 'lucide-react';
-import { useFramework, useAdoptFramework } from '../hooks/use-frameworks';
+import { X, Layers, Download, AlertTriangle } from 'lucide-react';
+import { useFramework } from '../hooks/use-frameworks';
+import { useNavigate } from 'react-router-dom';
 import { SkeletonCard } from '@/components/ui';
 
 interface Props {
@@ -9,7 +10,7 @@ interface Props {
 
 export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Element {
   const { data: framework, isLoading, isError } = useFramework(frameworkId);
-  const { mutate: adopt, isPending: isAdopting } = useAdoptFramework();
+  const navigate=useNavigate();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -109,12 +110,12 @@ export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Eleme
           </button>
           <button
             type="button"
-            disabled={isAdopting || isLoading || isError || !framework}
-            onClick={() => adopt(frameworkId, { onSuccess: onClose })}
+            disabled={isLoading || isError || !framework}
+            onClick={() => {navigate('/frameworks?framework='+frameworkId);onClose();}}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
           >
-            {isAdopting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            Adopt Framework
+            <Download className="h-4 w-4" />
+            Open implementation steps
           </button>
         </div>
       </div>

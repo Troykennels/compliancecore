@@ -6,9 +6,11 @@ import { requirePermission } from '../../middleware/rbac.middleware';
 import { asyncHandler } from '../../lib/asyncHandler';
 import { countAdoptedFrameworks } from '../../lib/usage-counts';
 import * as ctrl from './frameworks.controller';
+import { implementationRouter } from './implementation.router';
 
 const router = Router();
 router.use(authenticate(), resolveTenant, enforceEntitlement());
+router.use(implementationRouter);
 
 // Frameworks feed the controls module, so they reuse the controls permissions.
 router.get('/',            requirePermission('controls:read'),  asyncHandler(ctrl.listFrameworks));

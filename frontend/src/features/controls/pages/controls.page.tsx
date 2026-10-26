@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { parseISO, isPast } from 'date-fns';
 import {
   Plus, Search, ShieldCheck, MoreHorizontal, Pencil, Trash2, CheckCircle2,
@@ -21,6 +22,7 @@ import {
 const PAGE_SIZE = 20;
 
 export function ControlsPage(): JSX.Element {
+  const [routeParams]=useSearchParams();
   const fmt = useOrgFormat();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ControlImplementationStatus | ''>('');
@@ -33,6 +35,7 @@ export function ControlsPage(): JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, isError, refetch } = useControls({
+    frameworkId: routeParams.get('frameworkId')||undefined,
     q: search || undefined,
     status: statusFilter || undefined,
     criticality: criticalityFilter || undefined,
@@ -119,6 +122,7 @@ export function ControlsPage(): JSX.Element {
           </Button>
         }
       />
+      <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-3 text-sm text-indigo-950">Work from the agreed scope and SoA, assign responsibility, record how the safeguard operates, attach evidence and review the result. <Link className="font-semibold underline" to={routeParams.get('frameworkId')?`/frameworks?framework=${routeParams.get('frameworkId')}`:'/frameworks'}>Return to implementation steps</Link></div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
@@ -189,7 +193,7 @@ export function ControlsPage(): JSX.Element {
             <EmptyState
               icon={<ShieldCheck />}
               title="No controls yet"
-              description="Controls are the individual safeguards you implement and evidence. Adopt a framework to bring in its full control set, or add one of your own."
+              description="Controls are safeguards you implement and evidence. Start a scoped framework implementation to prepare its control set, or add a custom control."
               action={<Button onClick={openCreate}><Plus /> New control</Button>}
             />
           )

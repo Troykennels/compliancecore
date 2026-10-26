@@ -116,10 +116,13 @@ async function main() {
     const detail = data(await call('GET', `/api/frameworks/${iso.id}`));
     assert('ISO 27001 library is populated', (detail?.controls ?? []).length > 0);
 
-    const adopt = data(await call('POST', `/api/frameworks/${iso.id}/adopt`, {}));
-    assert('adoption creates controls', (adopt?.created ?? 0) > 0);
+    const blocked = await call('POST', `/api/frameworks/${iso.id}/adopt`, {});
+    assert('unscoped one-click adoption is refused', blocked.status===409);
+    await call('PUT',`/api/frameworks/${iso.id}/implementation`,{scope:'The E2E organisation, its staff and customer information systems.',objective:'Implement and independently review the agreed safeguards.',ownerId:userId,targetDate:new Date(Date.now()+30*86400000).toISOString().slice(0,10)});
+    const adopt = data(await call('POST', `/api/frameworks/${iso.id}/implementation/start`, {}));
+    assert('scoped implementation prepares controls', (adopt?.created ?? 0) > 0);
 
-    const again = data(await call('POST', `/api/frameworks/${iso.id}/adopt`, {}));
+    const again = data(await call('POST', `/api/frameworks/${iso.id}/implementation/start`, {}));
     assert('re-adoption is idempotent', (again?.created ?? 0) === 0 && (again?.skipped ?? 0) > 0);
 
     const controls = data(await call('GET', '/api/controls'));
@@ -151,7 +154,7 @@ async function main() {
 
   r = await call('POST', '/api/controls', {
     controlRef: `E2E-${stamp % 100000}`, title: 'E2E control',
-    category: 'Access Control', criticality: 'high', implementationStatus: 'implemented',
+    category: 'Access Control', criticality: 'high', implementationStatus: 'planned',
   });
   made.control = data(r)?.id;
   if (made.control) {
@@ -163,7 +166,8 @@ async function main() {
   made.policy = data(r)?.id;
   if (made.policy) {
     await call('GET', `/api/policies/${made.policy}`);
-    await call('POST', `/api/policies/${made.policy}/publish`, {});
+    const prematurePublication=await call('POST', `/api/policies/${made.policy}/publish`, {});
+    assert('unapproved policy cannot be published',prematurePublication.status===409||prematurePublication.status===422);
   }
 
   r = await call('POST', '/api/risks', { title: 'E2E risk', category: 'security' });

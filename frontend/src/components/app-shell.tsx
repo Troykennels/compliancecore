@@ -29,82 +29,49 @@ interface NavGroup {
 }
 
 const NAV_GROUPS: NavGroup[] = [
-  {
-    items: [
-      { label: 'My Guide', to: PATHS.GUIDE, icon: <BookOpen className="h-4 w-4" /> },
-      { label: 'Dashboard',         to: PATHS.DASHBOARD,          icon: <LayoutDashboard className="h-4 w-4" /> },
-    ],
-  },
-  {
-    heading: 'Compliance',
-    items: [
-      { label: 'Compliance Score',  to: PATHS.COMPLIANCE_SCORE,   icon: <BarChart2 className="h-4 w-4" /> },
-      { label: 'Calendar',          to: PATHS.CALENDAR,           icon: <Calendar className="h-4 w-4" /> },
-      { label: 'Expiry Tracker',    to: PATHS.EXPIRY,             icon: <Clock className="h-4 w-4" /> },
-    ],
-  },
-  {
-    heading: 'Governance',
-    items: [
-      { label: 'Frameworks',        to: PATHS.FRAMEWORKS,         icon: <Library className="h-4 w-4" /> },
-      { label: 'Controls',          to: PATHS.CONTROLS,           icon: <ShieldCheck className="h-4 w-4" /> },
-      { label: 'Policies',          to: PATHS.POLICIES,           icon: <ScrollText className="h-4 w-4" /> },
-      { label: 'Risk Register',     to: PATHS.RISKS,              icon: <Flame className="h-4 w-4" /> },
-      { label: 'Incidents',         to: PATHS.INCIDENTS,          icon: <Siren className="h-4 w-4" /> },
-      { label: 'Vendors',           to: PATHS.VENDORS,            icon: <Store className="h-4 w-4" /> },
-      { label: 'Evidence Hub',      to: PATHS.EVIDENCE,           icon: <FileArchive className="h-4 w-4" /> },
-    ],
-  },
-  {
-    heading: 'Organization',
-    items: [
-      { label: 'Branches',          to: PATHS.BRANCHES,           icon: <GitBranch className="h-4 w-4" /> },
-      { label: 'Departments',       to: PATHS.DEPARTMENTS,        icon: <Building2 className="h-4 w-4" /> },
-    ],
-  },
-  {
-    heading: 'Assurance',
-    items: [
-      { label: 'Audits',            to: PATHS.AUDITS,             icon: <ClipboardCheck className="h-4 w-4" /> },
-      { label: 'Training',          to: PATHS.TRAINING,           icon: <GraduationCap className="h-4 w-4" /> },
-    ],
-  },
-  {
-    heading: 'Workflows',
-    items: [
-      { label: 'Tasks',             to: PATHS.TASKS,              icon: <CheckSquare className="h-4 w-4" /> },
-      { label: 'Approvals',         to: PATHS.APPROVALS,          icon: <ListChecks className="h-4 w-4" /> },
-      { label: 'Signatures',        to: PATHS.SIGNATURES,         icon: <ShieldAlert className="h-4 w-4" /> },
-      { label: 'Escalations',       to: PATHS.ESCALATIONS,        icon: <AlertTriangle className="h-4 w-4" /> },
-    ],
-  },
-  {
-    heading: 'AI',
-    items: [
-      { label: 'AI Tools',          to: PATHS.AI_TOOLS,           icon: <Sparkles className="h-4 w-4" /> },
-    ],
-  },
-  {
-    heading: 'Reports',
-    items: [
-      { label: 'Executive Dashboard', to: PATHS.REPORTS,      icon: <PieChart className="h-4 w-4" /> },
-      { label: 'Analytics',           to: PATHS.ANALYTICS,    icon: <TrendingUp className="h-4 w-4" /> },
-    ],
-  },
-  {
-    heading: 'Platform',
-    items: [
-      { label: 'Integrations',        to: PATHS.INTEGRATIONS, icon: <Plug className="h-4 w-4" /> },
-    ],
-  },
-  {
-    heading: 'Billing',
-    items: [
-      { label: 'Billing Overview',  to: PATHS.BILLING,                 icon: <CreditCard className="h-4 w-4" /> },
-      { label: 'Plans & Upgrade',   to: PATHS.BILLING_PLANS,           icon: <ShieldCheck className="h-4 w-4" /> },
-      { label: 'Invoices',          to: PATHS.BILLING_INVOICES,        icon: <FileText className="h-4 w-4" /> },
-    ],
-  },
+  { items: [
+    { label: 'Organisation overview', to: PATHS.DASHBOARD, icon: <LayoutDashboard className="h-4 w-4" /> },
+    { label: 'My Guide', to: PATHS.GUIDE, icon: <BookOpen className="h-4 w-4" /> },
+  ] },
+  { heading: 'Implementation', items: [
+    { label: 'Frameworks & SoA', to: PATHS.FRAMEWORKS, icon: <Library className="h-4 w-4" /> },
+    { label: 'Policies', to: PATHS.POLICIES, icon: <ScrollText className="h-4 w-4" /> },
+    { label: 'Controls', to: PATHS.CONTROLS, icon: <ShieldCheck className="h-4 w-4" /> },
+    { label: 'Evidence Hub', to: PATHS.EVIDENCE, icon: <FileArchive className="h-4 w-4" /> },
+    { label: 'Training', to: PATHS.TRAINING, icon: <GraduationCap className="h-4 w-4" /> },
+    { label: 'Audits', to: PATHS.AUDITS, icon: <ClipboardCheck className="h-4 w-4" /> },
+  ] },
+  { heading: 'Daily operations', items: [
+    { label: 'Risk Register', to: PATHS.RISKS, icon: <Flame className="h-4 w-4" /> },
+    { label: 'Incidents', to: PATHS.INCIDENTS, icon: <Siren className="h-4 w-4" /> },
+    { label: 'Vendors', to: PATHS.VENDORS, icon: <Store className="h-4 w-4" /> },
+  ] },
+  { heading: 'Actions and decisions', items: [
+    { label: 'Tasks', to: PATHS.TASKS, icon: <CheckSquare className="h-4 w-4" /> },
+    { label: 'Approvals', to: PATHS.APPROVALS, icon: <ListChecks className="h-4 w-4" /> },
+    { label: 'Signatures', to: PATHS.SIGNATURES, icon: <ShieldAlert className="h-4 w-4" /> },
+    { label: 'Escalations', to: PATHS.ESCALATIONS, icon: <AlertTriangle className="h-4 w-4" /> },
+  ] },
+  { heading: 'Monitor and report', items: [
+    { label: 'Compliance Score', to: PATHS.COMPLIANCE_SCORE, icon: <BarChart2 className="h-4 w-4" /> },
+    { label: 'Calendar', to: PATHS.CALENDAR, icon: <Calendar className="h-4 w-4" /> },
+    { label: 'Expiry Tracker', to: PATHS.EXPIRY, icon: <Clock className="h-4 w-4" /> },
+    { label: 'Executive Dashboard', to: PATHS.REPORTS, icon: <PieChart className="h-4 w-4" /> },
+    { label: 'Analytics', to: PATHS.ANALYTICS, icon: <TrendingUp className="h-4 w-4" /> },
+  ] },
+  { heading: 'Organisation', items: [
+    { label: 'Branches', to: PATHS.BRANCHES, icon: <GitBranch className="h-4 w-4" /> },
+    { label: 'Departments', to: PATHS.DEPARTMENTS, icon: <Building2 className="h-4 w-4" /> },
+  ] },
+  { heading: 'Tools', items: [
+    { label: 'AI Tools', to: PATHS.AI_TOOLS, icon: <Sparkles className="h-4 w-4" /> },
+    { label: 'Integrations', to: PATHS.INTEGRATIONS, icon: <Plug className="h-4 w-4" /> },
+  ] },
+  { heading: 'Billing', items: [
+    { label: 'Billing Overview', to: PATHS.BILLING, icon: <CreditCard className="h-4 w-4" /> },
+    { label: 'Plans & Upgrade', to: PATHS.BILLING_PLANS, icon: <ShieldCheck className="h-4 w-4" /> },
+    { label: 'Invoices', to: PATHS.BILLING_INVOICES, icon: <FileText className="h-4 w-4" /> },
+  ] },
 ];
 
 // Owner-only navigation. Kept out of NAV_GROUPS so it is never rendered for a

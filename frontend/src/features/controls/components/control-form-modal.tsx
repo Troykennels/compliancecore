@@ -7,9 +7,11 @@ import { cn } from '@/lib/utils';
 import type { Control } from '../types/controls.types';
 import { CRITICALITY_CONFIG, IMPLEMENTATION_STATUS_CONFIG } from '../types/controls.types';
 import { useCreateControl, useUpdateControl } from '../hooks/use-controls';
+import { useImplementationMembers } from '@/features/frameworks/implementation';
 
 const schema = z.object({
   controlRef:           z.string().min(1, 'Control reference is required').max(100),
+  ownerId:              z.string().optional(),
   title:                z.string().min(1, 'Title is required').max(500),
   description:          z.string().max(10000).optional(),
   category:             z.string().max(255).optional(),
@@ -37,6 +39,7 @@ interface Props {
 
 const DEFAULTS: FormValues = {
   controlRef:           '',
+  ownerId:              '',
   title:                '',
   description:          '',
   category:             '',
@@ -50,6 +53,7 @@ const DEFAULTS: FormValues = {
 
 export function ControlFormModal({ open, onClose, control }: Props): JSX.Element | null {
   const isEditing = !!control;
+  const {data:members=[]}=useImplementationMembers(open);
   const { mutate: create, isPending: isCreating } = useCreateControl();
   const { mutate: update, isPending: isUpdating } = useUpdateControl();
   const isPending = isCreating || isUpdating;
@@ -69,6 +73,7 @@ export function ControlFormModal({ open, onClose, control }: Props): JSX.Element
     if (control) {
       reset({
         controlRef:           control.controlRef,
+        ownerId:              control.ownerId ?? '',
         title:                control.title,
         description:          control.description ?? '',
         category:             control.category ?? '',
@@ -87,6 +92,7 @@ export function ControlFormModal({ open, onClose, control }: Props): JSX.Element
   const onSubmit = (values: FormValues) => {
     const input = {
       controlRef:           values.controlRef,
+      ownerId:              values.ownerId || null,
       title:                values.title,
       description:          values.description || null,
       category:             values.category || null,
@@ -176,6 +182,9 @@ export function ControlFormModal({ open, onClose, control }: Props): JSX.Element
 
               <FormField label="Due Date" error={errors.dueDate?.message}>
                 <input type="date" {...register('dueDate')} className={inputClass(false)} />
+              </FormField>
+              <FormField label="Responsible owner">
+                <select aria-label="Control owner" {...register('ownerId')} className={inputClass(false)}><option value="">Select an active member</option>{members.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select>
               </FormField>
 
               <FormField label="Review Frequency (days)" error={errors.reviewFrequencyDays?.message}>

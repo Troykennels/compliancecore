@@ -78,3 +78,6 @@ export function usePublishPolicy() {
     onError: errorMessage('Failed to publish policy.'),
   });
 }
+export function useApprovePolicy() {
+ const qc=useQueryClient();return useMutation({mutationFn:(id:string)=>policiesApi.approve(id),onSuccess:()=>{void qc.invalidateQueries({queryKey:policyKeys.all});void qc.invalidateQueries({queryKey:['implementation']});toast.success('Independent policy approval recorded.');},onError:errorMessage('Could not approve this policy.')});
+}
