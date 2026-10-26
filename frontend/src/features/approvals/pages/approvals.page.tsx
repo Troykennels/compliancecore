@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import React, { useState } from 'react';
 import { Plus, GitBranch, Clock, CheckCircle, XCircle, AlertCircle, Trash2, Eye, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -148,7 +149,7 @@ export function ApprovalsPage() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-            >
+             aria-label="Filter: All Statuses" >
               <option value="">All Statuses</option>
               <option value="pending">Pending</option>
               <option value="approved">Approved</option>
@@ -242,7 +243,7 @@ export function ApprovalsPage() {
 
       {/* Cancel confirm */}
       {cancelId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <ModalSurface label="Cancel Request?" onClose={() => setCancelId(null)} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="rounded-xl bg-white p-6 shadow-2xl w-80">
             <h3 className="text-sm font-semibold text-slate-900 mb-2">Cancel Request?</h3>
             <p className="text-xs text-slate-600 mb-4">This action cannot be undone. The request will be marked as cancelled.</p>
@@ -253,7 +254,7 @@ export function ApprovalsPage() {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
 
       <ApprovalRequestModal open={showRequestModal} onClose={() => setShowRequestModal(false)} />

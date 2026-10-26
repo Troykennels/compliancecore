@@ -10,7 +10,8 @@ interface TaskCommentProps {
   canDelete:  boolean;
 }
 
-export function TaskCommentItem({ comment, taskId, canDelete }: TaskCommentProps) {
+export function TaskCommentItem({ comment, taskId, canDelete }: TaskCommentProps) {
+
   const fmt = useOrgFormat();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const deleteComment = useDeleteComment(taskId);
@@ -106,7 +107,7 @@ export function AddCommentForm({ taskId, showInternal = false }: AddCommentFormP
         rows={3}
         placeholder="Add a comment…"
         className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-400 resize-none"
-      />
+       aria-label="Add a comment…" />
       <div className="flex items-center justify-between">
         {showInternal && (
           <label className="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">

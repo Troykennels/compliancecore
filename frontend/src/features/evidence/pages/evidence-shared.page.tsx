@@ -118,7 +118,7 @@ export function EvidenceSharedPage() {
                   onKeyDown={(e) => { if (e.key === 'Enter') attempt(password); }}
                   autoFocus
                   className="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
+                 aria-label="Enter password..." />
                 {error && <p className="text-xs text-red-600">{error}</p>}
                 <button
                   type="button"

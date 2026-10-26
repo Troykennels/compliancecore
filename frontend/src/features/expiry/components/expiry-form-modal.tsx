@@ -1,3 +1,5 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { ModalSurface } from '@/components/modal-surface';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -79,53 +81,53 @@ export function ExpiryFormModal({ open, onClose, item }: ExpiryFormModalProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <ModalSurface label=" " onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 shrink-0">
           <h2 className="text-base font-semibold text-slate-900">
             {item ? 'Edit Expiry Item' : 'Track New Expiry'}
           </h2>
-          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100">
+          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close dialog">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">Name *</label>
+            <AccessibleField label={<>Name *</>} >
+
               <input {...register('name')} placeholder="e.g. AWS SSL Certificate" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
               {errors.name && <p className="mt-0.5 text-xs text-red-600">{errors.name.message}</p>}
-            </div>
+            </AccessibleField>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Type</label>
+              <AccessibleField label={<>Type</>} >
+
                 <select {...register('entityType')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                   {TYPE_ENTRIES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Expiry Date *</label>
+              </AccessibleField>
+              <AccessibleField label={<>Expiry Date *</>} >
+
                 <input type="date" {...register('expiryDate')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
                 {errors.expiryDate && <p className="mt-0.5 text-xs text-red-600">{errors.expiryDate.message}</p>}
-              </div>
+              </AccessibleField>
             </div>
 
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">Remind (days before expiry)</label>
+            <AccessibleField label={<>Remind (days before expiry)</>} >
+
               <input {...register('reminderDays')} placeholder="90,30,7,1" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
               <p className="mt-0.5 text-xs text-slate-400">Comma-separated (e.g. 90,30,7)</p>
-            </div>
+            </AccessibleField>
 
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">Notes</label>
+            <AccessibleField label={<>Notes</>} >
+
               <textarea {...register('notes')} rows={3} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm resize-none outline-none focus:border-blue-500" />
-            </div>
+            </AccessibleField>
 
             {item && (
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Status</label>
+              <AccessibleField label={<>Status</>} >
+
                 <select {...register('status')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                   <option value="active">Active</option>
                   <option value="expiring_soon">Expiring Soon</option>
@@ -133,7 +135,7 @@ export function ExpiryFormModal({ open, onClose, item }: ExpiryFormModalProps) {
                   <option value="renewed">Renewed</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-              </div>
+              </AccessibleField>
             )}
           </div>
 
@@ -145,6 +147,6 @@ export function ExpiryFormModal({ open, onClose, item }: ExpiryFormModalProps) {
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }

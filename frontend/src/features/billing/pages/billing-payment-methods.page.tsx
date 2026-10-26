@@ -1,3 +1,4 @@
+import { AccessibleField } from '@/components/accessible-field';
 import { useState } from 'react';
 import { ArrowLeft, Plus, Star, Trash2, CreditCard, Loader2, Building2, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -65,8 +66,8 @@ function AddPaymentMethodForm({ onCancel }: { onCancel: () => void }) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="sm:col-span-2">
-          <label className="block text-xs font-medium text-slate-700 mb-1">Label *</label>
+        <AccessibleField label={<>Label *</>} className="sm:col-span-2">
+
           <input
             value={label}
             onChange={(e) => setLabel(e.target.value)}
@@ -74,12 +75,12 @@ function AddPaymentMethodForm({ onCancel }: { onCancel: () => void }) {
             placeholder={type === 'card' ? 'e.g. Visa ending 4242' : 'e.g. Company account'}
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
-        </div>
+        </AccessibleField>
 
         {type === 'card' && (
           <>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">Card Brand</label>
+            <AccessibleField label={<>Card Brand</>} >
+
               <select
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
@@ -90,9 +91,9 @@ function AddPaymentMethodForm({ onCancel }: { onCancel: () => void }) {
                   <option key={b} value={b}>{b}</option>
                 ))}
               </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">Last 4 digits</label>
+            </AccessibleField>
+            <AccessibleField label={<>Last 4 digits</>} >
+
               <input
                 value={last4}
                 onChange={(e) => setLast4(e.target.value.replace(/\D/g, '').slice(0, 4))}
@@ -101,9 +102,9 @@ function AddPaymentMethodForm({ onCancel }: { onCancel: () => void }) {
                 pattern="\d{4}"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">Expiry Month</label>
+            </AccessibleField>
+            <AccessibleField label={<>Expiry Month</>} >
+
               <input
                 value={expMonth}
                 onChange={(e) => setExpMonth(e.target.value)}
@@ -111,9 +112,9 @@ function AddPaymentMethodForm({ onCancel }: { onCancel: () => void }) {
                 placeholder="MM"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">Expiry Year</label>
+            </AccessibleField>
+            <AccessibleField label={<>Expiry Year</>} >
+
               <input
                 value={expYear}
                 onChange={(e) => setExpYear(e.target.value)}
@@ -121,23 +122,23 @@ function AddPaymentMethodForm({ onCancel }: { onCancel: () => void }) {
                 placeholder="YYYY"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
-            </div>
+            </AccessibleField>
           </>
         )}
 
         {(type === 'bank_transfer' || type === 'wire') && (
           <>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">Bank Name</label>
+            <AccessibleField label={<>Bank Name</>} >
+
               <input
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
                 placeholder="e.g. Barclays"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">Account Last 4</label>
+            </AccessibleField>
+            <AccessibleField label={<>Account Last 4</>} >
+
               <input
                 value={bankLast4}
                 onChange={(e) => setBankLast4(e.target.value.replace(/\D/g, '').slice(0, 4))}
@@ -145,7 +146,7 @@ function AddPaymentMethodForm({ onCancel }: { onCancel: () => void }) {
                 maxLength={4}
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
-            </div>
+            </AccessibleField>
           </>
         )}
       </div>

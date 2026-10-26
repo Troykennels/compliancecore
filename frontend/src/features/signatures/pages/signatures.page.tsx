@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { useState } from 'react';
 import { ShieldCheck, ShieldX, RotateCcw, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useOrgFormat } from '@/lib/org-format';
@@ -160,7 +161,7 @@ export function SignaturesPage() {
 
       {/* Revoke modal */}
       {revokeTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <ModalSurface label="Revoke Signature" onClose={() => { setRevokeTarget(null); setRevokeReason(''); }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="rounded-xl bg-white p-6 shadow-2xl w-96">
             <h3 className="text-sm font-semibold text-slate-900 mb-1">Revoke Signature</h3>
             <p className="text-xs text-slate-500 mb-3">Provide a reason for revocation. This action will be permanently logged.</p>
@@ -171,7 +172,7 @@ export function SignaturesPage() {
               rows={3}
               placeholder="e.g. Signed in error, document version superseded"
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 resize-none mb-3"
-            />
+             aria-label="e.g. Signed in error, document version superseded" />
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => { setRevokeTarget(null); setRevokeReason(''); }}
@@ -193,7 +194,7 @@ export function SignaturesPage() {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </div>
   );

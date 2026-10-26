@@ -455,7 +455,7 @@ export function BillingPlansPage(): JSX.Element {
                 onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponValidation(null); }}
                 placeholder="COUPON CODE"
                 className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-mono w-40 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
+               aria-label="COUPON CODE" />
               <button
                 onClick={handleValidateCoupon}
                 disabled={validatingCoupon || !couponInput}
@@ -463,7 +463,7 @@ export function BillingPlansPage(): JSX.Element {
               >
                 {validatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Apply'}
               </button>
-              <button onClick={() => { setShowCoupon(false); setCouponInput(''); setCouponValidation(null); }}>
+              <button onClick={() => { setShowCoupon(false); setCouponInput(''); setCouponValidation(null); }} aria-label="Close dialog">
                 <X className="h-4 w-4 text-slate-400" />
               </button>
             </div>

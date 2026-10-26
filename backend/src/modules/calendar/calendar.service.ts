@@ -1,6 +1,7 @@
 import { withTenantSchema } from '../../lib/prisma';
 import { setAuditSessionVars } from '../../middleware/audit.middleware';
 import { NotFoundError } from '../../lib/errors';
+import { assertDateRange } from '../../lib/date-range';
 import { calendarRepository } from './calendar.repository';
 import type { CreateCalendarEventInput, UpdateCalendarEventInput, ListCalendarEventsInput } from './calendar.schema';
 
@@ -18,6 +19,7 @@ export const calendarService = {
   },
 
   async create(schemaName: string, input: CreateCalendarEventInput, actor: Actor) {
+    assertDateRange(input);
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
       const { id } = await calendarRepository.create(tx, { ...input, createdBy: actor.id });
@@ -28,6 +30,10 @@ export const calendarService = {
   async update(schemaName: string, id: string, input: UpdateCalendarEventInput, actor: Actor) {
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
+      await tx.$queryRawUnsafe('SELECT id FROM compliance_calendar_events WHERE id=$1::uuid FOR UPDATE',id);
+      const current=await calendarRepository.findById(tx,id);
+      if(!current)throw new NotFoundError('Calendar event not found.');
+      assertDateRange({...current,...input});
       const ok = await calendarRepository.update(tx, id, { ...input, updatedBy: actor.id });
       if (!ok) throw new NotFoundError('Calendar event not found.');
       return calendarRepository.findById(tx, id);

@@ -211,7 +211,7 @@ export function ScopingQuestionnaire({ variant = 'onboarding', onDone }: Props):
       <div className="grid gap-4 sm:grid-cols-2">
         <Section title="Where do your systems run?">
           <select
-            value={profile.hostingModel}
+            aria-label="Where do your systems run?" value={profile.hostingModel}
             onChange={(e) => set('hostingModel', e.target.value as HostingModel)}
             className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
           >
@@ -221,7 +221,7 @@ export function ScopingQuestionnaire({ variant = 'onboarding', onDone }: Props):
 
         <Section title="What is driving this?">
           <select
-            value={profile.primaryDriver}
+            aria-label="What is driving this assessment?" value={profile.primaryDriver}
             onChange={(e) => set('primaryDriver', e.target.value as PrimaryDriver)}
             className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
           >

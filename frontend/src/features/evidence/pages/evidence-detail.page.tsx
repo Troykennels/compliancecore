@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -23,7 +24,8 @@ const STATUS_OPTIONS: { value: EvidenceStatus; label: string; color: string }[] 
 
 type DetailTab = 'preview' | 'ocr' | 'versions' | 'audit';
 
-export function EvidenceDetailPage() {
+export function EvidenceDetailPage() {
+
   const fmt = useOrgFormat();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -114,12 +116,12 @@ export function EvidenceDetailPage() {
                   className="rounded border border-blue-500 px-2 py-1 text-lg font-semibold text-slate-900 outline-none"
                 />
                 <button type="button" onClick={handleTitleSave} className="text-green-600 hover:text-green-700"><Check className="h-5 w-5" /></button>
-                <button type="button" onClick={() => setEditingTitle(false)} className="text-slate-400 hover:text-slate-600"><X className="h-5 w-5" /></button>
+                <button type="button" onClick={() => setEditingTitle(false)} className="text-slate-400 hover:text-slate-600" aria-label="Close dialog"><X className="h-5 w-5" /></button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-slate-900 truncate">{evidence.title}</h1>
-                <button type="button" onClick={startEditTitle} className="shrink-0 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                <button type="button" onClick={startEditTitle} className="shrink-0 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600" aria-label="Edit record">
                   <Pencil className="h-4 w-4" />
                 </button>
               </div>
@@ -343,7 +345,7 @@ export function EvidenceDetailPage() {
 
       {/* Delete confirmation */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <ModalSurface label="Delete Evidence?" onClose={() => setDeleteConfirm(false)} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
             <h3 className="text-base font-semibold text-slate-900">Delete Evidence?</h3>
             <p className="mt-2 text-sm text-slate-600">
@@ -368,7 +370,7 @@ export function EvidenceDetailPage() {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </div>
   );

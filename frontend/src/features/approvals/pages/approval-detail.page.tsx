@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, Clock, AlertCircle, FileSignature } from 'lucide-react';
@@ -18,7 +19,8 @@ const STATUS_CONFIG: Record<ApprovalStatus, { label: string; icon: React.ReactNo
   changes_requested: { label: 'Changes Requested', icon: <AlertCircle className="h-4 w-4" />, className: 'bg-orange-100 text-orange-700' },
 };
 
-export function ApprovalDetailPage() {
+export function ApprovalDetailPage() {
+
   const fmt = useOrgFormat();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -168,7 +170,7 @@ export function ApprovalDetailPage() {
 
       {/* Cancel confirm */}
       {cancelConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <ModalSurface label="Cancel this request?" onClose={() => setCancelConfirm(false)} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="rounded-xl bg-white p-6 shadow-2xl w-80">
             <h3 className="text-sm font-semibold text-slate-900 mb-2">Cancel this request?</h3>
             <p className="text-xs text-slate-600 mb-4">All pending approvers will be notified. This cannot be undone.</p>
@@ -187,7 +189,7 @@ export function ApprovalDetailPage() {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
 
       {/* Decision modal */}

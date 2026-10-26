@@ -1,3 +1,5 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { ModalSurface } from '@/components/modal-surface';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -58,21 +60,21 @@ export function InviteMemberModal({ open, onClose }: Props): JSX.Element | null 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <ModalSurface label="Invite a team member" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
       <div className="relative z-10 w-full max-w-md rounded-xl bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
           <h2 className="text-base font-semibold text-slate-900">Invite Team Member</h2>
-          <button type="button" onClick={onClose} className="rounded-md p-1 text-slate-400 hover:text-slate-600">
+          <button type="button" onClick={onClose} className="rounded-md p-1 text-slate-400 hover:text-slate-600" aria-label="Close dialog">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit((v) => mutate(v))} className="p-6 space-y-4">
-          <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-slate-700">
+          <AccessibleField label={<>
               Email Address <span className="text-rose-500">*</span>
-            </label>
+            </>} className="space-y-1.5">
+
             <input
               {...register('email')}
               type="email"
@@ -85,12 +87,12 @@ export function InviteMemberModal({ open, onClose }: Props): JSX.Element | null 
               )}
             />
             {errors.email && <p className="text-xs text-rose-600">{errors.email.message}</p>}
-          </div>
+          </AccessibleField>
 
-          <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-slate-700">
+          <AccessibleField label={<>
               Role <span className="text-rose-500">*</span>
-            </label>
+            </>} className="space-y-1.5">
+
             <select
               {...register('role')}
               className={cn(
@@ -111,7 +113,7 @@ export function InviteMemberModal({ open, onClose }: Props): JSX.Element | null 
             <div className="rounded-md bg-slate-50 p-3 text-xs text-slate-600 space-y-1">
               <RoleDescription />
             </div>
-          </div>
+          </AccessibleField>
 
           <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
             <button
@@ -132,7 +134,7 @@ export function InviteMemberModal({ open, onClose }: Props): JSX.Element | null 
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }
 

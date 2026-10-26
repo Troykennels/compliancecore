@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { useState } from 'react';
 import { AlertTriangle, Loader2, Trash2, X } from 'lucide-react';
 import { useUnadoptFramework, useUnadoptImpact } from '../hooks/use-frameworks';
@@ -84,12 +85,7 @@ export function RemoveFrameworkDialog({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="removeFrameworkTitle"
-    >
+    <ModalSurface label="Remove ?" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
       <div className="w-full max-w-lg rounded-xl bg-white shadow-xl">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 border-b border-slate-200 p-5">
@@ -215,6 +211,6 @@ export function RemoveFrameworkDialog({
           </button>
         </div>
       </div>
-    </div>
+    </ModalSurface>
   );
 }

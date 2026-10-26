@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -148,13 +149,13 @@ export function SettingsTeamPage(): JSX.Element {
                       {canManage && !isMe && (member.role !== 'owner' || myRole === 'owner') ? (
                         <div className="relative inline-block">
                           <select
-                            value={member.role}
+                            aria-label={`Role for ${member.firstName || member.email} ${member.lastName || ""}`} value={member.role}
                             onChange={(e) =>
                               updateRole({ id: member.id, role: e.target.value })
                             }
                             className="appearance-none rounded-md bg-transparent py-1 pl-2.5 pr-7 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600 cursor-pointer"
                           >
-                            {!assignableRoles.includes(member.role) && <option value={member.role} disabled>{ROLE_LABELS[member.role]}</option>}
+                            {!assignableRoles.includes(member.role) && <option aria-label={`Role for ${member.firstName || member.email} ${member.lastName || ""}`} value={member.role} disabled>{ROLE_LABELS[member.role]}</option>}
                             {assignableRoles.map((r) => (
                               <option key={r} value={r}>{ROLE_LABELS[r]}</option>
                             ))}
@@ -190,7 +191,7 @@ export function SettingsTeamPage(): JSX.Element {
                             <button
                               onClick={() => setMenuOpenId(menuOpenId === member.id ? null : member.id)}
                               className="rounded-md p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-                            >
+                             aria-label="More actions">
                               <MoreHorizontal className="h-4 w-4" />
                             </button>
                             {menuOpenId === member.id && (
@@ -223,7 +224,7 @@ export function SettingsTeamPage(): JSX.Element {
       <InviteMemberModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
 
       {confirmRemoveId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Remove Member?" onClose={() => setConfirmRemoveId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmRemoveId(null)} />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-base font-semibold text-slate-900">Remove Member?</h3>
@@ -246,7 +247,7 @@ export function SettingsTeamPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </SettingsLayout>
   );

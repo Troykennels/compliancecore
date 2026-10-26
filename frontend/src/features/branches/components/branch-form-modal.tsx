@@ -1,3 +1,5 @@
+import { ModalSurface } from '@/components/modal-surface';
+import { AccessibleField } from '@/components/accessible-field';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -85,7 +87,7 @@ export function BranchFormModal({ open, onClose, branch }: Props): JSX.Element |
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <ModalSurface label="Branch form" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40"
@@ -177,7 +179,7 @@ export function BranchFormModal({ open, onClose, branch }: Props): JSX.Element |
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }
 
@@ -189,20 +191,7 @@ interface FormFieldProps {
   children: React.ReactNode;
 }
 
-function FormField({ label, error, required, className, children }: FormFieldProps): JSX.Element {
-  return (
-    <div className={cn('space-y-1', className)}>
-      {label && (
-        <label className="block text-sm font-medium text-slate-700">
-          {label}
-          {required && <span className="ml-1 text-rose-500">*</span>}
-        </label>
-      )}
-      {children}
-      {error && <p className="text-xs text-rose-600">{error}</p>}
-    </div>
-  );
-}
+function FormField({ label, error, required, className, children }: FormFieldProps): JSX.Element { return <AccessibleField label={label} error={error} required={required} className={className}>{children}</AccessibleField>; }
 
 function inputClass(hasError: boolean): string {
   return cn(

@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { PermissionAction } from '@/components/permission-action';
 import { useState } from 'react';
 import { parseISO, isPast } from 'date-fns';
@@ -78,14 +79,14 @@ export function TasksPage() {
           </button>
         </div>
 
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs">
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs" aria-label="Filter: All Statuses" >
           <option value="">All Statuses</option>
           {Object.entries(STATUS_CONFIG).map(([k, v]) => (
             <option key={k} value={k}>{v.label}</option>
           ))}
         </select>
 
-        <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value as any)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs">
+        <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value as any)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs" aria-label="Filter: All Priorities" >
           <option value="">All Priorities</option>
           {Object.entries(PRIORITY_CONFIG).map(([k, v]) => (
             <option key={k} value={k}>{v.label}</option>
@@ -184,7 +185,7 @@ export function TasksPage() {
 
       {/* Delete confirm */}
       {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <ModalSurface label="Delete Task?" onClose={() => setDeleteId(null)} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="rounded-xl bg-white p-6 shadow-2xl w-80">
             <h3 className="text-sm font-semibold text-slate-900 mb-2">Delete Task?</h3>
             <p className="text-xs text-slate-600 mb-4">This will permanently delete the task and all its subtasks and comments.</p>
@@ -199,7 +200,7 @@ export function TasksPage() {
               </button></PermissionAction>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
 
       <TaskFormModal

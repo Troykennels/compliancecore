@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { PermissionAction } from '@/components/permission-action';
 import { useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
@@ -96,14 +97,14 @@ export function VendorsPage(): JSX.Element {
               value={search}
               onChange={(e) => resetToFirstPage(setSearch)(e.target.value)}
               className="w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-            />
+             aria-label="Search vendors..." />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => resetToFirstPage(setStatusFilter)(e.target.value as VendorStatus | '')}
             className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          >
+           aria-label="Filter: All Statuses" >
             <option value="">All Statuses</option>
             {Object.entries(VENDOR_STATUS_CONFIG).map(([value, cfg]) => (
               <option key={value} value={value}>{cfg.label}</option>
@@ -114,7 +115,7 @@ export function VendorsPage(): JSX.Element {
             value={riskFilter}
             onChange={(e) => resetToFirstPage(setRiskFilter)(e.target.value as VendorRiskLevel | '')}
             className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          >
+           aria-label="Filter: All Risk Levels" >
             <option value="">All Risk Levels</option>
             {Object.entries(RISK_LEVEL_CONFIG).map(([value, cfg]) => (
               <option key={value} value={value}>{cfg.label}</option>
@@ -257,7 +258,7 @@ export function VendorsPage(): JSX.Element {
 
       {/* Delete confirmation */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Delete Vendor?" onClose={() => setConfirmDeleteId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDeleteId(null)} />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-base font-semibold text-slate-900">Delete Vendor?</h3>
@@ -280,7 +281,7 @@ export function VendorsPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </div>
   );

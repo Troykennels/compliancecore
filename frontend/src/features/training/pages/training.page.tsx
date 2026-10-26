@@ -1,3 +1,5 @@
+import { ModalSurface } from '@/components/modal-surface';
+import { TrainingParticipantsModal } from '../components/training-participants-modal';
 import { PermissionAction } from '@/components/permission-action';
 import { useState } from 'react';
 import {
@@ -14,6 +16,7 @@ import { SkeletonTable } from '@/components/ui';
 const PAGE_SIZE = 20;
 
 export function TrainingPage(): JSX.Element {
+  const [participants,setParticipants]=useState<TrainingProgram>();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<TrainingStatus | ''>('');
   const [page, setPage] = useState(1);
@@ -58,6 +61,7 @@ export function TrainingPage(): JSX.Element {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+        {participants&&<TrainingParticipantsModal key={participants.id} program={participants} onClose={()=>setParticipants(undefined)}/>}
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
@@ -85,14 +89,14 @@ export function TrainingPage(): JSX.Element {
               value={search}
               onChange={(e) => resetToFirstPage(setSearch)(e.target.value)}
               className="w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-            />
+             aria-label="Search programs..." />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => resetToFirstPage(setStatusFilter)(e.target.value as TrainingStatus | '')}
             className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          >
+           aria-label="Filter: All Statuses" >
             <option value="">All Statuses</option>
             {Object.entries(TRAINING_STATUS_CONFIG).map(([value, cfg]) => (
               <option key={value} value={value}>{cfg.label}</option>
@@ -169,6 +173,7 @@ export function TrainingPage(): JSX.Element {
 
                           {menuOpenId === program.id && (
                             <div className="absolute right-0 top-full z-10 mt-1 w-44 rounded-lg border border-slate-200 bg-white shadow-lg py-1">
+                              <button className="flex w-full items-center px-3 py-2 text-sm text-indigo-700 hover:bg-slate-50" onClick={()=>{setParticipants(program);setMenuOpenId(null);}}>Participants and assignments</button>
                               <PermissionAction scope="training:write"><button
                                 onClick={() => { openEdit(program); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
@@ -229,7 +234,7 @@ export function TrainingPage(): JSX.Element {
 
       {/* Delete confirmation */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Delete Training Program?" onClose={() => setConfirmDeleteId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDeleteId(null)} />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-base font-semibold text-slate-900">Delete Training Program?</h3>
@@ -252,7 +257,7 @@ export function TrainingPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </div>
   );

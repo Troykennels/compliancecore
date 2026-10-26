@@ -25,7 +25,8 @@ const STATUS_COLORS: Record<InvoiceStatus, string> = {
   uncollectible: 'bg-red-100 text-red-600',
 };
 
-export function BillingInvoicesPage(): JSX.Element {
+export function BillingInvoicesPage(): JSX.Element {
+
   const fmt = useOrgFormat();
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
@@ -75,10 +76,10 @@ export function BillingInvoicesPage(): JSX.Element {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search invoices…"
             className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+           aria-label="Search invoices…" />
         </div>
         <select
-          value={statusFilter}
+          aria-label="Filter invoices by status" value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >

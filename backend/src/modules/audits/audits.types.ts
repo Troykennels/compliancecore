@@ -5,6 +5,9 @@ export type FindingSeverity = 'critical' | 'high' | 'medium' | 'low' | 'observat
 export type FindingStatus = 'open' | 'in_remediation' | 'resolved' | 'accepted';
 
 export interface Audit {
+  reviewedBy?: string | null;
+  reviewedAt?: Date | null;
+  reportCurrent?: boolean;
   id: string;
   title: string;
   auditType: AuditType;

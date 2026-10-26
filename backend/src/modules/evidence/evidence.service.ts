@@ -92,7 +92,7 @@ export const evidenceService = {
       throw new ValidationError(`File type "${input.mimeType}" is not accepted.`);
     }
 
-    return withTenantSchema(schemaName, async (tx) => {
+    const pending = await withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
 
       // Create the evidence record (status pending until confirmed)
@@ -132,10 +132,10 @@ export const evidenceService = {
 
       // Generate presigned PUT URL (after transaction — S3 call outside DB tx)
       // We generate AFTER committing the version record so the record always exists
-      const { uploadUrl, expiresAt } = await generateUploadUrl(fileKey, input.mimeType);
-
-      return { evidenceId, versionId, uploadUrl, fileKey, expiresAt };
+      return { evidenceId, versionId, fileKey };
     });
+    const { uploadUrl, expiresAt } = await generateUploadUrl(pending.fileKey, input.mimeType);
+    return { ...pending, uploadUrl, expiresAt };
   },
 
   // Step 2 of 3: Browser uploads file directly to S3 (handled by frontend)
@@ -277,7 +277,7 @@ export const evidenceService = {
       throw new ValidationError(`File type "${input.mimeType}" is not accepted.`);
     }
 
-    return withTenantSchema(schemaName, async (tx) => {
+    const pending = await withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
       const exists = await evidenceRepository.findById(tx, evidenceId);
       if (!exists) throw new NotFoundError('Evidence not found.');
@@ -298,9 +298,10 @@ export const evidenceService = {
         metadata: { versionId, fileName: input.fileName },
       });
 
-      const { uploadUrl, expiresAt } = await generateUploadUrl(fileKey, input.mimeType);
-      return { evidenceId, versionId, uploadUrl, fileKey, expiresAt };
+      return { evidenceId, versionId, fileKey };
     });
+    const { uploadUrl, expiresAt } = await generateUploadUrl(pending.fileKey, input.mimeType);
+    return { ...pending, uploadUrl, expiresAt };
   },
 
   // ── Preview & Download URLs ────────────────────────────────────────────────

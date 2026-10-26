@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { PermissionAction } from '@/components/permission-action';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useFrameworks } from '@/features/frameworks/hooks/use-frameworks';
@@ -91,14 +92,14 @@ function LegacyRisksPage(): JSX.Element {
               value={search}
               onChange={(e) => resetToFirstPage(setSearch)(e.target.value)}
               className="w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-            />
+             aria-label="Search risks..." />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => resetToFirstPage(setStatusFilter)(e.target.value as RiskStatus | '')}
             className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          >
+           aria-label="Filter: All Statuses" >
             <option value="">All Statuses</option>
             {Object.entries(STATUS_CONFIG).map(([value, cfg]) => (
               <option key={value} value={value}>{cfg.label}</option>
@@ -109,7 +110,7 @@ function LegacyRisksPage(): JSX.Element {
             value={categoryFilter}
             onChange={(e) => resetToFirstPage(setCategoryFilter)(e.target.value as RiskCategory | '')}
             className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          >
+           aria-label="Filter: All Categories" >
             <option value="">All Categories</option>
             {Object.entries(CATEGORY_CONFIG).map(([value, cfg]) => (
               <option key={value} value={value}>{cfg.label}</option>
@@ -238,7 +239,7 @@ function LegacyRisksPage(): JSX.Element {
 
       {/* Delete confirmation */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Delete Risk?" onClose={() => setConfirmDeleteId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDeleteId(null)} />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-base font-semibold text-slate-900">Delete Risk?</h3>
@@ -261,7 +262,7 @@ function LegacyRisksPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </div>
   );

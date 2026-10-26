@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { useState } from 'react';
 import { Plus, Search, MapPin, Building2, Star, MoreHorizontal, Pencil, Trash2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -59,7 +60,7 @@ export function BranchesPage(): JSX.Element {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          />
+           aria-label="Search branches..." />
         </div>
 
         {/* Table */}
@@ -185,7 +186,7 @@ export function BranchesPage(): JSX.Element {
 
       {/* Delete confirmation */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Delete Branch?" onClose={() => setConfirmDeleteId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDeleteId(null)} />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-base font-semibold text-slate-900">Delete Branch?</h3>
@@ -209,7 +210,7 @@ export function BranchesPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import { AccessibleField } from '@/components/accessible-field';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -161,7 +162,7 @@ export function EvidencePage() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
+             aria-label="Search evidence by title, content, or OCR text..." />
           </div>
           <button
             type="submit"
@@ -189,15 +190,15 @@ export function EvidencePage() {
         </div>
 
         {/* Evidence list */}
-        <main className="flex-1 overflow-y-auto bg-slate-50 p-6">
+        <section className="flex-1 overflow-y-auto bg-slate-50 p-6">
           {/* Sort controls */}
           <div className="mb-4 flex items-center justify-between">
             <p className="text-sm text-slate-600">
               {filters.q && <span>Results for "<strong>{filters.q}</strong>" · </span>}
               {total} item{total !== 1 ? 's' : ''}
             </p>
-            <div className="flex items-center gap-2">
-              <label className="text-xs text-slate-500">Sort by</label>
+            <AccessibleField label={<>Sort by</>} className="flex items-center gap-2">
+
               <select
                 value={`${filters.sortBy}:${filters.sortDir}`}
                 onChange={(e) => {
@@ -212,7 +213,7 @@ export function EvidencePage() {
                 <option value="title:asc">Title A–Z</option>
                 <option value="file_size:desc">Largest first</option>
               </select>
-            </div>
+            </AccessibleField>
           </div>
 
           {isLoading && (
@@ -261,7 +262,7 @@ export function EvidencePage() {
                 disabled={(filters.page ?? 1) <= 1}
                 onClick={() => setFilters((f) => ({ ...f, page: (f.page ?? 1) - 1 }))}
                 className="rounded-md border border-slate-300 p-2 text-slate-600 hover:bg-slate-100 disabled:opacity-40"
-              >
+               aria-label="Previous">
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <span className="text-sm text-slate-600">
@@ -272,12 +273,12 @@ export function EvidencePage() {
                 disabled={(filters.page ?? 1) >= totalPages}
                 onClick={() => setFilters((f) => ({ ...f, page: (f.page ?? 1) + 1 }))}
                 className="rounded-md border border-slate-300 p-2 text-slate-600 hover:bg-slate-100 disabled:opacity-40"
-              >
+               aria-label="Next">
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
           )}
-        </main>
+        </section>
       </div>
 
       <EvidenceUploadModal

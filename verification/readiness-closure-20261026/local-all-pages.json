@@ -1,0 +1,377 @@
+{
+  "passed": true,
+  "pages": [
+    {
+      "route": "dashboard",
+      "headings": [
+        "Compliance overview",
+        "Control status",
+        "Your next steps",
+        "What needs attention?",
+        "Duties to review",
+        "Tests to review",
+        "Corrections to check",
+        "Policies to read"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "frameworks",
+      "headings": [
+        "Compliance assessments",
+        "Assessment progress",
+        "Choose the requirements you need to assess",
+        "CIS Controls",
+        "CCPA/CPRA",
+        "DPDPA",
+        "GDPR",
+        "HIPAA",
+        "ISO 22301",
+        "ISO 27001",
+        "ISO 27701",
+        "NIST CSF",
+        "NIST 800-53",
+        "NDPR",
+        "PCI-DSS",
+        "POPIA",
+        "SAMA CSF",
+        "SOC 2",
+        "SOX ITGC",
+        "UAE PDPL",
+        "UK GDPR"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "risks",
+      "headings": [
+        "Risk assessment"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "policies",
+      "headings": [
+        "Policies",
+        "No policies yet"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "policy-templates",
+      "headings": [
+        "Policy templates",
+        "Information Security Policy",
+        "Access Control Policy",
+        "Compliance Risk Assessment and Treatment Policy",
+        "Data Protection and Privacy Policy",
+        "Records Retention and Secure Disposal Policy",
+        "Incident Reporting and Response Policy",
+        "Supplier and Third-Party Assurance Policy",
+        "Backup and Recovery Policy",
+        "Business Continuity Policy",
+        "Financial Systems and Change Control Policy",
+        "Other compliance forms and working templates",
+        "Obligations register",
+        "Control test workpaper",
+        "Audit plan and checklist",
+        "Audit report",
+        "Evidence request",
+        "Incident report",
+        "Corrective and preventive action",
+        "Supplier due-diligence questionnaire",
+        "Conflict-of-interest declaration",
+        "Gifts and hospitality register",
+        "Training attendance and attestation",
+        "Compliance calendar",
+        "Management and board review"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "controls",
+      "headings": [
+        "Controls"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "evidence",
+      "headings": [
+        "Evidence Hub",
+        "Isolated readiness report proof"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "tasks",
+      "headings": [
+        "Tasks"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "approvals",
+      "headings": [
+        "Approval Workflows"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "signatures",
+      "headings": [
+        "Digital Signatures"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "audits",
+      "headings": [
+        "Audits"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "vendors",
+      "headings": [
+        "Vendors",
+        "No vendors yet"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "incidents",
+      "headings": [
+        " Incidents"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "training",
+      "headings": [
+        "Training"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "expiry",
+      "headings": [
+        "Expiry Tracker"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "calendar",
+      "headings": [
+        "Compliance Calendar",
+        "October 2026"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "reports",
+      "headings": [
+        "Compliance Report",
+        "Executive Dashboard"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "analytics",
+      "headings": [
+        "Analytics",
+        "Controls by Status",
+        "Risks by Severity (residual)",
+        "Policies by Status",
+        "Vendors by Risk Level",
+        "Open Audit Findings",
+        "Training Completion"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "compliance-score",
+      "headings": [
+        "Compliance Score"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "notifications",
+      "headings": [
+        "Notifications"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "branches",
+      "headings": [
+        "Branches",
+        "No branches yet"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "departments",
+      "headings": [
+        "Departments",
+        "No departments yet"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "integrations",
+      "headings": [
+        "Integrations",
+        "Available now",
+        "API Keys",
+        "Webhooks",
+        "Coming soon",
+        "Slack",
+        "Microsoft Teams",
+        "Jira",
+        "Google Drive",
+        "Okta (SSO / SCIM)",
+        "Email / SMTP"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "escalations",
+      "headings": [
+        "Escalation Rules"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "ai-tools",
+      "headings": [
+        "AI Compliance Tools"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "settings/organization",
+      "headings": [
+        "Settings",
+        "Your Data",
+        "Compliance Scope",
+        "Organisation Profile",
+        "Logo",
+        "Basic Information",
+        "Address",
+        "Localisation",
+        "Danger Zone"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "settings/team",
+      "headings": [
+        "Settings",
+        "Team Members"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "settings/security",
+      "headings": [
+        "Settings",
+        "Security",
+        "Password"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "settings/sso",
+      "headings": [
+        "Settings",
+        "Single Sign-On (SSO)",
+        "SSO Configuration"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "settings/api-keys",
+      "headings": [
+        "Settings",
+        "API Keys"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "settings/webhooks",
+      "headings": [
+        "Settings",
+        "Webhooks"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "settings/notifications",
+      "headings": [
+        "Settings",
+        "Email Alerts",
+        "Email Digest",
+        "Chat Integrations"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "billing",
+      "headings": [
+        "Billing",
+        "Current Subscription",
+        "Usage Limits",
+        "Payment Methods",
+        "Recent Invoices"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "billing/plans",
+      "headings": [
+        "Choose your plan",
+        "Starter",
+        "Professional",
+        "Business",
+        "Enterprise",
+        "MSP"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "billing/invoices",
+      "headings": [
+        "Invoices"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "billing/payment-methods",
+      "headings": [
+        "Payment Methods"
+      ],
+      "unlabelled": []
+    },
+    {
+      "route": "guide",
+      "headings": [
+        "My Guide",
+        "Start and secure your workspace",
+        "Understand onboarding and subscription",
+        "Assess compliance, from scope to review",
+        "Request a review and record a decision",
+        "Add, verify or revoke a signature",
+        "Set up notifications and sound",
+        "Review management reports",
+        "Configure integrations and assisted drafting",
+        "Daily, weekly and monthly routine"
+      ],
+      "unlabelled": []
+    }
+  ],
+  "errors": [],
+  "serverErrors": [],
+  "productionWrites": false
+}

@@ -94,81 +94,49 @@ const teamService = {
     return { message: 'Invitation accepted.', tenantId: invitation.tenantId };
   },
 
-  async updateMemberRole(
-    tenantId: string,
-    membershipId: string,
-    input: UpdateMemberRoleInput,
-    actor: Actor,
-  ) {
-    const membership = await settingsRepository.findMembership(tenantId, membershipId);
-    if (!membership) throw new NotFoundError('Team member not found.');
-
-    if (membership.role === 'owner' && actor.role !== 'owner') {
-      throw new ForbiddenError('Only an owner can change another owner\'s role.');
-    }
-
-    // Widen to string: the invite/update role enum does not include 'owner',
-    // but the stored membership role and actor role can be 'owner'.
-    const requestedRole: string = input.role;
-
-    // Cannot demote the last owner
-    if (membership.role === 'owner' && requestedRole !== 'owner') {
-      const ownerCount = await settingsRepository.countActiveOwners(tenantId);
-      if (ownerCount <= 1) {
-        throw new ForbiddenError(
-          'Cannot change the role of the last owner. Promote another member to owner first.',
-        );
+  async updateMemberRole(tenantId: string, membershipId: string, input: UpdateMemberRoleInput, actor: Actor) {
+    const result = await prisma.$transaction(async tx => {
+      // One tenant row serialises every ownership change, including removals.
+      await tx.$queryRaw`SELECT id FROM global.tenants WHERE id=${tenantId}::uuid FOR UPDATE`;
+      const acting = await settingsRepository.findMembershipByUserId(tenantId, actor.id, tx);
+      if (!acting?.isActive || acting.role !== actor.role || !['owner','admin','msp_admin'].includes(acting.role)) {
+        throw new ForbiddenError('Your team-management access changed. Sign in again before changing membership.');
       }
-    }
-
-    // Non-owners cannot promote/demote to owner
-    if (requestedRole === 'owner' && actor.role !== 'owner') {
-      throw new ForbiddenError('Only owners can assign the owner role.');
-    }
-
-    const updated = await settingsRepository.updateMemberRole(membershipId, input.role);
-
-    // Role and permissions are baked into the access token, so a demotion did
-    // nothing until the token expired: an admin dropped to viewer kept writing
-    // as an admin for up to fifteen minutes. Forcing a re-issue makes the new
-    // role take effect on their next request.
-    await revokeUserTokens(membership.userId, `role changed to ${input.role}`);
-
-    return updated;
+      await setAuditSessionVars(tx, actor);
+      const membership = await settingsRepository.findMembership(tenantId, membershipId, tx);
+      if (!membership) throw new NotFoundError('Team member not found.');
+      if ((membership.role === 'owner' || input.role === 'owner') && acting.role !== 'owner') {
+        throw new ForbiddenError('Only an owner can change ownership.');
+      }
+      if (membership.role === 'owner' && membership.isActive && membership.user?.isActive !== false && !membership.user?.deletedAt && input.role !== 'owner' && await settingsRepository.countActiveOwners(tenantId, tx) <= 1) {
+        throw new ForbiddenError('Cannot change the role of the last owner. Promote another member to owner first.');
+      }
+      const updated = await settingsRepository.updateMemberRole(membershipId, input.role, tx);
+      return {updated, userId: membership.userId};
+    });
+    await revokeUserTokens(result.userId, `role changed to ${input.role}`);
+    return result.updated;
   },
 
   async removeMember(tenantId: string, membershipId: string, actor: Actor) {
-    const membership = await settingsRepository.findMembership(tenantId, membershipId);
-    if (!membership) throw new NotFoundError('Team member not found.');
-
-    if (membership.role === 'owner' && actor.role !== 'owner') {
-      throw new ForbiddenError('Only an owner can remove another owner.');
-    }
-
-    // Cannot remove yourself
-    if (membership.userId === actor.id) {
-      throw new ForbiddenError(
-        'You cannot remove yourself. Transfer ownership first or ask another admin.',
-      );
-    }
-
-    // Cannot remove the last owner
-    if (membership.role === 'owner') {
-      const ownerCount = await settingsRepository.countActiveOwners(tenantId);
-      if (ownerCount <= 1) {
-        throw new ForbiddenError(
-          'Cannot remove the last owner. Promote another member to owner first.',
-        );
+    const userId = await prisma.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM global.tenants WHERE id=${tenantId}::uuid FOR UPDATE`;
+      const acting = await settingsRepository.findMembershipByUserId(tenantId, actor.id, tx);
+      if (!acting?.isActive || acting.role !== actor.role || !['owner','admin','msp_admin'].includes(acting.role)) {
+        throw new ForbiddenError('Your team-management access changed. Sign in again before changing membership.');
       }
-    }
-
-    await settingsRepository.deactivateMember(membershipId);
-
-    // Deactivating the membership row alone did not end the session. A person
-    // who had just been removed — the one case where you most want access to
-    // stop immediately — kept full read and write on the tenant until their
-    // token expired.
-    await revokeUserTokens(membership.userId, 'removed from organisation');
+      await setAuditSessionVars(tx, actor);
+      const membership = await settingsRepository.findMembership(tenantId, membershipId, tx);
+      if (!membership) throw new NotFoundError('Team member not found.');
+      if (membership.userId === actor.id) throw new ForbiddenError('You cannot remove yourself. Ask another administrator.');
+      if (membership.role === 'owner' && acting.role !== 'owner') throw new ForbiddenError('Only an owner can remove another owner.');
+      if (membership.role === 'owner' && membership.isActive && membership.user?.isActive !== false && !membership.user?.deletedAt && await settingsRepository.countActiveOwners(tenantId, tx) <= 1) {
+        throw new ForbiddenError('Cannot remove the last owner. Promote another member to owner first.');
+      }
+      await settingsRepository.deactivateMember(membershipId, tx);
+      return membership.userId;
+    });
+    await revokeUserTokens(userId, 'removed from organisation');
   },
 };
 

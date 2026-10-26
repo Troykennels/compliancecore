@@ -1,3 +1,6 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { refineDateStrings } from '@/lib/form-validation';
+import { ModalSurface } from '@/components/modal-surface';
 import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,7 +23,7 @@ const schema = z.object({
   color:       z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#3B82F6'),
   reminderDays: z.string().default('7,1'),
   status:      z.enum(['upcoming','in_progress','completed','cancelled','overdue']).optional(),
-});
+}).superRefine(refineDateStrings);
 
 type FormValues = z.infer<typeof schema>;
 
@@ -103,57 +106,57 @@ export function CalendarEventModal({ open, onClose, event, defaultDate }: Calend
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <ModalSurface label="Calendar event" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg rounded-xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 shrink-0">
           <h2 className="text-base font-semibold text-slate-900">
             {event ? 'Edit Event' : 'New Calendar Event'}
           </h2>
-          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100">
+          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close dialog">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">Title *</label>
+            <AccessibleField label={<>Title *</>} >
+
               <input {...register('title')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
               {errors.title && <p className="mt-0.5 text-xs text-red-600">{errors.title.message}</p>}
-            </div>
+            </AccessibleField>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Event Type</label>
+              <AccessibleField label={<>Event Type</>} >
+
                 <select {...register('eventType')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                   {TYPE_OPTIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Priority</label>
+              </AccessibleField>
+              <AccessibleField label={<>Priority</>} >
+
                 <select {...register('priority')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                   {(['critical','high','medium','low'] as const).map((p) => (
                     <option key={p} value={p} className={PRIORITY_COLORS[p]}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
                   ))}
                 </select>
-              </div>
+              </AccessibleField>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Start Date *</label>
+              <AccessibleField label={<>Start Date *</>} >
+
                 <input type="datetime-local" {...register('startDate')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">End Date</label>
+              </AccessibleField>
+              <AccessibleField label={<>End Date</>} >
+
                 <input type="datetime-local" {...register('endDate')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
-              </div>
+              </AccessibleField>
             </div>
 
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">Description</label>
+            <AccessibleField label={<>Description</>} >
+
               <textarea {...register('description')} rows={3} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm resize-none outline-none focus:border-blue-500" />
-            </div>
+            </AccessibleField>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -165,23 +168,23 @@ export function CalendarEventModal({ open, onClose, event, defaultDate }: Calend
                   <span className="text-xs text-slate-500">Event colour</span>
                 </div>
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Remind (days before)</label>
+              <AccessibleField label={<>Remind (days before)</>} >
+
                 <input {...register('reminderDays')} placeholder="7,3,1" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
                 <p className="mt-0.5 text-xs text-slate-400">Comma-separated</p>
-              </div>
+              </AccessibleField>
             </div>
 
             {event && (
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Status</label>
+              <AccessibleField label={<>Status</>} >
+
                 <select {...register('status')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                   <option value="upcoming">Upcoming</option>
                   <option value="in_progress">In Progress</option>
                   <option value="completed">Completed</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-              </div>
+              </AccessibleField>
             )}
 
             <Controller name="allDay" control={control} render={({ field }) => (
@@ -200,6 +203,6 @@ export function CalendarEventModal({ open, onClose, event, defaultDate }: Calend
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }

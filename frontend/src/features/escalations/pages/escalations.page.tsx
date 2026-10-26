@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import React, { useState } from 'react';
 import { Plus, AlertTriangle, CheckCircle, Power, Trash2, ChevronRight, RefreshCw } from 'lucide-react';
 import {
@@ -40,7 +41,8 @@ function ErrorBlock({ label, onRetry }: { label: string; onRetry: () => void }) 
   );
 }
 
-export function EscalationsPage() {
+export function EscalationsPage() {
+
   const fmt = useOrgFormat();
   const [tab, setTab] = useState<Tab>('rules');
   const [showForm, setShowForm] = useState(false);
@@ -195,7 +197,7 @@ export function EscalationsPage() {
               value={eventStatusFilter}
               onChange={(e) => setEventStatusFilter(e.target.value as any)}
               className="rounded-md border border-slate-300 px-3 py-1.5 text-xs"
-            >
+             aria-label="Filter: All Events" >
               <option value="">All Events</option>
               <option value="active">Active</option>
               <option value="resolved">Resolved</option>
@@ -268,7 +270,7 @@ export function EscalationsPage() {
 
       {/* Resolve modal */}
       {resolveTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <ModalSurface label="Resolve Escalation" onClose={() => { setResolveTarget(null); setResolveNote(''); }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="rounded-xl bg-white p-6 shadow-2xl w-96">
             <h3 className="text-sm font-semibold text-slate-900 mb-1">Resolve Escalation</h3>
             <p className="text-xs text-slate-500 mb-3">Provide a resolution note to close this escalation event.</p>
@@ -278,7 +280,7 @@ export function EscalationsPage() {
               rows={3}
               placeholder="e.g. Issue addressed, task reassigned to team lead"
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 resize-none mb-3"
-            />
+             aria-label="e.g. Issue addressed, task reassigned to team lead" />
             <div className="flex gap-2 justify-end">
               <button onClick={() => { setResolveTarget(null); setResolveNote(''); }} className="rounded-md px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">Cancel</button>
               <button
@@ -294,7 +296,7 @@ export function EscalationsPage() {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
 
       <EscalationRuleForm open={showForm} onClose={() => setShowForm(false)} />

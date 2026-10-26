@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { PermissionAction } from '@/components/permission-action';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -123,7 +124,7 @@ export function IncidentsPage(): JSX.Element {
           onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value || undefined, page: 1 }))}
           placeholder="Search reference, title or description…"
           className="min-w-56 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-        />
+         aria-label="Search reference, title or description…" />
         <FilterSelect
           value={filters.status ?? ''}
           onChange={(v) => setFilters((f) => ({ ...f, status: (v || undefined) as IncidentStatus, page: 1 }))}
@@ -278,6 +279,7 @@ function FilterSelect({ value, onChange, placeholder, options }: {
 }): JSX.Element {
   return (
     <select
+      aria-label={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
@@ -415,11 +417,11 @@ function IncidentDetailModal({ incident, onClose, onChanged }: {
     <Modal title={`${incident.reference} — ${incident.title}`} onClose={onClose} wide>
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
-          <select value={incident.status} className={field}
+          <select aria-label="Incident status" value={incident.status} className={field}
             onChange={(e) => patch.mutate({ status: e.target.value as IncidentStatus })}>
             {STATUSES.map((s) => <option key={s} value={s}>{titleCase(s)}</option>)}
           </select>
-          <select value={incident.severity} className={field}
+          <select aria-label="Incident severity" value={incident.severity} className={field}
             onChange={(e) => patch.mutate({ severity: e.target.value as IncidentSeverity })}>
             {SEVERITIES.map((s) => <option key={s} value={s}>{titleCase(s)}</option>)}
           </select>
@@ -482,7 +484,7 @@ function IncidentDetailModal({ incident, onClose, onChanged }: {
           <div className="mb-2 flex gap-2">
             <input value={note} onChange={(e) => setNote(e.target.value)}
               placeholder="Add an entry…"
-              className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500" />
+              className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"  aria-label="Add an entry…" />
             <button type="button" disabled={!note || addNote.isPending} onClick={() => addNote.mutate()}
               className="rounded-md bg-slate-800 px-3 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50">
               Add
@@ -518,18 +520,18 @@ function Modal({ title, children, onClose, wide }: {
     // scrolling and the inner flex centres within `min-h-full`: short content
     // sits in the middle, tall content scrolls without the top being clipped —
     // which is what plain `items-center` + `overflow-y-auto` gets wrong.
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 p-4">
+    <ModalSurface label="Record details" onClose={onClose} className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 p-4">
       <div className="flex min-h-full items-center justify-center">
         <div className={`w-full ${wide ? 'max-w-2xl' : 'max-w-lg'} rounded-xl border border-slate-200 bg-white shadow-xl`}>
           <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
             <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-            <button type="button" onClick={onClose} className="rounded-md p-1 text-slate-400 hover:bg-slate-100">
+            <button type="button" onClick={onClose} className="rounded-md p-1 text-slate-400 hover:bg-slate-100" aria-label="Close dialog">
               <X className="h-4 w-4" />
             </button>
           </div>
           <div className="p-5">{children}</div>
         </div>
       </div>
-    </div>
+    </ModalSurface>
   );
 }

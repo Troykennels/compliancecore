@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { PermissionAction } from '@/components/permission-action';
 import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -289,7 +290,7 @@ export function ControlsPage(): JSX.Element {
                               role="menu"
                               className="absolute right-0 top-full z-20 mt-1 w-44 animate-scale-in rounded-xl border border-slate-200 bg-white p-1 text-left shadow-lg"
                             >
-                              <PermissionAction scope="controls:write" assignedOnly ownerId={control.ownerId}><button
+                              <PermissionAction scope="controls:write" assignedOnly managerOnly={control.implementationStatus==='not_applicable'} ownerId={control.ownerId}><button
                                 role="menuitem"
                                 type="button"
                                 onClick={() => { openEdit(control); setMenuOpenId(null); }}
@@ -367,7 +368,7 @@ export function ControlsPage(): JSX.Element {
 
       {/* Delete confirmation */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Delete this control?" onClose={() => setConfirmDeleteId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 animate-fade-in bg-slate-900/50 backdrop-blur-[2px]"
             onClick={() => setConfirmDeleteId(null)}
@@ -404,7 +405,7 @@ export function ControlsPage(): JSX.Element {
               </Button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </PageShell>
   );

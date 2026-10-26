@@ -1,3 +1,5 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { ModalSurface } from '@/components/modal-surface';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -79,38 +81,38 @@ export function EscalationRuleForm({ open, onClose }: EscalationRuleFormProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <ModalSurface label="New Escalation Rule" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-2xl rounded-xl bg-white shadow-2xl flex flex-col max-h-[92vh]">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 shrink-0">
           <div>
             <h2 className="text-base font-semibold text-slate-900">New Escalation Rule</h2>
             <p className="text-xs text-slate-500 mt-0.5">Define triggers and a chain of escalation actions</p>
           </div>
-          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close dialog"><X className="h-5 w-5" /></button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
             {/* Basic info */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
-                <label className="mb-1 block text-xs font-medium text-slate-700">Rule Name *</label>
+              <AccessibleField label={<>Rule Name *</>} className="col-span-2">
+
                 <input {...register('name')} placeholder="e.g. Escalate Overdue Critical Tasks" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
                 {errors.name && <p className="mt-0.5 text-xs text-red-600">{errors.name.message}</p>}
-              </div>
-              <div className="col-span-2">
-                <label className="mb-1 block text-xs font-medium text-slate-700">Description</label>
+              </AccessibleField>
+              <AccessibleField label={<>Description</>} className="col-span-2">
+
                 <input {...register('description')} placeholder="Optional" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
-              </div>
-              <div className="col-span-2">
-                <label className="mb-1 block text-xs font-medium text-slate-700">Trigger Type *</label>
+              </AccessibleField>
+              <AccessibleField label={<>Trigger Type *</>} className="col-span-2">
+
                 <select {...register('triggerType')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                   <option value="task_overdue">Task Overdue</option>
                   <option value="approval_pending">Approval Pending</option>
                   <option value="expiry_approaching">Expiry Approaching</option>
                   <option value="control_overdue">Control Review Overdue</option>
                 </select>
-              </div>
+              </AccessibleField>
             </div>
 
             {/* Conditions */}
@@ -118,29 +120,29 @@ export function EscalationRuleForm({ open, onClose }: EscalationRuleFormProps) {
               <h3 className="text-xs font-semibold text-slate-700 mb-3">Trigger Conditions</h3>
               <div className="grid grid-cols-2 gap-3">
                 {(triggerType === 'task_overdue' || triggerType === 'control_overdue') && (
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-600">Overdue After (hours)</label>
+                  <AccessibleField label={<>Overdue After (hours)</>} >
+
                     <input type="number" min={1} {...register('conditions.overdueHours')} className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white" />
-                  </div>
+                  </AccessibleField>
                 )}
                 {triggerType === 'approval_pending' && (
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-600">Pending After (hours)</label>
+                  <AccessibleField label={<>Pending After (hours)</>} >
+
                     <input type="number" min={1} {...register('conditions.pendingHours')} className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white" />
-                  </div>
+                  </AccessibleField>
                 )}
                 {triggerType === 'expiry_approaching' && (
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-600">Days Before Expiry</label>
+                  <AccessibleField label={<>Days Before Expiry</>} >
+
                     <input type="number" min={1} {...register('conditions.expiryDays')} className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white" />
-                  </div>
+                  </AccessibleField>
                 )}
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">Entity Type (optional)</label>
+                <AccessibleField label={<>Entity Type (optional)</>} >
+
                   <input {...register('conditions.entityType')} placeholder="e.g. control" className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white outline-none" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">Priority Filter (optional)</label>
+                </AccessibleField>
+                <AccessibleField label={<>Priority Filter (optional)</>} >
+
                   <select {...register('conditions.priority')} className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white">
                     <option value="">Any priority</option>
                     <option value="critical">Critical</option>
@@ -148,7 +150,7 @@ export function EscalationRuleForm({ open, onClose }: EscalationRuleFormProps) {
                     <option value="medium">Medium</option>
                     <option value="low">Low</option>
                   </select>
-                </div>
+                </AccessibleField>
               </div>
             </div>
 
@@ -183,41 +185,41 @@ export function EscalationRuleForm({ open, onClose }: EscalationRuleFormProps) {
                       </div>
                       <div className="p-4 space-y-3">
                         <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="mb-1 block text-xs font-medium text-slate-600">Delay After Trigger (hours)</label>
+                          <AccessibleField label={<>Delay After Trigger (hours)</>} >
+
                             <input type="number" min={0} {...register(`escalationChain.${idx}.delayHours`)} className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white" />
-                          </div>
-                          <div>
-                            <label className="mb-1 block text-xs font-medium text-slate-600">Action</label>
+                          </AccessibleField>
+                          <AccessibleField label={<>Action</>} >
+
                             <select {...register(`escalationChain.${idx}.action`)} className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white">
                               <option value="notify">Notify User</option>
                               <option value="notify_role">Notify Role</option>
                               <option value="reassign">Reassign</option>
                               <option value="create_task">Create Task</option>
                             </select>
-                          </div>
+                          </AccessibleField>
                         </div>
 
                         {(action === 'notify' || action === 'reassign') && (
-                          <div>
-                            <label className="mb-1 block text-xs font-medium text-slate-600">Target User ID (UUID)</label>
+                          <AccessibleField label={<>Target User ID (UUID)</>} >
+
                             <input {...register(`escalationChain.${idx}.targetId`)} placeholder="User UUID" className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white outline-none" />
-                          </div>
+                          </AccessibleField>
                         )}
 
                         {action === 'notify_role' && (
-                          <div>
-                            <label className="mb-1 block text-xs font-medium text-slate-600">Target Role</label>
+                          <AccessibleField label={<>Target Role</>} >
+
                             <select {...register(`escalationChain.${idx}.targetRole`)} className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white">
                               {ROLE_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
                             </select>
-                          </div>
+                          </AccessibleField>
                         )}
 
-                        <div>
-                          <label className="mb-1 block text-xs font-medium text-slate-600">Message (optional)</label>
+                        <AccessibleField label={<>Message (optional)</>} >
+
                           <input {...register(`escalationChain.${idx}.message`)} placeholder="Custom notification message" className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white outline-none" />
-                        </div>
+                        </AccessibleField>
                       </div>
                     </div>
                   );
@@ -234,6 +236,6 @@ export function EscalationRuleForm({ open, onClose }: EscalationRuleFormProps) {
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }

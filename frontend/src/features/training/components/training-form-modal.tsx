@@ -1,3 +1,6 @@
+import { optionalDuration, optionalFrequency } from '@/lib/form-validation';
+import { ModalSurface } from '@/components/modal-surface';
+import { AccessibleField } from '@/components/accessible-field';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,9 +16,9 @@ const schema = z.object({
   description:     z.string().max(10000).optional(),
   category:        z.string().max(100).optional(),
   provider:        z.string().max(255).optional(),
-  durationMinutes: z.coerce.number().int().min(0).max(1000000).optional(),
+  durationMinutes: optionalDuration,
   isMandatory:     z.boolean().default(false),
-  frequencyDays:   z.coerce.number().int().min(1).max(3650).optional(),
+  frequencyDays:   optionalFrequency,
   status:          z.enum(['active', 'archived']).default('active'),
 });
 
@@ -94,7 +97,7 @@ export function TrainingFormModal({ open, onClose, program }: Props): JSX.Elemen
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <ModalSurface label="Training programme form" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
 
@@ -193,7 +196,7 @@ export function TrainingFormModal({ open, onClose, program }: Props): JSX.Elemen
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }
 
@@ -205,18 +208,7 @@ interface FormFieldProps {
   children: React.ReactNode;
 }
 
-function FormField({ label, error, required, className, children }: FormFieldProps): JSX.Element {
-  return (
-    <div className={cn('space-y-1', className)}>
-      <label className="block text-sm font-medium text-slate-700">
-        {label}
-        {required && <span className="ml-1 text-rose-500">*</span>}
-      </label>
-      {children}
-      {error && <p className="text-xs text-rose-600">{error}</p>}
-    </div>
-  );
-}
+function FormField({ label, error, required, className, children }: FormFieldProps): JSX.Element { return <AccessibleField label={label} error={error} required={required} className={className}>{children}</AccessibleField>; }
 
 function inputClass(hasError: boolean): string {
   return cn(

@@ -1,3 +1,5 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { ModalSurface } from '@/components/modal-surface';
 import { useAuthStore } from '@/stores/auth.store';
 import { hasPermission } from '@/config/role-permissions';
 import { useImplementationMembers } from '@/features/frameworks/implementation';
@@ -109,31 +111,31 @@ export function TaskFormModal({ open, onClose, task, parentTaskId, entityType, e
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <ModalSurface label=" " onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-xl rounded-xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 shrink-0">
           <h2 className="text-base font-semibold text-slate-900">
             {isEdit ? 'Edit Task' : parentTaskId ? 'Add Subtask' : 'New Task'}
           </h2>
-          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close dialog"><X className="h-5 w-5" /></button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">Title *</label>
+            <AccessibleField label={<>Title *</>} >
+
               <input {...register('title')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
               {errors.title && <p className="mt-0.5 text-xs text-red-600">{errors.title.message}</p>}
-            </div>
+            </AccessibleField>
 
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">Description</label>
+            <AccessibleField label={<>Description</>} >
+
               <textarea {...register('description')} rows={3} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm resize-none outline-none focus:border-blue-500" />
-            </div>
+            </AccessibleField>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Status</label>
+              <AccessibleField label={<>Status</>} >
+
                 <select {...register('status')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                   <option value="todo">To Do</option>
                   <option value="in_progress">In Progress</option>
@@ -142,33 +144,33 @@ export function TaskFormModal({ open, onClose, task, parentTaskId, entityType, e
                   <option value="completed">Completed</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Priority</label>
+              </AccessibleField>
+              <AccessibleField label={<>Priority</>} >
+
                 <select {...register('priority')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                   <option value="critical">Critical</option>
                   <option value="high">High</option>
                   <option value="medium">Medium</option>
                   <option value="low">Low</option>
                 </select>
-              </div>
+              </AccessibleField>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Responsible person</label>
+              <AccessibleField label={<>Responsible person</>} >
+
                 <select aria-label="Task responsible person" {...register('assignedTo')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"><option value="">Unassigned</option>{members.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Due Date</label>
+              </AccessibleField>
+              <AccessibleField label={<>Due Date</>} >
+
                 <input type="datetime-local" {...register('dueDate')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              </div>
+              </AccessibleField>
             </div>
 
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">Tags (comma-separated)</label>
+            <AccessibleField label={<>Tags (comma-separated)</>} >
+
               <input {...register('tags')} placeholder="e.g. security, audit, q4" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
-            </div>
+            </AccessibleField>
 
             <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
               <input type="checkbox" {...register('isRecurring')} className="h-4 w-4 rounded border-slate-300" />
@@ -176,10 +178,10 @@ export function TaskFormModal({ open, onClose, task, parentTaskId, entityType, e
             </label>
 
             {isRecurring && (
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Repeat schedule</label>
+              <AccessibleField label={<>Repeat schedule</>} >
+
                 <select {...register('recurrenceRule')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"><option value="">Choose a schedule</option><option value="FREQ=DAILY">Daily</option><option value="FREQ=WEEKLY">Weekly</option><option value="FREQ=MONTHLY">Monthly</option><option value="FREQ=YEARLY">Yearly</option>{task?.recurrenceRule&&! ['FREQ=DAILY','FREQ=WEEKLY','FREQ=MONTHLY','FREQ=YEARLY'].includes(task.recurrenceRule)&&<option value={task.recurrenceRule}>Existing custom schedule</option>}</select>
-              </div>
+              </AccessibleField>
             )}
           </div>
 
@@ -191,6 +193,6 @@ export function TaskFormModal({ open, onClose, task, parentTaskId, entityType, e
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }

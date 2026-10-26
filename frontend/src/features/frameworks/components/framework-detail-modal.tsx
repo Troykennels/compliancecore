@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { X, Layers, Download, AlertTriangle } from 'lucide-react';
 import { useFramework } from '../hooks/use-frameworks';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +14,7 @@ export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Eleme
   const navigate=useNavigate();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <ModalSurface label=" " onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
 
@@ -119,7 +120,7 @@ export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Eleme
           </button>
         </div>
       </div>
-    </div>
+    </ModalSurface>
   );
 }
 

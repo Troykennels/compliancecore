@@ -74,6 +74,7 @@ export const trainingService = {
       await setAuditSessionVars(tx, actor);
       const program = await trainingRepository.findById(tx, programId);
       if (!program) throw new NotFoundError('Training program not found.');
+      if(program.status!=='active')throw new AppError('Reactivate this training programme before assigning new participants.',409,'TRAINING_ARCHIVED');
       await trainingRepository.assignRecords(tx, programId, input);
       return trainingRepository.findRecords(tx, programId);
     });

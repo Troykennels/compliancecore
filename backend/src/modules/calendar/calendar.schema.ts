@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { refineDateRange } from '../../lib/date-range';
 
 const uuidSchema = z.string().uuid();
 
-export const createCalendarEventSchema = z.object({
+const calendarFields = z.object({
   title:            z.string().min(1).max(500),
   description:      z.string().max(5000).optional().nullable(),
   eventType:        z.enum(['deadline','review','audit','training','renewal','assessment','meeting','other']).default('other'),
@@ -20,9 +21,10 @@ export const createCalendarEventSchema = z.object({
   reminderDays:     z.array(z.number().int().min(0).max(365)).max(10).optional().default([7, 1]),
 });
 
-export const updateCalendarEventSchema = createCalendarEventSchema.partial().extend({
+export const createCalendarEventSchema = calendarFields.superRefine(refineDateRange);
+export const updateCalendarEventSchema = calendarFields.partial().extend({
   status: z.enum(['upcoming','in_progress','completed','cancelled','overdue']).optional(),
-});
+}).superRefine(refineDateRange);
 
 export const listCalendarEventsSchema = z.object({
   from:       z.coerce.date().optional(),

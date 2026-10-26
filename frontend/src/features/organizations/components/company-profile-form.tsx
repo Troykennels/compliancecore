@@ -1,3 +1,4 @@
+import { AccessibleField } from '@/components/accessible-field';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -204,18 +205,7 @@ interface FieldProps {
   children: React.ReactNode;
 }
 
-function Field({ label, error, required, className, children }: FieldProps): JSX.Element {
-  return (
-    <div className={cn('space-y-1.5', className)}>
-      <label className="block text-sm font-medium text-slate-700">
-        {label}
-        {required && <span className="ml-1 text-rose-500">*</span>}
-      </label>
-      {children}
-      {error && <p className="text-xs text-rose-600">{error}</p>}
-    </div>
-  );
-}
+function Field({ label, error, required, className, children }: FieldProps): JSX.Element { return <AccessibleField label={label} error={error} required={required} className={className}>{children}</AccessibleField>; }
 
 function inputClass(hasError: boolean): string {
   return cn(

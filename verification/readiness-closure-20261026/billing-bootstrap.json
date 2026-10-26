@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "freshBootstrap": true,
+  "repeatPreservesCommercialRecords": true,
+  "newBillingTablesAudited": true,
+  "productionWrites": false
+}

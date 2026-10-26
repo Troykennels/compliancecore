@@ -1,3 +1,6 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { PermissionAction } from '@/components/permission-action';
+import { ModalSurface } from '@/components/modal-surface';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -36,7 +39,8 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export function SettingsApiKeysPage(): JSX.Element {
+export function SettingsApiKeysPage(): JSX.Element {
+
   const fmt = useOrgFormat();
   const [createOpen, setCreateOpen] = useState(false);
   const [createdKey, setCreatedKey] = useState<ApiKeyCreated | null>(null);
@@ -97,12 +101,12 @@ export function SettingsApiKeysPage(): JSX.Element {
                 Create keys to authenticate the ComplianceCore API from your systems.
               </p>
             </div>
-            <button
+            <PermissionAction scope="settings:write"><button
               onClick={() => { setCreateOpen(true); reset(); }}
               className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
             >
               <Plus className="h-4 w-4" /> New Key
-            </button>
+            </button></PermissionAction>
           </div>
 
           {isLoading ? (
@@ -147,13 +151,13 @@ export function SettingsApiKeysPage(): JSX.Element {
                       {key.expiresAt ? fmt.formatDate(key.expiresAt) : 'Never'}
                     </td>
                     <td className="px-4 py-4 text-right">
-                      <button
+                      <PermissionAction scope="settings:write"><button
                         onClick={() => setRevokeId(key.id)}
                         className="rounded-md p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50"
                         title="Revoke key"
                       >
                         <Trash2 className="h-4 w-4" />
-                      </button>
+                      </button></PermissionAction>
                     </td>
                   </tr>
                 ))}
@@ -170,20 +174,20 @@ export function SettingsApiKeysPage(): JSX.Element {
 
       {/* Create Key Modal */}
       {createOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Create API Key" onClose={() => setCreateOpen(false)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setCreateOpen(false)} />
           <div className="relative z-10 w-full max-w-md rounded-xl bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
               <h3 className="text-base font-semibold text-slate-900">Create API Key</h3>
-              <button onClick={() => setCreateOpen(false)} className="rounded-md p-1 text-slate-400 hover:text-slate-600">
+              <button onClick={() => setCreateOpen(false)} className="rounded-md p-1 text-slate-400 hover:text-slate-600" aria-label="Close dialog">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleSubmit((v) => createKey(v))} className="p-6 space-y-4">
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-700">
+              <AccessibleField label={<>
                   Key Name <span className="text-rose-500">*</span>
-                </label>
+                </>} className="space-y-1.5">
+
                 <input
                   {...register('name')}
                   autoFocus
@@ -191,7 +195,7 @@ export function SettingsApiKeysPage(): JSX.Element {
                   className={cn('block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600', errors.name ? 'border-rose-500' : 'border-slate-300')}
                 />
                 {errors.name && <p className="text-xs text-rose-600">{errors.name.message}</p>}
-              </div>
+              </AccessibleField>
 
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-slate-700">
@@ -215,17 +219,17 @@ export function SettingsApiKeysPage(): JSX.Element {
                 )}
               </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-700">
+              <AccessibleField label={<>
                   Expiry Date <span className="text-slate-400">(optional)</span>
-                </label>
+                </>} className="space-y-1.5">
+
                 <input
                   {...register('expiresAt')}
                   type="date"
                   min={new Date().toISOString().split('T')[0]}
                   className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
                 />
-              </div>
+              </AccessibleField>
 
               <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
                 <button type="button" onClick={() => setCreateOpen(false)} className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700">
@@ -242,12 +246,12 @@ export function SettingsApiKeysPage(): JSX.Element {
               </div>
             </form>
           </div>
-        </div>
+        </ModalSurface>
       )}
 
       {/* New Key Display Modal */}
       {createdKey && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Your New API Key" onClose={() => { setCreatedKey(null); setShowKey(false); }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" />
           <div className="relative z-10 w-full max-w-md rounded-xl bg-white shadow-xl">
             <div className="border-b border-slate-200 px-6 py-4">
@@ -276,12 +280,12 @@ export function SettingsApiKeysPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
 
       {/* Revoke Confirm */}
       {revokeId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Revoke API Key?" onClose={() => setRevokeId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setRevokeId(null)} />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-base font-semibold text-slate-900">Revoke API Key?</h3>
@@ -299,7 +303,7 @@ export function SettingsApiKeysPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </SettingsLayout>
   );

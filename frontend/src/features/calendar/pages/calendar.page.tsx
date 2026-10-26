@@ -105,7 +105,7 @@ export function CalendarPage() {
           value={filterType}
           onChange={(e) => setFilterType(e.target.value as CalendarEventType | '')}
           className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700"
-        >
+         aria-label="Filter: All Types" >
           <option value="">All Types</option>
           {(Object.entries(EVENT_TYPE_LABELS) as [CalendarEventType, string][]).map(([v, l]) => (
             <option key={v} value={v}>{l}</option>
@@ -115,7 +115,7 @@ export function CalendarPage() {
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value as CalendarEventStatus | '')}
           className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700"
-        >
+         aria-label="Filter: All Statuses" >
           <option value="">All Statuses</option>
           {(Object.entries(STATUS_LABELS) as [CalendarEventStatus, string][]).map(([v, l]) => (
             <option key={v} value={v}>{l}</option>

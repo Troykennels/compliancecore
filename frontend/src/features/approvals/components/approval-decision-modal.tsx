@@ -1,3 +1,5 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { ModalSurface } from '@/components/modal-surface';
 import { useEffect, useState } from 'react';
 import { SignaturePad } from '@/features/signatures/components/signature-pad';
 import { useForm } from 'react-hook-form';
@@ -73,11 +75,11 @@ export function ApprovalDecisionModal({ open, onClose, requestId, step }: Approv
   const cfg = DECISION_CONFIG[selected as keyof typeof DECISION_CONFIG] ?? DECISION_CONFIG.approved;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <ModalSurface label="Approval decision" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg rounded-xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 shrink-0">
           <h2 className="text-base font-semibold text-slate-900">Record Decision — {step.name}</h2>
-          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close dialog"><X className="h-5 w-5" /></button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
@@ -104,10 +106,10 @@ export function ApprovalDecisionModal({ open, onClose, requestId, step }: Approv
             </div>
 
             {/* Comments */}
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">
+            <AccessibleField label={<>
                 Comments {selected !== 'approved' ? '*' : '(optional)'}
-              </label>
+              </>} >
+
               <textarea
                 {...register('comments')}
                 rows={3}
@@ -118,7 +120,7 @@ export function ApprovalDecisionModal({ open, onClose, requestId, step }: Approv
                 }
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm resize-none outline-none focus:border-blue-500"
               />
-            </div>
+            </AccessibleField>
 
             {/* Digital signature */}
             {step.requireSignature && (
@@ -149,6 +151,6 @@ export function ApprovalDecisionModal({ open, onClose, requestId, step }: Approv
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }

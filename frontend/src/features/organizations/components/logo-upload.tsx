@@ -102,6 +102,7 @@ export function LogoUpload({ currentLogoUrl, orgName }: Props): JSX.Element {
         <input
           ref={inputRef}
           type="file"
+          aria-label="Upload organisation logo"
           accept={ALLOWED_TYPES.join(',')}
           className="sr-only"
           onChange={(e) => {
