@@ -1,4 +1,5 @@
 import { Search } from 'lucide-react';
+import { ComplianceRecordDetails } from './compliance-record-details';
 import { ComplianceRecordPicker } from "./compliance-record-picker";
 import { complianceDownload } from "./compliance-template-library";
 import { useState } from "react";
@@ -837,6 +838,7 @@ function Operations({
                           )}
                       </div>
                     </div>
+                    <ComplianceRecordDetails kind={config.kind} record={r} options={query.data.options} expanded={review?.id === r.id} />
                   </article>
                 ))}
                 {!query.data.records.length && (
