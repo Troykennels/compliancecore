@@ -21,6 +21,9 @@ const {auditsService}=await import('../dist/modules/audits/audits.service.js');
 const {createAuditSchema}=await import('../dist/modules/audits/audits.schema.js');
 const {incidentsService}=await import('../dist/modules/incidents/incidents.service.js');
 const {prisma}=await import('../dist/lib/prisma.js');
+// Only the operator traverses the public database proxy. Web request limits stay unchanged.
+const transaction=prisma.$transaction.bind(prisma);
+prisma.$transaction=(callback,options)=>transaction(callback,{maxWait:10000,timeout:60000,...options});
 const c=new pg.Client({connectionString:process.env.DATABASE_URL});await c.connect();
 const day=n=>new Date(Date.now()+n*86400000).toISOString().slice(0,10),today=day(0);
 const disclaimer='FICTIONAL DEMONSTRATION ONLY. These records describe sample operations, not the actual staff, assets or compliance position of C&I Leasing Plc. No certification or regulatory filing is asserted.';
