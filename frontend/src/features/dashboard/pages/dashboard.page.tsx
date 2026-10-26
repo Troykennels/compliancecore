@@ -1,3 +1,4 @@
+import { ComplianceWorkSummary } from '../components/compliance-work-summary';
 import { useNavigate } from 'react-router-dom';
 import { ImplementationOverview } from '@/features/frameworks/components/implementation-overview';
 import {
@@ -32,10 +33,10 @@ const EVENT_STATUS_TONE: Record<string, StatusTone> = {
 
 /** Control status, ordered worst-first so the gaps read before the wins. */
 const CONTROL_BANDS = [
-  { key: 'notImplemented', label: 'Not implemented', bar: 'bg-red-500' },
-  { key: 'partiallyImplemented', label: 'Partially implemented', bar: 'bg-amber-500' },
+  { key: 'notImplemented', label: 'Not operating', bar: 'bg-red-500' },
+  { key: 'partiallyImplemented', label: 'Partly operating', bar: 'bg-amber-500' },
   { key: 'planned', label: 'Planned', bar: 'bg-brand-400' },
-  { key: 'implemented', label: 'Implemented', bar: 'bg-green-500' },
+  { key: 'implemented', label: 'Operating safeguard recorded', bar: 'bg-green-500' },
   { key: 'notApplicable', label: 'Not applicable', bar: 'bg-slate-300' },
 ] as const;
 
@@ -115,16 +116,17 @@ export function DashboardPage() {
   return (
     <PageShell width="wide">
       <PageHeader
-        title="Organisation assurance overview"
+        title="Compliance overview"
         description={`Compliance overview — ${fmt.formatDateMedium(new Date())}`}
       />
+      <ComplianceWorkSummary />
       <ImplementationOverview />
 
       {/* Headline metrics. Single column on a phone: two 3xl figures side by
           side at 375px truncate into meaninglessness. */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
-          title="Compliance Score"
+          title="Recorded control score"
           value={complianceScore.overall !== null ? `${Math.round(complianceScore.overall)}%` : '—'}
           subtitle={complianceScore.snapshotDate ? `as of ${fmt.formatDateShort(complianceScore.snapshotDate)}` : 'Real-time'}
           icon={<ShieldCheck className="h-5 w-5" />}
@@ -132,7 +134,7 @@ export function DashboardPage() {
           onClick={() => navigate('/compliance-score')}
         />
         <MetricCard
-          title="Controls Implemented"
+          title="Operating safeguards recorded"
           value={`${controls.implemented}/${controls.total}`}
           subtitle={`${controlImplementedPct}% complete`}
           icon={<CheckCircle className="h-5 w-5" />}

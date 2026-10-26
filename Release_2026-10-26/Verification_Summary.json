@@ -1,0 +1,36 @@
+{
+  "releaseStatus": "Local candidate; production migration/configuration/deployment require explicit approval",
+  "date": "2026-10-26",
+  "backendBuild": "passed",
+  "frontendBuild": "passed",
+  "unitTestsPassed": 50,
+  "existingDatabaseIntegrationTestsPassed": 40,
+  "governanceLifecycleChecks": 47,
+  "assessmentChecks": 26,
+  "HTTPRoleChecks": 212,
+  "roles": 8,
+  "templateDownloads": 36,
+  "browserChecks": 88,
+  "multiuserBrowserChecks": 4,
+  "authRaceBrowserChecks": 9,
+  "fileRoundtripAndRefusalChecks": 15,
+  "cloudBackup": {
+    "readOnly": true,
+    "applicationTablesRestored": 501,
+    "rowsPreserved": 3230,
+    "tenantsMigrationRehearsed": 11,
+    "limitations": [
+      "Local Windows UTF8/C restore validates logical rows, not equivalence of production collation/index performance.",
+      "Object-store/provider disaster recovery and production restore execution remain separate operator checks.",
+      "Local vector library unavailable. Its two extension TOC entries were omitted only after verifying no application vector columns; original full backup remains unchanged. This is not an identical full-server recovery drill."
+    ]
+  },
+  "productionWrites": false,
+  "cloudDeploymentPerformed": false,
+  "liveProviderDeliveryOrChargeTested": false,
+  "focusedFrontendLint": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "knownLimits": "Read the Release and Runbook; provider/WCAG/load/object-store recovery and organisation-specific governance gates remain."
+}

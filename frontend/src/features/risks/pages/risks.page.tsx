@@ -1,3 +1,7 @@
+import { PermissionAction } from '@/components/permission-action';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useFrameworks } from '@/features/frameworks/hooks/use-frameworks';
+import { RiskAssessmentSheet } from '@/features/frameworks/components/assessment-records';
 import { useState } from 'react';
 import {
   Plus, Search, ShieldAlert, MoreHorizontal, Pencil, Trash2,
@@ -12,8 +16,9 @@ import { SkeletonTable } from '@/components/ui';
 
 const PAGE_SIZE = 20;
 
-export function RisksPage(): JSX.Element {
-  const [search, setSearch] = useState('');
+function LegacyRisksPage(): JSX.Element {
+  const [routeParams]=useSearchParams();
+  const [search, setSearch] = useState(routeParams.get('q')??'');
   const [statusFilter, setStatusFilter] = useState<RiskStatus | ''>('');
   const [categoryFilter, setCategoryFilter] = useState<RiskCategory | ''>('');
   const [page, setPage] = useState(1);
@@ -67,13 +72,13 @@ export function RisksPage(): JSX.Element {
               Maintain your risk register — assess inherent and residual risk and track treatment.
             </p>
           </div>
-          <button
+          <PermissionAction scope="risks:write"><button
             onClick={openCreate}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
             New Risk
-          </button>
+          </button></PermissionAction>
         </div>
 
         {/* Filters */}
@@ -173,18 +178,18 @@ export function RisksPage(): JSX.Element {
 
                           {menuOpenId === risk.id && (
                             <div className="absolute right-0 top-full z-10 mt-1 w-44 rounded-lg border border-slate-200 bg-white shadow-lg py-1">
-                              <button
+                              <PermissionAction scope="risks:write"><button
                                 onClick={() => { openEdit(risk); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                               >
                                 <Pencil className="h-4 w-4" /> Edit
-                              </button>
-                              <button
+                              </button></PermissionAction>
+                              <PermissionAction scope="risks:delete"><button
                                 onClick={() => { setConfirmDeleteId(risk.id); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"
                               >
                                 <Trash2 className="h-4 w-4" /> Delete
-                              </button>
+                              </button></PermissionAction>
                             </div>
                           )}
                         </div>
@@ -241,12 +246,12 @@ export function RisksPage(): JSX.Element {
               This will permanently delete the risk. This action cannot be undone.
             </p>
             <div className="mt-6 flex justify-end gap-3">
-              <button
+              <PermissionAction scope="risks:delete"><button
                 onClick={() => setConfirmDeleteId(null)}
                 className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Cancel
-              </button>
+              </button></PermissionAction>
               <button
                 onClick={() => handleDelete(confirmDeleteId)}
                 disabled={isDeleting}
@@ -312,4 +317,11 @@ function EmptyState({ onAdd }: { onAdd: () => void }): JSX.Element {
       </button>
     </div>
   );
+}
+
+export function RisksPage():JSX.Element {
+ const [params,setParams]=useSearchParams();const {data:frameworks=[]}=useFrameworks();const [legacy,setLegacy]=useState(params.get('view')==='register');
+ const id=params.get('frameworkId')??frameworks.find(f=>f.adoptedControlCount>0)?.id??'';
+ if(legacy)return <><div className="mx-4 mt-4 flex flex-wrap items-center gap-3 rounded-lg bg-indigo-50 p-3 text-sm"><p>All saved risk records are retained here.</p><button className="font-semibold text-indigo-700 underline" onClick={()=>setLegacy(false)}>Return to framework risk worksheet</button></div><LegacyRisksPage/></>;
+ return <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6"><header><h1 className="text-2xl font-bold">Risk assessment</h1><p className="mt-2 text-sm text-slate-600">Use the spreadsheet-style register for the chosen requirements. Review assets, risks, ratings and treatment decisions together.</p></header><div className="flex flex-wrap items-center gap-3"><label className="text-sm font-medium">Assessment framework<select aria-label="Risk assessment framework" value={id} onChange={e=>setParams(e.target.value?{frameworkId:e.target.value}:{})} className="ml-2 max-w-full rounded-lg border px-3 py-2"><option value="">Choose a framework</option>{frameworks.map(f=><option key={f.id} value={f.id}>{f.shortName||f.name}</option>)}</select></label><button className="text-sm font-semibold text-indigo-700 underline" onClick={()=>setLegacy(true)}>Other / existing risk records</button></div>{id?<><Link className="inline-block text-sm font-semibold text-indigo-700 underline" to={`/frameworks?framework=${id}`}>Open scope, assessment criteria and compliance review</Link><RiskAssessmentSheet key={id} id={id}/></>:<p className="rounded-lg border bg-white p-4 text-sm">Choose the relevant framework to open its worksheet. Save its scope and assessment basis before confirming risk ratings.</p>}</div>;
 }

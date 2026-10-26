@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { useState } from 'react';
 import { parseISO, isPast } from 'date-fns';
 import { Plus, LayoutGrid, List, AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
@@ -12,7 +13,8 @@ import { useOrgFormat } from '@/lib/org-format';
 
 type View = 'board' | 'list';
 
-export function TasksPage() {
+export function TasksPage() {
+
   const fmt = useOrgFormat();
   const [view, setView] = useState<View>('board');
   const [statusFilter, setStatusFilter] = useState<TaskStatus | ''>('');
@@ -47,12 +49,12 @@ export function TasksPage() {
           <h1 className="text-xl font-bold text-slate-900">Tasks</h1>
           <p className="text-sm text-slate-500 mt-0.5">Track and manage compliance tasks across your organization</p>
         </div>
-        <button
+        <PermissionAction scope="tasks:write"><button
           onClick={() => openCreate()}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" /> New Task
-        </button>
+        </button></PermissionAction>
       </div>
 
       {/* Stat cards */}
@@ -187,14 +189,14 @@ export function TasksPage() {
             <h3 className="text-sm font-semibold text-slate-900 mb-2">Delete Task?</h3>
             <p className="text-xs text-slate-600 mb-4">This will permanently delete the task and all its subtasks and comments.</p>
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setDeleteId(null)} className="rounded-md px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">Cancel</button>
-              <button
+              <PermissionAction scope="tasks:write"><button onClick={() => setDeleteId(null)} className="rounded-md px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">Cancel</button></PermissionAction>
+              <PermissionAction scope="tasks:write"><button
                 onClick={async () => { await deleteTask.mutateAsync(deleteId); setDeleteId(null); }}
                 disabled={deleteTask.isPending}
                 className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
               >
                 {deleteTask.isPending ? 'Deleting…' : 'Delete'}
-              </button>
+              </button></PermissionAction>
             </div>
           </div>
         </div>

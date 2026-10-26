@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "PDFs": [
+    {
+      "name": "ORION_ComplianceCore_Step_2_Release_and_Runbook.pdf",
+      "pages": 5,
+      "textPresentOnEveryPage": true
+    },
+    {
+      "name": "ORION_ComplianceCore_Step_2_User_and_Admin_Guide.pdf",
+      "pages": 4,
+      "textPresentOnEveryPage": true
+    }
+  ],
+  "wordPackagesValid": true
+}

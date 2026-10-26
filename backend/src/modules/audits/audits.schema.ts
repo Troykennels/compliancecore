@@ -29,6 +29,8 @@ export const listAuditsSchema = z.object({
 });
 
 export const createFindingSchema = z.object({
+  controlId:      uuidSchema.optional().nullable(),
+  testId:         uuidSchema.optional().nullable(),
   title:          z.string().min(1).max(500),
   description:    z.string().max(10000).optional().nullable(),
   severity:       z.enum(['critical', 'high', 'medium', 'low', 'observation']).default('medium'),

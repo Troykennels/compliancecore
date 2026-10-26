@@ -172,7 +172,7 @@ export function ControlFormModal({ open, onClose, control }: Props): JSX.Element
                 </select>
               </FormField>
 
-              <FormField label="Implementation Status" error={errors.implementationStatus?.message}>
+              <FormField label="Current safeguard status" error={errors.implementationStatus?.message}>
                 <select {...register('implementationStatus')} className={inputClass(false)}>
                   {Object.entries(IMPLEMENTATION_STATUS_CONFIG).map(([value, cfg]) => (
                     <option key={value} value={value}>{cfg.label}</option>
@@ -195,11 +195,11 @@ export function ControlFormModal({ open, onClose, control }: Props): JSX.Element
                 />
               </FormField>
 
-              <FormField label="Implementation Notes" error={errors.implementationNotes?.message} className="col-span-2">
+              <FormField label="How the safeguard operates" error={errors.implementationNotes?.message} className="col-span-2">
                 <textarea {...register('implementationNotes')} rows={2} className={cn(inputClass(false), 'resize-none')} />
               </FormField>
 
-              <FormField label="Testing Notes" error={errors.testingNotes?.message} className="col-span-2">
+              <FormField label="Checks performed and result" error={errors.testingNotes?.message} className="col-span-2">
                 <textarea {...register('testingNotes')} rows={2} className={cn(inputClass(false), 'resize-none')} />
               </FormField>
             </div>

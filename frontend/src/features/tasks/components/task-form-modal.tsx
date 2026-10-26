@@ -1,3 +1,6 @@
+import { useAuthStore } from '@/stores/auth.store';
+import { hasPermission } from '@/config/role-permissions';
+import { useImplementationMembers } from '@/features/frameworks/implementation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -36,6 +39,9 @@ interface TaskFormModalProps {
 }
 
 export function TaskFormModal({ open, onClose, task, parentTaskId, entityType, entityId, defaultStatus }: TaskFormModalProps) {
+  const role=useAuthStore(s=>s.activeTenant?.role),userId=useAuthStore(s=>s.user?.id);
+  const {data:allMembers=[]}=useImplementationMembers(open);
+  const members=hasPermission(role,'tasks:assign')?allMembers:allMembers.filter(m=>m.id===userId);
   const isEdit = Boolean(task);
   const create = useCreateTask();
   const update = useUpdateTask(task?.id ?? '');
@@ -132,6 +138,7 @@ export function TaskFormModal({ open, onClose, task, parentTaskId, entityType, e
                   <option value="todo">To Do</option>
                   <option value="in_progress">In Progress</option>
                   <option value="in_review">In Review</option>
+                  <option value="blocked">Blocked — waiting for a dependency</option>
                   <option value="completed">Completed</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
@@ -149,8 +156,8 @@ export function TaskFormModal({ open, onClose, task, parentTaskId, entityType, e
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Assigned To (UUID)</label>
-                <input {...register('assignedTo')} placeholder="User UUID" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
+                <label className="mb-1 block text-xs font-medium text-slate-700">Responsible person</label>
+                <select aria-label="Task responsible person" {...register('assignedTo')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"><option value="">Unassigned</option>{members.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-700">Due Date</label>
@@ -170,8 +177,8 @@ export function TaskFormModal({ open, onClose, task, parentTaskId, entityType, e
 
             {isRecurring && (
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Recurrence Rule (iCal RRULE)</label>
-                <input {...register('recurrenceRule')} placeholder="FREQ=WEEKLY;BYDAY=MO" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-blue-500" />
+                <label className="mb-1 block text-xs font-medium text-slate-700">Repeat schedule</label>
+                <select {...register('recurrenceRule')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"><option value="">Choose a schedule</option><option value="FREQ=DAILY">Daily</option><option value="FREQ=WEEKLY">Weekly</option><option value="FREQ=MONTHLY">Monthly</option><option value="FREQ=YEARLY">Yearly</option>{task?.recurrenceRule&&! ['FREQ=DAILY','FREQ=WEEKLY','FREQ=MONTHLY','FREQ=YEARLY'].includes(task.recurrenceRule)&&<option value={task.recurrenceRule}>Existing custom schedule</option>}</select>
               </div>
             )}
           </div>

@@ -1,0 +1,132 @@
+﻿path,change,purpose
+backend/.env.example,modified,Existing module repaired/connected
+backend/.env.production.example,modified,Existing module repaired/connected
+backend/scripts/apply-final-governance-local.mjs,new,Operator/recovery/isolated verification support
+backend/scripts/migrate-tenants.mjs,modified,Operator/recovery/isolated verification support
+backend/scripts/prepare-runtime-identity.mjs,new,Operator/recovery/isolated verification support
+backend/scripts/prepare-step2-roles-local.mjs,new,Operator/recovery/isolated verification support
+backend/scripts/restore.sh,modified,Operator/recovery/isolated verification support
+backend/scripts/start-presentation-fixture.mjs,modified,Operator/recovery/isolated verification support
+backend/scripts/step2-release-migrations.mjs,new,Operator/recovery/isolated verification support
+backend/scripts/verify-cloud-backup-readonly-private.mjs,new,Operator/recovery/isolated verification support
+backend/scripts/verify-compliance-assessment.mjs,new,Operator/recovery/isolated verification support
+backend/scripts/verify-compliance-governance.mjs,new,Operator/recovery/isolated verification support
+backend/scripts/verify-compliance-uploads.mjs,new,Operator/recovery/isolated verification support
+backend/scripts/verify-existing-integrations-isolated.mjs,new,Operator/recovery/isolated verification support
+backend/scripts/verify-recovery-local.mjs,new,Operator/recovery/isolated verification support
+backend/scripts/verify-restored-cloud-migrations-local.mjs,new,Operator/recovery/isolated verification support
+backend/scripts/verify-step2-http.mjs,new,Operator/recovery/isolated verification support
+backend/scripts/workflow-local.mjs,modified,Operator/recovery/isolated verification support
+backend/src/app.ts,modified,Existing module repaired/connected
+backend/src/config/env.ts,modified,Existing module repaired/connected
+backend/src/jobs/billing-renewal.job.ts,modified,Existing module repaired/connected
+backend/src/jobs/ocr.job.ts,modified,Existing module repaired/connected
+backend/src/lib/active-member.ts,new,"Shared security, tenant, document or export support"
+backend/src/lib/audit-context.ts,new,"Shared security, tenant, document or export support"
+backend/src/lib/docx-document.ts,new,"Shared security, tenant, document or export support"
+backend/src/lib/file-signature.ts,new,"Shared security, tenant, document or export support"
+backend/src/lib/prisma.ts,modified,"Shared security, tenant, document or export support"
+backend/src/lib/provisioning.ts,modified,"Shared security, tenant, document or export support"
+backend/src/lib/runtime-privileges.ts,new,"Shared security, tenant, document or export support"
+backend/src/lib/spreadsheet.ts,new,"Shared security, tenant, document or export support"
+backend/src/lib/storage.ts,modified,"Shared security, tenant, document or export support"
+backend/src/lib/tenant-erasure.ts,modified,"Shared security, tenant, document or export support"
+backend/src/modules/approvals/approvals.service.ts,modified,Existing module repaired/connected
+backend/src/modules/audits/audits.schema.ts,modified,Existing module repaired/connected
+backend/src/modules/audits/audits.service.ts,modified,Existing module repaired/connected
+backend/src/modules/auth/auth.repository.ts,modified,Existing module repaired/connected
+backend/src/modules/billing/commercial-pricing.ts,modified,Existing module repaired/connected
+backend/src/modules/controls/controls.repository.ts,modified,Existing module repaired/connected
+backend/src/modules/controls/controls.service.ts,modified,Existing module repaired/connected
+backend/src/modules/controls/controls.types.ts,modified,Existing module repaired/connected
+backend/src/modules/evidence/evidence.repository.ts,modified,Existing module repaired/connected
+backend/src/modules/evidence/evidence.service.ts,modified,Existing module repaired/connected
+backend/src/modules/frameworks/assessment-export.ts,new,Absent workflow support or focused verification
+backend/src/modules/frameworks/assessment-rules.ts,new,Absent workflow support or focused verification
+backend/src/modules/frameworks/assessment.service.ts,new,Absent workflow support or focused verification
+backend/src/modules/frameworks/compliance-followup.ts,new,Absent workflow support or focused verification
+backend/src/modules/frameworks/compliance-options.ts,new,Absent workflow support or focused verification
+backend/src/modules/frameworks/compliance-profiles.ts,new,Absent workflow support or focused verification
+backend/src/modules/frameworks/compliance-records.router.ts,new,Absent workflow support or focused verification
+backend/src/modules/frameworks/compliance-records.service.ts,new,Absent workflow support or focused verification
+backend/src/modules/frameworks/compliance-summary.ts,new,Absent workflow support or focused verification
+backend/src/modules/frameworks/compliance-templates.ts,new,Absent workflow support or focused verification
+backend/src/modules/frameworks/control-actions.ts,modified,Existing module repaired/connected
+backend/src/modules/frameworks/frameworks.router.ts,modified,Existing module repaired/connected
+backend/src/modules/frameworks/frameworks.service.ts,modified,Existing module repaired/connected
+backend/src/modules/frameworks/implementation.router.ts,modified,Existing module repaired/connected
+backend/src/modules/frameworks/implementation.service.ts,modified,Existing module repaired/connected
+backend/src/modules/incidents/incidents.repository.ts,modified,Existing module repaired/connected
+backend/src/modules/incidents/incidents.service.ts,modified,Existing module repaired/connected
+backend/src/modules/organizations/export.service.ts,modified,Existing module repaired/connected
+backend/src/modules/organizations/organization.service.ts,modified,Existing module repaired/connected
+backend/src/modules/organizations/scoping.ts,modified,Existing module repaired/connected
+backend/src/modules/payments/recurring.service.ts,modified,Existing module repaired/connected
+backend/src/modules/payments/reserve-checkout.ts,modified,Existing module repaired/connected
+backend/src/modules/payments/settle-paid-checkout.ts,modified,Existing module repaired/connected
+backend/src/modules/policies/policies.router.ts,modified,Existing module repaired/connected
+backend/src/modules/policies/policies.service.ts,modified,Existing module repaired/connected
+backend/src/modules/policies/policy-templates.ts,new,Absent workflow support or focused verification
+backend/src/modules/risks/risks.service.ts,modified,Existing module repaired/connected
+backend/src/modules/tasks/tasks.controller.ts,modified,Existing module repaired/connected
+backend/src/modules/tasks/tasks.service.ts,modified,Existing module repaired/connected
+backend/src/modules/training/training.service.ts,modified,Existing module repaired/connected
+backend/src/modules/vendors/vendors.service.ts,modified,Existing module repaired/connected
+backend/src/server.ts,modified,Existing module repaired/connected
+backend/test/unit/compliance-assessment.test.ts,new,Absent workflow support or focused verification
+backend/test/unit/compliance-safety.test.ts,new,Absent workflow support or focused verification
+database/migrations/014_global_compliance_history.sql,new,Additive runtime migration; no duplicate master records
+database/tenant-template/015_compliance_assessments.sql,new,Additive runtime migration; no duplicate master records
+database/tenant-template/016_compliance_governance.sql,new,Additive runtime migration; no duplicate master records
+frontend/scripts/render-step2-guides.mjs,new,Operator/recovery/isolated verification support
+frontend/scripts/verify-auth-race-browser.mjs,new,Operator/recovery/isolated verification support
+frontend/scripts/verify-compliance-product.mjs,new,Operator/recovery/isolated verification support
+frontend/scripts/verify-step2-browser.mjs,new,Operator/recovery/isolated verification support
+frontend/scripts/verify-step2-multiuser-browser.mjs,new,Operator/recovery/isolated verification support
+frontend/src/App.tsx,modified,Existing module repaired/connected
+frontend/src/components/app-shell.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/components/ci-demo-guide.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/components/compliance-page-help.tsx,new,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/components/linked-compliance-record.tsx,new,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/components/permission-action.tsx,new,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/config/role-permissions.ts,new,Absent workflow support or focused verification
+frontend/src/features/approvals/components/approval-request-modal.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/audits/pages/audits.page.tsx,modified,Existing module repaired/connected
+frontend/src/features/auth/api/auth.api.ts,modified,Existing module repaired/connected
+frontend/src/features/compliance-score/pages/score.page.tsx,modified,Existing module repaired/connected
+frontend/src/features/controls/components/control-form-modal.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/controls/pages/controls.page.tsx,modified,Existing module repaired/connected
+frontend/src/features/controls/types/controls.types.ts,modified,Existing module repaired/connected
+frontend/src/features/dashboard/components/compliance-work-summary.tsx,new,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/dashboard/pages/dashboard.page.tsx,modified,Existing module repaired/connected
+frontend/src/features/evidence/components/evidence-preview.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/frameworks/assessment.ts,new,Absent workflow support or focused verification
+frontend/src/features/frameworks/components/assessment-records.tsx,new,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/frameworks/components/compliance-operations.tsx,new,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/frameworks/components/compliance-record-picker.tsx,new,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/frameworks/components/compliance-template-library.tsx,new,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/frameworks/components/compliance-workspace.tsx,new,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/frameworks/components/evidence-picker.tsx,new,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/frameworks/components/framework-detail-modal.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/frameworks/components/implementation-overview.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/frameworks/components/remove-framework-dialog.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/frameworks/implementation.ts,modified,Existing module repaired/connected
+frontend/src/features/frameworks/pages/frameworks.page.tsx,modified,Existing module repaired/connected
+frontend/src/features/guide/guide-content.ts,modified,Existing module repaired/connected
+frontend/src/features/guide/guide.page.tsx,modified,Existing module repaired/connected
+frontend/src/features/incidents/pages/incidents.page.tsx,modified,Existing module repaired/connected
+frontend/src/features/organizations/components/scoping-questionnaire.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/policies/components/policy-form-modal.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/policies/pages/policies.page.tsx,modified,Existing module repaired/connected
+frontend/src/features/policies/pages/policy-templates.page.tsx,new,Absent workflow support or focused verification
+frontend/src/features/policies/policy-templates.ts,new,Absent workflow support or focused verification
+frontend/src/features/reports/pages/executive-dashboard.page.tsx,modified,Existing module repaired/connected
+frontend/src/features/risks/components/risk-form-modal.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/risks/pages/risks.page.tsx,modified,Existing module repaired/connected
+frontend/src/features/settings/components/settings-layout.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/tasks/components/task-form-modal.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/tasks/pages/tasks.page.tsx,modified,Existing module repaired/connected
+frontend/src/features/training/pages/training.page.tsx,modified,Existing module repaired/connected
+frontend/src/features/vendors/pages/vendors.page.tsx,modified,Existing module repaired/connected
+frontend/src/lib/api-client.ts,modified,"Shared security, tenant, document or export support"
+frontend/src/routes/paths.ts,modified,Existing module repaired/connected

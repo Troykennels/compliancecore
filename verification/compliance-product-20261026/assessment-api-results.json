@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "checks": [
+    "Active organisation members remain valid assignment targets",
+    "Unknown or outside-organisation assignees are refused",
+    "Invalid task assignment is refused before notifications",
+    "Invalid approval reviewer is refused before notifications",
+    "Read-only users cannot change scope",
+    "Applicability cannot precede stakeholder/risk/treatment assessment",
+    "Confirmed questionnaire requires complete answers",
+    "Suggested draft ratings do not complete risk assessment",
+    "Ratings outside the documented scale are rejected",
+    "Cross-framework control mappings are rejected",
+    "Read-only role cannot save risks",
+    "A selected risk-treatment control cannot be excluded",
+    "Risk assessment and treatment precede applicability",
+    "No separate gap, training-project or implementation step",
+    "Non-certification profile does not acquire ISO audit/management requirements",
+    "Framework-specific routes distinguish ISO, SOC, PCI and NIST",
+    "Privacy and financial assessments use appropriate focus",
+    "A monitoring framework cannot create a certification audit",
+    "Untailored templates cannot enter approval",
+    "Policy authors cannot approve themselves",
+    "Real assessment records can satisfy every required check",
+    "Assessment owner cannot self-approve",
+    "Independent review is recorded without declaring certification",
+    "Suggestions use named stakeholder assets and real control references",
+    "Excel contains separate stakeholder, risk and method sheets with calculated scores",
+    "Editing through a legacy risk route reopens confirmation and sign-off"
+  ]
+}

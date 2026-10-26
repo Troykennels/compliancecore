@@ -1,6 +1,7 @@
+import { assertActiveMembers } from '../../lib/active-member';
 import { withTenantSchema } from '../../lib/prisma';
 import { setAuditSessionVars } from '../../middleware/audit.middleware';
-import { NotFoundError } from '../../lib/errors';
+import { AppError, ForbiddenError, NotFoundError } from '../../lib/errors';
 import { incidentsRepository } from './incidents.repository';
 import type {
   CreateIncidentInput, UpdateIncidentInput, ListIncidentsInput, AddIncidentUpdateInput,
@@ -24,6 +25,8 @@ export const incidentsService = {
   },
 
   async create(schemaName: string, input: CreateIncidentInput, actor: Actor) {
+    await assertActiveMembers(schemaName,[input.assignedTo]);
+    if(['closed','resolved'].includes(input.status))throw new AppError('Report and investigate the incident before closure review.',409);
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
       const { id } = await incidentsRepository.create(tx, { ...input, createdBy: actor.id });
@@ -39,12 +42,31 @@ export const incidentsService = {
   },
 
   async update(schemaName: string, id: string, input: UpdateIncidentInput, actor: Actor) {
+    await assertActiveMembers(schemaName,[input.assignedTo]);
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
 
       const before = await incidentsRepository.findById(tx, id);
       if (!before) throw new NotFoundError('Incident not found.');
 
+      const materialChange = ['detectedAt','isDataBreach','affectedDataSubjects','description','category','severity'].some(key => {
+        const value=(input as Record<string,unknown>)[key],prior=(before as unknown as Record<string,unknown>)[key];
+        if(value===undefined)return false;
+        return key==='detectedAt' ? new Date(String(value)).getTime()!==new Date(String(prior)).getTime() : JSON.stringify(value)!==JSON.stringify(prior);
+      });
+      if(['closed','resolved'].includes(input.status??'')){
+        if(materialChange)throw new AppError('Save changed incident facts and record a fresh notification decision before closing.',409);
+        if(actor.id===before.reportedBy||actor.id===before.assignedTo)throw new ForbiddenError('Ask an independent authorised reviewer to close this incident.');
+        if(!['owner','admin','compliance_manager'].includes(actor.role??''))throw new ForbiddenError();
+        const saved=await tx.$queryRawUnsafe<Array<{notification_decision:{decision?:string}|null}>>('SELECT notification_decision FROM incidents WHERE id=$1::uuid',id);
+        const current=await tx.$queryRawUnsafe<Array<{valid:boolean}>>(`SELECT
+          (notification_decision->>'obligationId' IS NULL OR EXISTS(SELECT 1 FROM compliance_obligations o WHERE o.id::text=notification_decision->>'obligationId' AND o.revision::text=notification_decision->>'obligationRevision' AND o.status='active' AND o.review_date>=CURRENT_DATE AND (o.effective_on IS NULL OR o.effective_on<=CURRENT_DATE)))
+          AND (notification_decision->>'evidenceId' IS NULL OR EXISTS(SELECT 1 FROM evidence e JOIN evidence_versions v ON v.id=e.current_version_id WHERE e.id::text=notification_decision->>'evidenceId' AND e.current_version_id::text=notification_decision->>'evidenceVersionId' AND e.deleted_at IS NULL AND e.status='active' AND (e.retention_date IS NULL OR e.retention_date>NOW()) AND v.upload_status='completed')) valid
+          FROM incidents WHERE id=$1::uuid`,id);
+        if(!current[0]?.valid)throw new AppError('The notification source or proof changed. Record a fresh decision before closure.',409);
+        if(!['submitted','not_required'].includes(saved[0]?.notification_decision?.decision??'')||!(input.rootCause??before.rootCause)?.trim()||!(input.remediation??before.remediation)?.trim()||!(input.lessonsLearned??before.lessonsLearned)?.trim())throw new AppError('Record root cause, remediation, lessons and a verified notification decision before closure.',409,'INCIDENT_NOT_READY');
+      }
+      if(materialChange)await tx.$executeRawUnsafe('UPDATE incidents SET notification_decision=NULL WHERE id=$1::uuid',id);
       const ok = await incidentsRepository.update(tx, id, { ...input, updatedBy: actor.id });
       if (!ok) throw new NotFoundError('Incident not found.');
 

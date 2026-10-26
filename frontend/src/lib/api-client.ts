@@ -23,18 +23,22 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 let isRefreshing = false;
 let pendingRefresh: Promise<AxiosResponse<ApiResponse<{ accessToken: string }>>> | null = null;
+let refreshController:AbortController|null=null;
 
 // Startup, explicit refresh and the 401 interceptor must share a rotation.
 // Concurrent rotations can otherwise replay the same single-use cookie.
 export function refreshSession(): Promise<AxiosResponse<ApiResponse<{ accessToken: string }>>> {
   if (!pendingRefresh) {
-    pendingRefresh = axios.post<ApiResponse<{ accessToken: string }>>(
+    const revision=getAuthRevision();
+    const controller=new AbortController();refreshController=controller;
+    const request = axios.post<ApiResponse<{ accessToken: string }>>(
       `${env.VITE_API_URL}/api/auth/refresh`, {},
-      { withCredentials: true, timeout: 30_000 },
+      { withCredentials: true, timeout: 30_000,signal:controller.signal },
     ).then(response => {
-      setAccessToken(response.data.data.accessToken);
+      if(getAuthRevision()===revision)setAccessToken(response.data.data.accessToken);
       return response;
-    }).finally(() => { pendingRefresh = null; });
+    }).finally(() => { if(pendingRefresh===request){pendingRefresh = null;refreshController=null;} });
+    pendingRefresh=request;
   }
   return pendingRefresh;
 }
@@ -83,16 +87,19 @@ apiClient.interceptors.response.use(
 
       originalRequest._retry = true;
       isRefreshing = true;
+      const revision=getAuthRevision();
 
       try {
         const { data } = await refreshSession();
         const newToken: string = data.data.accessToken;
+        if(getAccessToken()!==newToken)throw new Error('The session changed while refreshing.');
         setAccessToken(newToken);
         processQueue(null, newToken);
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
+        if(getAuthRevision()!==revision)return Promise.reject(refreshError);
         clearAccessToken();
         // Redirect to login — import is dynamic to avoid circular deps
         window.location.href = '/login';
@@ -109,15 +116,21 @@ apiClient.interceptors.response.use(
 // ─── In-memory token storage (cleared on tab close) ───────────────────────
 
 let _accessToken: string | null = null;
+let _authRevision=0;
+export function getAuthRevision():number{return _authRevision;}
+/** Explicit sign-in, sign-out and workspace changes supersede older rotations. */
+export function beginAuthChange():void{_authRevision++;refreshController?.abort();refreshController=null;pendingRefresh=null;}
 
 export function getAccessToken(): string | null {
   return _accessToken;
 }
 
 export function setAccessToken(token: string): void {
+  if(_accessToken!==token)_authRevision++;
   _accessToken = token;
 }
 
 export function clearAccessToken(): void {
+  _authRevision++;
   _accessToken = null;
 }

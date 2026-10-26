@@ -1,3 +1,4 @@
+import { auditCurrentActor } from '../../lib/audit-context';
 import crypto from 'node:crypto';
 import { prisma } from '../../config/database';
 import { encrypt, decrypt } from '../../lib/crypto';
@@ -29,6 +30,7 @@ export async function rememberConsent(reference: string, auth: { authorization_c
   const initial = await prisma.$queryRawUnsafe<any[]>(`SELECT tenant_id FROM global.payment_transactions WHERE reference=$1`,reference);
   if (!initial[0]) return;
   await prisma.$transaction(async tx => {
+        await auditCurrentActor(tx);
     await tx.$queryRawUnsafe(`SELECT id FROM global.tenants WHERE id=$1::uuid FOR UPDATE`, initial[0].tenant_id);
     const rows = await tx.$queryRawUnsafe<any[]>(`SELECT * FROM global.payment_transactions WHERE reference=$1 FOR UPDATE`, reference);
     const payment = rows[0];
@@ -46,6 +48,7 @@ export async function rememberConsent(reference: string, auth: { authorization_c
 
 export async function cancelRecurring(tenantId: string) {
   await prisma.$transaction(async tx => {
+        await auditCurrentActor(tx);
     await tx.$queryRawUnsafe(`SELECT id FROM global.tenants WHERE id=$1::uuid FOR UPDATE`, tenantId);
     await tx.$executeRawUnsafe(`INSERT INTO global.recurring_consents(tenant_id,enabled,cancelled_at)
       VALUES($1::uuid,false,now()) ON CONFLICT(tenant_id) DO UPDATE SET enabled=false,cancelled_at=now()`, tenantId);
@@ -80,6 +83,7 @@ export async function reconcileRenewal(reference: string): Promise<{ status: 'pa
   if (!Number.isFinite(+paidAt) || +paidAt > Date.now()+300000) return { status:'unpaid', reason:'Payment timestamp could not be verified.' };
   let applied=false;
   await prisma.$transaction(async tx => {
+        await auditCurrentActor(tx);
     const subs = await tx.$queryRawUnsafe<any[]>(`SELECT * FROM global.subscriptions WHERE id=$1::uuid FOR UPDATE`, row.subscription_id);
     const attempts = await tx.$queryRawUnsafe<any[]>(`SELECT * FROM global.renewal_attempts WHERE reference=$1 FOR UPDATE`, reference);
     if (attempts[0].status === 'paid') return;
@@ -98,6 +102,7 @@ export async function reconcileRenewal(reference: string): Promise<{ status: 'pa
 export async function collectRenewal(input: { tenantId:string; subscriptionId:string; periodEnd:Date; invoiceId:string; amount:number; currency:string; planId:string; cycle:'monthly'|'yearly' }) {
   let charge: { reference:string; authorization:string; email:string } | null = null;
   const result = await prisma.$transaction(async tx => {
+        await auditCurrentActor(tx);
     const subs = await tx.$queryRawUnsafe<any[]>(`SELECT * FROM global.subscriptions WHERE id=$1::uuid FOR UPDATE`, input.subscriptionId);
     const sub = subs[0];
     if (!sub || sub.cancel_at_period_end || +new Date(sub.current_period_end)!==+new Date(input.periodEnd) || +new Date(sub.current_period_end)>Date.now()) return { status:'unpaid' as const,reason:'This billing period is not due.' };

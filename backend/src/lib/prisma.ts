@@ -1,5 +1,6 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 import { logger } from './logger';
+import { auditRequestContext } from './audit-context';
 
 // Singleton Prisma client. The globalThis guard prevents `tsx watch` hot
 // reloads from opening a fresh connection pool on every code change in dev.
@@ -16,6 +17,18 @@ const makePrismaClient = () =>
 const globalForPrisma = globalThis as unknown as { prisma?: ReturnType<typeof makePrismaClient> };
 
 const prisma = globalForPrisma.prisma ?? makePrismaClient();
+
+// Stamp global writes as well as tenant transactions. A fresh transaction is
+// necessary: session SET outside a transaction can stamp another pooled request.
+prisma.$use(async(params,next)=>{
+  const actor=auditRequestContext.getStore()?.actor();
+  const writes=['create','createMany','update','updateMany','upsert','delete','deleteMany'];
+  if(!actor||params.runInTransaction||!params.model||!writes.includes(params.action))return next(params);
+  return prisma.$transaction(async tx=>{
+    await tx.$queryRaw`SELECT set_config('app.current_user_id',${actor.id},true),set_config('app.current_user_role',${actor.role??'system'},true)`;
+    const key=params.model![0].toLowerCase()+params.model!.slice(1);const delegate=(tx as unknown as Record<string,Record<string,(args:unknown)=>Promise<unknown>>>)[key];return delegate[params.action](params.args);
+  });
+});
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
@@ -72,6 +85,8 @@ export async function withTenantSchema<T>(
     // Prisma.raw() interpolates identifiers without quoting, which is correct
     // here because we have already validated the schema name above.
     await tx.$executeRaw`SET LOCAL search_path = ${Prisma.raw(schemaName)}, framework_data, global, public`;
+    const actor=auditRequestContext.getStore()?.actor();
+    if(actor) await tx.$queryRaw`SELECT set_config('app.current_user_id',${actor.id},true), set_config('app.current_user_role',${actor.role??'system'},true)`;
     return fn(tx);
   }, options);
 }

@@ -1,3 +1,4 @@
+import { useImplementationMembers } from '@/features/frameworks/implementation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -57,6 +58,7 @@ const DEFAULTS: FormValues = {
 };
 
 export function RiskFormModal({ open, onClose, risk }: Props): JSX.Element | null {
+  const {data:members=[]}=useImplementationMembers(open);
   const isEditing = !!risk;
   const { mutate: create, isPending: isCreating } = useCreateRisk();
   const { mutate: update, isPending: isUpdating } = useUpdateRisk();
@@ -227,12 +229,8 @@ export function RiskFormModal({ open, onClose, risk }: Props): JSX.Element | nul
                 <textarea {...register('mitigationPlan')} rows={2} className={cn(inputClass(false), 'resize-none')} />
               </FormField>
 
-              <FormField label="Owner ID (optional)" error={errors.ownerId?.message} className="col-span-2">
-                <input
-                  {...register('ownerId')}
-                  placeholder="User UUID"
-                  className={inputClass(!!errors.ownerId)}
-                />
+              <FormField label="Responsible risk owner" error={errors.ownerId?.message} className="col-span-2">
+                <select aria-label="Risk owner" {...register('ownerId')} className={inputClass(!!errors.ownerId)}><option value="">Choose an active member</option>{members.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select>
               </FormField>
             </div>
           </div>

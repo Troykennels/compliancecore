@@ -1,0 +1,437 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "dashboard"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "frameworks"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "risks"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "policies"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "policy-templates"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "controls"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "evidence"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "tasks"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "approvals"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "signatures"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "audits"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "vendors"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "incidents"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "training"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "expiry"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "calendar"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "reports"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "analytics"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "compliance-score"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "notifications"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "branches"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "departments"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "integrations"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "escalations"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "ai-tools"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "settings/organization"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "settings/team"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "settings/security"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "settings/sso"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "settings/api-keys"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "settings/webhooks"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "settings/notifications"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "billing"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "billing/plans"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "billing/invoices"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "billing/payment-methods"
+    },
+    {
+      "type": "page",
+      "width": 1440,
+      "route": "guide"
+    },
+    {
+      "type": "workflow form",
+      "width": 1440,
+      "route": "controls"
+    },
+    {
+      "type": "actual Word downloads",
+      "width": 1440,
+      "count": 2
+    },
+    {
+      "type": "obligation form",
+      "width": 1440
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "dashboard"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "frameworks"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "risks"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "policies"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "policy-templates"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "controls"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "evidence"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "tasks"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "approvals"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "signatures"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "audits"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "vendors"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "incidents"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "training"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "expiry"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "calendar"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "reports"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "analytics"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "compliance-score"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "notifications"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "branches"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "departments"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "integrations"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "escalations"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "ai-tools"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "settings/organization"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "settings/team"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "settings/security"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "settings/sso"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "settings/api-keys"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "settings/webhooks"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "settings/notifications"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "billing"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "billing/plans"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "billing/invoices"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "billing/payment-methods"
+    },
+    {
+      "type": "page",
+      "width": 390,
+      "route": "guide"
+    },
+    {
+      "type": "workflow form",
+      "width": 390,
+      "route": "controls"
+    },
+    {
+      "type": "actual Word downloads",
+      "width": 390,
+      "count": 2
+    },
+    {
+      "type": "obligation form",
+      "width": 390
+    },
+    {
+      "type": "role navigation and direct URL boundary",
+      "role": "owner"
+    },
+    {
+      "type": "role navigation and direct URL boundary",
+      "role": "compliance_manager"
+    },
+    {
+      "type": "role navigation and direct URL boundary",
+      "role": "auditor"
+    },
+    {
+      "type": "role navigation and direct URL boundary",
+      "role": "viewer"
+    },
+    {
+      "type": "role navigation and direct URL boundary",
+      "role": "admin"
+    },
+    {
+      "type": "role navigation and direct URL boundary",
+      "role": "control_owner"
+    },
+    {
+      "type": "role navigation and direct URL boundary",
+      "role": "msp_admin"
+    },
+    {
+      "type": "role navigation and direct URL boundary",
+      "role": "msp_analyst"
+    }
+  ],
+  "pageErrors": [],
+  "serverErrors": []
+}

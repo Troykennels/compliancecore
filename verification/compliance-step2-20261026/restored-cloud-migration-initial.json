@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "scope": "Isolated PostgreSQL18 restored copy only; live database unchanged",
+  "originalTablesPreserved": 501,
+  "originalRowsPreserved": 3230,
+  "tenantsMigrated": 11,
+  "globalMigration": "014_global_compliance_history.sql",
+  "tenantTemplates": 12,
+  "dryRunRolledBack": true,
+  "originalColumnsAndRowsUnchanged": true,
+  "newStructuresAndMetadataOnly": true
+}

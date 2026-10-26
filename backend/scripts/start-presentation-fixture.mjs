@@ -21,7 +21,7 @@ const storage=http.createServer(async(req,res)=>{
   } catch(err) {console.error('Fixture storage failure',req.method,err.code);res.statusCode=404;res.end();}
 });
 await new Promise(r=>storage.listen(3019,'127.0.0.1',r));
-const {initBillingTables}=await import('../dist/modules/billing/billing.repository.js');await initBillingTables();
+if(!process.env.PROVISIONING_DATABASE_URL){const {initBillingTables}=await import('../dist/modules/billing/billing.repository.js');await initBillingTables();}
 const {createApp}=await import('../dist/app.js');
 const server=createApp().listen(3008,'127.0.0.1',()=>console.log('Isolated API and fixture object storage ready'));
 function close(){server.close();storage.close();}

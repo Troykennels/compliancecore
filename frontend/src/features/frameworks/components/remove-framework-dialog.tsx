@@ -153,11 +153,11 @@ export function RemoveFrameworkDialog({
                     </p>
                     <ul className="mt-2 space-y-1 text-sm text-rose-800">
                       {shown.implemented > 0 && (
-                        <li>· {shown.implemented} with an implementation status set</li>
+                        <li>· {shown.implemented} with an operating status recorded</li>
                       )}
                       {shown.withOwner > 0 && <li>· {shown.withOwner} with an assigned owner</li>}
                       {shown.withNotes > 0 && (
-                        <li>· {shown.withNotes} with implementation or testing notes</li>
+                        <li>· {shown.withNotes} with operating descriptions or check notes</li>
                       )}
                       {shown.withEvidence > 0 && (
                         <li>

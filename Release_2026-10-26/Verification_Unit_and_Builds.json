@@ -1,0 +1,16 @@
+{
+  "backendBuild": "passed",
+  "frontendBuild": "passed",
+  "unitRun": {
+    "passed": 50,
+    "skippedDatabaseTests": 40,
+    "note": "Database suites executed separately; use their receipt."
+  },
+  "focusedFrontendLint": {
+    "errors": 0,
+    "warnings": 1,
+    "warning": "Development Fast Refresh helper export advisory"
+  },
+  "frontendBuildAdvisory": "Chunk larger than 500kB; enterprise-volume performance not demonstrated",
+  "diffWhitespaceCheck": "passed"
+}

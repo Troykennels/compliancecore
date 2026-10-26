@@ -13,6 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api';
 import { useAuthStore } from '@/stores/auth.store';
+import { usePolicyTemplates, type PolicyTemplate } from '../policy-templates';
 
 const schema = z.object({
   title:         z.string().min(1, 'Title is required').max(500),
@@ -33,6 +34,7 @@ interface Props {
   onClose: () => void;
   policy?: Policy; // if set, editing; otherwise creating
   initialFrameworkId?: string;
+  initialTemplate?: PolicyTemplate;
 }
 
 const DEFAULTS: FormValues = {
@@ -47,7 +49,8 @@ const DEFAULTS: FormValues = {
   tags:          '',
 };
 
-export function PolicyFormModal({ open, onClose, policy, initialFrameworkId }: Props): JSX.Element | null {
+export function PolicyFormModal({ open, onClose, policy, initialFrameworkId, initialTemplate }: Props): JSX.Element | null {
+  const {data:templates=[]}=usePolicyTemplates();
   const role=useAuthStore(s=>s.activeTenant?.role);
   const canWrite=['owner','admin','compliance_manager','msp_admin'].includes(role??'');
   const {data:members=[]}=useImplementationMembers(open);
@@ -62,6 +65,7 @@ export function PolicyFormModal({ open, onClose, policy, initialFrameworkId }: P
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -83,9 +87,9 @@ export function PolicyFormModal({ open, onClose, policy, initialFrameworkId }: P
         tags:          policy.tags.join(', '),
       });
     } else {
-      reset({...DEFAULTS,frameworkIds:initialFrameworkId?[initialFrameworkId]:[]});
+      reset({...DEFAULTS,frameworkIds:initialFrameworkId?[initialFrameworkId]:[],title:initialTemplate?.title??'',content:initialTemplate?.content??'',description:initialTemplate?.purpose??''});
     }
-  }, [open, policy, reset, initialFrameworkId]);
+  }, [open, policy, reset, initialFrameworkId, initialTemplate]);
 
   const onSubmit = (values: FormValues) => {
     if(!canWrite)return;
@@ -138,6 +142,7 @@ export function PolicyFormModal({ open, onClose, policy, initialFrameworkId }: P
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-5">
             <div className="grid grid-cols-2 gap-4">
+              {!policy&&<div className="col-span-2 space-y-2 rounded-lg bg-indigo-50 p-3"><label className="block text-sm font-semibold">Start from a policy template<select aria-label="Choose policy template" defaultValue={initialTemplate?.id??''} className={inputClass(false)} onChange={e=>{const t=templates.find(t=>t.id===e.target.value);if(t){setValue('title',t.title,{shouldDirty:true});setValue('content',t.content,{shouldDirty:true});setValue('description',t.purpose,{shouldDirty:true});}}}><option value="">Blank draft</option>{templates.map(t=><option key={t.id} value={t.id}>{t.title}</option>)}</select></label><p className="text-xs text-indigo-950">Choosing a template replaces the draft title and content. Replace every [placeholder] before review; the app checks this before approval.</p></div>}
               <FormField label="Title" error={errors.title?.message} required className="col-span-2">
                 <input {...register('title')} autoFocus className={inputClass(!!errors.title)} />
               </FormField>

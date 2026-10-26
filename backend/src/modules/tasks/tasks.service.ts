@@ -3,6 +3,7 @@ import { notificationService } from '../notifications/notification.service';
 import { sendEmail, emailTemplates } from '../../lib/email.service';
 import { withTenantSchema } from '../../lib/tenant';
 import { AppError } from '../../lib/errors';
+import { assertActiveMembers } from '../../lib/active-member';
 import type { CreateTaskDto, UpdateTaskDto, TaskFilters, AddCommentDto } from './tasks.types';
 
 export async function listTasks(schemaName: string, filters: TaskFilters, currentUserId: string) {
@@ -26,6 +27,7 @@ export async function createTask(
   userEmail: string,
   userName: string,
 ) {
+  await assertActiveMembers(schemaName,[dto.assignedTo]);
   const id = await repo.createTask(schemaName, dto, userId);
 
   if (dto.assignedTo && dto.assignedTo !== userId) {
@@ -57,7 +59,15 @@ export async function updateTask(
   const existing = await repo.findTaskById(schemaName, id);
   if (!existing) throw new AppError('Task not found', 404);
 
+  await assertActiveMembers(schemaName,[dto.assignedTo]);
+
+  if(dto.status==='completed'&&Object.keys(dto).some(key=>key!=='status')){const action=await withTenantSchema(schemaName,tx=>tx.$queryRawUnsafe<Array<{corrective_action:unknown}>>('SELECT corrective_action FROM tasks WHERE id=$1::uuid',id));if(action[0]?.corrective_action)throw new AppError('Save changed action details and obtain a fresh effectiveness check before closure.',409,'ACTION_REVIEW_REQUIRED');}
+  if(dto.status==='completed') {
+    const rows=await withTenantSchema(schemaName,tx=>tx.$queryRawUnsafe<Array<{corrective_action:{state?:string}|null}>>('SELECT corrective_action FROM tasks WHERE id=$1::uuid',id));
+    if(rows[0]?.corrective_action&&rows[0].corrective_action.state!=='effective')throw new AppError('An independent reviewer must verify corrective-action effectiveness before closure.',409,'ACTION_REVIEW_REQUIRED');
+  }
   await repo.updateTask(schemaName, id, dto);
+  if(Object.keys(dto).some(key=>!['status','actualHours'].includes(key)))await withTenantSchema(schemaName,tx=>tx.$executeRawUnsafe("UPDATE tasks SET corrective_action=(corrective_action-'reviewedBy'-'reviewedAt'-'reviewNote')||'{\"state\":\"awaiting_verification\"}'::jsonb,status='in_review' WHERE id=$1::uuid AND corrective_action IS NOT NULL",id));
 
   // Notify new assignee if reassigned
   if (dto.assignedTo && dto.assignedTo !== existing.assignedTo && dto.assignedTo !== currentUserId) {

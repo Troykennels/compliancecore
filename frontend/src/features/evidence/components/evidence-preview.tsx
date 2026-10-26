@@ -9,7 +9,9 @@ interface EvidencePreviewProps {
 }
 
 export function EvidencePreview({ evidenceId, fileName }: EvidencePreviewProps) {
+  const [externalPreview,setExternalPreview]=React.useState(false);
   const { data, isLoading, isError } = useEvidencePreviewUrl(evidenceId);
+  React.useEffect(()=>setExternalPreview(false),[evidenceId,data?.officePreviewUrl]);
 
   if (isLoading) {
     return (
@@ -63,7 +65,8 @@ export function EvidencePreview({ evidenceId, fileName }: EvidencePreviewProps) 
           <TextPreview url={url} />
         )}
 
-        {previewType === 'office' && officePreviewUrl && (
+        {previewType === 'office' && officePreviewUrl && !externalPreview&&<div className="space-y-3 p-5 text-sm"><p>Opening this preview sends a temporary document link to Microsoft’s online viewer. You can download the file and open it on your device.</p><button className="rounded bg-indigo-700 px-3 py-2 text-white" onClick={()=>setExternalPreview(true)}>Open with Microsoft’s viewer</button></div>}
+        {previewType === 'office' && officePreviewUrl && externalPreview&&(
           <iframe
             src={officePreviewUrl}
             title={fileName}

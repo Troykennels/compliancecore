@@ -1,4 +1,8 @@
+import { LinkedComplianceRecord } from './linked-compliance-record';
+import { hasPermission } from '@/config/role-permissions';
+import { ComplianceOperationsPanel, ComplianceSearch } from '@/features/frameworks/components/compliance-operations';
 import { CiDemoGuide } from './ci-demo-guide';
+import { CompliancePageHelp } from './compliance-page-help';
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -33,16 +37,17 @@ const NAV_GROUPS: NavGroup[] = [
     { label: 'Organisation overview', to: PATHS.DASHBOARD, icon: <LayoutDashboard className="h-4 w-4" /> },
     { label: 'My Guide', to: PATHS.GUIDE, icon: <BookOpen className="h-4 w-4" /> },
   ] },
-  { heading: 'Implementation', items: [
-    { label: 'Frameworks & SoA', to: PATHS.FRAMEWORKS, icon: <Library className="h-4 w-4" /> },
+  { heading: 'Assess and document compliance', items: [
+    { label: 'Compliance assessments', to: PATHS.FRAMEWORKS, icon: <Library className="h-4 w-4" /> },
+    { label: 'Risk assessment', to: PATHS.RISKS, icon: <Flame className="h-4 w-4" /> },
     { label: 'Policies', to: PATHS.POLICIES, icon: <ScrollText className="h-4 w-4" /> },
+    { label: 'Policy templates', to: PATHS.POLICY_TEMPLATES, icon: <FileText className="h-4 w-4" /> },
     { label: 'Controls', to: PATHS.CONTROLS, icon: <ShieldCheck className="h-4 w-4" /> },
     { label: 'Evidence Hub', to: PATHS.EVIDENCE, icon: <FileArchive className="h-4 w-4" /> },
     { label: 'Training', to: PATHS.TRAINING, icon: <GraduationCap className="h-4 w-4" /> },
     { label: 'Audits', to: PATHS.AUDITS, icon: <ClipboardCheck className="h-4 w-4" /> },
   ] },
   { heading: 'Daily operations', items: [
-    { label: 'Risk Register', to: PATHS.RISKS, icon: <Flame className="h-4 w-4" /> },
     { label: 'Incidents', to: PATHS.INCIDENTS, icon: <Siren className="h-4 w-4" /> },
     { label: 'Vendors', to: PATHS.VENDORS, icon: <Store className="h-4 w-4" /> },
   ] },
@@ -196,7 +201,12 @@ export function AppShell() {
 
   // Append the owner group only for a platform superadmin, so customers never
   // see a link into cross-tenant billing.
-  const navGroups = user?.isSuperadmin ? [...NAV_GROUPS, OWNER_NAV_GROUP] : NAV_GROUPS;
+  const routeScope:Record<string,string>={
+    '/frameworks':'controls:read','/controls':'controls:read','/risks':'risks:read','/policies':'policies:read','/policy-templates':'policies:read','/evidence':'evidence:read','/training':'training:read','/audits':'audits:read','/incidents':'incidents:read','/vendors':'vendors:read','/tasks':'tasks:read','/approvals':'approvals:read','/signatures':'signatures:read','/escalations':'escalations:read','/calendar':'calendar:read','/expiry':'expiry:read','/reports':'reports:read','/analytics':'reports:read','/compliance-score':'reports:read','/branches':'org:read','/departments':'org:read','/ai-tools':'ai:use','/integrations':'integrations:read','/billing':'billing:read','/billing/plans':'billing:read','/billing/invoices':'billing:read','/settings':'settings:read','/settings/security':'notifications:read','/settings/notifications':'settings:read'
+  };
+  const navGroups = (user?.isSuperadmin ? [...NAV_GROUPS, OWNER_NAV_GROUP] : NAV_GROUPS).map(group=>({...group,items:group.items.filter(item=>!routeScope[item.to]||hasPermission(activeTenant?.role,routeScope[item.to]))})).filter(group=>group.items.length);
+  const requiredScope=routeScope[location.pathname]??routeScope['/'+location.pathname.split('/')[1]];
+  const permitted=!requiredScope||hasPermission(activeTenant?.role,requiredScope);
 
   async function handleLogout() {
     try { await authApi.logout(); } catch { /* ignore */ }
@@ -488,16 +498,16 @@ export function AppShell() {
           {/* On a phone the rail is hidden, so the header carries the context of
               which organisation you are acting in. Getting this wrong in a
               multi-tenant tool means editing the wrong company's records. */}
-          <span className="min-w-0 truncate text-sm font-semibold text-slate-800 lg:hidden">
+          <span className="hidden min-w-0 max-w-[180px] truncate text-sm font-semibold text-slate-800 sm:block lg:hidden">
             {activeTenant?.name ?? 'ComplianceCore'}
           </span>
 
-          <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <ComplianceSearch /><div className="ml-auto flex items-center gap-1 sm:gap-2">
             <NotificationBell />
             <div className="hidden h-5 w-px bg-slate-200 sm:block" aria-hidden="true" />
             <button
               type="button"
-              onClick={() => navigate(PATHS.SETTINGS)}
+              onClick={() => navigate('/settings/security')}
               className="flex items-center gap-2 rounded-full p-0.5 transition-opacity hover:opacity-80"
               aria-label="Account settings"
               title={displayName}
@@ -506,6 +516,7 @@ export function AppShell() {
             </button>
           </div>
         </header>
+        <div className="truncate border-b bg-white px-4 py-1.5 text-xs text-slate-600 sm:hidden">Organisation: {activeTenant?.name??'ComplianceCore'}</div>
 
         {/* Subscription state. Outside <main> so it stays visible while a page
             scrolls, and renders nothing at all on a healthy subscription. */}
@@ -529,7 +540,8 @@ export function AppShell() {
               </div>
             }
           >
-            <Outlet />
+            <CompliancePageHelp />
+            {permitted?<><LinkedComplianceRecord />{(location.pathname!=='/settings/security'||hasPermission(activeTenant?.role,'settings:read'))&&<ComplianceOperationsPanel key={location.pathname+location.search}/>}<Outlet key={location.pathname+location.search}/></>:<div role="alert" className="m-6 rounded-xl border bg-white p-6"><h1 className="text-xl font-semibold">This page needs additional access</h1><p className="mt-3 text-sm">Ask your organisation administrator if you need this permission. Your current role has not been changed.</p></div>}
           </Suspense>
         </main>
       </div>

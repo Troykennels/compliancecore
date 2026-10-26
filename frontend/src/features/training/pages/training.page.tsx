@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { useState } from 'react';
 import {
   Plus, Search, GraduationCap, MoreHorizontal, Pencil, Trash2,
@@ -65,13 +66,13 @@ export function TrainingPage(): JSX.Element {
               Manage training programs and track employee enrollments and completions.
             </p>
           </div>
-          <button
+          <PermissionAction scope="training:write"><button
             onClick={openCreate}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
             New Program
-          </button>
+          </button></PermissionAction>
         </div>
 
         {/* Filters */}
@@ -168,18 +169,18 @@ export function TrainingPage(): JSX.Element {
 
                           {menuOpenId === program.id && (
                             <div className="absolute right-0 top-full z-10 mt-1 w-44 rounded-lg border border-slate-200 bg-white shadow-lg py-1">
-                              <button
+                              <PermissionAction scope="training:write"><button
                                 onClick={() => { openEdit(program); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                               >
                                 <Pencil className="h-4 w-4" /> Edit
-                              </button>
-                              <button
+                              </button></PermissionAction>
+                              <PermissionAction scope="training:delete"><button
                                 onClick={() => { setConfirmDeleteId(program.id); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"
                               >
                                 <Trash2 className="h-4 w-4" /> Delete
-                              </button>
+                              </button></PermissionAction>
                             </div>
                           )}
                         </div>
@@ -236,12 +237,12 @@ export function TrainingPage(): JSX.Element {
               This will permanently delete the training program. This action cannot be undone.
             </p>
             <div className="mt-6 flex justify-end gap-3">
-              <button
+              <PermissionAction scope="training:delete"><button
                 onClick={() => setConfirmDeleteId(null)}
                 className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Cancel
-              </button>
+              </button></PermissionAction>
               <button
                 onClick={() => handleDelete(confirmDeleteId)}
                 disabled={isDeleting}

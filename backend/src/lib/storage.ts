@@ -8,6 +8,7 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '../config/env';
 import { AppError } from './errors';
+import { matchesFileSignature } from './file-signature';
 
 function requireStorageEndpoint(): void {
   if (env.AWS_REGION === 'auto' && !env.AWS_S3_ENDPOINT) {
@@ -161,6 +162,15 @@ export async function verifyUpload(fileKey: string): Promise<{
   } catch {
     return null;
   }
+}
+
+export async function verifyFileFormat(fileKey:string,mime:string):Promise<boolean>{
+  const response=await s3.send(new GetObjectCommand({Bucket:BUCKET,Key:fileKey,Range:'bytes=0-1023'}));
+  if(!response.Body)return false;
+  const chunks:Buffer[]=[];let size=0;
+  try {for await(const chunk of response.Body as AsyncIterable<Uint8Array>){const part=Buffer.from(chunk);chunks.push(part.subarray(0,1024-size));size+=Math.min(part.length,1024-size);if(size>=1024)break;}}
+  finally {const body=response.Body as {destroy?:()=>void};body.destroy?.();}
+  return matchesFileSignature(Buffer.concat(chunks),mime);
 }
 
 // Hard-delete a file from S3 (called when evidence is permanently purged).

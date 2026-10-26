@@ -31,8 +31,10 @@ export interface OcrJobData {
 }
 
 export async function enqueueOcrJob(data: OcrJobData): Promise<void> {
+  const existing=await ocrQueue.getJob(`ocr-${data.versionId}`);
+  if(existing){const state=await existing.getState();if(state==='failed'){await existing.retry();return;}if(state!=='completed')return;await existing.remove();}
   await ocrQueue.add('extract-text', data, {
-    jobId: `ocr:${data.versionId}`, // idempotent — won't duplicate on re-queue
+    jobId: `ocr-${data.versionId}`, // BullMQ custom IDs cannot contain colons.
   });
 }
 
@@ -84,11 +86,8 @@ async function processOcrJob(job: Job<OcrJobData>): Promise<void> {
   logger.info({ evidenceId, versionId, attempt: job.attemptsMade + 1 }, 'OCR job started');
 
   // Mark as processing
-  await withTenantSchema(schemaName, async (tx) => {
-    await tx.$executeRaw`
-      UPDATE evidence SET ocr_status = 'processing' WHERE id = ${evidenceId}::uuid
-    `;
-  });
+  const current=await withTenantSchema(schemaName,tx=>tx.$executeRaw`UPDATE evidence SET ocr_status='processing' WHERE id=${evidenceId}::uuid AND current_version_id=${versionId}::uuid AND deleted_at IS NULL`);
+  if(!current)return;
 
   let ocrText = '';
   let succeeded = false;
@@ -110,7 +109,7 @@ async function processOcrJob(job: Job<OcrJobData>): Promise<void> {
         ocr_text   = ${ocrText},
         ocr_status = ${succeeded ? 'completed' : 'failed'},
         updated_at = NOW()
-      WHERE id = ${evidenceId}::uuid
+      WHERE id = ${evidenceId}::uuid AND current_version_id=${versionId}::uuid AND deleted_at IS NULL
     `;
 
     // Log the event
@@ -140,6 +139,7 @@ export function startOcrWorker(): Worker {
 
   worker.on('failed', (job, err) => {
     logger.error({ jobId: job?.id, err }, 'OCR job failed');
+    if(job&&job.attemptsMade>=(job.opts.attempts??1))void withTenantSchema(job.data.schemaName,tx=>tx.$executeRaw`UPDATE evidence SET ocr_status='failed' WHERE id=${job.data.evidenceId}::uuid AND current_version_id=${job.data.versionId}::uuid`).catch(error=>logger.error({err:error},'Could not update failed extraction status'));
   });
 
   return worker;

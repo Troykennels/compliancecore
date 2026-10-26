@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { withTenantSchema } from '../../lib/prisma';
 import { setAuditSessionVars } from '../../middleware/audit.middleware';
 import {
-  NotFoundError, ForbiddenError, ConflictError, ValidationError, UnauthorizedError,
+  AppError, NotFoundError, ForbiddenError, ConflictError, ValidationError, UnauthorizedError,
 } from '../../lib/errors';
 import { evidenceRepository } from './evidence.repository';
 import {
@@ -11,6 +11,8 @@ import {
   generateUploadUrl,
   generateDownloadUrl,
   verifyUpload,
+  verifyFileFormat,
+  MAX_FILE_SIZE_BYTES,
   OCR_SUPPORTED_MIME_TYPES,
   PREVIEW_MIME_TYPES,
   OFFICE_PREVIEW_MIME_TYPES,
@@ -26,6 +28,7 @@ import type {
 import type { InitiateUploadResult, PreviewUrlResult, ShareResult } from './evidence.types';
 import { email as emailClient } from '../../lib/email';
 import { env } from '../../config/env';
+import { logger } from '../../lib/logger';
 
 type Actor = { id: string; email: string; role: string | null; tenantId: string | null };
 
@@ -146,29 +149,36 @@ export const evidenceService = {
     actor: Actor,
   ) {
     const evidence = await withTenantSchema(schemaName, async (tx) => {
+      if(!await evidenceRepository.findById(tx,evidenceId))throw new NotFoundError('Evidence');
       const versions = await evidenceRepository.listVersions(tx, evidenceId);
       return versions.find((v) => v.id === versionId) ?? null;
     });
 
     if (!evidence) throw new NotFoundError('Version not found.');
-    if (evidence.uploadStatus === 'completed') throw new ConflictError('Upload already confirmed.');
+    if (evidence.uploadStatus === 'completed') return {evidence:await this.getById(schemaName,evidenceId,actor),version:evidence};
 
     // Verify the file actually exists in S3
     const s3Meta = await verifyUpload(evidence.fileKey);
     if (!s3Meta) {
       throw new ValidationError('File not found in storage. Ensure the upload completed before confirming.');
     }
+    if(input.fileSizeBytes!==undefined&&input.fileSizeBytes!==s3Meta.sizeBytes)throw new ValidationError('The stored file size differs from the upload. Upload the complete file before confirming.');
+    if(s3Meta.sizeBytes<1||s3Meta.sizeBytes>MAX_FILE_SIZE_BYTES)throw new ValidationError('The stored file must be between 1 byte and 200 MB.');
+    if(!await verifyFileFormat(evidence.fileKey,evidence.mimeType))throw new ValidationError('The file contents do not match the selected document type. Upload the original file with its correct type.');
 
     const version = await withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
-
+      await tx.$queryRawUnsafe('SELECT id FROM evidence WHERE id=$1::uuid AND deleted_at IS NULL FOR UPDATE',evidenceId);
+      const existingVersions=await evidenceRepository.listVersions(tx,evidenceId);
+      const already=existingVersions.find(v=>v.id===versionId);
+      if(already?.uploadStatus==='completed')return already;
       await evidenceRepository.confirmVersion(tx, versionId, evidenceId, {
-        fileSizeBytes:  input.fileSizeBytes ?? s3Meta.sizeBytes,
+        fileSizeBytes:  s3Meta.sizeBytes,
         checksumSha256: input.checksumSha256,
       });
 
       // Set OCR status based on whether the MIME type supports OCR
-      const ocrApplicable = OCR_SUPPORTED_MIME_TYPES.has(evidence.mimeType);
+      const ocrApplicable = env.OCR_PROVIDER!=='none'&&OCR_SUPPORTED_MIME_TYPES.has(evidence.mimeType);
       if (!ocrApplicable) {
         await tx.$executeRaw`
           UPDATE evidence SET ocr_status = 'not_applicable' WHERE id = ${evidenceId}::uuid
@@ -180,14 +190,15 @@ export const evidenceService = {
     });
 
     // Queue OCR job outside the DB transaction (safe to enqueue after commit)
-    if (OCR_SUPPORTED_MIME_TYPES.has(evidence.mimeType)) {
-      await enqueueOcrJob({
-        schemaName,
-        evidenceId,
-        versionId,
-        fileKey:  evidence.fileKey,
-        mimeType: evidence.mimeType,
-      });
+    if (env.OCR_PROVIDER!=='none'&&OCR_SUPPORTED_MIME_TYPES.has(evidence.mimeType)) {
+      try {
+        await enqueueOcrJob({schemaName,evidenceId,versionId,fileKey:evidence.fileKey,mimeType:evidence.mimeType});
+      } catch {
+        // The file is already committed. Optional text extraction must never
+        // turn a successful upload into an error or encourage duplicate files.
+        await withTenantSchema(schemaName,tx=>tx.$executeRaw`UPDATE evidence SET ocr_status='failed' WHERE id=${evidenceId}::uuid`);
+        logger.warn({evidenceId},'Evidence saved; optional text extraction could not be queued.');
+      }
     }
 
     const fullEvidence = await withTenantSchema(schemaName, (tx) =>
@@ -314,7 +325,7 @@ export const evidenceService = {
         metadata: { action: 'preview' },
       });
 
-      return { mimeType: ev.currentMimeType, fileName: ev.currentFileName, fileKey: current.fileKey };
+      return { mimeType: ev.currentMimeType, fileName: ev.currentFileName, fileKey: current.fileKey,confidential:ev.isConfidential };
     });
 
     const { mimeType, fileName, fileKey } = result;
@@ -331,7 +342,7 @@ export const evidenceService = {
       return { url, officePreviewUrl: null, previewType, downloadUrl };
     }
 
-    if (OFFICE_PREVIEW_MIME_TYPES.has(mimeType)) {
+    if (env.ALLOW_EXTERNAL_DOCUMENT_PREVIEW&&!result.confidential&&OFFICE_PREVIEW_MIME_TYPES.has(mimeType)) {
       const directUrl = await generateDownloadUrl(fileKey, fileName, 'inline', 3600, mimeType);
       const officePreviewUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(directUrl)}`;
       return { url: null, officePreviewUrl, previewType: 'office', downloadUrl };
@@ -403,6 +414,10 @@ export const evidenceService = {
 
   async addLink(schemaName: string, evidenceId: string, input: AddLinkInput, actor: Actor) {
     return withTenantSchema(schemaName, async (tx) => {
+      const tables:Record<string,string>={control:'controls',risk:'risks',policy:'policies',audit:'audits',vendor:'vendors'};
+      const target=await tx.$queryRawUnsafe<unknown[]>('SELECT id FROM '+tables[input.linkedType]+' WHERE id=$1::uuid AND deleted_at IS NULL',input.linkedId);
+      if(!target.length)throw new NotFoundError('Linked record in this organisation');
+      if(!await evidenceRepository.findById(tx,evidenceId))throw new NotFoundError('Evidence');
       await evidenceRepository.addLink(tx, {
         evidenceId, linkedType: input.linkedType, linkedId: input.linkedId, linkedBy: actor.id,
       });
@@ -456,7 +471,7 @@ export const evidenceService = {
       await evidenceRepository.logEvent(tx, {
         evidenceId, eventType: 'shared',
         actorId: actor.id, actorEmail: actor.email,
-        metadata: { shareToken, shareType: input.shareType, recipientEmail: input.recipientEmail },
+        metadata: { shareType: input.shareType },
       });
 
       return created;
@@ -571,6 +586,7 @@ export const evidenceService = {
   },
 
   async retryOcr(schemaName: string, evidenceId: string, actor: Actor) {
+    if(env.OCR_PROVIDER==='none')throw new AppError('Text extraction is not configured. Your uploaded file remains available.',503,'OCR_UNAVAILABLE');
     return withTenantSchema(schemaName, async (tx) => {
       const ev = await evidenceRepository.findById(tx, evidenceId);
       if (!ev) throw new NotFoundError('Evidence not found.');
@@ -586,10 +602,10 @@ export const evidenceService = {
 
       await tx.$executeRaw`UPDATE evidence SET ocr_status = 'pending' WHERE id = ${evidenceId}::uuid`;
 
-      await enqueueOcrJob({
+      try { await enqueueOcrJob({
         schemaName, evidenceId, versionId: current.id,
         fileKey: current.fileKey, mimeType: current.mimeType,
-      });
+      }); } catch { throw new AppError('Text extraction is temporarily unavailable. Your file is safe; try again later.',503,'OCR_UNAVAILABLE'); }
 
       await evidenceRepository.logEvent(tx, {
         evidenceId, eventType: 'ocr_retried',

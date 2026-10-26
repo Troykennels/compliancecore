@@ -1,3 +1,4 @@
+import { hasPermission } from '@/config/role-permissions';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Building2, Users, Shield, Key, Bell, Webhook, Lock,
@@ -32,9 +33,7 @@ export function SettingsLayout({ children }: Props): JSX.Element {
   const role = useUserRole();
 
   const visibleItems = NAV_ITEMS.filter(
-    (item) =>
-      !item.requiresRole ||
-      (role && item.requiresRole.includes(role)),
+    (item) => (item.path===PATHS.SETTINGS_SECURITY || hasPermission(role??undefined,item.path===PATHS.SETTINGS_TEAM?'team:read':item.path===PATHS.SETTINGS_ORG?'org:read':'settings:read')) && (!item.requiresRole || Boolean(role && item.requiresRole.includes(role))),
   );
 
   return (

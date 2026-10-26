@@ -1,7 +1,8 @@
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Loader2, Check, ShieldCheck, Info } from 'lucide-react';
+import { Loader2, ShieldCheck, Info } from 'lucide-react';
 import { organizationApi } from '../api/organization.api';
 import { frameworksApi } from '@/features/frameworks/api/frameworks.api';
 import {
@@ -17,8 +18,8 @@ const PRIORITY_STYLES: Record<FrameworkRecommendation['priority'], string> = {
 };
 
 const PRIORITY_LABEL: Record<FrameworkRecommendation['priority'], string> = {
-  required:    'Required',
-  recommended: 'Recommended',
+  required:    'Review first',
+  recommended: 'Consider next',
   optional:    'Optional',
 };
 
@@ -64,19 +65,6 @@ export function ScopingQuestionnaire({ variant = 'onboarding', onDone }: Props):
     onError: () => toast.error('Could not save your answers. Please try again.'),
   });
 
-  const adopt = useMutation({
-    mutationFn: (frameworkId: string) => frameworksApi.adopt(frameworkId).then((r) => r.data.data),
-    onSuccess: (res) => {
-      toast.success(
-        res.created > 0
-          ? `Added ${res.created} controls to your programme.`
-          : 'Already adopted — no new controls to add.',
-      );
-      void frameworksQuery.refetch();
-    },
-    onError: () => toast.error('Could not adopt that framework.'),
-  });
-
   const set = <K extends keyof ScopingProfile>(key: K, value: ScopingProfile[K]) =>
     setProfile((p) => ({ ...p, [key]: value }));
 
@@ -96,18 +84,17 @@ export function ScopingQuestionnaire({ variant = 'onboarding', onDone }: Props):
       <div className="space-y-4">
         <div>
           <h2 className="text-base font-semibold text-slate-900">
-            Based on your answers, these apply to you
+            Suggested requirements to review
           </h2>
           <p className="mt-0.5 text-sm text-slate-500">
-            Adopting a framework copies its controls into your programme so you can work through
-            them. You can change this at any time.
+            These suggestions need scope and applicability review. Open an assessment to confirm
+            the actual obligations with the responsible stakeholders.
           </p>
         </div>
 
         <ul className="space-y-2">
           {recommendations.map((rec) => {
             const fw = byCode.get(rec.code);
-            const alreadyAdopted = (fw?.adoptedControlCount ?? 0) > 0;
             return (
               <li key={rec.code} className="rounded-lg border border-slate-200 p-3">
                 <div className="flex flex-wrap items-center gap-2">
@@ -121,22 +108,8 @@ export function ScopingQuestionnaire({ variant = 'onboarding', onDone }: Props):
                   <div className="ml-auto">
                     {!fw ? (
                       <span className="text-xs text-slate-400">Not in catalogue</span>
-                    ) : alreadyAdopted ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
-                        <Check className="h-3.5 w-3.5" /> Adopted
-                      </span>
-                    ) : fw.libraryControlCount === 0 ? (
-                      // Be straight about coverage rather than adopting nothing silently.
-                      <span className="text-xs text-slate-400">Controls coming soon</span>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => adopt.mutate(fw.id)}
-                        disabled={adopt.isPending}
-                        className="rounded-md border border-indigo-300 px-3 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50 disabled:opacity-50"
-                      >
-                        Adopt
-                      </button>
+                      variant==='onboarding'?<span className="text-xs text-slate-500">Finish setup, then open Compliance assessments</span>:<Link to={`/frameworks?framework=${fw.id}`} className="rounded-md border border-indigo-300 px-3 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50">Open compliance assessment</Link>
                     )}
                   </div>
                 </div>

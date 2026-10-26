@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 export function CiDemoGuide() {
   return (
     <details className="border-b border-indigo-100 bg-indigo-50 px-4 py-3 text-xs text-indigo-950 sm:px-5">
-      <summary className="cursor-pointer font-semibold">C&I Leasing Plc presentation — explore the daily workflows</summary>
+      <summary className="cursor-pointer font-semibold">Demonstration workspace — explore the compliance workflow</summary>
       <p className="mt-2 max-w-4xl leading-relaxed">Fictional scenarios prepared by Orion Soft Limited. These examples describe how the platform could support your teams; the sample scores, incidents, suppliers and certificates do not describe C&I’s actual compliance position. Sample invoices are non-payable.</p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[

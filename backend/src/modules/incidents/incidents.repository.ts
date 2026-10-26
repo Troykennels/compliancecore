@@ -26,9 +26,8 @@ function mapRow(row: Record<string, unknown>): Incident {
   const resolvedAt = d(row.resolvedAt);
 
   // Only a reportable breach has a notification clock at all.
-  const notificationDueAt = isDataBreach
-    ? new Date(detectedAt.getTime() + deadlineHours * 3600_000)
-    : null;
+  const decision=row.notificationDecision as {decision?:string;deadlineAt?:string}|null;
+  const notificationDueAt = decision?.decision==='required'&&decision.deadlineAt ? new Date(decision.deadlineAt) : null;
 
   return {
     id:          row.id as string,
@@ -87,7 +86,7 @@ const SELECT_COLUMNS = `
   i.affected_data_subjects AS "affectedDataSubjects",
   i.regulator_notified_at AS "regulatorNotifiedAt",
   i.data_subjects_notified_at AS "dataSubjectsNotifiedAt",
-  i.notification_deadline_hours AS "notificationDeadlineHours",
+  i.notification_deadline_hours AS "notificationDeadlineHours", i.notification_decision AS "notificationDecision",
   i.reported_by AS "reportedBy",
   rb.first_name || ' ' || rb.last_name AS "reportedByName",
   i.assigned_to AS "assignedTo",
@@ -119,7 +118,7 @@ export const incidentsRepository = {
     if (overdueNotification) {
       conditions.push(`i.is_data_breach = TRUE
         AND i.regulator_notified_at IS NULL
-        AND i.detected_at + (i.notification_deadline_hours * INTERVAL '1 hour') < NOW()`);
+        AND i.notification_decision->>'decision'='required' AND (i.notification_decision->>'deadlineAt')::timestamptz<NOW()`);
     }
     if (q) {
       conditions.push(`(i.title ILIKE $${idx} OR i.description ILIKE $${idx} OR i.reference ILIKE $${idx})`);
@@ -333,7 +332,7 @@ export const incidentsRepository = {
         COUNT(*) FILTER (WHERE is_data_breach)::int           AS "dataBreaches",
         COUNT(*) FILTER (
           WHERE is_data_breach AND regulator_notified_at IS NULL
-            AND detected_at + (notification_deadline_hours * INTERVAL '1 hour') < NOW()
+            AND notification_decision->>'decision'='required' AND (notification_decision->>'deadlineAt')::timestamptz<NOW()
         )::int AS "overdueNotifications",
         AVG(EXTRACT(EPOCH FROM (resolved_at - detected_at)) / 3600)
           FILTER (WHERE resolved_at IS NOT NULL) AS "mttr"

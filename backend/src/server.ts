@@ -27,7 +27,9 @@ async function bootstrap(): Promise<void> {
   // in-flight job, stop taking new ones) instead of being killed mid-processing.
   const workers: Worker[] = [];
 
-  await initBillingTables();
+  // Schema changes run with the operator/provisioning connection, never the
+  // restricted normal-query identity. Legacy configurations remain compatible.
+  if(!env.PROVISIONING_DATABASE_URL)await initBillingTables();
   const stopPushDelivery = startPushDelivery();
 
   // Say out loud how mail will be sent. Every email in this app is

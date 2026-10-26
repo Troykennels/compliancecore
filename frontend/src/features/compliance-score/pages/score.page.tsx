@@ -13,7 +13,8 @@ const TREND_OPTIONS: { label: string; days: number }[] = [
   { label: '1y',  days: 365 },
 ];
 
-export function ScorePage() {
+export function ScorePage() {
+
   const fmt = useOrgFormat();
   const [trendDays, setTrendDays] = useState(180);
   const { data: scoreData, isLoading: scoreLoading, isError: scoreError, refetch: refetchScore } = useCurrentScore();

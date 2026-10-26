@@ -1,3 +1,4 @@
+import { useImplementationMembers } from '@/features/frameworks/implementation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,7 +25,7 @@ const schema = z.object({
   deadline:     z.string().optional(),
   workflowId:   z.string().uuid().optional().or(z.literal('')),
   useWorkflow:  z.boolean().default(false),
-  steps:        z.array(stepSchema).optional(),
+  steps:        z.array(stepSchema.superRefine((v,ctx)=>{if(v.approverType==='user'&&!v.assignedTo)ctx.addIssue({code:'custom',path:['assignedTo'],message:'Choose the reviewer.'});if(v.approverType==='role'&&!v.assignedRole)ctx.addIssue({code:'custom',path:['assignedRole'],message:'Choose the reviewer role.'});})).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -38,6 +39,7 @@ interface ApprovalRequestModalProps {
 }
 
 export function ApprovalRequestModal({ open, onClose, entityType, entityId, entityTitle }: ApprovalRequestModalProps) {
+  const {data:members=[]}=useImplementationMembers(open);
   const create = useCreateApprovalRequest();
   const { data: workflows = [] } = useWorkflows();
 
@@ -175,13 +177,10 @@ export function ApprovalRequestModal({ open, onClose, entityType, entityId, enti
                         <select {...register(`steps.${idx}.approverType`)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs bg-white">
                           <option value="user">Specific user</option>
                           <option value="role">Role</option>
-                          <option value="manager">Manager</option>
+
                         </select>
-                        <input
-                          {...register(`steps.${idx}.assignedTo`)}
-                          placeholder="Approver ID (UUID)"
-                          className="rounded-md border border-slate-300 px-2 py-1.5 text-xs bg-white outline-none"
-                        />
+                        {watch(`steps.${idx}.approverType`)==='role'?<select aria-label={`Reviewer role for step ${idx+1}`} {...register(`steps.${idx}.assignedRole`)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs"><option value="">Choose a role</option>{['owner','admin','compliance_manager','auditor','control_owner','msp_admin'].map(r=><option key={r} value={r}>{r.replace(/_/g,' ')}</option>)}</select>:<select aria-label={`Reviewer for step ${idx+1}`} {...register(`steps.${idx}.assignedTo`)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs"><option value="">Choose an authorised reviewer</option>{members.filter(m=>!m.role||['owner','admin','compliance_manager','auditor','control_owner','msp_admin'].includes(m.role)).map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select>}
+
                       </div>
                       <label className="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                         <input type="checkbox" {...register(`steps.${idx}.requireSignature`)} className="h-3.5 w-3.5 rounded border-slate-300" />

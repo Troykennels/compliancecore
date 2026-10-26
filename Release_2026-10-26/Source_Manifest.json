@@ -1,0 +1,792 @@
+{
+  "baseline": "5b213b95495234964ab49bd153ad35970f40a13b",
+  "sourceFiles": [
+    {
+      "path": "backend/.env.example",
+      "change": "modified",
+      "bytes": 4582,
+      "sha256": "839f96f77873ac380a12e94d01384cd50e2fd77969b87fcf9f8fea6dd95571eb"
+    },
+    {
+      "path": "backend/.env.production.example",
+      "change": "modified",
+      "bytes": 3854,
+      "sha256": "05939446d2fb4fecb44a6ed7c56dc44fd2a262a018202e0d3c69473f6ec8bb7f"
+    },
+    {
+      "path": "backend/scripts/apply-final-governance-local.mjs",
+      "change": "new",
+      "bytes": 905,
+      "sha256": "4439d83028453a1f65b7d807a829c25b8c23823f17f72da2517f51ccb5968551"
+    },
+    {
+      "path": "backend/scripts/migrate-tenants.mjs",
+      "change": "modified",
+      "bytes": 4176,
+      "sha256": "12d3ba345e579e99c4a198259b80687c037635fc075af359468d673543e63cae"
+    },
+    {
+      "path": "backend/scripts/prepare-runtime-identity.mjs",
+      "change": "new",
+      "bytes": 3173,
+      "sha256": "032c2694e8b6d20cfad68b437cb3ba4079208db05094b984e726f70e344441fc"
+    },
+    {
+      "path": "backend/scripts/prepare-step2-roles-local.mjs",
+      "change": "new",
+      "bytes": 1860,
+      "sha256": "aeffedd0bb6da81a73774ec99ed123d27834e0cc7a95bf9b854e48bf03e8c467"
+    },
+    {
+      "path": "backend/scripts/restore.sh",
+      "change": "modified",
+      "bytes": 970,
+      "sha256": "ef737a2b4b094cbedaa3aeda3c6f45dc1972aaf47b9dbfc2c50a163880b0e9e3"
+    },
+    {
+      "path": "backend/scripts/start-presentation-fixture.mjs",
+      "change": "modified",
+      "bytes": 2031,
+      "sha256": "91431880091407e6ee7504a18906fc83216e2fe4f6a8425e9531f5e809c6e1ba"
+    },
+    {
+      "path": "backend/scripts/step2-release-migrations.mjs",
+      "change": "new",
+      "bytes": 2705,
+      "sha256": "f11f5b039a83bf3f361085baf9cf47f2f680bb2d14eddbe4df67c38c4b85440f"
+    },
+    {
+      "path": "backend/scripts/verify-cloud-backup-readonly-private.mjs",
+      "change": "new",
+      "bytes": 6617,
+      "sha256": "19165b0b036d2114dd9c98e3b72312a129ad45468998abc2a15cc21c8e921f38"
+    },
+    {
+      "path": "backend/scripts/verify-compliance-assessment.mjs",
+      "change": "new",
+      "bytes": 16168,
+      "sha256": "fc2d0985c04b7bb38329ebc4c184e63762b09f7d3e056fb2278748f9b260e555"
+    },
+    {
+      "path": "backend/scripts/verify-compliance-governance.mjs",
+      "change": "new",
+      "bytes": 17125,
+      "sha256": "bde8f73fd0f21a15804d071aa025e0ec30b920837e9e42cac167f650ab7765d9"
+    },
+    {
+      "path": "backend/scripts/verify-compliance-uploads.mjs",
+      "change": "new",
+      "bytes": 6117,
+      "sha256": "9ef35d6a59c2c917fb2ce76c41e0b153bfa0bcccefaf00fa1deb494b6053422b"
+    },
+    {
+      "path": "backend/scripts/verify-existing-integrations-isolated.mjs",
+      "change": "new",
+      "bytes": 1692,
+      "sha256": "c0d960911ee9ef49904f374700a875effd99fa4ded9470101335aa7f059c46a2"
+    },
+    {
+      "path": "backend/scripts/verify-recovery-local.mjs",
+      "change": "new",
+      "bytes": 3459,
+      "sha256": "b644c968dda4756ed528d647a6397a14ca4818e4b8aeeb0b01dcafd82806132d"
+    },
+    {
+      "path": "backend/scripts/verify-restored-cloud-migrations-local.mjs",
+      "change": "new",
+      "bytes": 3571,
+      "sha256": "fd2311ac791792a46c8f8cf76fe742a93fb565c80184d8890c99504f0da3db84"
+    },
+    {
+      "path": "backend/scripts/verify-step2-http.mjs",
+      "change": "new",
+      "bytes": 8534,
+      "sha256": "93ad6213fce86ef25d8601e62dd94b77a2b5df564e13d5f6e4826415051ebdf5"
+    },
+    {
+      "path": "backend/scripts/workflow-local.mjs",
+      "change": "modified",
+      "bytes": 1896,
+      "sha256": "f791d8920bcb2ae4eae095884abf08e1de8a3eafc32bfe23b4fa0ae9d1c892ba"
+    },
+    {
+      "path": "backend/src/app.ts",
+      "change": "modified",
+      "bytes": 8330,
+      "sha256": "8475eaf22e8249a4e3b1a9ae479cb152d4b9f88a763a22468623a2b6279bd86a"
+    },
+    {
+      "path": "backend/src/config/env.ts",
+      "change": "modified",
+      "bytes": 5436,
+      "sha256": "ef03ea59ba9568259bf5271a127548f7f64fcf90b6c15e6ee6caf9589f85a1ad"
+    },
+    {
+      "path": "backend/src/jobs/billing-renewal.job.ts",
+      "change": "modified",
+      "bytes": 12630,
+      "sha256": "44212301055a332e00dcb722b874d63d25a293c5f8e676817a170b9fa29cf286"
+    },
+    {
+      "path": "backend/src/jobs/ocr.job.ts",
+      "change": "modified",
+      "bytes": 5393,
+      "sha256": "3b25d34fe380d80a8dbe61f834052ead0b91805ecb4e5d95b50bf65a82af88cc"
+    },
+    {
+      "path": "backend/src/lib/active-member.ts",
+      "change": "new",
+      "bytes": 938,
+      "sha256": "73e7e8b35f5dd073825ab334e891795bd219f2f6af9ca95da0d1b05158eeec55"
+    },
+    {
+      "path": "backend/src/lib/audit-context.ts",
+      "change": "new",
+      "bytes": 525,
+      "sha256": "30899a73bd82e72e46c7f82c21d9c43642f866fc5edd5cb7ae6172fcf3d7fb13"
+    },
+    {
+      "path": "backend/src/lib/docx-document.ts",
+      "change": "new",
+      "bytes": 2006,
+      "sha256": "b12842b8b95a74fd2038bcd4d526d83698399a90ea29c32e690bd47c4db16077"
+    },
+    {
+      "path": "backend/src/lib/file-signature.ts",
+      "change": "new",
+      "bytes": 1204,
+      "sha256": "5c6e8765fe5c0df6b832ca4590f039d277a83d546d8e362cbf969c800ed96013"
+    },
+    {
+      "path": "backend/src/lib/prisma.ts",
+      "change": "modified",
+      "bytes": 4152,
+      "sha256": "b522f448efd6694085d2b6b1137b063c412de7eba659d30dd93efc86d092d305"
+    },
+    {
+      "path": "backend/src/lib/provisioning.ts",
+      "change": "modified",
+      "bytes": 3893,
+      "sha256": "09f03a6632e12f08585668621cbf6840a2dda61d308503b705f9269e77fb12fc"
+    },
+    {
+      "path": "backend/src/lib/runtime-privileges.ts",
+      "change": "new",
+      "bytes": 1019,
+      "sha256": "a6fe443dd36bf54d3a9362cb3c4e904f8a62c5ccf571c707d03466599b483a0b"
+    },
+    {
+      "path": "backend/src/lib/spreadsheet.ts",
+      "change": "new",
+      "bytes": 605,
+      "sha256": "de3c50ecf4cb46f1011aa1b1cb59d60064b0b9f5aefc3811fda1e1737d782426"
+    },
+    {
+      "path": "backend/src/lib/storage.ts",
+      "change": "modified",
+      "bytes": 7543,
+      "sha256": "99b536ffdb2f0130108f62495af291bfc4ed91cf06d560f3104c8ca1e401c4d3"
+    },
+    {
+      "path": "backend/src/lib/tenant-erasure.ts",
+      "change": "modified",
+      "bytes": 5798,
+      "sha256": "6aea4e122a18cca823abf173ff7b6e0516be9e70a914655a2be22bce7c95da10"
+    },
+    {
+      "path": "backend/src/modules/approvals/approvals.service.ts",
+      "change": "modified",
+      "bytes": 9829,
+      "sha256": "62063ee85b4fcd79e13017a607a830f8b852ae3c9dfbe3db8ee9efb49cdcbf85"
+    },
+    {
+      "path": "backend/src/modules/audits/audits.schema.ts",
+      "change": "modified",
+      "bytes": 2552,
+      "sha256": "68c88a51e49f404d49ea204acd0a543694cf390565ae39c77d5c1bdd6ebc44d0"
+    },
+    {
+      "path": "backend/src/modules/audits/audits.service.ts",
+      "change": "modified",
+      "bytes": 8091,
+      "sha256": "272c5b19ecc9e54ce3f527a6500587dce1b99a551795ff145b116b91e77048e8"
+    },
+    {
+      "path": "backend/src/modules/auth/auth.repository.ts",
+      "change": "modified",
+      "bytes": 10156,
+      "sha256": "6bdfde66b1c07addcd0a10ae997b9215f64f507088bb402397ce70d0e3c7472c"
+    },
+    {
+      "path": "backend/src/modules/billing/commercial-pricing.ts",
+      "change": "modified",
+      "bytes": 4338,
+      "sha256": "0a019d612d3e71b11748bae793f6319cf49d61b289f5187c289d8f1a8e28224f"
+    },
+    {
+      "path": "backend/src/modules/controls/controls.repository.ts",
+      "change": "modified",
+      "bytes": 11646,
+      "sha256": "1911c0f46e42406da037775fa22427eb8187f4933664f4f78245be21f619ed63"
+    },
+    {
+      "path": "backend/src/modules/controls/controls.service.ts",
+      "change": "modified",
+      "bytes": 6342,
+      "sha256": "1962633a2275e71bcb70027cd3dbdd080e94bba0f912d09e00071bf625fa2656"
+    },
+    {
+      "path": "backend/src/modules/controls/controls.types.ts",
+      "change": "modified",
+      "bytes": 1292,
+      "sha256": "addc796375e1216593699569cf524038c553e2bb150909a39dd35decc4df1a9d"
+    },
+    {
+      "path": "backend/src/modules/evidence/evidence.repository.ts",
+      "change": "modified",
+      "bytes": 23165,
+      "sha256": "f1c4d5af072202df234f1955ed724ea8ad01c8fbd45a53eceff74ed5353ce910"
+    },
+    {
+      "path": "backend/src/modules/evidence/evidence.service.ts",
+      "change": "modified",
+      "bytes": 27780,
+      "sha256": "169e307f2e2e2ed22c9d14416eeb83681acf5e6e361060f64968b9065483a419"
+    },
+    {
+      "path": "backend/src/modules/frameworks/assessment-export.ts",
+      "change": "new",
+      "bytes": 4981,
+      "sha256": "a3e36ecf77af1e9c36bc7642385d1c37444b79f9e3f719ba1e17f44eab788092"
+    },
+    {
+      "path": "backend/src/modules/frameworks/assessment-rules.ts",
+      "change": "new",
+      "bytes": 8325,
+      "sha256": "8753781a600060d8f8e604ec88f14ad0c869d6940d22fe1b2d7ec7d45b5e5491"
+    },
+    {
+      "path": "backend/src/modules/frameworks/assessment.service.ts",
+      "change": "new",
+      "bytes": 11619,
+      "sha256": "a847b714515539d3e4a3923dcab2c7b2a022f30f3157c0cd0ab5527c6f9b3b5b"
+    },
+    {
+      "path": "backend/src/modules/frameworks/compliance-followup.ts",
+      "change": "new",
+      "bytes": 1880,
+      "sha256": "43e4be3671b15ea4a92f3a2a1a6ca8664fd3e64f4bd71c5e2bbee84eaa0f8b6a"
+    },
+    {
+      "path": "backend/src/modules/frameworks/compliance-options.ts",
+      "change": "new",
+      "bytes": 3848,
+      "sha256": "5298eb3b351f8212a4f4cc804742cd4fec07eeaee996a5b6b428086d3154f29b"
+    },
+    {
+      "path": "backend/src/modules/frameworks/compliance-profiles.ts",
+      "change": "new",
+      "bytes": 8683,
+      "sha256": "653269941ff1b607e7aecdff37820fa90e4ae4da5801c4a6ae00d671ce8d2683"
+    },
+    {
+      "path": "backend/src/modules/frameworks/compliance-records.router.ts",
+      "change": "new",
+      "bytes": 9971,
+      "sha256": "078156920aa3d72bd24d0c17260e7648d8f5e97e53dc0816acc7778d84f9afab"
+    },
+    {
+      "path": "backend/src/modules/frameworks/compliance-records.service.ts",
+      "change": "new",
+      "bytes": 46659,
+      "sha256": "2577a68a7c0eb76eee2d6ca1bb3c89988ded406e591137297ea44d5f5821f06a"
+    },
+    {
+      "path": "backend/src/modules/frameworks/compliance-summary.ts",
+      "change": "new",
+      "bytes": 2854,
+      "sha256": "70e1c8f89e5aa2d83bf98fb09c683ab146f81583ec33cc66d8c16f350c6db0d1"
+    },
+    {
+      "path": "backend/src/modules/frameworks/compliance-templates.ts",
+      "change": "new",
+      "bytes": 6148,
+      "sha256": "373a353ffcf318e7044b1ee259c216ce0a3f7acb3c592696641a116133442250"
+    },
+    {
+      "path": "backend/src/modules/frameworks/control-actions.ts",
+      "change": "modified",
+      "bytes": 1981,
+      "sha256": "6a1f80468b9e1d4529dc7a5efe00ea405599048777c0b488f4bc36934f1e1ac5"
+    },
+    {
+      "path": "backend/src/modules/frameworks/frameworks.router.ts",
+      "change": "modified",
+      "bytes": 2549,
+      "sha256": "2841b736efeccc7157762a66aeb62a6a6b6340098be51b600ac0d80a5cefead5"
+    },
+    {
+      "path": "backend/src/modules/frameworks/frameworks.service.ts",
+      "change": "modified",
+      "bytes": 8637,
+      "sha256": "1c22cf253d880e05715cd7a2030d650f89e50591268027217c821e6be5d237bd"
+    },
+    {
+      "path": "backend/src/modules/frameworks/implementation.router.ts",
+      "change": "modified",
+      "bytes": 5885,
+      "sha256": "235afd4bf9738b73c139ad1fd29622bff0173a98e11072be63d8c7bc353f163a"
+    },
+    {
+      "path": "backend/src/modules/frameworks/implementation.service.ts",
+      "change": "modified",
+      "bytes": 28399,
+      "sha256": "5304a65e0d12129bd0e9e9202726e72197443282db29b1d8ba812236be31d4d1"
+    },
+    {
+      "path": "backend/src/modules/incidents/incidents.repository.ts",
+      "change": "modified",
+      "bytes": 16847,
+      "sha256": "42837624f1bd3990e4b336ba2d1a886d59dc3785c1376b90b401489d443b1fdb"
+    },
+    {
+      "path": "backend/src/modules/incidents/incidents.service.ts",
+      "change": "modified",
+      "bytes": 8154,
+      "sha256": "623ba8fc53ab555c0c20e350899074664c7dc69d73f26c42bafa0f86033be384"
+    },
+    {
+      "path": "backend/src/modules/organizations/export.service.ts",
+      "change": "modified",
+      "bytes": 8661,
+      "sha256": "d092cbc05eca4c1b75883b57ad6de770e50155976a9cf7ccc78f48ea31e9d874"
+    },
+    {
+      "path": "backend/src/modules/organizations/organization.service.ts",
+      "change": "modified",
+      "bytes": 10740,
+      "sha256": "4657794c225ef4d5de42a5d17a235ee16daa854f11dc2807c63ab8b3e692c473"
+    },
+    {
+      "path": "backend/src/modules/organizations/scoping.ts",
+      "change": "modified",
+      "bytes": 8880,
+      "sha256": "777d4b501ab89645983b25a117bba0d7a40027a110ee7deb2a3623c09db34747"
+    },
+    {
+      "path": "backend/src/modules/payments/recurring.service.ts",
+      "change": "modified",
+      "bytes": 11221,
+      "sha256": "dd74153ec4eb9d1fa7b608fefa244aede3203369dab136b969c4e53fc016c14f"
+    },
+    {
+      "path": "backend/src/modules/payments/reserve-checkout.ts",
+      "change": "modified",
+      "bytes": 2304,
+      "sha256": "38935f0543364f0d2e3084587eaee193d9ae96ff53ee7d307a9500e3f616bedd"
+    },
+    {
+      "path": "backend/src/modules/payments/settle-paid-checkout.ts",
+      "change": "modified",
+      "bytes": 6258,
+      "sha256": "150e165aa4cd4d21e1e9b3088f245b344f5d55e4accf9b5d0f98ce56105c7ca4"
+    },
+    {
+      "path": "backend/src/modules/policies/policies.router.ts",
+      "change": "modified",
+      "bytes": 2395,
+      "sha256": "9fdfcdd8ecb991cc21556db1173abe26c3ef3dd9fc89c44b92a9e3ccf96b63ab"
+    },
+    {
+      "path": "backend/src/modules/policies/policies.service.ts",
+      "change": "modified",
+      "bytes": 7375,
+      "sha256": "0190469080047e88271bfe11bbc54bc3148b47f523797290e6be04172b01500f"
+    },
+    {
+      "path": "backend/src/modules/policies/policy-templates.ts",
+      "change": "new",
+      "bytes": 10437,
+      "sha256": "101c246b8be2c7d0ebac921b9a91272f465cc346cda90499e78d63f5840a61a5"
+    },
+    {
+      "path": "backend/src/modules/risks/risks.service.ts",
+      "change": "modified",
+      "bytes": 3303,
+      "sha256": "4e2a8b828456e5a7679cee3e5ea1c5d0a0e4fb6566b7cdde32351e6561e40be5"
+    },
+    {
+      "path": "backend/src/modules/tasks/tasks.controller.ts",
+      "change": "modified",
+      "bytes": 4016,
+      "sha256": "2447db233bd2c51487884127f3366ae532ddb207d4074b6b67e7b39fc5808762"
+    },
+    {
+      "path": "backend/src/modules/tasks/tasks.service.ts",
+      "change": "modified",
+      "bytes": 8389,
+      "sha256": "e671a1d0ccaf5e2e783270c65cf6f37fe89a1165ddd3987969a07a4f2f82ed12"
+    },
+    {
+      "path": "backend/src/modules/training/training.service.ts",
+      "change": "modified",
+      "bytes": 3385,
+      "sha256": "b1b259baeb5ad456453599a10cf8e2a5e654813da784dcc659c8a95b33b93836"
+    },
+    {
+      "path": "backend/src/modules/vendors/vendors.service.ts",
+      "change": "modified",
+      "bytes": 3140,
+      "sha256": "2c2613cef9a048d07bf9e2d04dfe793acf78262e4a5b4d91fc9e038360658c45"
+    },
+    {
+      "path": "backend/src/server.ts",
+      "change": "modified",
+      "bytes": 6569,
+      "sha256": "46f95f27878c9d1608a1db8989ea51a6ec9d7f860f9cf8eb4c106409932ea895"
+    },
+    {
+      "path": "backend/test/unit/compliance-assessment.test.ts",
+      "change": "new",
+      "bytes": 3901,
+      "sha256": "62e180d3a87f30b82589c5147dab83802b64b8613584f16672e7863eaa6e9eb9"
+    },
+    {
+      "path": "backend/test/unit/compliance-safety.test.ts",
+      "change": "new",
+      "bytes": 1643,
+      "sha256": "a31317b5724842d86aaca60216dc887f63e7b40c88d27ad5e285318ed96160b1"
+    },
+    {
+      "path": "database/migrations/014_global_compliance_history.sql",
+      "change": "new",
+      "bytes": 3471,
+      "sha256": "05949f4a3fb9bd46a355ee2e3f8a9ffc57dd3c597cef2a10453d48511e0822a1"
+    },
+    {
+      "path": "database/tenant-template/015_compliance_assessments.sql",
+      "change": "new",
+      "bytes": 1921,
+      "sha256": "bfa81f69a82f4b6fb0014f23712e2a275534709e8d7ed85f2365c8312e577039"
+    },
+    {
+      "path": "database/tenant-template/016_compliance_governance.sql",
+      "change": "new",
+      "bytes": 10750,
+      "sha256": "022581146c307c4e745beeebf3589144d32dc1b10e05822dc3d6fafaab77e789"
+    },
+    {
+      "path": "frontend/scripts/render-step2-guides.mjs",
+      "change": "new",
+      "bytes": 1009,
+      "sha256": "f3dba4567fb9116981b902edf16d1ce9811832905577422c4876feae4701ab5b"
+    },
+    {
+      "path": "frontend/scripts/verify-auth-race-browser.mjs",
+      "change": "new",
+      "bytes": 3561,
+      "sha256": "58b019562ee6b149b6dc41625262138acb5f25d1e43b5f788528b5eef0f397da"
+    },
+    {
+      "path": "frontend/scripts/verify-compliance-product.mjs",
+      "change": "new",
+      "bytes": 6368,
+      "sha256": "57fdc399c744d32d0ec86a42181358b56b3b7346f7341a46be2248a4b7df1fd3"
+    },
+    {
+      "path": "frontend/scripts/verify-step2-browser.mjs",
+      "change": "new",
+      "bytes": 5689,
+      "sha256": "3aa53573efb3617b104c5f3b158357c6fcf8441c184635e97e0a0c817a927477"
+    },
+    {
+      "path": "frontend/scripts/verify-step2-multiuser-browser.mjs",
+      "change": "new",
+      "bytes": 5065,
+      "sha256": "8d2769dcf2f2d4ae43c74164bb763d125442121a613747b69b223856629dd8cb"
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "change": "modified",
+      "bytes": 15077,
+      "sha256": "fbb7938907fa1ebce2246fd30dd1bfa01b13437ba37f11f0922f5c4e272208c6"
+    },
+    {
+      "path": "frontend/src/components/app-shell.tsx",
+      "change": "modified",
+      "bytes": 25980,
+      "sha256": "a735f591850f093820f7369773c0758a96a15025fc24873a924d4d8a7d04bc70"
+    },
+    {
+      "path": "frontend/src/components/ci-demo-guide.tsx",
+      "change": "modified",
+      "bytes": 2435,
+      "sha256": "0c91be195bc4a93cca5d13444b16c22be131c85a7d8458ff2d864a6888bb8077"
+    },
+    {
+      "path": "frontend/src/components/compliance-page-help.tsx",
+      "change": "new",
+      "bytes": 10996,
+      "sha256": "c691b8fcc13784b21d1f1aebb619120dae8747f46cece6ce1ea4d52c66543c24"
+    },
+    {
+      "path": "frontend/src/components/linked-compliance-record.tsx",
+      "change": "new",
+      "bytes": 3729,
+      "sha256": "bbff8d7e1e9e76eeeeaa5b82d4271917946399c590dff3f2ee39e99005e160fa"
+    },
+    {
+      "path": "frontend/src/components/permission-action.tsx",
+      "change": "new",
+      "bytes": 771,
+      "sha256": "01cd31cabbc753cbdc077aaf9cf0e96c6094b92a81dc1c326729b6610da0b63f"
+    },
+    {
+      "path": "frontend/src/config/role-permissions.ts",
+      "change": "new",
+      "bytes": 5137,
+      "sha256": "d95e503e0bcdbac0a038e8f971cf215ad843f9d3e8899c9d4c12f2e295ab3824"
+    },
+    {
+      "path": "frontend/src/features/approvals/components/approval-request-modal.tsx",
+      "change": "modified",
+      "bytes": 10843,
+      "sha256": "4f591155c42d65c670f43492b4d1780c49b078dd65eba002a2e165c0dc4904f4"
+    },
+    {
+      "path": "frontend/src/features/audits/pages/audits.page.tsx",
+      "change": "modified",
+      "bytes": 15025,
+      "sha256": "2b206815f155e23c8a1b7b97fb54823bf975e2e618d4268277ed8f573660340b"
+    },
+    {
+      "path": "frontend/src/features/auth/api/auth.api.ts",
+      "change": "modified",
+      "bytes": 3477,
+      "sha256": "df6209f75889a29be7db669a014ac0c970a80b0a51eee93a9d5b24c906a19b7f"
+    },
+    {
+      "path": "frontend/src/features/compliance-score/pages/score.page.tsx",
+      "change": "modified",
+      "bytes": 5763,
+      "sha256": "8632eda999dc246ea1ea4c13020cb6445d3879ff64e70dc53226ef8bbdcf86a7"
+    },
+    {
+      "path": "frontend/src/features/controls/components/control-form-modal.tsx",
+      "change": "modified",
+      "bytes": 10577,
+      "sha256": "b16b2a1305c2e676df51526f5fc9849b1f3a2bad14b7b4984573aeb7522d5081"
+    },
+    {
+      "path": "frontend/src/features/controls/pages/controls.page.tsx",
+      "change": "modified",
+      "bytes": 20176,
+      "sha256": "bd490df5744bd07f004d425b4ffe8b07b34de8308f5b43359bf56a2726bdab90"
+    },
+    {
+      "path": "frontend/src/features/controls/types/controls.types.ts",
+      "change": "modified",
+      "bytes": 3637,
+      "sha256": "10c4c1afd65f761785c49c064651a46cbc8cdd6830b03cb58bc4b63ad64a751c"
+    },
+    {
+      "path": "frontend/src/features/dashboard/components/compliance-work-summary.tsx",
+      "change": "new",
+      "bytes": 1881,
+      "sha256": "bab60082367fc477c869eeb33bab4686ee2dd8dcce0ef22af3ab0f1f253eb6ce"
+    },
+    {
+      "path": "frontend/src/features/dashboard/pages/dashboard.page.tsx",
+      "change": "modified",
+      "bytes": 13236,
+      "sha256": "c406d2b64f361f7727351feafd47a91640efce294cd8c5a324bc92aae8f4659e"
+    },
+    {
+      "path": "frontend/src/features/evidence/components/evidence-preview.tsx",
+      "change": "modified",
+      "bytes": 5012,
+      "sha256": "53add8c2eacc6866aa8ccd1522da8ddc61ca73f75a0138a5d216c02607b58b84"
+    },
+    {
+      "path": "frontend/src/features/frameworks/assessment.ts",
+      "change": "new",
+      "bytes": 3163,
+      "sha256": "9f1954dfa0daf8de65d42bff69c4b199cecc52f62d9cd94d24a5f572d65e853f"
+    },
+    {
+      "path": "frontend/src/features/frameworks/components/assessment-records.tsx",
+      "change": "new",
+      "bytes": 20621,
+      "sha256": "a3f36d0df8f01656f2f77c01adbbc4039891e0d7f0269bfa7d7bd4b6e85be81e"
+    },
+    {
+      "path": "frontend/src/features/frameworks/components/compliance-operations.tsx",
+      "change": "new",
+      "bytes": 39528,
+      "sha256": "c2e1bb681a3b646dbbfc132cf32e6250f37f167eb541c0ae3f4c58a08d9fedc4"
+    },
+    {
+      "path": "frontend/src/features/frameworks/components/compliance-record-picker.tsx",
+      "change": "new",
+      "bytes": 4495,
+      "sha256": "4f038f80abbcbbabc3844c438de2214fd5b3c2304425e929c8322b0c8c170e68"
+    },
+    {
+      "path": "frontend/src/features/frameworks/components/compliance-template-library.tsx",
+      "change": "new",
+      "bytes": 4033,
+      "sha256": "4f67b72ec76aeb1890fc54447a74d1266716486330fcefa798e4761be8399f7e"
+    },
+    {
+      "path": "frontend/src/features/frameworks/components/compliance-workspace.tsx",
+      "change": "new",
+      "bytes": 23884,
+      "sha256": "525d54004e069e69d25e8cc152b5cbcb67c3f15989d3a44bcdafe8a7586f793a"
+    },
+    {
+      "path": "frontend/src/features/frameworks/components/evidence-picker.tsx",
+      "change": "new",
+      "bytes": 2600,
+      "sha256": "2ad1d2ef46a5ac83aa329e28239f2c924d15fd15dd7191e9763f54d05018bf38"
+    },
+    {
+      "path": "frontend/src/features/frameworks/components/framework-detail-modal.tsx",
+      "change": "modified",
+      "bytes": 5810,
+      "sha256": "c29ab1a23e4e8bf0b8edb66a4f22c91eb460930cd925ac66f97d87079b01ec94"
+    },
+    {
+      "path": "frontend/src/features/frameworks/components/implementation-overview.tsx",
+      "change": "modified",
+      "bytes": 2986,
+      "sha256": "a75877ea311497a584ebe3c9424e406188ea8959d9885d031897ea214e18e196"
+    },
+    {
+      "path": "frontend/src/features/frameworks/components/remove-framework-dialog.tsx",
+      "change": "modified",
+      "bytes": 9866,
+      "sha256": "da2dfe80fcbd078fb267d87b6d9f1bd944497a93fac06a5d66d51fbde2fa5a9a"
+    },
+    {
+      "path": "frontend/src/features/frameworks/implementation.ts",
+      "change": "modified",
+      "bytes": 3364,
+      "sha256": "5fee1d67393186fef4f13763f28f3b78bdadf599c09415162d422c3a49aaa5f7"
+    },
+    {
+      "path": "frontend/src/features/frameworks/pages/frameworks.page.tsx",
+      "change": "modified",
+      "bytes": 2568,
+      "sha256": "f4b3f3b359298eb9ea069f668c43acbb8cb6f95bb1fd6164e783123c71f72ab4"
+    },
+    {
+      "path": "frontend/src/features/guide/guide-content.ts",
+      "change": "modified",
+      "bytes": 27194,
+      "sha256": "657dc694b0abcad3d0f6983e097c7af87644a7aad6bef359048a5afe091b7503"
+    },
+    {
+      "path": "frontend/src/features/guide/guide.page.tsx",
+      "change": "modified",
+      "bytes": 7299,
+      "sha256": "a64c8817015237c58987f33976a391b8658c7391c77ee9a44af9c43a8a327ee3"
+    },
+    {
+      "path": "frontend/src/features/incidents/pages/incidents.page.tsx",
+      "change": "modified",
+      "bytes": 25483,
+      "sha256": "d8a459a0f1d3807cb8f0a032e26ee8564202e019ca43f50f36a28535b756850d"
+    },
+    {
+      "path": "frontend/src/features/organizations/components/scoping-questionnaire.tsx",
+      "change": "modified",
+      "bytes": 14014,
+      "sha256": "818f64eebbec50b9bb1466ddfab2a11cf73cf1aabdbd850103e4782b8b222a67"
+    },
+    {
+      "path": "frontend/src/features/policies/components/policy-form-modal.tsx",
+      "change": "modified",
+      "bytes": 11584,
+      "sha256": "03804d338358399b74b239a3f1d025c559a495671a14b20257adaa20487e1e88"
+    },
+    {
+      "path": "frontend/src/features/policies/pages/policies.page.tsx",
+      "change": "modified",
+      "bytes": 16785,
+      "sha256": "9a04ae46ec6e91883a8c209a17fc5b7d0dab222e23b0b8cdc21eed1a881c6df2"
+    },
+    {
+      "path": "frontend/src/features/policies/pages/policy-templates.page.tsx",
+      "change": "new",
+      "bytes": 3843,
+      "sha256": "7f67c2600a965840d9922b607d88ba093d0ece383bb87a977bb99e722385e051"
+    },
+    {
+      "path": "frontend/src/features/policies/policy-templates.ts",
+      "change": "new",
+      "bytes": 958,
+      "sha256": "3cac6fbd0c85d89f5ce35cdfbc7eed0c40b3e40b5067fdf0d6fa189b8049b588"
+    },
+    {
+      "path": "frontend/src/features/reports/pages/executive-dashboard.page.tsx",
+      "change": "modified",
+      "bytes": 44252,
+      "sha256": "0369b4b56f0b15ecac98b08fb1896cd39b6b9d817d4993d96235bfc7a60efc83"
+    },
+    {
+      "path": "frontend/src/features/risks/components/risk-form-modal.tsx",
+      "change": "modified",
+      "bytes": 12236,
+      "sha256": "01696166d5d5beb946ef0eeafc27c603abf2b01d704f39faecddcdee4ba4d3c4"
+    },
+    {
+      "path": "frontend/src/features/risks/pages/risks.page.tsx",
+      "change": "modified",
+      "bytes": 16692,
+      "sha256": "9c258c8a618ab38e34be7d5d85bb0aae9d2da457b0c9bb50e0b813948ab70186"
+    },
+    {
+      "path": "frontend/src/features/settings/components/settings-layout.tsx",
+      "change": "modified",
+      "bytes": 3376,
+      "sha256": "99bd98d5ec9b20ed10db4da81e8fb490aa7ec7cb3fe6b90629898dce7c8ad9b7"
+    },
+    {
+      "path": "frontend/src/features/tasks/components/task-form-modal.tsx",
+      "change": "modified",
+      "bytes": 9957,
+      "sha256": "b0135ddd532b434ded428d7cddbb40f022a148fa11bae931109d8c7d8bddfb42"
+    },
+    {
+      "path": "frontend/src/features/tasks/pages/tasks.page.tsx",
+      "change": "modified",
+      "bytes": 11309,
+      "sha256": "232bf2e404679781cdb4bc248e2eaace5c46366af2b0b103d415912b09e4c84f"
+    },
+    {
+      "path": "frontend/src/features/training/pages/training.page.tsx",
+      "change": "modified",
+      "bytes": 14185,
+      "sha256": "840960b40e96491ced5a858dff8870055a49652443444b197c3b696296da3272"
+    },
+    {
+      "path": "frontend/src/features/vendors/pages/vendors.page.tsx",
+      "change": "modified",
+      "bytes": 15261,
+      "sha256": "65310d5461275b2c41edfed1a71773dcdfb992b3d074e0337daca42dca48e780"
+    },
+    {
+      "path": "frontend/src/lib/api-client.ts",
+      "change": "modified",
+      "bytes": 5540,
+      "sha256": "d7944568f619878b41e075ffa09c00cee9d7138de44cc71c6699fafc5e3693ec"
+    },
+    {
+      "path": "frontend/src/routes/paths.ts",
+      "change": "modified",
+      "bytes": 2390,
+      "sha256": "b8f62c7892fabb773c84808e16fc436b51c787f4a5aa2e32984abbfcae91a51a"
+    }
+  ],
+  "privateDataIncluded": false
+}

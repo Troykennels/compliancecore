@@ -4,6 +4,7 @@ import { AppError, ForbiddenError, NotFoundError } from '../../lib/errors';
 import { policiesRepository } from './policies.repository';
 import type { CreatePolicyInput, UpdatePolicyInput, ListPoliciesInput } from './policies.schema';
 import type { Prisma } from '@prisma/client';
+import { hasTemplatePlaceholders } from './policy-templates';
 
 type Actor = { id: string; email: string; role: string | null; tenantId: string | null };
 async function activeOwner(tx:Prisma.TransactionClient,ownerId:string|null|undefined,actor:Actor) {
@@ -13,6 +14,7 @@ async function activeOwner(tx:Prisma.TransactionClient,ownerId:string|null|undef
 }
 function reviewable(p: {ownerId?:string|null;content?:string|null;reviewDueDate?:Date|null}) {
   if(!p.ownerId||!p.content?.trim()||!p.reviewDueDate||new Date(p.reviewDueDate).getTime()<Date.now())throw new AppError('Add a responsible owner, policy content and a future review date before submitting for approval.',422,'POLICY_NOT_READY');
+  if(hasTemplatePlaceholders(p.content))throw new AppError('Replace the bracketed template placeholders with your organisation’s actual decisions before requesting approval.',422,'TEMPLATE_NOT_TAILORED');
 }
 
 export const policiesService = {

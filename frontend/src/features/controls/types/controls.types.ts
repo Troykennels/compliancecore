@@ -89,9 +89,9 @@ export const IMPLEMENTATION_STATUS_CONFIG: Record<
   ControlImplementationStatus,
   { label: string; color: string; bgColor: string }
 > = {
-  implemented:           { label: 'Implemented',           color: 'text-green-700',  bgColor: 'bg-green-100' },
-  partially_implemented: { label: 'Partially Implemented', color: 'text-amber-700',  bgColor: 'bg-amber-100' },
-  not_implemented:       { label: 'Not Implemented',       color: 'text-red-700',    bgColor: 'bg-red-100' },
+  implemented:           { label: 'Operating — proof required',           color: 'text-green-700',  bgColor: 'bg-green-100' },
+  partially_implemented: { label: 'Partly operating', color: 'text-amber-700',  bgColor: 'bg-amber-100' },
+  not_implemented:       { label: 'Not operating',       color: 'text-red-700',    bgColor: 'bg-red-100' },
   not_applicable:        { label: 'Not Applicable',        color: 'text-slate-500',  bgColor: 'bg-slate-100' },
   planned:               { label: 'Planned',               color: 'text-purple-700', bgColor: 'bg-purple-100' },
 };

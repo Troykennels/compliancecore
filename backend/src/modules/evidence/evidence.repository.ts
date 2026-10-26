@@ -388,6 +388,7 @@ export const evidenceRepository = {
     await tx.$executeRaw`
       UPDATE evidence SET
         current_version_id = ${versionId}::uuid,
+        ocr_text = NULL,
         ocr_status = 'pending',
         updated_at = NOW()
       WHERE id = ${evidenceId}::uuid

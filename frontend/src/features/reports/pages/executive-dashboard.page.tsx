@@ -186,9 +186,9 @@ function ScoreTrendChart({ data }: { data: Array<{ date: string; score: number |
 
 function ControlsDonut({ breakdown }: { breakdown: { implemented: number; partiallyImplemented: number; notImplemented: number; planned: number; notApplicable: number } }) {
   const chartData = [
-    { name: 'Implemented',    value: breakdown.implemented,          color: CHART_COLORS.implemented },
+    { name: 'Operating',    value: breakdown.implemented,          color: CHART_COLORS.implemented },
     { name: 'Partial',        value: breakdown.partiallyImplemented, color: CHART_COLORS.partial },
-    { name: 'Not Implemented',value: breakdown.notImplemented,       color: CHART_COLORS.notImpl },
+    { name: 'Not operating',value: breakdown.notImplemented,       color: CHART_COLORS.notImpl },
     { name: 'Planned',        value: breakdown.planned,              color: CHART_COLORS.planned },
     { name: 'N/A',            value: breakdown.notApplicable,        color: CHART_COLORS.notApplicable },
   ].filter((d) => d.value > 0);
@@ -245,10 +245,10 @@ function CriticalityChart({ data }: { data: ControlsByCriticality[] }) {
         <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
         <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #e2e8f0' }} />
         <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-        <Bar dataKey="implemented"   name="Implemented"    fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={28}>
+        <Bar dataKey="implemented"   name="Operating"    fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={28}>
           {data.map((d, i) => <Cell key={i} fill={CRITICALITY_COLORS[d.criticality] ?? '#3b82f6'} />)}
         </Bar>
-        <Bar dataKey="notImplemented" name="Not Implemented" fill="#dc262620" radius={[4, 4, 0, 0]} maxBarSize={28} />
+        <Bar dataKey="notImplemented" name="Not operating" fill="#dc262620" radius={[4, 4, 0, 0]} maxBarSize={28} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -660,8 +660,8 @@ export function ExecutiveDashboardPage() {
                 ? 'Not scored — adopt a framework'
                 : `${data.kpis.implementedControls} of ${data.kpis.totalControls} controls`}
               color={scoreColor} />
-            <KpiCard icon={ShieldCheck} label="Implemented Controls" value={data.kpis.implementedControls}
-              sub={`${data.kpis.notImplementedControls} not implemented`}
+            <KpiCard icon={ShieldCheck} label="Operating safeguards" value={data.kpis.implementedControls}
+              sub={`${data.kpis.notImplementedControls} not operating`}
               color={data.kpis.notImplementedControls > 0 ? 'amber' : 'green'} />
             <KpiCard icon={CheckSquare} label="Overdue Tasks" value={data.kpis.overdueTasks}
               sub={`${data.kpis.openTasks} total open`}
@@ -705,7 +705,7 @@ export function ExecutiveDashboardPage() {
         ) : data ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <Card>
-              <CardHeader title="Framework Coverage" subtitle="% controls implemented" />
+              <CardHeader title="Framework Coverage" subtitle="% safeguards recorded as operating" />
               <div className="p-4 h-56">
                 <FrameworkBar coverage={data.frameworkCoverage} />
               </div>
@@ -728,7 +728,7 @@ export function ExecutiveDashboardPage() {
         {/* ── Charts Row 3 — Controls by Criticality ───────────────────────── */}
         {!isLoading && data && data.controlsByCriticality.length > 0 && (
           <Card>
-            <CardHeader title="Controls by Criticality" subtitle="Implemented vs not implemented" />
+            <CardHeader title="Controls by Criticality" subtitle="Operating vs not operating" />
             <div className="p-4 h-48">
               <CriticalityChart data={data.controlsByCriticality} />
             </div>

@@ -4,7 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { useAuthStore } from './stores/auth.store';
-import { setAccessToken } from './lib/api-client';
+import { setAccessToken, getAccessToken, getAuthRevision } from './lib/api-client';
 import { queryClient } from './lib/query-client';
 import { ErrorBoundary } from './components/error-boundary';
 import { authApi } from './features/auth/api/auth.api';
@@ -30,6 +30,7 @@ const EmailVerificationPage = lazyPage(() => import('./features/auth/pages/email
 const BranchesPage = lazyPage(() => import('./features/branches/pages/branches.page'), 'BranchesPage');
 const ControlsPage = lazyPage(() => import('./features/controls/pages/controls.page'), 'ControlsPage');
 const PoliciesPage = lazyPage(() => import('./features/policies/pages/policies.page'), 'PoliciesPage');
+const PolicyTemplatesPage = lazyPage(() => import('./features/policies/pages/policy-templates.page'), 'PolicyTemplatesPage');
 const RisksPage = lazyPage(() => import('./features/risks/pages/risks.page'), 'RisksPage');
 const VendorsPage = lazyPage(() => import('./features/vendors/pages/vendors.page'), 'VendorsPage');
 const IncidentsPage = lazyPage(() => import('./features/incidents/pages/incidents.page'), 'IncidentsPage');
@@ -75,12 +76,17 @@ function AuthInitialiser({ children }: { children: React.ReactNode }): JSX.Eleme
   const { setAuth, clearAuth } = useAuthStore();
 
   useEffect(() => {
+    const initialRevision=getAuthRevision();
+    let refreshToken:string|null=null;
     authApi
       .refresh()
       .then(async (refreshRes) => {
         const newToken = refreshRes.data.data.accessToken;
+        if(useAuthStore.getState().isAuthenticated||getAccessToken()!==newToken)return;
+        refreshToken=newToken;
         setAccessToken(newToken);
         const meRes = await authApi.me();
+        if(useAuthStore.getState().isAuthenticated||getAccessToken()!==newToken)return;
         const u = meRes.data.data;
         setAuth(
           {
@@ -104,8 +110,9 @@ function AuthInitialiser({ children }: { children: React.ReactNode }): JSX.Eleme
         );
       })
       .catch(() => {
-        clearAuth();
-      });
+        // A slow startup refresh must not undo a newer explicit sign-in.
+        if(!useAuthStore.getState().isAuthenticated&&(getAuthRevision()===initialRevision||(refreshToken!==null&&getAccessToken()===refreshToken)))clearAuth();
+      }).finally(()=>useAuthStore.getState().setInitialised());
   // Run once on mount only
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -148,6 +155,7 @@ export default function App(): JSX.Element {
                 <Route path={PATHS.EVIDENCE}     element={<EvidencePage />} />
                 <Route path="/evidence/:id"      element={<EvidenceDetailPage />} />
                 <Route path={PATHS.POLICIES}     element={<PoliciesPage />} />
+                <Route path={PATHS.POLICY_TEMPLATES} element={<PolicyTemplatesPage />} />
                 <Route path={PATHS.RISKS}        element={<RisksPage />} />
                 <Route path={PATHS.VENDORS}      element={<VendorsPage />} />
                 <Route path={PATHS.AUDITS}       element={<AuditsPage />} />

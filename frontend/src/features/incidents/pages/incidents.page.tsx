@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -68,13 +69,13 @@ export function IncidentsPage(): JSX.Element {
             Security and privacy incident register, with statutory breach-notification tracking.
           </p>
         </div>
-        <button
+        <PermissionAction scope="incidents:write"><button
           type="button"
           onClick={() => setShowForm(true)}
           className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700"
         >
           <Plus className="h-4 w-4" /> Report incident
-        </button>
+        </button></PermissionAction>
       </div>
 
       {/* Breach-notification warning takes priority over everything else: this is
@@ -351,8 +352,8 @@ function ReportIncidentModal({ onClose, onCreated }: { onClose: () => void; onCr
           <input type="checkbox" checked={isDataBreach} onChange={(e) => setIsDataBreach(e.target.checked)}
             className="mt-0.5 h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500" />
           <span className="text-xs text-amber-900">
-            <strong>This involves personal data.</strong> Ticking this starts a 72-hour
-            notification clock from now, in line with GDPR Article 33 and the NDPA.
+            <strong>This involves personal data.</strong> Record the facts, then use the notification-decision workflow above. Applicable duties determine the
+            notification deadline and who must be told. A reviewer must confirm the applicable rule and awareness time.
           </span>
         </label>
 

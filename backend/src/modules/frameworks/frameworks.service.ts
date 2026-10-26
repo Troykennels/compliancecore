@@ -58,7 +58,7 @@ export const frameworksService = {
       await setAuditSessionVars(tx, actor);
       await tx.$queryRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))::text', 'framework-implementation:' + id);
       const plans = await tx.$queryRawUnsafe<unknown[]>('SELECT 1 FROM framework_implementations WHERE framework_id=$1::uuid', id);
-      if (!plans.length) throw new AppError('Record the scope, objective, accountable owner and target date before starting implementation.', 409, 'SCOPE_REQUIRED');
+      if (!plans.length) throw new AppError('Record the scope, objective, accountable owner and target date before preparing an assessment register.', 409, 'SCOPE_REQUIRED');
 
       const framework = await frameworksRepository.findById(tx, id);
       if (!framework) throw new NotFoundError('Framework not found.');

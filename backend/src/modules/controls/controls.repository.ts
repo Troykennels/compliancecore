@@ -26,6 +26,7 @@ function mapRow(row: Record<string, unknown>): Control {
     lastReviewedAt:       row.lastReviewedAt ? new Date(row.lastReviewedAt as string) : null,
     reviewedBy:           row.reviewedBy as string | null,
     createdBy:            row.createdBy as string | null,
+    updatedBy:            row.updatedBy as string | null,
     createdAt:            new Date(row.createdAt as string),
     updatedAt:            new Date(row.updatedAt as string),
   };
@@ -77,7 +78,7 @@ export const controlsRepository = {
           u.email AS "ownerEmail",
           c.due_date AS "dueDate", c.review_frequency_days AS "reviewFrequencyDays",
           c.last_reviewed_at AS "lastReviewedAt", c.reviewed_by AS "reviewedBy",
-          c.created_by AS "createdBy", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
+          c.created_by AS "createdBy", c.updated_by AS "updatedBy", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
           f.name AS "frameworkName"
         FROM controls c
         LEFT JOIN global.users u ON u.id = c.owner_id
@@ -112,7 +113,7 @@ export const controlsRepository = {
         u.email AS "ownerEmail",
         c.due_date AS "dueDate", c.review_frequency_days AS "reviewFrequencyDays",
         c.last_reviewed_at AS "lastReviewedAt", c.reviewed_by AS "reviewedBy",
-        c.created_by AS "createdBy", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
+        c.created_by AS "createdBy", c.updated_by AS "updatedBy", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
         f.name AS "frameworkName"
       FROM controls c
       LEFT JOIN global.users u ON u.id = c.owner_id

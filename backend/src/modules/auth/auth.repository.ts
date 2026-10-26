@@ -1,3 +1,4 @@
+import { auditCurrentActor } from '../../lib/audit-context';
 import { prisma } from '../../config/database';
 import type { User, TenantMembership, Session, RefreshToken, MfaCredential } from '@prisma/client';
 
@@ -203,6 +204,7 @@ export async function rotateRefreshToken(
   const old = await prisma.refreshToken.findUniqueOrThrow({ where: { id: oldTokenId } });
 
   return prisma.$transaction(async (tx) => {
+        await auditCurrentActor(tx);
     await tx.refreshToken.update({
       where: { id: oldTokenId },
       data: { usedAt: new Date(), revokedAt: new Date() },

@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "scope": "Fresh disposable local database; fixture and production databases untouched",
+  "database": "compliance_renewal_task_step2regression_e2fea0de",
+  "realPaymentOrEmailDelivery": false
+}
