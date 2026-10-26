@@ -596,6 +596,12 @@
       "sha256": "bab60082367fc477c869eeb33bab4686ee2dd8dcce0ef22af3ab0f1f253eb6ce"
     },
     {
+      "path": "frontend/src/features/dashboard/components/insight-widgets.tsx",
+      "change": "modified",
+      "bytes": 17751,
+      "sha256": "5f21d3757deae2c049ba243f87cd69d551592e5ffe4f94d8fc304116fa1a34c0"
+    },
+    {
       "path": "frontend/src/features/dashboard/pages/dashboard.page.tsx",
       "change": "modified",
       "bytes": 13236,
@@ -664,8 +670,8 @@
     {
       "path": "frontend/src/features/frameworks/components/remove-framework-dialog.tsx",
       "change": "modified",
-      "bytes": 9866,
-      "sha256": "da2dfe80fcbd078fb267d87b6d9f1bd944497a93fac06a5d66d51fbde2fa5a9a"
+      "bytes": 9867,
+      "sha256": "1db0429320b5d020ad0472b2680ee95107ce748b1a66a119c83651800fee0ded"
     },
     {
       "path": "frontend/src/features/frameworks/implementation.ts",
@@ -730,8 +736,8 @@
     {
       "path": "frontend/src/features/reports/pages/executive-dashboard.page.tsx",
       "change": "modified",
-      "bytes": 44252,
-      "sha256": "0369b4b56f0b15ecac98b08fb1896cd39b6b9d817d4993d96235bfc7a60efc83"
+      "bytes": 44254,
+      "sha256": "f1499234fd4173d38221cf6653408c079ed936d04e9330691532643e232418ae"
     },
     {
       "path": "frontend/src/features/risks/components/risk-form-modal.tsx",

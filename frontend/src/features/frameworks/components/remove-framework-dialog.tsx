@@ -186,7 +186,7 @@ export function RemoveFrameworkDialog({
               ) : (
                 <p className="mt-3 text-sm text-slate-500">
                   Nothing has been recorded against these controls yet, so nothing is lost. You can
-                  adopt {name} again at any time.
+                  assess {name} again at any time.
                 </p>
               )}
             </>

@@ -657,7 +657,7 @@ export function ExecutiveDashboardPage() {
             <KpiCard icon={TrendingUp} label="Compliance Score"
               value={score === null ? '—' : `${score}%`}
               sub={score === null
-                ? 'Not scored — adopt a framework'
+                ? 'Not scored — start an assessment'
                 : `${data.kpis.implementedControls} of ${data.kpis.totalControls} controls`}
               color={scoreColor} />
             <KpiCard icon={ShieldCheck} label="Operating safeguards" value={data.kpis.implementedControls}

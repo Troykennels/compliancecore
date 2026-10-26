@@ -98,6 +98,7 @@
   "frontend/src/features/controls/pages/controls.page.tsx",
   "frontend/src/features/controls/types/controls.types.ts",
   "frontend/src/features/dashboard/components/compliance-work-summary.tsx",
+  "frontend/src/features/dashboard/components/insight-widgets.tsx",
   "frontend/src/features/dashboard/pages/dashboard.page.tsx",
   "frontend/src/features/evidence/components/evidence-preview.tsx",
   "frontend/src/features/frameworks/assessment.ts",

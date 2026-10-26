@@ -9,7 +9,7 @@ Verification_Summary.json records passing checks; Evidence contains selected rec
 This is a local release candidate, not an already-published update or installer. The supplied demo site remains unchanged by Step 2 until its approved release.
 The adopted document says: "Do not modify production data without explicit approval." No production migration or deployment has been performed. Source preparation is complete for review; schema/configuration/deployment remain the approval action.
 
-Source contains 131 modified/new source and focused verification files relative to baseline in Source_Manifest.json. The patch is for that exact existing repository baseline, not a replacement application. Use git apply --check before applying it on a matching clean review checkout. Do not apply blindly over another developer's changes.
+Source contains 132 modified/new source and focused verification files relative to baseline in Source_Manifest.json. The patch is for that exact existing repository baseline, not a replacement application. Use git apply --check before applying it on a matching clean review checkout. Do not apply blindly over another developer's changes.
 Preserve existing lockfiles, signing/encryption keys, tenant data, licensing, payment settings and storage. Never reset the database or replay database/schema.sql for this release.
 
 Do not run lifecycle verification scripts against production. They use isolated local fixtures and private synthetic access files generated during setup. Those private keys/passwords and the native cloud backup are intentionally excluded. Existing database regression tests use a new isolated local database; no actual card or communication provider was used.

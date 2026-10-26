@@ -98,6 +98,7 @@ frontend/src/features/controls/components/control-form-modal.tsx,modified,"Exist
 frontend/src/features/controls/pages/controls.page.tsx,modified,Existing module repaired/connected
 frontend/src/features/controls/types/controls.types.ts,modified,Existing module repaired/connected
 frontend/src/features/dashboard/components/compliance-work-summary.tsx,new,"Existing-page workflow, navigation, guide or accessible selection UI"
+frontend/src/features/dashboard/components/insight-widgets.tsx,modified,Use assessment wording in existing dashboard empty states
 frontend/src/features/dashboard/pages/dashboard.page.tsx,modified,Existing module repaired/connected
 frontend/src/features/evidence/components/evidence-preview.tsx,modified,"Existing-page workflow, navigation, guide or accessible selection UI"
 frontend/src/features/frameworks/assessment.ts,new,Absent workflow support or focused verification
