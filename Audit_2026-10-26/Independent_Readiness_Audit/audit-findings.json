@@ -1,0 +1,182 @@
+{
+  "date": "2026-10-26",
+  "reviewedSource": "4c9b978 (runtime unchanged by dd19f50 verification commit)",
+  "liveUrl": "https://compliancecore-sand.vercel.app/",
+  "verdict": "NOT READY FOR UNRESTRICTED PRODUCTION USE",
+  "high": 4,
+  "medium": 4,
+  "sourceInventory": {
+    "tsxFiles": 134,
+    "filesWithFieldsOrLinks": 95,
+    "fieldAndLabelNodes": 484,
+    "linkNodes": 90
+  },
+  "localPageInspection": {
+    "pages": 37,
+    "rendered": 37,
+    "workflowPanels": 9,
+    "pageExceptions": 0
+  },
+  "isolatedDeficiencyProbes": 6,
+  "applicationChangesMade": false,
+  "productionBusinessWritesMade": false,
+  "scope": "Public Vanta documentation benchmark; source and isolated-service probes; current local UI against managed-demo API with writes blocked. Fresh remote browser inspection timed out before reaching the sign-in fields. Earlier live route/download receipts are historical evidence, not proof every lifecycle works.",
+  "findings": [
+    {
+      "id": "H1",
+      "severity": "High",
+      "title": "Audit report and completion journey is blocked",
+      "observation": "The audit edit form has no report-summary input, while independent report review requires a non-empty summary. The form also sends all edited fields when status is changed to completed, but the service permits a reviewed completion request to contain status only. A seeded completed demo audit masks the fresh-user problem.",
+      "fix": "Add a report summary and accountable owner; pick the framework from actual records. Save report changes, obtain independent review, then offer a separate completion action that sends status only.",
+      "acceptance": "A new audit can be created, have its summary and report saved, be reviewed by another authorised person, and be completed entirely through the UI.",
+      "evidence": [
+        {
+          "file": "frontend/src/features/audits/components/audit-form-modal.tsx",
+          "line": 11
+        },
+        {
+          "file": "backend/src/modules/frameworks/compliance-records.service.ts",
+          "line": 982
+        },
+        {
+          "file": "backend/src/modules/audits/audits.service.ts",
+          "line": 60
+        }
+      ]
+    },
+    {
+      "id": "H2",
+      "severity": "High",
+      "title": "Training participants cannot be assigned through the connected UI",
+      "observation": "The training page creates and edits programmes but offers no participant-assignment journey. An assignment API and hook exist, but the hook has no page/component caller. The verification workflow expects records that already exist, so a new organisation cannot complete the advertised journey without operator/API help.",
+      "fix": "Connect programme -> assign people and due dates -> participant records -> evidence -> independent verification. Keep unverified assignments separate from completions.",
+      "acceptance": "A newly created programme can be assigned to active members and completed with independently verified proof using normal screens.",
+      "evidence": [
+        {
+          "file": "frontend/src/features/training/pages/training.page.tsx",
+          "line": 16
+        },
+        {
+          "file": "frontend/src/features/training/hooks/use-training.ts",
+          "line": 84
+        }
+      ]
+    },
+    {
+      "id": "H3",
+      "severity": "High",
+      "title": "Ordinary control updates can bypass applicability decision controls",
+      "observation": "An assigned control owner can change their control status to not applicable using the normal update service with only a justification. This path does not call the framework applicability service or its preceding risk/obligation checks and PCI evidence rule. The final framework gate detects inconsistent SoA records, but the control status and dashboard denominator can already change. This is not evidence of a successful certification-signoff bypass.",
+      "fix": "Centralise applicability changes in the authorised applicability workflow. Prevent ordinary control-owner edits from excluding a requirement. Keep pending exclusions visible and out of approved-scope scoring.",
+      "acceptance": "A direct PATCH and the ordinary edit form cannot exclude a mapped control without the appropriate applicability authorisation and required proof.",
+      "evidence": [
+        {
+          "file": "backend/src/modules/controls/controls.service.ts",
+          "line": 11
+        },
+        {
+          "file": "backend/src/modules/controls/controls.service.ts",
+          "line": 45
+        },
+        {
+          "file": "backend/src/modules/frameworks/implementation.service.ts",
+          "line": 95
+        }
+      ]
+    },
+    {
+      "id": "H4",
+      "severity": "High",
+      "title": "Concurrent owner changes can defeat the last-owner safeguard",
+      "observation": "The owner count and membership update are separate operations. A controlled concurrency probe executed two co-owner demotions that both observed two owners, leaving zero in the repository fixture. The service does not serialise those checks and updates. No production owner account was changed during this audit.",
+      "fix": "Perform ownership changes under a transaction and a per-tenant lock or equivalent invariant enforcement. Preserve session revocation after a successful authorised change.",
+      "acceptance": "Concurrent demotion/removal tests against an isolated real database always retain at least one active owner; rollback and revoked-session behaviour are verified.",
+      "evidence": [
+        {
+          "file": "backend/src/modules/settings/settings.service.ts",
+          "line": 97
+        },
+        {
+          "file": "backend/src/modules/settings/settings.repository.ts",
+          "line": 152
+        }
+      ]
+    },
+    {
+      "id": "M1",
+      "severity": "Medium",
+      "title": "An optional training-frequency field rejects a blank value",
+      "observation": "The actual client schema coerces an empty frequency string into zero and then rejects it because frequency must be at least one. Omission is accepted, so the optional form field behaves inconsistently for one-time training.",
+      "fix": "Convert blank optional numeric inputs to undefined/null before number validation; explain recurrence and units.",
+      "acceptance": "A one-time programme saves with blank frequency; zero, negative and invalid populated values are rejected clearly.",
+      "evidence": [
+        {
+          "file": "frontend/src/features/training/components/training-form-modal.tsx",
+          "line": 18
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "severity": "Medium",
+      "title": "Audit and calendar date ranges are not validated chronologically",
+      "observation": "Both schemas accepted an end date earlier than the start date in local probes. The inspected services add no chronological check. These probes validate schema/service logic, not a live database insert.",
+      "fix": "Validate start/end ordering in the UI and service on both create and partial updates; compare against stored dates where needed.",
+      "acceptance": "Reversed ranges are rejected with a field-specific message, and valid historical ranges remain possible.",
+      "evidence": [
+        {
+          "file": "backend/src/modules/audits/audits.schema.ts",
+          "line": 5
+        },
+        {
+          "file": "backend/src/modules/calendar/calendar.schema.ts",
+          "line": 5
+        }
+      ]
+    },
+    {
+      "id": "M3",
+      "severity": "Medium",
+      "title": "Several visible actions do not match role permissions",
+      "observation": "Examples: notification preferences exposes Save to a compliance manager with settings:read but no settings:write; the score page offers Take Snapshot to read-only roles although the API requires controls:write; the framework evidence step includes an attachment action for msp_analyst despite no evidence:write permission. API rejection protects the operation, but users are offered actions that cannot succeed.",
+      "fix": "Use the same permission checks for action visibility, form editability, direct-page access and API calls. Retain readable views for read-only roles.",
+      "acceptance": "Every role sees a usable action set; forbidden write attempts stay blocked by the API even if a user crafts a request.",
+      "evidence": [
+        {
+          "file": "frontend/src/features/settings/pages/settings-notifications.page.tsx",
+          "line": 174
+        },
+        {
+          "file": "frontend/src/features/compliance-score/pages/score.page.tsx",
+          "line": 40
+        },
+        {
+          "file": "frontend/src/features/frameworks/components/compliance-workspace.tsx",
+          "line": 48
+        },
+        {
+          "file": "backend/src/modules/compliance-score/score.router.ts",
+          "line": 15
+        }
+      ]
+    },
+    {
+      "id": "M4",
+      "severity": "Medium",
+      "title": "Form labels and page landmarks need accessibility corrections",
+      "observation": "Several reusable FormField helpers render a label beside an input without htmlFor/id association or wrapping it. Visible text is therefore not necessarily the field accessible name. The evidence screen also nests a main landmark inside the application main. These affect assistive technology and reliable keyboard/form automation.",
+      "fix": "Associate every label, hint and error with its field; give dialogs accessible names and focus behaviour; use one main landmark.",
+      "acceptance": "Keyboard and screen-reader checks pass on create/edit/review forms; getByLabel works for each named input; dialog focus is trapped and restored appropriately.",
+      "evidence": [
+        {
+          "file": "frontend/src/features/audits/components/audit-form-modal.tsx",
+          "line": 209
+        },
+        {
+          "file": "frontend/src/features/training/components/training-form-modal.tsx",
+          "line": 208
+        }
+      ]
+    }
+  ]
+}

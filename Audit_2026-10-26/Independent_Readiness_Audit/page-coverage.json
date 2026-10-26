@@ -1,0 +1,5940 @@
+{
+  "scope": "Public Vanta documentation benchmark; source and isolated-service probes; current local UI against managed-demo API with writes blocked. Fresh remote browser inspection timed out before reaching the sign-in fields. Earlier live route/download receipts are historical evidence, not proof every lifecycle works.",
+  "pages": [
+    {
+      "route": "dashboard",
+      "page": {
+        "headings": [
+          "Compliance overview",
+          "Control status",
+          "Your next steps",
+          "What needs attention?",
+          "Duties to review",
+          "Tests to review",
+          "Corrections to check",
+          "Policies to read"
+        ],
+        "links": [
+          {
+            "text": "Review assessments",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Open management report",
+            "href": "/reports"
+          },
+          {
+            "text": "View score history",
+            "href": "/compliance-score"
+          },
+          {
+            "text": "Total controls181All recorded safeguards",
+            "href": "/controls"
+          },
+          {
+            "text": "Operating12Recorded as in place",
+            "href": "/controls"
+          },
+          {
+            "text": "Partly operating6Further work is needed",
+            "href": "/controls"
+          },
+          {
+            "text": "Needs work163Planned or not operating",
+            "href": "/controls"
+          },
+          {
+            "text": "Not applicable0Recorded as outside scope",
+            "href": "/controls"
+          },
+          {
+            "text": "View assessments",
+            "href": "/frameworks"
+          },
+          {
+            "text": "1Duties to reviewDraft, undecided or due for another review.",
+            "href": "/frameworks?workflow=obligations&attention=review"
+          },
+          {
+            "text": "0Tests to reviewSubmitted tests need an independent decision.",
+            "href": "/controls?workflow=tests&attention=review"
+          },
+          {
+            "text": "1Corrections to checkVerify the correction before closing the task.",
+            "href": "/tasks?workflow=actions&attention=review"
+          },
+          {
+            "text": "5Policies to readCurrent published versions with unread assignments.",
+            "href": "/policies?workflow=acknowledgments&attention=review"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Dates, activity and score history0 overdue calendar events · 0 expired tracked items",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "frameworks",
+      "page": {
+        "headings": [
+          "Compliance assessments",
+          "Assessment progress",
+          "Choose the requirements you need to assess"
+        ],
+        "links": [
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "View assessments",
+            "href": "/frameworks"
+          }
+        ],
+        "buttons": [],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": null,
+            "aria": "Search frameworks",
+            "labels": [],
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "risks",
+      "page": {
+        "headings": [
+          "Risk assessment"
+        ],
+        "links": [
+          {
+            "text": "Scope and requirements",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Controls and checks",
+            "href": "/controls"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Other / existing risk records",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": "Risk assessment framework",
+            "labels": [
+              "Assessment frameworkChoose a framework"
+            ],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Choose a framework",
+                "value": ""
+              }
+            ]
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "policies",
+      "page": {
+        "headings": [
+          "Policies"
+        ],
+        "links": [
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Compliance assessment",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "Browse policy templates and Word downloads",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Return to compliance assessment",
+            "href": "/frameworks"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New Policy",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Policy actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Policy actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Policy actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Policy actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Policy actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Policy actions",
+            "disabled": false
+          },
+          {
+            "text": "Prev",
+            "name": null,
+            "disabled": true
+          },
+          {
+            "text": "Next",
+            "name": null,
+            "disabled": true
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Statuses",
+                "value": ""
+              },
+              {
+                "text": "Draft",
+                "value": "draft"
+              },
+              {
+                "text": "In Review",
+                "value": "in_review"
+              },
+              {
+                "text": "Approved",
+                "value": "approved"
+              },
+              {
+                "text": "Published",
+                "value": "published"
+              },
+              {
+                "text": "Archived",
+                "value": "archived"
+              }
+            ]
+          }
+        ]
+      },
+      "primaryAction": "New Policy",
+      "openForm": {
+        "headings": [
+          "Policies",
+          "New Policy"
+        ],
+        "links": [
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Compliance assessment",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "Browse policy templates and Word downloads",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Return to compliance assessment",
+            "href": "/frameworks"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New Policy",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Policy actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Policy actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Policy actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Policy actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Policy actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Policy actions",
+            "disabled": false
+          },
+          {
+            "text": "Prev",
+            "name": null,
+            "disabled": true
+          },
+          {
+            "text": "Next",
+            "name": null,
+            "disabled": true
+          },
+          {
+            "text": "",
+            "name": "Close",
+            "disabled": false
+          },
+          {
+            "text": "Cancel",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create Policy",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Statuses",
+                "value": ""
+              },
+              {
+                "text": "Draft",
+                "value": "draft"
+              },
+              {
+                "text": "In Review",
+                "value": "in_review"
+              },
+              {
+                "text": "Approved",
+                "value": "approved"
+              },
+              {
+                "text": "Published",
+                "value": "published"
+              },
+              {
+                "text": "Archived",
+                "value": "archived"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": "Choose policy template",
+            "labels": [
+              "Start from a policy templateBlank draft"
+            ],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Blank draft",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "title",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Title*",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "TEXTAREA",
+            "type": null,
+            "name": "description",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Description",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "documentType",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Document Type",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Policy",
+                "value": "policy"
+              },
+              {
+                "text": "Procedure",
+                "value": "procedure"
+              },
+              {
+                "text": "Standard",
+                "value": "standard"
+              },
+              {
+                "text": "Guideline",
+                "value": "guideline"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "status",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Status",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Draft",
+                "value": "draft"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": "reviewDueDate",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Review Due Date",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "ownerId",
+            "aria": "Policy owner",
+            "labels": [],
+            "nearbyLabel": "Responsible owner",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Select an active member",
+                "value": ""
+              },
+              {
+                "text": "Ada Okafor",
+                "value": "14221a64-eecf-49d0-8d92-3a34161d41a3"
+              },
+              {
+                "text": "Grace Mensah",
+                "value": "8aa253e9-9927-4086-a3ce-01bf5dcc1616"
+              },
+              {
+                "text": "Orion Demo Administrator",
+                "value": "b6b58e83-d05e-4e34-96cd-c5ac4b42f57e"
+              },
+              {
+                "text": "Tunde Bello",
+                "value": "c0c115b6-9daf-462b-b885-6ef7c1b043d6"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "frameworkIds",
+            "aria": "Policy linked frameworks",
+            "labels": [],
+            "nearbyLabel": "Linked frameworks",
+            "required": false,
+            "disabled": false,
+            "options": []
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "tags",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Tags",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "TEXTAREA",
+            "type": null,
+            "name": "content",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Content",
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "policy-templates",
+      "page": {
+        "headings": [
+          "Policy templates",
+          "Information Security Policy",
+          "Access Control Policy",
+          "Compliance Risk Assessment and Treatment Policy",
+          "Data Protection and Privacy Policy",
+          "Records Retention and Secure Disposal Policy",
+          "Incident Reporting and Response Policy",
+          "Supplier and Third-Party Assurance Policy",
+          "Backup and Recovery Policy",
+          "Business Continuity Policy",
+          "Financial Systems and Change Control Policy",
+          "Other compliance forms and working templates"
+        ],
+        "links": [
+          {
+            "text": "Return to compliance assessment",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Open policy register",
+            "href": "/policies"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Create a draft from template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Preview",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Word template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create a draft from template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Preview",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Word template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create a draft from template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Preview",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Word template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create a draft from template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Preview",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Word template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create a draft from template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Preview",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Word template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create a draft from template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Preview",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Word template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create a draft from template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Preview",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Word template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create a draft from template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Preview",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Word template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create a draft from template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Preview",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Word template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create a draft from template",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Preview",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Word template",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": null,
+            "aria": "Find policy templates",
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": "Policy template area",
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All compliance areas",
+                "value": ""
+              },
+              {
+                "text": "Information security",
+                "value": "security"
+              },
+              {
+                "text": "Privacy",
+                "value": "privacy"
+              },
+              {
+                "text": "Financial assurance",
+                "value": "financial"
+              },
+              {
+                "text": "Business continuity",
+                "value": "continuity"
+              }
+            ]
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "controls",
+      "page": {
+        "headings": [
+          "Controls"
+        ],
+        "links": [
+          {
+            "text": "Assess risks",
+            "href": "/risks"
+          },
+          {
+            "text": "Supporting evidence",
+            "href": "/evidence"
+          },
+          {
+            "text": "Corrective actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "Return to compliance assessment",
+            "href": "/frameworks"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New control",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": "Search controls",
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": "Filter by operating status",
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All statuses",
+                "value": ""
+              },
+              {
+                "text": "Operating — proof required",
+                "value": "implemented"
+              },
+              {
+                "text": "Partly operating",
+                "value": "partially_implemented"
+              },
+              {
+                "text": "Not operating",
+                "value": "not_implemented"
+              },
+              {
+                "text": "Not Applicable",
+                "value": "not_applicable"
+              },
+              {
+                "text": "Planned",
+                "value": "planned"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": "Filter by criticality",
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All criticalities",
+                "value": ""
+              },
+              {
+                "text": "Critical",
+                "value": "critical"
+              },
+              {
+                "text": "High",
+                "value": "high"
+              },
+              {
+                "text": "Medium",
+                "value": "medium"
+              },
+              {
+                "text": "Low",
+                "value": "low"
+              }
+            ]
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "evidence",
+      "page": {
+        "headings": [
+          "Evidence Hub"
+        ],
+        "links": [
+          {
+            "text": "Controls and checks",
+            "href": "/controls"
+          },
+          {
+            "text": "Policies",
+            "href": "/policies"
+          },
+          {
+            "text": "Audit records",
+            "href": "/audits"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Upload Evidence",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Search",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "radio",
+            "name": "status",
+            "aria": null,
+            "labels": [
+              "Active"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "radio",
+            "name": "status",
+            "aria": null,
+            "labels": [
+              "Archived"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "radio",
+            "name": "status",
+            "aria": null,
+            "labels": [
+              "Expired"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All types",
+                "value": ""
+              },
+              {
+                "text": "PDF",
+                "value": "application/pdf"
+              },
+              {
+                "text": "Word (DOCX)",
+                "value": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              },
+              {
+                "text": "Excel (XLSX)",
+                "value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              },
+              {
+                "text": "Images",
+                "value": "image/"
+              },
+              {
+                "text": "Text files",
+                "value": "text/"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Any",
+                "value": ""
+              },
+              {
+                "text": "OCR Complete",
+                "value": "completed"
+              },
+              {
+                "text": "OCR Pending",
+                "value": "pending"
+              },
+              {
+                "text": "OCR Failed",
+                "value": "failed"
+              },
+              {
+                "text": "No OCR",
+                "value": "not_applicable"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "From",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "To",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Sort by",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Newest first",
+                "value": "created_at:desc"
+              },
+              {
+                "text": "Oldest first",
+                "value": "created_at:asc"
+              },
+              {
+                "text": "Recently updated",
+                "value": "updated_at:desc"
+              },
+              {
+                "text": "Title A–Z",
+                "value": "title:asc"
+              },
+              {
+                "text": "Largest first",
+                "value": "file_size:desc"
+              }
+            ]
+          }
+        ]
+      },
+      "primaryAction": "Upload Evidence",
+      "openForm": {
+        "headings": [
+          "Evidence Hub",
+          "Upload Evidence"
+        ],
+        "links": [
+          {
+            "text": "Controls and checks",
+            "href": "/controls"
+          },
+          {
+            "text": "Policies",
+            "href": "/policies"
+          },
+          {
+            "text": "Audit records",
+            "href": "/audits"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Upload Evidence",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Search",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Cancel",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Upload Evidence",
+            "name": null,
+            "disabled": true
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "radio",
+            "name": "status",
+            "aria": null,
+            "labels": [
+              "Active"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "radio",
+            "name": "status",
+            "aria": null,
+            "labels": [
+              "Archived"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "radio",
+            "name": "status",
+            "aria": null,
+            "labels": [
+              "Expired"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All types",
+                "value": ""
+              },
+              {
+                "text": "PDF",
+                "value": "application/pdf"
+              },
+              {
+                "text": "Word (DOCX)",
+                "value": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              },
+              {
+                "text": "Excel (XLSX)",
+                "value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              },
+              {
+                "text": "Images",
+                "value": "image/"
+              },
+              {
+                "text": "Text files",
+                "value": "text/"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Any",
+                "value": ""
+              },
+              {
+                "text": "OCR Complete",
+                "value": "completed"
+              },
+              {
+                "text": "OCR Pending",
+                "value": "pending"
+              },
+              {
+                "text": "OCR Failed",
+                "value": "failed"
+              },
+              {
+                "text": "No OCR",
+                "value": "not_applicable"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "From",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "To",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Sort by",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Newest first",
+                "value": "created_at:desc"
+              },
+              {
+                "text": "Oldest first",
+                "value": "created_at:asc"
+              },
+              {
+                "text": "Recently updated",
+                "value": "updated_at:desc"
+              },
+              {
+                "text": "Title A–Z",
+                "value": "title:asc"
+              },
+              {
+                "text": "Largest first",
+                "value": "file_size:desc"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "file",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Drop file here or browsePDF, DOCX, XLSX, images, ZIP and more · Max 200 MB"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "title",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Title *",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "TEXTAREA",
+            "type": null,
+            "name": "description",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Description",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "categoryId",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Category",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "No category",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": "collectedAt",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Collection Date",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": "retentionDate",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Retention Date",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "changeNote",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Change Note (optional)",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Mark as ConfidentialConfidential evidence is only visible to compliance managers, admins, and owners."
+            ],
+            "nearbyLabel": "Mark as ConfidentialConfidential evidence is only visible to compliance managers, admins, and owners.",
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true,
+      "recheckedAfterHarnessFix": true
+    },
+    {
+      "route": "tasks",
+      "page": {
+        "headings": [
+          "Tasks"
+        ],
+        "links": [
+          {
+            "text": "Evidence",
+            "href": "/evidence"
+          },
+          {
+            "text": "Audit findings",
+            "href": "/audits"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New Task",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Board",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "List",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Statuses",
+                "value": ""
+              },
+              {
+                "text": "To Do",
+                "value": "todo"
+              },
+              {
+                "text": "In Progress",
+                "value": "in_progress"
+              },
+              {
+                "text": "In Review",
+                "value": "in_review"
+              },
+              {
+                "text": "Completed",
+                "value": "completed"
+              },
+              {
+                "text": "Cancelled",
+                "value": "cancelled"
+              },
+              {
+                "text": "Blocked",
+                "value": "blocked"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Priorities",
+                "value": ""
+              },
+              {
+                "text": "Critical",
+                "value": "critical"
+              },
+              {
+                "text": "High",
+                "value": "high"
+              },
+              {
+                "text": "Medium",
+                "value": "medium"
+              },
+              {
+                "text": "Low",
+                "value": "low"
+              }
+            ]
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "approvals",
+      "page": {
+        "headings": [
+          "Approval Workflows"
+        ],
+        "links": [
+          {
+            "text": "Policies and publication",
+            "href": "/policies"
+          },
+          {
+            "text": "Actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New Workflow",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "New Request",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "My Pending",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "All Requests",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Workflows",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "signatures",
+      "page": {
+        "headings": [
+          "Digital Signatures"
+        ],
+        "links": [
+          {
+            "text": "Policy approval",
+            "href": "/policies"
+          },
+          {
+            "text": "Evidence records",
+            "href": "/evidence"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "How to add and verify a signature",
+            "href": "/guide#signatures"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Sign a document",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "all",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "valid",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "revoked",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "audits",
+      "page": {
+        "headings": [
+          "Audits"
+        ],
+        "links": [
+          {
+            "text": "Assessment readiness",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Corrective actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "Evidence",
+            "href": "/evidence"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New Audit",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Statuses",
+                "value": ""
+              },
+              {
+                "text": "Planned",
+                "value": "planned"
+              },
+              {
+                "text": "In Progress",
+                "value": "in_progress"
+              },
+              {
+                "text": "Completed",
+                "value": "completed"
+              },
+              {
+                "text": "Cancelled",
+                "value": "cancelled"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Types",
+                "value": ""
+              },
+              {
+                "text": "Internal",
+                "value": "internal"
+              },
+              {
+                "text": "External",
+                "value": "external"
+              },
+              {
+                "text": "Certification",
+                "value": "certification"
+              },
+              {
+                "text": "Surveillance",
+                "value": "surveillance"
+              }
+            ]
+          }
+        ]
+      },
+      "primaryAction": "New Audit",
+      "openForm": {
+        "headings": [
+          "Audits",
+          "New Audit"
+        ],
+        "links": [
+          {
+            "text": "Assessment readiness",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Corrective actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "Evidence",
+            "href": "/evidence"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New Audit",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Audit actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Audit actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Audit actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Audit actions",
+            "disabled": false
+          },
+          {
+            "text": "Prev",
+            "name": null,
+            "disabled": true
+          },
+          {
+            "text": "Next",
+            "name": null,
+            "disabled": true
+          },
+          {
+            "text": "",
+            "name": "Close",
+            "disabled": false
+          },
+          {
+            "text": "Cancel",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create Audit",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Statuses",
+                "value": ""
+              },
+              {
+                "text": "Planned",
+                "value": "planned"
+              },
+              {
+                "text": "In Progress",
+                "value": "in_progress"
+              },
+              {
+                "text": "Completed",
+                "value": "completed"
+              },
+              {
+                "text": "Cancelled",
+                "value": "cancelled"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Types",
+                "value": ""
+              },
+              {
+                "text": "Internal",
+                "value": "internal"
+              },
+              {
+                "text": "External",
+                "value": "external"
+              },
+              {
+                "text": "Certification",
+                "value": "certification"
+              },
+              {
+                "text": "Surveillance",
+                "value": "surveillance"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "title",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Title*",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "auditType",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Audit Type",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Internal",
+                "value": "internal"
+              },
+              {
+                "text": "External",
+                "value": "external"
+              },
+              {
+                "text": "Certification",
+                "value": "certification"
+              },
+              {
+                "text": "Surveillance",
+                "value": "surveillance"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "status",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Status",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Planned",
+                "value": "planned"
+              },
+              {
+                "text": "In Progress",
+                "value": "in_progress"
+              },
+              {
+                "text": "Completed",
+                "value": "completed"
+              },
+              {
+                "text": "Cancelled",
+                "value": "cancelled"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "frameworkRef",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Framework Reference",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "auditorName",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Auditor Name",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": "startDate",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Start Date",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": "endDate",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "End Date",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "TEXTAREA",
+            "type": null,
+            "name": "scope",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Scope",
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "vendors",
+      "page": {
+        "headings": [
+          "Vendors"
+        ],
+        "links": [
+          {
+            "text": "Assess supplier risk",
+            "href": "/risks"
+          },
+          {
+            "text": "Supporting evidence",
+            "href": "/evidence"
+          },
+          {
+            "text": "Review dates",
+            "href": "/expiry"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New Vendor",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Statuses",
+                "value": ""
+              },
+              {
+                "text": "Active",
+                "value": "active"
+              },
+              {
+                "text": "Under Review",
+                "value": "under_review"
+              },
+              {
+                "text": "Inactive",
+                "value": "inactive"
+              },
+              {
+                "text": "Offboarded",
+                "value": "offboarded"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Risk Levels",
+                "value": ""
+              },
+              {
+                "text": "Critical",
+                "value": "critical"
+              },
+              {
+                "text": "High",
+                "value": "high"
+              },
+              {
+                "text": "Medium",
+                "value": "medium"
+              },
+              {
+                "text": "Low",
+                "value": "low"
+              }
+            ]
+          }
+        ]
+      },
+      "primaryAction": "New Vendor",
+      "openForm": {
+        "headings": [
+          "Vendors",
+          "New Vendor"
+        ],
+        "links": [
+          {
+            "text": "Assess supplier risk",
+            "href": "/risks"
+          },
+          {
+            "text": "Supporting evidence",
+            "href": "/evidence"
+          },
+          {
+            "text": "Review dates",
+            "href": "/expiry"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New Vendor",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Vendor actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Vendor actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Vendor actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Vendor actions",
+            "disabled": false
+          },
+          {
+            "text": "Prev",
+            "name": null,
+            "disabled": true
+          },
+          {
+            "text": "Next",
+            "name": null,
+            "disabled": true
+          },
+          {
+            "text": "",
+            "name": "Close",
+            "disabled": false
+          },
+          {
+            "text": "Cancel",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create Vendor",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Statuses",
+                "value": ""
+              },
+              {
+                "text": "Active",
+                "value": "active"
+              },
+              {
+                "text": "Under Review",
+                "value": "under_review"
+              },
+              {
+                "text": "Inactive",
+                "value": "inactive"
+              },
+              {
+                "text": "Offboarded",
+                "value": "offboarded"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Risk Levels",
+                "value": ""
+              },
+              {
+                "text": "Critical",
+                "value": "critical"
+              },
+              {
+                "text": "High",
+                "value": "high"
+              },
+              {
+                "text": "Medium",
+                "value": "medium"
+              },
+              {
+                "text": "Low",
+                "value": "low"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "name",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Name*",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "TEXTAREA",
+            "type": null,
+            "name": "description",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Description",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "category",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Category",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "website",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Website",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "contactName",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Contact Name",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "contactEmail",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Contact Email",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "riskLevel",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Risk Level",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Critical",
+                "value": "critical"
+              },
+              {
+                "text": "High",
+                "value": "high"
+              },
+              {
+                "text": "Medium",
+                "value": "medium"
+              },
+              {
+                "text": "Low",
+                "value": "low"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "status",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Status",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Active",
+                "value": "active"
+              },
+              {
+                "text": "Under Review",
+                "value": "under_review"
+              },
+              {
+                "text": "Inactive",
+                "value": "inactive"
+              },
+              {
+                "text": "Offboarded",
+                "value": "offboarded"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": "nextReviewDate",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Next Review Date",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "TEXTAREA",
+            "type": null,
+            "name": "dataProcessed",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Data Processed",
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "incidents",
+      "page": {
+        "headings": [
+          "Incidents"
+        ],
+        "links": [
+          {
+            "text": "Response actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "Supporting evidence",
+            "href": "/evidence"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Report incident",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All statuses",
+                "value": ""
+              },
+              {
+                "text": "Open",
+                "value": "open"
+              },
+              {
+                "text": "Investigating",
+                "value": "investigating"
+              },
+              {
+                "text": "Contained",
+                "value": "contained"
+              },
+              {
+                "text": "Resolved",
+                "value": "resolved"
+              },
+              {
+                "text": "Closed",
+                "value": "closed"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All severities",
+                "value": ""
+              },
+              {
+                "text": "Critical",
+                "value": "critical"
+              },
+              {
+                "text": "High",
+                "value": "high"
+              },
+              {
+                "text": "Medium",
+                "value": "medium"
+              },
+              {
+                "text": "Low",
+                "value": "low"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All categories",
+                "value": ""
+              },
+              {
+                "text": "Security",
+                "value": "security"
+              },
+              {
+                "text": "Privacy",
+                "value": "privacy"
+              },
+              {
+                "text": "Availability",
+                "value": "availability"
+              },
+              {
+                "text": "Integrity",
+                "value": "integrity"
+              },
+              {
+                "text": "Third party",
+                "value": "third_party"
+              },
+              {
+                "text": "Physical",
+                "value": "physical"
+              },
+              {
+                "text": "Fraud",
+                "value": "fraud"
+              },
+              {
+                "text": "Other",
+                "value": "other"
+              }
+            ]
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "training",
+      "page": {
+        "headings": [
+          "Training"
+        ],
+        "links": [
+          {
+            "text": "Policies people must understand",
+            "href": "/policies"
+          },
+          {
+            "text": "Evidence",
+            "href": "/evidence"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New Program",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Statuses",
+                "value": ""
+              },
+              {
+                "text": "Active",
+                "value": "active"
+              },
+              {
+                "text": "Archived",
+                "value": "archived"
+              }
+            ]
+          }
+        ]
+      },
+      "primaryAction": "New Program",
+      "openForm": {
+        "headings": [
+          "Training",
+          "New Training Program"
+        ],
+        "links": [
+          {
+            "text": "Policies people must understand",
+            "href": "/policies"
+          },
+          {
+            "text": "Evidence",
+            "href": "/evidence"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New Program",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Program actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Program actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Program actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Program actions",
+            "disabled": false
+          },
+          {
+            "text": "Prev",
+            "name": null,
+            "disabled": true
+          },
+          {
+            "text": "Next",
+            "name": null,
+            "disabled": true
+          },
+          {
+            "text": "",
+            "name": "Close",
+            "disabled": false
+          },
+          {
+            "text": "Cancel",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Create Program",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Statuses",
+                "value": ""
+              },
+              {
+                "text": "Active",
+                "value": "active"
+              },
+              {
+                "text": "Archived",
+                "value": "archived"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "title",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Title*",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "TEXTAREA",
+            "type": null,
+            "name": "description",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Description",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "category",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Category",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "provider",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Provider",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "number",
+            "name": "durationMinutes",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Duration (minutes)",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "number",
+            "name": "frequencyDays",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Frequency (days)",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "status",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Status",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Active",
+                "value": "active"
+              },
+              {
+                "text": "Archived",
+                "value": "archived"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": "isMandatory",
+            "aria": null,
+            "labels": [
+              "Mandatory"
+            ],
+            "nearbyLabel": "Mandatory",
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "expiry",
+      "page": {
+        "headings": [
+          "Expiry Tracker"
+        ],
+        "links": [
+          {
+            "text": "Calendar",
+            "href": "/calendar"
+          },
+          {
+            "text": "Supporting evidence",
+            "href": "/evidence"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Track Item",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Edit",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Delete",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Edit",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Delete",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Edit",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Delete",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Edit",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Delete",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Edit",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Delete",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Statuses",
+                "value": ""
+              },
+              {
+                "text": "Active",
+                "value": "active"
+              },
+              {
+                "text": "Expiring Soon",
+                "value": "expiring_soon"
+              },
+              {
+                "text": "Expired",
+                "value": "expired"
+              },
+              {
+                "text": "Renewed",
+                "value": "renewed"
+              },
+              {
+                "text": "Cancelled",
+                "value": "cancelled"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Types",
+                "value": ""
+              },
+              {
+                "text": "Certificate",
+                "value": "certificate"
+              },
+              {
+                "text": "Policy",
+                "value": "policy"
+              },
+              {
+                "text": "Contract",
+                "value": "contract"
+              },
+              {
+                "text": "License",
+                "value": "license"
+              },
+              {
+                "text": "ISO Certification",
+                "value": "iso_certification"
+              },
+              {
+                "text": "Penetration Test",
+                "value": "penetration_test"
+              },
+              {
+                "text": "Insurance",
+                "value": "insurance"
+              },
+              {
+                "text": "Vendor Assessment",
+                "value": "vendor_assessment"
+              },
+              {
+                "text": "Audit Report",
+                "value": "audit_report"
+              },
+              {
+                "text": "Training Certification",
+                "value": "training_certification"
+              },
+              {
+                "text": "Subscription",
+                "value": "subscription"
+              },
+              {
+                "text": "Custom",
+                "value": "custom"
+              }
+            ]
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "calendar",
+      "page": {
+        "headings": [
+          "Compliance Calendar",
+          "October 2026"
+        ],
+        "links": [
+          {
+            "text": "Actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "Review and renewal dates",
+            "href": "/expiry"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Month",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "List",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "New Event",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Fleet maintenance supplier checkpoint",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Four-business-line assurance meeting",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Fleet policy review workshop",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Marine contractor assurance review",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Outsourced personnel privacy briefing",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Fleet and marine continuity debrief",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Today",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Types",
+                "value": ""
+              },
+              {
+                "text": "Deadline",
+                "value": "deadline"
+              },
+              {
+                "text": "Review",
+                "value": "review"
+              },
+              {
+                "text": "Audit",
+                "value": "audit"
+              },
+              {
+                "text": "Training",
+                "value": "training"
+              },
+              {
+                "text": "Renewal",
+                "value": "renewal"
+              },
+              {
+                "text": "Assessment",
+                "value": "assessment"
+              },
+              {
+                "text": "Meeting",
+                "value": "meeting"
+              },
+              {
+                "text": "Other",
+                "value": "other"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Statuses",
+                "value": ""
+              },
+              {
+                "text": "Upcoming",
+                "value": "upcoming"
+              },
+              {
+                "text": "In Progress",
+                "value": "in_progress"
+              },
+              {
+                "text": "Completed",
+                "value": "completed"
+              },
+              {
+                "text": "Cancelled",
+                "value": "cancelled"
+              },
+              {
+                "text": "Overdue",
+                "value": "overdue"
+              }
+            ]
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "reports",
+      "page": {
+        "headings": [
+          "Compliance Report",
+          "Executive Dashboard"
+        ],
+        "links": [
+          {
+            "text": "Assessment readiness",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Risk worksheet",
+            "href": "/risks"
+          },
+          {
+            "text": "Actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "30d",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "60d",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "90d",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "180d",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Refresh",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Export PDF",
+            "name": null,
+            "disabled": true
+          },
+          {
+            "text": "Export Excel",
+            "name": null,
+            "disabled": true
+          },
+          {
+            "text": "Scheduled reports",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "analytics",
+      "page": {
+        "headings": [
+          "Analytics",
+          "Controls by Status",
+          "Risks by Severity (residual)",
+          "Policies by Status",
+          "Vendors by Risk Level",
+          "Open Audit Findings",
+          "Training Completion"
+        ],
+        "links": [
+          {
+            "text": "Management report",
+            "href": "/reports"
+          },
+          {
+            "text": "Controls",
+            "href": "/controls"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "compliance-score",
+      "page": {
+        "headings": [
+          "Compliance Score",
+          "Score Trend",
+          "Framework Breakdown"
+        ],
+        "links": [
+          {
+            "text": "Actual assessment readiness",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Supporting evidence",
+            "href": "/evidence"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Take Snapshot",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "30d",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "90d",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "180d",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "1y",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "notifications",
+      "page": {
+        "headings": [
+          "Notifications"
+        ],
+        "links": [],
+        "buttons": [
+          {
+            "text": "Mark all 11 as read",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Mark read",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Mark read",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Mark read",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Mark read",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Mark read",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Mark read",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Mark read",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Mark read",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Mark read",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Mark read",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Mark read",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Unread only"
+            ],
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "branches",
+      "page": {
+        "headings": [
+          "Branches"
+        ],
+        "links": [
+          {
+            "text": "Organisation profile",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Compliance scope",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Add Branch",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "primaryAction": "Add Branch",
+      "openForm": {
+        "headings": [
+          "Branches",
+          "Add Branch"
+        ],
+        "links": [
+          {
+            "text": "Organisation profile",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Compliance scope",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Add Branch",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Branch actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Branch actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Branch actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Branch actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Branch actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Branch actions",
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": "Close",
+            "disabled": false
+          },
+          {
+            "text": "Cancel",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Add Branch",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "name",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Branch Name*",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "code",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Branch Code",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": "isHeadquarters",
+            "aria": null,
+            "labels": [
+              "Mark as headquarters"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "country",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Country",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "city",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "City",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "state",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "State / Region",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "postalCode",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Postal Code",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "address",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Address",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "tel",
+            "name": "phone",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Phone",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "email",
+            "name": "email",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Email",
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "departments",
+      "page": {
+        "headings": [
+          "Departments"
+        ],
+        "links": [
+          {
+            "text": "Team and roles",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Stakeholder scoping",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Add Department",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "primaryAction": "Add Department",
+      "openForm": {
+        "headings": [
+          "Departments",
+          "Add Department"
+        ],
+        "links": [
+          {
+            "text": "Team and roles",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Stakeholder scoping",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Add Department",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Cancel",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Add Department",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "name",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Department Name*",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "code",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Code",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "branchId",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Branch",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "No branch",
+                "value": ""
+              },
+              {
+                "text": "Lagos Head Office",
+                "value": "2bb651e9-d4d2-40ed-8e1c-465ccfb5058b"
+              },
+              {
+                "text": "Abuja Operations",
+                "value": "cc23633c-ef39-4d62-82c1-8c40af197023"
+              },
+              {
+                "text": "Benin Operations",
+                "value": "019ff781-c1b9-4cb9-8e0a-cac3d3660a48"
+              },
+              {
+                "text": "Calabar Operations",
+                "value": "71aa15ee-b0b7-4f79-8cc0-34c8a60707a2"
+              },
+              {
+                "text": "Enugu Operations",
+                "value": "9326fc84-5234-4ff1-8649-ebce0779504a"
+              },
+              {
+                "text": "Port Harcourt Office",
+                "value": "e89fcbbd-ff38-4fd2-8899-b11f36bf8131"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "parentDepartmentId",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Parent Department",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Top-level department",
+                "value": ""
+              },
+              {
+                "text": "Citracks / Telematics",
+                "value": "0afe8a4c-66e3-48b1-80c4-c8d5493edf35"
+              },
+              {
+                "text": "Fleet Management",
+                "value": "0cc46665-d65e-4c2e-8a5d-c58e8a181744"
+              },
+              {
+                "text": "Group Governance & Compliance",
+                "value": "b8966191-fc8b-480f-80ea-5c22246ccc5f"
+              },
+              {
+                "text": "Marine Services",
+                "value": "04de0a25-4964-4048-8ef6-f641d13cb273"
+              },
+              {
+                "text": "Personnel Outsourcing",
+                "value": "6dcad803-05e1-42e9-836b-88e8fd7fe7d8"
+              }
+            ]
+          },
+          {
+            "tag": "TEXTAREA",
+            "type": null,
+            "name": "description",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Description",
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "integrations",
+      "page": {
+        "headings": [
+          "Integrations",
+          "Available now",
+          "API Keys",
+          "Webhooks",
+          "Coming soon",
+          "Slack",
+          "Microsoft Teams",
+          "Jira",
+          "Google Drive",
+          "Okta (SSO / SCIM)",
+          "Email / SMTP"
+        ],
+        "links": [
+          {
+            "text": "API access",
+            "href": "/settings/api-keys"
+          },
+          {
+            "text": "Webhook settings",
+            "href": "/settings/webhooks"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Request this integration",
+            "href": "mailto:orionsoftlimited@gmail.com?subject=Integration%20request%3A%20Slack"
+          },
+          {
+            "text": "Request this integration",
+            "href": "mailto:orionsoftlimited@gmail.com?subject=Integration%20request%3A%20Microsoft%20Teams"
+          },
+          {
+            "text": "Request this integration",
+            "href": "mailto:orionsoftlimited@gmail.com?subject=Integration%20request%3A%20Jira"
+          },
+          {
+            "text": "Request this integration",
+            "href": "mailto:orionsoftlimited@gmail.com?subject=Integration%20request%3A%20Google%20Drive"
+          },
+          {
+            "text": "Request this integration",
+            "href": "mailto:orionsoftlimited@gmail.com?subject=Integration%20request%3A%20Okta%20(SSO%20%2F%20SCIM)"
+          },
+          {
+            "text": "Request this integration",
+            "href": "mailto:orionsoftlimited@gmail.com?subject=Integration%20request%3A%20Email%20%2F%20SMTP"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Manage keys",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Manage webhooks",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "escalations",
+      "page": {
+        "headings": [
+          "Escalation Rules"
+        ],
+        "links": [
+          {
+            "text": "Open actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "Notification settings",
+            "href": "/settings/notifications"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New Rule",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Rules (1)",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Active Events",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "ai-tools",
+      "page": {
+        "headings": [
+          "AI Compliance Tools"
+        ],
+        "links": [
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Risk assessment",
+            "href": "/risks"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Contract Summarizer",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Policy Generator",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Risk Analyzer",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Checklist Generator",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Document Q&A",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "AI Search",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Summarise Contract",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Evidence ID (UUID of the uploaded contract)",
+            "required": true,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Focus Areas (optional, comma-separated)",
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "settings/organization",
+      "page": {
+        "headings": [
+          "Settings",
+          "Your Data",
+          "Compliance Scope",
+          "Organisation Profile",
+          "Logo",
+          "Basic Information",
+          "Address",
+          "Localisation",
+          "Danger Zone"
+        ],
+        "links": [
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team and access",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Account security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "SSO",
+            "href": "/settings/sso"
+          },
+          {
+            "text": "API Keys",
+            "href": "/settings/api-keys"
+          },
+          {
+            "text": "Webhooks",
+            "href": "/settings/webhooks"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Download everything",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Nigeria",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Ghana",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Kenya",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "South Africa",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "European Union",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "United Kingdom",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "United States",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "California (CCPA)",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Canada",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "United Arab Emirates",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Saudi Arabia",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "India",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Elsewhere",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Nigeria",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Ghana",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Kenya",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "South Africa",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "European Union",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "United Kingdom",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "United States",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "California (CCPA)",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Canada",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "United Arab Emirates",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Saudi Arabia",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "India",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Elsewhere",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Show what applies to me",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Save Changes",
+            "name": null,
+            "disabled": true
+          },
+          {
+            "text": "Delete organisation",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Personal data about individuals (names, emails, addresses…)"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Card payments — we take payments by debit or credit card"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Health or medical information"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Financial account or transaction data"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Data about children"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "We build our own software or product"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "We sell to large companies or government"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "We use third-party suppliers who handle our data"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Staff work remotely"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Downtime would seriously damage the business"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "We are a regulated financial institution"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "We are listed on a public stock exchange"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "We have a Data Protection Officer"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Cloud (AWS, Azure, GCP…)",
+                "value": "cloud"
+              },
+              {
+                "text": "Our own servers",
+                "value": "on_premise"
+              },
+              {
+                "text": "A mix of both",
+                "value": "hybrid"
+              },
+              {
+                "text": "Not sure",
+                "value": "unknown"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "A customer asked us for it",
+                "value": "customer_requirement"
+              },
+              {
+                "text": "We are bidding for a tender or RFP",
+                "value": "tender_or_rfp"
+              },
+              {
+                "text": "A regulator requires it",
+                "value": "regulatory_obligation"
+              },
+              {
+                "text": "Investor or acquirer due diligence",
+                "value": "investor_due_diligence"
+              },
+              {
+                "text": "We want to do this properly, internally",
+                "value": "internal_best_practice"
+              },
+              {
+                "text": "Not sure yet",
+                "value": "unknown"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "file",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "name",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Organisation Name*",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "industry",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Industry",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Select industry",
+                "value": ""
+              },
+              {
+                "text": "Technology",
+                "value": "Technology"
+              },
+              {
+                "text": "Financial Services",
+                "value": "Financial Services"
+              },
+              {
+                "text": "Healthcare",
+                "value": "Healthcare"
+              },
+              {
+                "text": "Retail & E-commerce",
+                "value": "Retail & E-commerce"
+              },
+              {
+                "text": "Manufacturing",
+                "value": "Manufacturing"
+              },
+              {
+                "text": "Education",
+                "value": "Education"
+              },
+              {
+                "text": "Government & Public Sector",
+                "value": "Government & Public Sector"
+              },
+              {
+                "text": "Legal",
+                "value": "Legal"
+              },
+              {
+                "text": "Telecommunications",
+                "value": "Telecommunications"
+              },
+              {
+                "text": "Energy & Utilities",
+                "value": "Energy & Utilities"
+              },
+              {
+                "text": "Media & Entertainment",
+                "value": "Media & Entertainment"
+              },
+              {
+                "text": "Non-profit",
+                "value": "Non-profit"
+              },
+              {
+                "text": "Professional Services",
+                "value": "Professional Services"
+              },
+              {
+                "text": "Real Estate",
+                "value": "Real Estate"
+              },
+              {
+                "text": "Other",
+                "value": "Other"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "size",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Company Size",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Select size",
+                "value": ""
+              },
+              {
+                "text": "1–10 employees",
+                "value": "1-10"
+              },
+              {
+                "text": "11–50 employees",
+                "value": "11-50"
+              },
+              {
+                "text": "51–200 employees",
+                "value": "51-200"
+              },
+              {
+                "text": "201–500 employees",
+                "value": "201-500"
+              },
+              {
+                "text": "501–1000 employees",
+                "value": "501-1000"
+              },
+              {
+                "text": "1001+ employees",
+                "value": "1001+"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "url",
+            "name": "website",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Website",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "tel",
+            "name": "phone",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Phone",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "country",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Country",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "city",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "City",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "postalCode",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Postal Code",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "address",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Street Address",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "dateFormat",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Date Format",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "DD/MM/YYYY (31/12/2025)",
+                "value": "DD/MM/YYYY"
+              },
+              {
+                "text": "MM/DD/YYYY (12/31/2025)",
+                "value": "MM/DD/YYYY"
+              },
+              {
+                "text": "YYYY-MM-DD (2025-12-31)",
+                "value": "YYYY-MM-DD"
+              },
+              {
+                "text": "DD-MM-YYYY (31-12-2025)",
+                "value": "DD-MM-YYYY"
+              }
+            ]
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "settings/team",
+      "page": {
+        "headings": [
+          "Settings",
+          "Team Members"
+        ],
+        "links": [
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team and access",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Account security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "SSO",
+            "href": "/settings/sso"
+          },
+          {
+            "text": "API Keys",
+            "href": "/settings/api-keys"
+          },
+          {
+            "text": "Webhooks",
+            "href": "/settings/webhooks"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Invite Member",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "settings/security",
+      "page": {
+        "headings": [
+          "Settings",
+          "Security",
+          "Password"
+        ],
+        "links": [
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team and access",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Account security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Scope and obligations",
+            "href": "/frameworks"
+          },
+          {
+            "text": "Upload supporting files",
+            "href": "/evidence"
+          },
+          {
+            "text": "Policy templates",
+            "href": "/policy-templates"
+          },
+          {
+            "text": "Follow-up actions",
+            "href": "/tasks"
+          },
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "SSO",
+            "href": "/settings/sso"
+          },
+          {
+            "text": "API Keys",
+            "href": "/settings/api-keys"
+          },
+          {
+            "text": "Webhooks",
+            "href": "/settings/webhooks"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Enable 2FA",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "View Sessions",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Sign Out All",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Change Password",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "settings/sso",
+      "page": {
+        "headings": [
+          "Settings",
+          "Single Sign-On (SSO)",
+          "SSO Configuration"
+        ],
+        "links": [
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team and access",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Account security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "SSO",
+            "href": "/settings/sso"
+          },
+          {
+            "text": "API Keys",
+            "href": "/settings/api-keys"
+          },
+          {
+            "text": "Webhooks",
+            "href": "/settings/webhooks"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          },
+          {
+            "text": "Contact Sales",
+            "href": "mailto:orionsoftlimited@gmail.com?subject=SSO%20enquiry%20%E2%80%94%20Enterprise%20plan"
+          }
+        ],
+        "buttons": [],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "settings/api-keys",
+      "page": {
+        "headings": [
+          "Settings",
+          "API Keys"
+        ],
+        "links": [
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team and access",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Account security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "SSO",
+            "href": "/settings/sso"
+          },
+          {
+            "text": "API Keys",
+            "href": "/settings/api-keys"
+          },
+          {
+            "text": "Webhooks",
+            "href": "/settings/webhooks"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "New Key",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "settings/webhooks",
+      "page": {
+        "headings": [
+          "Settings",
+          "Webhooks"
+        ],
+        "links": [
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team and access",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Account security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "SSO",
+            "href": "/settings/sso"
+          },
+          {
+            "text": "API Keys",
+            "href": "/settings/api-keys"
+          },
+          {
+            "text": "Webhooks",
+            "href": "/settings/webhooks"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Add Webhook",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "settings/notifications",
+      "page": {
+        "headings": [
+          "Settings"
+        ],
+        "links": [
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team and access",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Account security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Organisation",
+            "href": "/settings/organization"
+          },
+          {
+            "text": "Team",
+            "href": "/settings/team"
+          },
+          {
+            "text": "Security",
+            "href": "/settings/security"
+          },
+          {
+            "text": "SSO",
+            "href": "/settings/sso"
+          },
+          {
+            "text": "API Keys",
+            "href": "/settings/api-keys"
+          },
+          {
+            "text": "Webhooks",
+            "href": "/settings/webhooks"
+          },
+          {
+            "text": "Notifications",
+            "href": "/settings/notifications"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Enable & test in-app sound",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Enable device alerts",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "billing",
+      "page": {
+        "headings": [
+          "Billing",
+          "Current Subscription",
+          "Enterprise",
+          "Usage Limits",
+          "Payment Methods",
+          "Recent Invoices"
+        ],
+        "links": [
+          {
+            "text": "Billing overview",
+            "href": "/billing"
+          },
+          {
+            "text": "Plans and charges",
+            "href": "/billing/plans"
+          },
+          {
+            "text": "Invoices",
+            "href": "/billing/invoices"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Change Plan",
+            "href": "/billing/plans"
+          },
+          {
+            "text": "Add Method",
+            "href": "/billing/payment-methods"
+          },
+          {
+            "text": "View all",
+            "href": "/billing/invoices"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Have a coupon code?",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "billing/plans",
+      "page": {
+        "headings": [
+          "Choose your plan",
+          "Starter",
+          "Professional",
+          "Business",
+          "Enterprise",
+          "MSP"
+        ],
+        "links": [
+          {
+            "text": "Billing overview",
+            "href": "/billing"
+          },
+          {
+            "text": "Plans and charges",
+            "href": "/billing/plans"
+          },
+          {
+            "text": "Invoices",
+            "href": "/billing/invoices"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "Back to Billing",
+            "href": "/billing"
+          },
+          {
+            "text": "Read the onboarding and subscription guide",
+            "href": "/guide#billing"
+          },
+          {
+            "text": "Contact Sales",
+            "href": "mailto:orionsoftlimited@gmail.com?subject=Enterprise%20plan%20enquiry"
+          },
+          {
+            "text": "Contact Sales",
+            "href": "mailto:orionsoftlimited@gmail.com?subject=MSP%20plan%20enquiry"
+          },
+          {
+            "text": "orionsoftlimited@gmail.com",
+            "href": "mailto:orionsoftlimited@gmail.com?subject=Enterprise%20%2F%20MSP%20plan%20enquiry"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Monthly",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Yearly2 months free",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Apply a coupon to your current subscription",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Review payment",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Review payment",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Review payment",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Automatically renew the plan I select at its displayed monthly price, including my agreed discount, using my approved payment method. A changed plan or price needs fresh approval. Up to two retries, at least 24 hours apart, after a confirmed decline. I can cancel future deductions here."
+            ],
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "billing/invoices",
+      "page": {
+        "headings": [
+          "Invoices"
+        ],
+        "links": [
+          {
+            "text": "Billing overview",
+            "href": "/billing"
+          },
+          {
+            "text": "Plans and charges",
+            "href": "/billing/plans"
+          },
+          {
+            "text": "Invoices",
+            "href": "/billing/invoices"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "",
+            "href": "/billing"
+          }
+        ],
+        "buttons": [],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All Statuses",
+                "value": ""
+              },
+              {
+                "text": "Draft",
+                "value": "draft"
+              },
+              {
+                "text": "Open",
+                "value": "open"
+              },
+              {
+                "text": "Paid",
+                "value": "paid"
+              },
+              {
+                "text": "Void",
+                "value": "void"
+              },
+              {
+                "text": "Uncollectible",
+                "value": "uncollectible"
+              }
+            ]
+          }
+        ]
+      },
+      "opened": true
+    },
+    {
+      "route": "billing/payment-methods",
+      "page": {
+        "headings": [
+          "Payment Methods"
+        ],
+        "links": [
+          {
+            "text": "Billing overview",
+            "href": "/billing"
+          },
+          {
+            "text": "Plans and charges",
+            "href": "/billing/plans"
+          },
+          {
+            "text": "Invoices",
+            "href": "/billing/invoices"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          },
+          {
+            "text": "",
+            "href": "/billing"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Add Method",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Add your first payment method",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": []
+      },
+      "opened": true
+    },
+    {
+      "route": "guide",
+      "page": {
+        "headings": [
+          "My Guide",
+          "Start and secure your workspace",
+          "Understand onboarding and subscription",
+          "Assess compliance, from scope to review",
+          "Request a review and record a decision",
+          "Add, verify or revoke a signature",
+          "Set up notifications and sound",
+          "Review management reports",
+          "Configure integrations and assisted drafting",
+          "Daily, weekly and monthly routine"
+        ],
+        "links": [],
+        "buttons": [
+          {
+            "text": "Open complete guide with page links and download",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Print guide",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "1. Start and secure your workspace",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "2. Understand onboarding and subscription",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "3. Assess compliance, from scope to review",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "4. Request a review and record a decision",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "5. Add, verify or revoke a signature",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "6. Set up notifications and sound",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "7. Review management reports",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "8. Configure integrations and assisted drafting",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "9. Daily, weekly and monthly routine",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Choose a department to train your team"
+            ],
+            "nearbyLabel": "Choose a department to train your team",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Compliance manager",
+                "value": "compliance"
+              },
+              {
+                "text": "Organisation owner / administrator",
+                "value": "owner"
+              },
+              {
+                "text": "Control owners and department teams",
+                "value": "control"
+              },
+              {
+                "text": "Audit and assurance",
+                "value": "audit"
+              },
+              {
+                "text": "Risk, incident and supplier teams",
+                "value": "risk"
+              },
+              {
+                "text": "HR and training",
+                "value": "learning"
+              },
+              {
+                "text": "Billing and subscriptions",
+                "value": "finance"
+              },
+              {
+                "text": "Management / read-only review",
+                "value": "management"
+              },
+              {
+                "text": "Complete workflow",
+                "value": "complete"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Search this guide"
+            ],
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true
+    }
+  ]
+}

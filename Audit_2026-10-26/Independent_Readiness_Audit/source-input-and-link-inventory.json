@@ -1,0 +1,5769 @@
+{
+  "scope": "Static AST inventory of fields and links. This is not proof every dynamic link or input is correct.",
+  "tsxFilesReviewed": 134,
+  "filesWithFieldsOrLinks": 95,
+  "fieldAndLabelNodes": 484,
+  "linkNodes": 90,
+  "files": [
+    {
+      "file": "frontend\\src\\components\\app-shell.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "NavLink",
+          "line": 367,
+          "attributes": {
+            "key": "{item.to}",
+            "to": "{item.to}",
+            "title": "{collapsed ? item.label : undefined}",
+            "onClick": "{() => setMobileOpen(false)}",
+            "className": "{navLinkClass}"
+          }
+        },
+        {
+          "tag": "NavLink",
+          "line": 403,
+          "attributes": {
+            "to": "{hasPermission(activeTenant?.role, 'settings:read') ? PATHS.SETTINGS : PATHS.SETTINGS_SECURITY}",
+            "title": "{collapsed ? (hasPermission(activeTenant?.role, 'settings:read') ? 'Settings' : 'Account security') : undefined}",
+            "onClick": "{() => setMobileOpen(false)}",
+            "className": "{navLinkClass}"
+          }
+        },
+        {
+          "tag": "a",
+          "line": 440,
+          "attributes": {
+            "href": "\"#main-content\"",
+            "className": "\"sr-only z-50 focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:rounded-lg focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\components\\ci-demo-guide.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 8,
+          "attributes": {
+            "to": "{to}",
+            "className": "\"underline\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 25,
+          "attributes": {
+            "className": "\"font-medium text-indigo-700 underline underline-offset-2\"",
+            "to": "{to}"
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 29,
+          "attributes": {
+            "to": "\"/guide\"",
+            "className": "\"font-semibold underline\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\components\\compliance-page-help.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 29,
+          "attributes": {
+            "key": "{to}",
+            "to": "{to}",
+            "className": "\"font-medium text-indigo-700 underline\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 29,
+          "attributes": {
+            "to": "\"/guide\"",
+            "className": "\"font-medium text-indigo-700 underline\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\components\\entitlement-banner.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 102,
+          "attributes": {
+            "to": "{PATHS.BILLING_PLANS}",
+            "className": "\"shrink-0 rounded-lg bg-white/70 px-3 py-1 text-xs font-semibold hover:bg-white\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\ai\\pages\\ai-tools.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 58,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 67,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 resize-none\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 76,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 bg-white\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 529,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{checked.has(item.id)}",
+            "onChange": "{() => toggle(item.id)}",
+            "className": "\"mt-0.5 h-4 w-4 rounded border-slate-300 text-green-600 shrink-0\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 680,
+          "attributes": {
+            "value": "{query}",
+            "onChange": "{(e) => setQuery(e.target.value)}",
+            "placeholder": "\"Search across all your compliance documents…\"",
+            "required": true,
+            "className": "\"w-full rounded-md border border-slate-300 pl-9 pr-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\approvals\\components\\approval-decision-modal.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 96,
+          "attributes": {
+            "type": "\"radio\"",
+            "value": "{val}",
+            "className": "\"sr-only\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 111,
+          "attributes": {
+            "rows": "{3}",
+            "placeholder": "{\r\n                  selected === 'rejected' ? 'Reason for rejection...' :\r\n                  selected === 'changes_requested' ? 'What changes are needed...' :\r\n                  'Optional notes...'\r\n                }",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm resize-none outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 127,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "className": "\"h-4 w-4 rounded border-slate-300\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\approvals\\components\\approval-request-modal.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 104,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 111,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 120,
+          "attributes": {
+            "type": "\"datetime-local\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 126,
+          "attributes": {
+            "rows": "{2}",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm resize-none outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 133,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "className": "\"h-4 w-4 rounded border-slate-300\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 137,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 171,
+          "attributes": {
+            "placeholder": "\"Step name\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white outline-none\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 177,
+          "attributes": {
+            "className": "\"rounded-md border border-slate-300 px-2 py-1.5 text-xs bg-white\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 182,
+          "attributes": {
+            "aria-label": "{`Reviewer role for step ${idx+1}`}",
+            "className": "\"rounded-md border border-slate-300 px-2 py-1.5 text-xs\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 182,
+          "attributes": {
+            "aria-label": "{`Reviewer for step ${idx+1}`}",
+            "className": "\"rounded-md border border-slate-300 px-2 py-1.5 text-xs\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 186,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "className": "\"h-3.5 w-3.5 rounded border-slate-300\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\approvals\\components\\workflow-builder.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 107,
+          "attributes": {
+            "placeholder": "\"e.g. Policy Approval — Two-Level\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 112,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 118,
+          "attributes": {
+            "placeholder": "\"Optional description\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 170,
+          "attributes": {
+            "placeholder": "\"e.g. Manager Review\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 180,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 190,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 199,
+          "attributes": {
+            "placeholder": "\"User UUID\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white outline-none\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 207,
+          "attributes": {
+            "type": "\"number\"",
+            "min": "{1}",
+            "className": "\"w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 211,
+          "attributes": {
+            "type": "\"number\"",
+            "min": "{1}",
+            "placeholder": "\"Optional\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 217,
+          "attributes": {
+            "placeholder": "\"Optional guidance for the approver\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white outline-none\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 222,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "className": "\"h-3.5 w-3.5 rounded border-slate-300\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 226,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "className": "\"h-3.5 w-3.5 rounded border-slate-300\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\approvals\\pages\\approval-detail.page.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 48,
+          "attributes": {
+            "to": "{PATHS.APPROVALS}",
+            "className": "\"mt-2 text-sm text-blue-600 hover:underline\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\approvals\\pages\\approvals.page.tsx",
+      "fields": [
+        {
+          "tag": "select",
+          "line": 147,
+          "attributes": {
+            "value": "{statusFilter}",
+            "onChange": "{(e) => setStatusFilter(e.target.value)}",
+            "className": "\"rounded-md border border-slate-300 px-3 py-1.5 text-sm\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 326,
+          "attributes": {
+            "to": "{PATHS.APPROVAL_DETAIL(req.id)}",
+            "className": "\"rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700\"",
+            "title": "\"View details\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\audits\\components\\audit-form-modal.tsx",
+      "fields": [
+        {
+          "tag": "FormField",
+          "line": 122,
+          "attributes": {
+            "label": "\"Title\"",
+            "error": "{errors.title?.message}",
+            "required": true,
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 123,
+          "attributes": {
+            "autoFocus": true,
+            "placeholder": "\"e.g. SOC 2 Type II Annual Audit\"",
+            "className": "{inputClass(!!errors.title)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 131,
+          "attributes": {
+            "label": "\"Audit Type\"",
+            "error": "{errors.auditType?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 132,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 139,
+          "attributes": {
+            "label": "\"Status\"",
+            "error": "{errors.status?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 140,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 147,
+          "attributes": {
+            "label": "\"Framework Reference\"",
+            "error": "{errors.frameworkRef?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 148,
+          "attributes": {
+            "placeholder": "\"e.g. ISO 27001\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 155,
+          "attributes": {
+            "label": "\"Auditor Name\"",
+            "error": "{errors.auditorName?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 156,
+          "attributes": {
+            "placeholder": "\"e.g. Jane Doe / Acme LLP\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 163,
+          "attributes": {
+            "label": "\"Start Date\"",
+            "error": "{errors.startDate?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 164,
+          "attributes": {
+            "type": "\"date\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 167,
+          "attributes": {
+            "label": "\"End Date\"",
+            "error": "{errors.endDate?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 168,
+          "attributes": {
+            "type": "\"date\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 171,
+          "attributes": {
+            "label": "\"Scope\"",
+            "error": "{errors.scope?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 172,
+          "attributes": {
+            "rows": "{3}",
+            "className": "{cn(inputClass(false), 'resize-none')}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\audits\\pages\\audits.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 93,
+          "attributes": {
+            "type": "\"search\"",
+            "placeholder": "\"Search audits...\"",
+            "value": "{search}",
+            "onChange": "{(e) => resetToFirstPage(setSearch)(e.target.value)}",
+            "className": "\"w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 102,
+          "attributes": {
+            "value": "{statusFilter}",
+            "onChange": "{(e) => resetToFirstPage(setStatusFilter)(e.target.value as AuditStatus | '')}",
+            "className": "\"rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 113,
+          "attributes": {
+            "value": "{typeFilter}",
+            "onChange": "{(e) => resetToFirstPage(setTypeFilter)(e.target.value as AuditType | '')}",
+            "className": "\"rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\auth\\components\\login-form.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 44,
+          "attributes": {
+            "id": "\"email\"",
+            "type": "\"email\"",
+            "autoComplete": "\"email\"",
+            "autoFocus": true,
+            "className": "{cn(\n            'block w-full rounded-md border px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400',\n            'focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent',\n            'transition-colors duration-100',\n            errors.email\n              ? 'border-rose-500 bg-rose-50 focus:ring-rose-500'\n              : 'border-slate-300 bg-white',\n          )}",
+            "placeholder": "\"you@company.com\"",
+            "aria-describedby": "{errors.email ? 'email-error' : undefined}",
+            "aria-invalid": "{!!errors.email}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 83,
+          "attributes": {
+            "id": "\"password\"",
+            "type": "{showPassword ? 'text' : 'password'}",
+            "autoComplete": "\"current-password\"",
+            "className": "{cn(\n              'block w-full rounded-md border px-3 py-2 pr-10 text-sm text-slate-900',\n              'focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent',\n              'transition-colors duration-100',\n              errors.password\n                ? 'border-rose-500 bg-rose-50 focus:ring-rose-500'\n                : 'border-slate-300 bg-white',\n            )}",
+            "aria-invalid": "{!!errors.password}",
+            "aria-describedby": "{errors.password ? 'password-error' : undefined}"
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 75,
+          "attributes": {
+            "to": "{PATHS.FORGOT_PASSWORD}",
+            "className": "\"text-sm text-indigo-600 hover:text-indigo-700 hover:underline\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\auth\\components\\mfa-challenge.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 94,
+          "attributes": {
+            "id": "\"backup-code\"",
+            "type": "\"text\"",
+            "autoComplete": "\"off\"",
+            "autoFocus": true,
+            "value": "{backupCode}",
+            "onChange": "{(e) => setBackupCode(e.target.value.toUpperCase())}",
+            "className": "\"block w-full rounded-md border border-slate-300 bg-white px-3 py-2 font-mono text-sm text-slate-900 uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent\"",
+            "placeholder": "\"XXXXXXXX\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 142,
+          "attributes": {
+            "key": "{i}",
+            "ref": "{(el) => { inputs.current[i] = el; }}",
+            "type": "\"text\"",
+            "inputMode": "\"numeric\"",
+            "maxLength": "{1}",
+            "value": "{digit}",
+            "autoFocus": "{i === 0}",
+            "disabled": "{isLoading}",
+            "onChange": "{(e) => handleDigitChange(i, e.target.value)}",
+            "onKeyDown": "{(e) => handleKeyDown(i, e)}",
+            "onPaste": "{i === 0 ? handlePaste : undefined}",
+            "aria-label": "{`Digit ${i + 1}`}",
+            "className": "{cn(\n              'h-12 w-10 rounded-md border text-center text-lg font-bold text-slate-900',\n              'focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent',\n              'disabled:opacity-50 transition-colors',\n              digit ? 'border-indigo-400 bg-indigo-50' : 'border-slate-300 bg-white',\n            )}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\auth\\pages\\email-verification.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 109,
+          "attributes": {
+            "id": "\"resend-email\"",
+            "type": "\"email\"",
+            "required": true,
+            "value": "{resendEmail}",
+            "onChange": "{(e) => setResendEmail(e.target.value)}",
+            "placeholder": "\"you@company.com\"",
+            "className": "\"h-9 min-w-0 flex-1 rounded-lg border border-slate-300 px-3 text-sm\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 85,
+          "attributes": {
+            "to": "{PATHS.LOGIN}",
+            "className": "\"inline-flex w-full items-center justify-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 129,
+          "attributes": {
+            "to": "{PATHS.LOGIN}",
+            "className": "\"block pt-2 text-sm text-brand-600 hover:underline\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\auth\\pages\\forgot-password.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 107,
+          "attributes": {
+            "id": "\"email\"",
+            "type": "\"email\"",
+            "autoComplete": "\"email\"",
+            "autoFocus": true,
+            "className": "{cn(\r\n                      'block w-full rounded-md border px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400',\r\n                      'focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-colors',\r\n                      errors.email ? 'border-rose-500 bg-rose-50' : 'border-slate-300 bg-white',\r\n                    )}",
+            "placeholder": "\"you@company.com\"",
+            "aria-invalid": "{!!errors.email}",
+            "aria-describedby": "{errors.email ? 'email-error' : undefined}"
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 77,
+          "attributes": {
+            "to": "{PATHS.LOGIN}",
+            "className": "\"block text-sm text-indigo-600 hover:underline\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 86,
+          "attributes": {
+            "to": "{PATHS.LOGIN}",
+            "className": "\"mb-4 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\auth\\pages\\login.page.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 35,
+          "attributes": {
+            "to": "{PATHS.REGISTER}",
+            "className": "\"text-indigo-600 hover:underline font-medium\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\auth\\pages\\register.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 142,
+          "attributes": {
+            "id": "\"firstName\"",
+            "type": "\"text\"",
+            "autoComplete": "\"given-name\"",
+            "autoFocus": true,
+            "className": "{inputClass(!!errors.firstName)}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 156,
+          "attributes": {
+            "id": "\"lastName\"",
+            "type": "\"text\"",
+            "autoComplete": "\"family-name\"",
+            "className": "{inputClass(!!errors.lastName)}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 172,
+          "attributes": {
+            "id": "\"email\"",
+            "type": "\"email\"",
+            "autoComplete": "\"email\"",
+            "className": "{inputClass(!!errors.email)}",
+            "placeholder": "\"you@company.com\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 189,
+          "attributes": {
+            "id": "\"password\"",
+            "type": "{showPassword ? 'text' : 'password'}",
+            "autoComplete": "\"new-password\"",
+            "className": "{inputClass(!!errors.password)}"
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 115,
+          "attributes": {
+            "to": "{PATHS.LOGIN}",
+            "className": "\"block text-sm text-brand-600 hover:underline\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 129,
+          "attributes": {
+            "to": "{PATHS.LOGIN}",
+            "className": "\"text-indigo-600 hover:underline font-medium\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\auth\\pages\\reset-password.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 112,
+          "attributes": {
+            "id": "\"password\"",
+            "type": "{showPassword ? 'text' : 'password'}",
+            "autoComplete": "\"new-password\"",
+            "autoFocus": true,
+            "className": "{cn(\n                        'block w-full rounded-md border px-3 py-2 pr-10 text-sm text-slate-900',\n                        'focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-colors',\n                        errors.password ? 'border-rose-500 bg-rose-50' : 'border-slate-300 bg-white',\n                      )}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 142,
+          "attributes": {
+            "id": "\"confirmPassword\"",
+            "type": "{showPassword ? 'text' : 'password'}",
+            "autoComplete": "\"new-password\"",
+            "className": "{cn(\n                      'block w-full rounded-md border px-3 py-2 text-sm text-slate-900',\n                      'focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-colors',\n                      errors.confirmPassword ? 'border-rose-500 bg-rose-50' : 'border-slate-300 bg-white',\n                    )}"
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 81,
+          "attributes": {
+            "to": "{PATHS.LOGIN}",
+            "className": "\"inline-flex w-full items-center justify-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\billing\\components\\pricing-tab.tsx",
+      "fields": [
+        {
+          "tag": "select",
+          "line": 121,
+          "attributes": {
+            "value": "{currency}",
+            "onChange": "{(e) => setCurrency(e.target.value)}",
+            "className": "\"rounded-lg border border-slate-300 px-2 py-1 text-xs\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 185,
+          "attributes": {
+            "value": "{monthly}",
+            "onChange": "{(e) => { setMonthly(e.target.value); setDirty(true); }}",
+            "inputMode": "\"decimal\"",
+            "className": "\"w-28 rounded-lg border border-slate-300 px-2 py-1 text-sm\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 196,
+          "attributes": {
+            "value": "{yearly}",
+            "onChange": "{(e) => { setYearly(e.target.value); setDirty(true); }}",
+            "inputMode": "\"decimal\"",
+            "className": "\"w-32 rounded-lg border border-slate-300 px-2 py-1 text-sm\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\billing\\components\\signup-directory.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 78,
+          "attributes": {
+            "aria-label": "\"Search signups\"",
+            "value": "{search}",
+            "onChange": "{event => setSearch(event.target.value)}",
+            "placeholder": "\"Name, email or organisation\"",
+            "className": "{`${inputClass} pl-9`}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 79,
+          "attributes": {
+            "aria-label": "\"Registration stage\"",
+            "value": "{stage}",
+            "onChange": "{event => { setStage(event.target.value); setPage(1); }}",
+            "className": "{inputClass}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 80,
+          "attributes": {
+            "aria-label": "\"Follow-up status filter\"",
+            "value": "{followup}",
+            "onChange": "{event => { setFollowup(event.target.value); setPage(1); }}",
+            "className": "{inputClass}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 81,
+          "attributes": {
+            "aria-label": "\"Signup date range\"",
+            "value": "{days}",
+            "onChange": "{event => { setDays(event.target.value); setPage(1); }}",
+            "className": "{inputClass}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 95,
+          "attributes": {
+            "aria-label": "\"Follow-up status\"",
+            "value": "{review}",
+            "onChange": "{event => setReview(event.target.value)}",
+            "className": "{`${inputClass} mt-1`}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 95,
+          "attributes": {
+            "type": "\"date\"",
+            "value": "{due}",
+            "onChange": "{event => setDue(event.target.value)}",
+            "className": "{`${inputClass} mt-1`}"
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 95,
+          "attributes": {
+            "maxLength": "{4000}",
+            "rows": "{4}",
+            "value": "{notes}",
+            "onChange": "{event => setNotes(event.target.value)}",
+            "className": "{`${inputClass} mt-1`}"
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "a",
+          "line": 85,
+          "attributes": {
+            "className": "\"mt-1 inline-flex max-w-full items-center gap-1.5 break-all text-sm text-indigo-700 underline-offset-2 hover:underline\"",
+            "href": "{`mailto:${encodeURIComponent(person.email)}`}"
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\billing\\pages\\billing-admin.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 112,
+          "attributes": {
+            "value": "{form.name}",
+            "onChange": "{(e) => setForm({ ...form, name: e.target.value })}",
+            "required": true,
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 114,
+          "attributes": {
+            "value": "{form.slug}",
+            "onChange": "{(e) => setForm({ ...form, slug: e.target.value as PlanSlug })}",
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 118,
+          "attributes": {
+            "type": "\"number\"",
+            "step": "\"0.01\"",
+            "min": "\"0\"",
+            "value": "{form.priceMonthly}",
+            "onChange": "{(e) => setForm({ ...form, priceMonthly: e.target.value })}",
+            "required": true,
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 119,
+          "attributes": {
+            "type": "\"number\"",
+            "step": "\"0.01\"",
+            "min": "\"0\"",
+            "value": "{form.priceYearly}",
+            "onChange": "{(e) => setForm({ ...form, priceYearly: e.target.value })}",
+            "required": true,
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 120,
+          "attributes": {
+            "type": "\"number\"",
+            "min": "\"1\"",
+            "value": "{form.maxUsers}",
+            "onChange": "{(e) => setForm({ ...form, maxUsers: e.target.value })}",
+            "placeholder": "\"Unlimited\"",
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 121,
+          "attributes": {
+            "type": "\"number\"",
+            "min": "\"1\"",
+            "value": "{form.maxFrameworks}",
+            "onChange": "{(e) => setForm({ ...form, maxFrameworks: e.target.value })}",
+            "placeholder": "\"Unlimited\"",
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 122,
+          "attributes": {
+            "type": "\"number\"",
+            "step": "\"0.1\"",
+            "min": "\"0\"",
+            "value": "{form.maxEvidenceGb}",
+            "onChange": "{(e) => setForm({ ...form, maxEvidenceGb: e.target.value })}",
+            "placeholder": "\"Unlimited\"",
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 123,
+          "attributes": {
+            "type": "\"number\"",
+            "min": "\"0\"",
+            "value": "{form.sortOrder}",
+            "onChange": "{(e) => setForm({ ...form, sortOrder: e.target.value })}",
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 125,
+          "attributes": {
+            "value": "{form.description}",
+            "onChange": "{(e) => setForm({ ...form, description: e.target.value })}",
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 129,
+          "attributes": {
+            "value": "{form.featuresRaw}",
+            "onChange": "{(e) => setForm({ ...form, featuresRaw: e.target.value })}",
+            "rows": "{4}",
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 139,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{form.isPublic}",
+            "onChange": "{(e) => setForm({ ...form, isPublic: e.target.checked })}",
+            "className": "\"h-4 w-4 rounded text-indigo-600\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 248,
+          "attributes": {
+            "value": "{form.code}",
+            "onChange": "{(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}",
+            "required": true,
+            "className": "{`${inp} font-mono uppercase`}",
+            "placeholder": "\"SUMMER20\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 252,
+          "attributes": {
+            "value": "{form.name}",
+            "onChange": "{(e) => setForm({ ...form, name: e.target.value })}",
+            "required": true,
+            "className": "{inp}",
+            "placeholder": "\"Summer Discount\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 256,
+          "attributes": {
+            "value": "{form.discountType}",
+            "onChange": "{(e) => setForm({ ...form, discountType: e.target.value as 'percentage' | 'fixed' })}",
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 263,
+          "attributes": {
+            "type": "\"number\"",
+            "step": "\"0.01\"",
+            "min": "\"0\"",
+            "value": "{form.discountValue}",
+            "onChange": "{(e) => setForm({ ...form, discountValue: e.target.value })}",
+            "required": true,
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 267,
+          "attributes": {
+            "type": "\"number\"",
+            "min": "\"1\"",
+            "value": "{form.maxUses}",
+            "onChange": "{(e) => setForm({ ...form, maxUses: e.target.value })}",
+            "placeholder": "\"Unlimited\"",
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 271,
+          "attributes": {
+            "type": "\"number\"",
+            "step": "\"0.01\"",
+            "min": "\"0\"",
+            "value": "{form.minAmount}",
+            "onChange": "{(e) => setForm({ ...form, minAmount: e.target.value })}",
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 275,
+          "attributes": {
+            "type": "\"datetime-local\"",
+            "value": "{form.expiresAt}",
+            "onChange": "{(e) => setForm({ ...form, expiresAt: e.target.value })}",
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 279,
+          "attributes": {
+            "value": "{form.applicableSlugs}",
+            "onChange": "{(e) => setForm({ ...form, applicableSlugs: e.target.value })}",
+            "placeholder": "\"professional,enterprise\"",
+            "className": "{inp}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 425,
+          "attributes": {
+            "value": "{search}",
+            "onChange": "{(e) => setSearch(e.target.value)}",
+            "placeholder": "\"Search tenants…\"",
+            "className": "\"w-full max-w-xs rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 544,
+          "attributes": {
+            "id": "\"admin-confirm\"",
+            "value": "{confirmName}",
+            "onChange": "{(e) => setConfirmName(e.target.value)}",
+            "autoComplete": "\"off\"",
+            "className": "\"mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\billing\\pages\\billing-invoices.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 74,
+          "attributes": {
+            "value": "{search}",
+            "onChange": "{(e) => setSearch(e.target.value)}",
+            "placeholder": "\"Search invoices…\"",
+            "className": "\"w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 81,
+          "attributes": {
+            "value": "{statusFilter}",
+            "onChange": "{(e) => setStatusFilter(e.target.value)}",
+            "className": "\"rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 61,
+          "attributes": {
+            "to": "{PATHS.BILLING}",
+            "className": "\"rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\billing\\pages\\billing-overview.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 114,
+          "attributes": {
+            "value": "{couponInput}",
+            "onChange": "{(e) => setCouponInput(e.target.value.toUpperCase())}",
+            "placeholder": "\"COUPON CODE\"",
+            "className": "\"flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 254,
+          "attributes": {
+            "to": "{PATHS.BILLING_PLANS}",
+            "className": "\"flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 322,
+          "attributes": {
+            "to": "{PATHS.BILLING_PLANS}",
+            "className": "\"rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 354,
+          "attributes": {
+            "to": "{PATHS.BILLING_PAYMENT_METHODS}",
+            "className": "\"flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 375,
+          "attributes": {
+            "to": "{PATHS.BILLING_INVOICES}",
+            "className": "\"flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\billing\\pages\\billing-payment-methods.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 70,
+          "attributes": {
+            "value": "{label}",
+            "onChange": "{(e) => setLabel(e.target.value)}",
+            "required": true,
+            "placeholder": "{type === 'card' ? 'e.g. Visa ending 4242' : 'e.g. Company account'}",
+            "className": "\"w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 83,
+          "attributes": {
+            "value": "{brand}",
+            "onChange": "{(e) => setBrand(e.target.value)}",
+            "className": "\"w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 96,
+          "attributes": {
+            "value": "{last4}",
+            "onChange": "{(e) => setLast4(e.target.value.replace(/\\D/g, '').slice(0, 4))}",
+            "placeholder": "\"4242\"",
+            "maxLength": "{4}",
+            "pattern": "\"\\d{4}\"",
+            "className": "\"w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 107,
+          "attributes": {
+            "value": "{expMonth}",
+            "onChange": "{(e) => setExpMonth(e.target.value)}",
+            "type": "\"number\"",
+            "min": "\"1\"",
+            "max": "\"12\"",
+            "placeholder": "\"MM\"",
+            "className": "\"w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 117,
+          "attributes": {
+            "value": "{expYear}",
+            "onChange": "{(e) => setExpYear(e.target.value)}",
+            "type": "\"number\"",
+            "min": "\"2024\"",
+            "max": "\"2040\"",
+            "placeholder": "\"YYYY\"",
+            "className": "\"w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 132,
+          "attributes": {
+            "value": "{bankName}",
+            "onChange": "{(e) => setBankName(e.target.value)}",
+            "placeholder": "\"e.g. Barclays\"",
+            "className": "\"w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 141,
+          "attributes": {
+            "value": "{bankLast4}",
+            "onChange": "{(e) => setBankLast4(e.target.value.replace(/\\D/g, '').slice(0, 4))}",
+            "placeholder": "\"1234\"",
+            "maxLength": "{4}",
+            "className": "\"w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 154,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{setAsDefault}",
+            "onChange": "{(e) => setSetAsDefault(e.target.checked)}",
+            "className": "\"h-4 w-4 rounded text-indigo-600\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 195,
+          "attributes": {
+            "to": "{PATHS.BILLING}",
+            "className": "\"rounded-lg p-1.5 text-slate-400 hover:bg-slate-100\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\billing\\pages\\billing-plans.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 437,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{recurringConsent}",
+            "onChange": "{e=>setRecurringConsent(e.target.checked)}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 453,
+          "attributes": {
+            "value": "{couponInput}",
+            "onChange": "{(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponValidation(null); }}",
+            "placeholder": "\"COUPON CODE\"",
+            "className": "\"rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-mono w-40 focus:outline-none focus:ring-2 focus:ring-indigo-500\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "a",
+          "line": 147,
+          "attributes": {
+            "href": "{`mailto:${SALES_EMAIL}?subject=${encodeURIComponent(`${plan.name} plan enquiry`)}`}",
+            "className": "\"block w-full rounded-xl bg-slate-900 py-2.5 text-center text-sm font-bold text-white transition-colors hover:bg-slate-700\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 373,
+          "attributes": {
+            "to": "{PATHS.BILLING}",
+            "className": "\"inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-4\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 480,
+          "attributes": {
+            "to": "\"/guide#billing\"",
+            "className": "\"font-semibold text-indigo-700 underline\""
+          }
+        },
+        {
+          "tag": "a",
+          "line": 529,
+          "attributes": {
+            "href": "{supportMailto('Enterprise / MSP plan enquiry')}",
+            "className": "\"text-brand-600 hover:underline\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\branches\\components\\branch-form-modal.tsx",
+      "fields": [
+        {
+          "tag": "FormField",
+          "line": 116,
+          "attributes": {
+            "label": "\"Branch Name\"",
+            "error": "{errors.name?.message}",
+            "required": true,
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 117,
+          "attributes": {
+            "autoFocus": true,
+            "className": "{inputClass(!!errors.name)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 120,
+          "attributes": {
+            "label": "\"Branch Code\"",
+            "error": "{errors.code?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 121,
+          "attributes": {
+            "placeholder": "\"e.g. LON-01\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 124,
+          "attributes": {
+            "label": "\"\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 126,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "className": "\"h-4 w-4 rounded border-slate-300 text-indigo-600\""
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 131,
+          "attributes": {
+            "label": "\"Country\"",
+            "error": "{errors.country?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 132,
+          "attributes": {
+            "placeholder": "\"United Kingdom\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 135,
+          "attributes": {
+            "label": "\"City\"",
+            "error": "{errors.city?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 136,
+          "attributes": {
+            "placeholder": "\"London\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 139,
+          "attributes": {
+            "label": "\"State / Region\"",
+            "error": "{errors.state?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 140,
+          "attributes": {
+            "placeholder": "\"England\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 143,
+          "attributes": {
+            "label": "\"Postal Code\"",
+            "error": "{errors.postalCode?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 144,
+          "attributes": {
+            "placeholder": "\"EC1A 1BB\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 147,
+          "attributes": {
+            "label": "\"Address\"",
+            "error": "{errors.address?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 148,
+          "attributes": {
+            "placeholder": "\"123 Main Street\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 151,
+          "attributes": {
+            "label": "\"Phone\"",
+            "error": "{errors.phone?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 152,
+          "attributes": {
+            "type": "\"tel\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 155,
+          "attributes": {
+            "label": "\"Email\"",
+            "error": "{errors.email?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 156,
+          "attributes": {
+            "type": "\"email\"",
+            "className": "{inputClass(!!errors.email)}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\branches\\pages\\branches.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 56,
+          "attributes": {
+            "type": "\"search\"",
+            "placeholder": "\"Search branches...\"",
+            "value": "{search}",
+            "onChange": "{(e) => setSearch(e.target.value)}",
+            "className": "\"w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\calendar\\components\\calendar-event-modal.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 121,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 128,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 134,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 145,
+          "attributes": {
+            "type": "\"datetime-local\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 149,
+          "attributes": {
+            "type": "\"datetime-local\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 155,
+          "attributes": {
+            "rows": "{3}",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm resize-none outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 163,
+          "attributes": {
+            "type": "\"color\"",
+            "value": "{field.value}",
+            "onChange": "{field.onChange}",
+            "className": "\"h-9 w-16 rounded border border-slate-300 p-0.5 cursor-pointer\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 170,
+          "attributes": {
+            "placeholder": "\"7,3,1\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 178,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 189,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{field.value}",
+            "onChange": "{field.onChange}",
+            "className": "\"h-4 w-4 rounded border-slate-300\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\calendar\\pages\\calendar.page.tsx",
+      "fields": [
+        {
+          "tag": "select",
+          "line": 104,
+          "attributes": {
+            "value": "{filterType}",
+            "onChange": "{(e) => setFilterType(e.target.value as CalendarEventType | '')}",
+            "className": "\"rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 114,
+          "attributes": {
+            "value": "{filterStatus}",
+            "onChange": "{(e) => setFilterStatus(e.target.value as CalendarEventStatus | '')}",
+            "className": "\"rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\controls\\components\\control-form-modal.tsx",
+      "fields": [
+        {
+          "tag": "FormField",
+          "line": 142,
+          "attributes": {
+            "label": "\"Control Reference\"",
+            "error": "{errors.controlRef?.message}",
+            "required": true
+          }
+        },
+        {
+          "tag": "input",
+          "line": 143,
+          "attributes": {
+            "autoFocus": true,
+            "placeholder": "\"e.g. AC-1\"",
+            "className": "{inputClass(!!errors.controlRef)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 151,
+          "attributes": {
+            "label": "\"Category\"",
+            "error": "{errors.category?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 152,
+          "attributes": {
+            "placeholder": "\"e.g. Access Control\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 159,
+          "attributes": {
+            "label": "\"Title\"",
+            "error": "{errors.title?.message}",
+            "required": true,
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 160,
+          "attributes": {
+            "className": "{inputClass(!!errors.title)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 163,
+          "attributes": {
+            "label": "\"Description\"",
+            "error": "{errors.description?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 164,
+          "attributes": {
+            "rows": "{3}",
+            "className": "{cn(inputClass(false), 'resize-none')}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 167,
+          "attributes": {
+            "label": "\"Criticality\"",
+            "error": "{errors.criticality?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 168,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 175,
+          "attributes": {
+            "label": "\"Current safeguard status\"",
+            "error": "{errors.implementationStatus?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 176,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 183,
+          "attributes": {
+            "label": "\"Due Date\"",
+            "error": "{errors.dueDate?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 184,
+          "attributes": {
+            "type": "\"date\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 186,
+          "attributes": {
+            "label": "\"Responsible owner\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 187,
+          "attributes": {
+            "aria-label": "\"Control owner\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 190,
+          "attributes": {
+            "label": "\"Review Frequency (days)\"",
+            "error": "{errors.reviewFrequencyDays?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 191,
+          "attributes": {
+            "type": "\"number\"",
+            "className": "{inputClass(!!errors.reviewFrequencyDays)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 198,
+          "attributes": {
+            "label": "\"How the safeguard operates\"",
+            "error": "{errors.implementationNotes?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 199,
+          "attributes": {
+            "rows": "{2}",
+            "className": "{cn(inputClass(false), 'resize-none')}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 202,
+          "attributes": {
+            "label": "\"Checks performed and result\"",
+            "error": "{errors.testingNotes?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 203,
+          "attributes": {
+            "rows": "{2}",
+            "className": "{cn(inputClass(false), 'resize-none')}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\controls\\pages\\controls.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 135,
+          "attributes": {
+            "type": "\"search\"",
+            "placeholder": "\"Search controls…\"",
+            "aria-label": "\"Search controls\"",
+            "value": "{search}",
+            "onChange": "{(e) => resetToFirstPage(setSearch)(e.target.value)}",
+            "className": "\"h-9 w-full rounded-lg border border-slate-300 bg-white pl-9 pr-3 text-sm text-slate-900 shadow-xs transition-colors placeholder:text-slate-400 hover:border-slate-400\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 145,
+          "attributes": {
+            "value": "{statusFilter}",
+            "onChange": "{(e) => resetToFirstPage(setStatusFilter)(e.target.value as ControlImplementationStatus | '')}",
+            "aria-label": "\"Filter by operating status\"",
+            "className": "{selectClass}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 157,
+          "attributes": {
+            "value": "{criticalityFilter}",
+            "onChange": "{(e) => resetToFirstPage(setCriticalityFilter)(e.target.value as ControlCriticality | '')}",
+            "aria-label": "\"Filter by criticality\"",
+            "className": "{selectClass}"
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 126,
+          "attributes": {
+            "className": "\"font-semibold underline\"",
+            "to": "{routeParams.get('frameworkId')?`/frameworks?framework=${routeParams.get('frameworkId')}`:'/frameworks'}"
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\dashboard\\components\\compliance-work-summary.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 38,
+          "attributes": {
+            "className": "{`rounded-xl border p-4 transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600 ${['border-amber-200 bg-amber-50', 'border-blue-200 bg-blue-50', 'border-violet-200 bg-violet-50', 'border-green-200 bg-green-50'][i % 4]}`}",
+            "key": "{c.kind}",
+            "to": "{c.href}"
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\dashboard\\pages\\dashboard.page.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 45,
+          "attributes": {
+            "to": "\"/frameworks\"",
+            "className": "\"inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#07534f] hover:bg-green-50\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 46,
+          "attributes": {
+            "to": "\"/reports\"",
+            "className": "\"rounded-lg border border-white/40 bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/20\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 53,
+          "attributes": {
+            "to": "\"/compliance-score\"",
+            "className": "\"mt-2 inline-flex items-center gap-1 text-xs font-semibold underline underline-offset-4\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 61,
+          "attributes": {
+            "key": "{title}",
+            "to": "\"/controls\"",
+            "className": "{`${className} transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}"
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 66,
+          "attributes": {
+            "to": "\"/guide\"",
+            "className": "\"mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-700\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 76,
+          "attributes": {
+            "to": "\"/expiry\"",
+            "className": "\"text-xs font-semibold text-brand-700\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 77,
+          "attributes": {
+            "to": "\"/evidence\"",
+            "className": "\"text-xs font-semibold text-brand-700\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 80,
+          "attributes": {
+            "to": "\"/calendar\"",
+            "className": "\"inline-flex items-center gap-2 text-sm font-semibold text-brand-700\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\departments\\components\\department-form-modal.tsx",
+      "fields": [
+        {
+          "tag": "FormField",
+          "line": 99,
+          "attributes": {
+            "label": "\"Department Name\"",
+            "error": "{errors.name?.message}",
+            "required": true,
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 100,
+          "attributes": {
+            "autoFocus": true,
+            "className": "{inputClass(!!errors.name)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 103,
+          "attributes": {
+            "label": "\"Code\"",
+            "error": "{errors.code?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 104,
+          "attributes": {
+            "placeholder": "\"e.g. ENG-01\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 107,
+          "attributes": {
+            "label": "\"Branch\"",
+            "error": "{errors.branchId?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 108,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 116,
+          "attributes": {
+            "label": "\"Parent Department\"",
+            "error": "{errors.parentDepartmentId?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 117,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 125,
+          "attributes": {
+            "label": "\"Description\"",
+            "error": "{errors.description?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 126,
+          "attributes": {
+            "rows": "{3}",
+            "className": "{cn(inputClass(false), 'resize-none')}",
+            "placeholder": "\"Optional description...\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\departments\\pages\\departments.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 55,
+          "attributes": {
+            "type": "\"search\"",
+            "placeholder": "\"Search departments...\"",
+            "value": "{search}",
+            "onChange": "{(e) => setSearch(e.target.value)}",
+            "className": "\"w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\escalations\\components\\escalation-rule-form.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 98,
+          "attributes": {
+            "placeholder": "\"e.g. Escalate Overdue Critical Tasks\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 103,
+          "attributes": {
+            "placeholder": "\"Optional\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 107,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 123,
+          "attributes": {
+            "type": "\"number\"",
+            "min": "{1}",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 129,
+          "attributes": {
+            "type": "\"number\"",
+            "min": "{1}",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 135,
+          "attributes": {
+            "type": "\"number\"",
+            "min": "{1}",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 140,
+          "attributes": {
+            "placeholder": "\"e.g. control\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white outline-none\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 144,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 188,
+          "attributes": {
+            "type": "\"number\"",
+            "min": "{0}",
+            "className": "\"w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 192,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 204,
+          "attributes": {
+            "placeholder": "\"User UUID\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white outline-none\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 211,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 219,
+          "attributes": {
+            "placeholder": "\"Custom notification message\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white outline-none\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\escalations\\pages\\escalations.page.tsx",
+      "fields": [
+        {
+          "tag": "select",
+          "line": 195,
+          "attributes": {
+            "value": "{eventStatusFilter}",
+            "onChange": "{(e) => setEventStatusFilter(e.target.value as any)}",
+            "className": "\"rounded-md border border-slate-300 px-3 py-1.5 text-xs\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 276,
+          "attributes": {
+            "value": "{resolveNote}",
+            "onChange": "{(e) => setResolveNote(e.target.value)}",
+            "rows": "{3}",
+            "placeholder": "\"e.g. Issue addressed, task reassigned to team lead\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 resize-none mb-3\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\evidence\\components\\evidence-dropzone.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 112,
+          "attributes": {
+            "type": "\"file\"",
+            "className": "\"sr-only\"",
+            "accept": "{ACCEPTED_EXTENSIONS.join(',')}",
+            "onChange": "{onInputChange}",
+            "disabled": "{disabled}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\evidence\\components\\evidence-filters.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 78,
+          "attributes": {
+            "type": "\"radio\"",
+            "name": "\"status\"",
+            "value": "{opt.value}",
+            "checked": "{filters.status === opt.value}",
+            "onChange": "{() => set('status', opt.value)}",
+            "className": "\"h-3.5 w-3.5 text-blue-600\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 101,
+          "attributes": {
+            "value": "{filters.categoryId ?? ''}",
+            "onChange": "{(e) => set('categoryId', e.target.value)}",
+            "className": "\"w-full rounded border border-slate-300 px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 144,
+          "attributes": {
+            "value": "{filters.mimeType ?? ''}",
+            "onChange": "{(e) => set('mimeType', e.target.value)}",
+            "className": "\"w-full rounded border border-slate-300 px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 159,
+          "attributes": {
+            "value": "{filters.ocrStatus ?? ''}",
+            "onChange": "{(e) => set('ocrStatus', e.target.value as never)}",
+            "className": "\"w-full rounded border border-slate-300 px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 177,
+          "attributes": {
+            "type": "\"date\"",
+            "value": "{filters.dateFrom ?? ''}",
+            "onChange": "{(e) => set('dateFrom', e.target.value)}",
+            "className": "\"w-full rounded border border-slate-300 px-2 py-1.5 text-xs focus:outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 186,
+          "attributes": {
+            "type": "\"date\"",
+            "value": "{filters.dateTo ?? ''}",
+            "onChange": "{(e) => set('dateTo', e.target.value)}",
+            "className": "\"w-full rounded border border-slate-300 px-2 py-1.5 text-xs focus:outline-none focus:border-blue-500\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\evidence\\components\\evidence-preview.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "a",
+          "line": 29,
+          "attributes": {
+            "href": "{data?.downloadUrl}",
+            "download": "{fileName}",
+            "className": "\"flex items-center gap-2 rounded-md bg-slate-700 px-4 py-2 text-sm text-white hover:bg-slate-800\""
+          }
+        },
+        {
+          "tag": "a",
+          "line": 90,
+          "attributes": {
+            "href": "{url}",
+            "target": "\"_blank\"",
+            "rel": "\"noreferrer\"",
+            "className": "\"flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-200\""
+          }
+        },
+        {
+          "tag": "a",
+          "line": 100,
+          "attributes": {
+            "href": "{downloadUrl}",
+            "download": "{fileName}",
+            "className": "\"flex items-center gap-1.5 rounded-md bg-slate-700 px-3 py-1.5 text-sm text-white hover:bg-slate-800\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\evidence\\components\\evidence-share-modal.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 94,
+          "attributes": {
+            "type": "\"email\"",
+            "placeholder": "\"colleague@company.com\"",
+            "value": "{form.recipientEmail ?? ''}",
+            "onChange": "{(e) => setForm((f) => ({ ...f, recipientEmail: e.target.value }))}",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 110,
+          "attributes": {
+            "type": "\"date\"",
+            "value": "{form.expiresAt ?? ''}",
+            "onChange": "{(e) => setForm((f) => ({ ...f, expiresAt: e.target.value || null }))}",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 123,
+          "attributes": {
+            "type": "\"password\"",
+            "placeholder": "\"Leave blank for no password\"",
+            "value": "{form.password ?? ''}",
+            "onChange": "{(e) => setForm((f) => ({ ...f, password: e.target.value || null }))}",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\evidence\\components\\evidence-upload-modal.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 110,
+          "attributes": {
+            "placeholder": "\"e.g. Q1 2026 SOC 2 Evidence\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 121,
+          "attributes": {
+            "rows": "{2}",
+            "placeholder": "\"Brief description of this evidence item...\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 133,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 165,
+          "attributes": {
+            "type": "\"date\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 175,
+          "attributes": {
+            "type": "\"date\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 186,
+          "attributes": {
+            "placeholder": "\"Describe what this evidence covers...\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 199,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "id": "\"isConfidential\"",
+            "checked": "{field.value}",
+            "onChange": "{field.onChange}",
+            "className": "\"mt-0.5 h-4 w-4 rounded border-slate-300 text-amber-600\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\evidence\\components\\evidence-version-history.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 78,
+          "attributes": {
+            "type": "\"text\"",
+            "placeholder": "\"Describe what changed in this version...\"",
+            "value": "{changeNote}",
+            "onChange": "{(e) => setChangeNote(e.target.value)}",
+            "className": "\"w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\evidence\\components\\tag-selector.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 85,
+          "attributes": {
+            "type": "\"text\"",
+            "placeholder": "\"Search or create tag...\"",
+            "value": "{search}",
+            "onChange": "{(e) => setSearch(e.target.value)}",
+            "autoFocus": true,
+            "className": "\"w-full rounded border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-blue-500\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\evidence\\pages\\evidence-detail.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 110,
+          "attributes": {
+            "autoFocus": true,
+            "value": "{titleInput}",
+            "onChange": "{(e) => setTitleInput(e.target.value)}",
+            "onKeyDown": "{(e) => { if (e.key === 'Enter') handleTitleSave(); if (e.key === 'Escape') setEditingTitle(false); }}",
+            "className": "\"rounded border border-blue-500 px-2 py-1 text-lg font-semibold text-slate-900 outline-none\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 325,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{evidence.isConfidential}",
+            "onChange": "{(e) => updateEvidence.mutate({ isConfidential: e.target.checked })}",
+            "className": "\"h-4 w-4 rounded border-slate-300 text-amber-600\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\evidence\\pages\\evidence-shared.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 113,
+          "attributes": {
+            "type": "\"password\"",
+            "placeholder": "\"Enter password...\"",
+            "value": "{password}",
+            "onChange": "{(e) => setPassword(e.target.value)}",
+            "onKeyDown": "{(e) => { if (e.key === 'Enter') attempt(password); }}",
+            "autoFocus": true,
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\evidence\\pages\\evidence.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 158,
+          "attributes": {
+            "type": "\"search\"",
+            "placeholder": "\"Search evidence by title, content, or OCR text...\"",
+            "value": "{searchInput}",
+            "onChange": "{(e) => setSearchInput(e.target.value)}",
+            "className": "\"w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 201,
+          "attributes": {
+            "value": "{`${filters.sortBy}:${filters.sortDir}`}",
+            "onChange": "{(e) => {\r\n                  const [sortBy, sortDir] = e.target.value.split(':') as [typeof filters.sortBy, typeof filters.sortDir];\r\n                  setFilters((f) => ({ ...f, sortBy, sortDir, page: 1 }));\r\n                }}",
+            "className": "\"rounded border border-slate-300 px-2 py-1 text-xs\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\expiry\\components\\expiry-form-modal.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 97,
+          "attributes": {
+            "placeholder": "\"e.g. AWS SSL Certificate\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 104,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 110,
+          "attributes": {
+            "type": "\"date\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 117,
+          "attributes": {
+            "placeholder": "\"90,30,7,1\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 123,
+          "attributes": {
+            "rows": "{3}",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm resize-none outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 129,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\expiry\\pages\\expiry.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 91,
+          "attributes": {
+            "value": "{query}",
+            "onChange": "{(e) => setQuery(e.target.value)}",
+            "placeholder": "\"Search items...\"",
+            "className": "\"w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 98,
+          "attributes": {
+            "value": "{filterStatus}",
+            "onChange": "{(e) => setFilterStatus(e.target.value as ExpiryStatus | '')}",
+            "className": "\"rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 108,
+          "attributes": {
+            "value": "{filterEntityType}",
+            "onChange": "{(e) => setFilterEntityType(e.target.value as ExpiryEntityType | '')}",
+            "className": "\"rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\frameworks\\components\\assessment-records.tsx",
+      "fields": [
+        {
+          "tag": "AssessmentField",
+          "line": 26,
+          "attributes": {
+            "label": "\"Stakeholder name or role\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 26,
+          "attributes": {
+            "required": true,
+            "minLength": "{2}",
+            "maxLength": "{200}",
+            "name": "\"stakeholder\"",
+            "defaultValue": "{editing?.stakeholder}",
+            "className": "{assessmentInput}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 26,
+          "attributes": {
+            "label": "\"Department or organisation\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 26,
+          "attributes": {
+            "required": true,
+            "minLength": "{2}",
+            "maxLength": "{200}",
+            "name": "\"department\"",
+            "defaultValue": "{editing?.department}",
+            "className": "{assessmentInput}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 26,
+          "attributes": {
+            "label": "\"Consultation date\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 26,
+          "attributes": {
+            "required": true,
+            "type": "\"date\"",
+            "max": "{new Date().toISOString().slice(0,10)}",
+            "name": "\"consultedOn\"",
+            "defaultValue": "{editing?.consulted_on.slice(0,10)??new Date().toISOString().slice(0,10)}",
+            "className": "{assessmentInput}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 27,
+          "attributes": {
+            "key": "{q.key}",
+            "label": "{`${i+1}. ${q.label}`}"
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 27,
+          "attributes": {
+            "name": "{q.key}",
+            "rows": "{3}",
+            "maxLength": "{5000}",
+            "defaultValue": "{editing?.answers[q.key]}",
+            "placeholder": "{q.example}",
+            "className": "{assessmentInput}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 28,
+          "attributes": {
+            "name": "\"confirmed\"",
+            "type": "\"checkbox\"",
+            "defaultChecked": "{editing?.status==='confirmed'}",
+            "className": "\"mt-1\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 42,
+          "attributes": {
+            "aria-label": "\"Filter risk worksheet\"",
+            "value": "{filter}",
+            "onChange": "{e=>setFilter(e.target.value)}",
+            "placeholder": "\"Find an asset or risk\"",
+            "className": "{assessmentInput+' sm:max-w-xs'}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 48,
+          "attributes": {
+            "key": "{k}",
+            "label": "{label}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 48,
+          "attributes": {
+            "required": true,
+            "minLength": "{k==='title'||k==='threat'?5:2}",
+            "maxLength": "{k==='threat'?5000:k==='assetType'?200:500}",
+            "className": "{assessmentInput}",
+            "value": "{draft[k]}",
+            "onChange": "{e=>update(k,e.target.value)}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 49,
+          "attributes": {
+            "label": "\"Weakness or vulnerability\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 49,
+          "attributes": {
+            "rows": "{2}",
+            "maxLength": "{5000}",
+            "className": "{assessmentInput}",
+            "value": "{draft.vulnerability}",
+            "onChange": "{e=>update('vulnerability',e.target.value)}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 49,
+          "attributes": {
+            "label": "\"Consequence / harm if it happens\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 49,
+          "attributes": {
+            "required": true,
+            "minLength": "{10}",
+            "rows": "{2}",
+            "maxLength": "{5000}",
+            "className": "{assessmentInput}",
+            "value": "{draft.consequence}",
+            "onChange": "{e=>update('consequence',e.target.value)}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 50,
+          "attributes": {
+            "label": "\"Likelihood (1–5)\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 50,
+          "attributes": {
+            "aria-label": "\"Inherent likelihood\"",
+            "required": true,
+            "type": "\"number\"",
+            "min": "{1}",
+            "max": "{5}",
+            "className": "{assessmentInput}",
+            "value": "{draft.inherentLikelihood}",
+            "onChange": "{e=>update('inherentLikelihood',Number(e.target.value))}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 50,
+          "attributes": {
+            "label": "\"Impact (1–5)\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 50,
+          "attributes": {
+            "aria-label": "\"Inherent impact\"",
+            "required": true,
+            "type": "\"number\"",
+            "min": "{1}",
+            "max": "{5}",
+            "className": "{assessmentInput}",
+            "value": "{draft.inherentImpact}",
+            "onChange": "{e=>update('inherentImpact',Number(e.target.value))}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 50,
+          "attributes": {
+            "label": "\"Why these ratings? Reference actual exposure, events and proof\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 50,
+          "attributes": {
+            "required": "{draft.ratingConfirmed}",
+            "minLength": "{draft.ratingConfirmed?20:undefined}",
+            "maxLength": "{5000}",
+            "rows": "{3}",
+            "className": "{assessmentInput}",
+            "value": "{draft.assessmentBasis}",
+            "onChange": "{e=>update('assessmentBasis',e.target.value)}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 50,
+          "attributes": {
+            "label": "\"Responsible risk owner\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 50,
+          "attributes": {
+            "required": "{draft.ratingConfirmed}",
+            "className": "{assessmentInput}",
+            "value": "{draft.ownerId??''}",
+            "onChange": "{e=>update('ownerId',e.target.value||null)}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 50,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{draft.ratingConfirmed}",
+            "onChange": "{e=>update('ratingConfirmed',e.target.checked)}",
+            "className": "\"mt-1\""
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 51,
+          "attributes": {
+            "label": "\"Risk response\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 51,
+          "attributes": {
+            "className": "{assessmentInput}",
+            "value": "{draft.treatment}",
+            "onChange": "{e=>update('treatment',e.target.value as RiskDraft['treatment'])}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 51,
+          "attributes": {
+            "label": "\"Selected framework controls (choose all that genuinely address this risk)\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 51,
+          "attributes": {
+            "multiple": true,
+            "aria-label": "\"Risk control mappings\"",
+            "size": "{5}",
+            "className": "{assessmentInput}",
+            "value": "{draft.controlIds}",
+            "onChange": "{e=>update('controlIds',Array.from(e.target.selectedOptions,o=>o.value))}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 51,
+          "attributes": {
+            "label": "\"Treatment action and expected result\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 51,
+          "attributes": {
+            "maxLength": "{5000}",
+            "rows": "{3}",
+            "className": "{assessmentInput}",
+            "value": "{draft.mitigationPlan}",
+            "onChange": "{e=>update('mitigationPlan',e.target.value)}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 51,
+          "attributes": {
+            "label": "\"Action due date\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 51,
+          "attributes": {
+            "type": "\"date\"",
+            "className": "{assessmentInput}",
+            "value": "{draft.treatmentDueDate??''}",
+            "onChange": "{e=>update('treatmentDueDate',e.target.value||null)}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 51,
+          "attributes": {
+            "label": "\"Acceptance authority, decision, reason and limits\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 51,
+          "attributes": {
+            "maxLength": "{5000}",
+            "rows": "{3}",
+            "className": "{assessmentInput}",
+            "value": "{draft.acceptanceNote}",
+            "onChange": "{e=>update('acceptanceNote',e.target.value)}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 52,
+          "attributes": {
+            "label": "\"Residual likelihood\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 52,
+          "attributes": {
+            "aria-label": "\"Residual likelihood\"",
+            "required": true,
+            "type": "\"number\"",
+            "min": "{1}",
+            "max": "{5}",
+            "className": "{assessmentInput}",
+            "value": "{draft.residualLikelihood}",
+            "onChange": "{e=>update('residualLikelihood',Number(e.target.value))}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 52,
+          "attributes": {
+            "label": "\"Residual impact\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 52,
+          "attributes": {
+            "aria-label": "\"Residual impact\"",
+            "required": true,
+            "type": "\"number\"",
+            "min": "{1}",
+            "max": "{5}",
+            "className": "{assessmentInput}",
+            "value": "{draft.residualImpact}",
+            "onChange": "{e=>update('residualImpact',Number(e.target.value))}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 52,
+          "attributes": {
+            "label": "\"Proof, remaining exposure and review decision\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 52,
+          "attributes": {
+            "maxLength": "{5000}",
+            "rows": "{3}",
+            "className": "{assessmentInput}",
+            "value": "{draft.residualBasis}",
+            "onChange": "{e=>update('residualBasis',e.target.value)}"
+          }
+        },
+        {
+          "tag": "AssessmentField",
+          "line": 53,
+          "attributes": {
+            "label": "\"Preparation status\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 53,
+          "attributes": {
+            "className": "{assessmentInput}",
+            "value": "{draft.status}",
+            "onChange": "{e=>update('status',e.target.value as RiskDraft['status'])}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\frameworks\\components\\compliance-operations.tsx",
+      "fields": [
+        {
+          "tag": "select",
+          "line": 608,
+          "attributes": {
+            "aria-label": "{field.label}",
+            "name": "{field.name}",
+            "defaultValue": "{fieldValue(field) || field.choices[0]}",
+            "className": "{input}"
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 621,
+          "attributes": {
+            "aria-label": "{field.label}",
+            "name": "{field.name}",
+            "defaultValue": "{String(fieldValue(field))}",
+            "required": true,
+            "minLength": "{20}",
+            "maxLength": "{10000}",
+            "rows": "{3}",
+            "className": "{input}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 632,
+          "attributes": {
+            "aria-label": "{field.label}",
+            "name": "{field.name}",
+            "defaultValue": "{String(fieldValue(field))}",
+            "required": "{!field.optional}",
+            "type": "{field.type ?? \"text\"}",
+            "minLength": "{field.type ? undefined : 2}",
+            "maxLength": "{2000}",
+            "className": "{input}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 687,
+          "attributes": {
+            "className": "{input}",
+            "value": "{outcome}",
+            "onChange": "{(e) => setOutcome(e.target.value)}"
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 700,
+          "attributes": {
+            "className": "{input}",
+            "name": "\"note\"",
+            "minLength": "{20}",
+            "required": true,
+            "rows": "{3}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 904,
+          "attributes": {
+            "className": "{input + \" !py-1.5 !pr-9\"}",
+            "aria-label": "\"Search compliance records\"",
+            "value": "{q}",
+            "onChange": "{(e) => {\r\n            setQ(e.target.value);\r\n            if (!e.target.value) setTerm(\"\");\r\n          }}",
+            "placeholder": "\"Search records\"",
+            "type": "\"search\"",
+            "enterKeyHint": "\"search\"",
+            "minLength": "{2}"
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 457,
+          "attributes": {
+            "className": "\"text-indigo-700 underline\"",
+            "to": "\"/frameworks\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 460,
+          "attributes": {
+            "className": "\"text-indigo-700 underline\"",
+            "to": "\"/evidence\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 463,
+          "attributes": {
+            "className": "\"text-indigo-700 underline\"",
+            "to": "\"/policy-templates\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 466,
+          "attributes": {
+            "className": "\"text-indigo-700 underline\"",
+            "to": "\"/tasks\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 720,
+          "attributes": {
+            "className": "\"text-indigo-700 underline\"",
+            "to": "{'/controls?workflow=tests&record='+f.control_id}"
+          }
+        },
+        {
+          "tag": "a",
+          "line": 769,
+          "attributes": {
+            "className": "\"text-xs text-indigo-700 underline\"",
+            "href": "{String(r.source_url)}",
+            "target": "\"_blank\"",
+            "rel": "\"noreferrer\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 781,
+          "attributes": {
+            "className": "{secondary}",
+            "to": "{sourceLink(config.kind, r)!}"
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 933,
+          "attributes": {
+            "className": "\"block border-b py-2 text-sm text-indigo-800\"",
+            "key": "{r.type + r.id}",
+            "to": "{r.url}",
+            "onClick": "{() => setTerm(\"\")}"
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\frameworks\\components\\compliance-record-details.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 68,
+          "attributes": {
+            "className": "\"text-indigo-700 underline\"",
+            "to": "{'/evidence/' + p.id}"
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\frameworks\\components\\compliance-record-picker.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 64,
+          "attributes": {
+            "aria-label": "{\"Find matching \" + p.source + \" records\"}",
+            "className": "{style}",
+            "placeholder": "\"Type at least 2 letters to search all records\"",
+            "value": "{search}",
+            "onChange": "{(e) => setSearch(e.target.value)}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 101,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "className": "\"mt-1\"",
+            "checked": "{selected.includes(o.id)}",
+            "required": "{p.required && selected.length === 0 && i === 0}",
+            "onChange": "{() => choose(o.id)}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 119,
+          "attributes": {
+            "key": "{v}",
+            "type": "\"hidden\"",
+            "name": "{p.name}",
+            "value": "{v}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 126,
+          "attributes": {
+            "aria-label": "{p.label}",
+            "className": "{style}",
+            "name": "{p.name}",
+            "required": "{p.required}",
+            "value": "{selected[0] ?? \"\"}",
+            "onChange": "{(e) => choose(e.target.value)}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\frameworks\\components\\compliance-template-library.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 99,
+          "attributes": {
+            "className": "\"text-indigo-700 underline\"",
+            "to": "{t.route}"
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\frameworks\\components\\compliance-workspace.tsx",
+      "fields": [
+        {
+          "tag": "Field",
+          "line": 37,
+          "attributes": {
+            "label": "\"Choose a compliance assessment step\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 37,
+          "attributes": {
+            "aria-label": "\"Choose compliance step\"",
+            "className": "{input}",
+            "value": "{step}",
+            "onChange": "{e=>setStep(e.target.value)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 40,
+          "attributes": {
+            "label": "\"Scope: services, records, systems, locations and boundaries\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 40,
+          "attributes": {
+            "aria-label": "\"Compliance scope\"",
+            "required": true,
+            "minLength": "{30}",
+            "maxLength": "{5000}",
+            "rows": "{4}",
+            "className": "{input}",
+            "value": "{scope}",
+            "onChange": "{e=>setScope(e.target.value)}",
+            "disabled": "{!manager}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 40,
+          "attributes": {
+            "label": "\"What should the assessment establish?\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 40,
+          "attributes": {
+            "aria-label": "\"Assessment objective\"",
+            "required": true,
+            "minLength": "{20}",
+            "maxLength": "{3000}",
+            "rows": "{3}",
+            "className": "{input}",
+            "value": "{objective}",
+            "onChange": "{e=>setObjective(e.target.value)}",
+            "disabled": "{!manager}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 40,
+          "attributes": {
+            "label": "\"Accountable assessment owner\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 40,
+          "attributes": {
+            "required": true,
+            "aria-label": "\"Assessment owner\"",
+            "className": "{input}",
+            "value": "{ownerId}",
+            "onChange": "{e=>setOwnerId(e.target.value)}",
+            "disabled": "{!manager}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 40,
+          "attributes": {
+            "label": "\"Target review date\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 40,
+          "attributes": {
+            "required": true,
+            "type": "\"date\"",
+            "className": "{input}",
+            "value": "{targetDate}",
+            "onChange": "{e=>setTargetDate(e.target.value)}",
+            "disabled": "{!manager}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 41,
+          "attributes": {
+            "label": "{step==='obligations'?'Applicable requirements, official source / edition and deadlines':step==='monitoring'?'Next review, responsible person, reporting dates and change triggers':'Management review evidence and decisions'}"
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 41,
+          "attributes": {
+            "required": true,
+            "minLength": "{30}",
+            "maxLength": "{5000}",
+            "rows": "{7}",
+            "className": "{input}",
+            "value": "{narrative}",
+            "onChange": "{e=>setNarrative(e.target.value)}",
+            "disabled": "{!manager}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 42,
+          "attributes": {
+            "label": "\"Assessment period and review date\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 42,
+          "attributes": {
+            "required": true,
+            "minLength": "{5}",
+            "maxLength": "{500}",
+            "placeholder": "\"For example: next 12 months; reviewed each quarter\"",
+            "className": "{input}",
+            "value": "{period}",
+            "onChange": "{e=>setPeriod(e.target.value)}",
+            "disabled": "{!manager}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 42,
+          "attributes": {
+            "label": "\"How will likelihood, impact and acceptable risk be judged?\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 42,
+          "attributes": {
+            "required": true,
+            "minLength": "{30}",
+            "maxLength": "{5000}",
+            "rows": "{3}",
+            "placeholder": "\"Use the 1–5 guide below; explain relevant harm, exposure, tolerance and who may accept remaining risk.\"",
+            "className": "{input}",
+            "value": "{riskMethod}",
+            "onChange": "{e=>setRiskMethod(e.target.value)}",
+            "disabled": "{!manager}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 47,
+          "attributes": {
+            "aria-label": "\"Find assessed controls\"",
+            "placeholder": "\"Find a requirement or reference\"",
+            "className": "{input+' sm:max-w-sm'}",
+            "value": "{filter}",
+            "onChange": "{e=>setFilter(e.target.value)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 50,
+          "attributes": {
+            "label": "\"Completed internal audit\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 50,
+          "attributes": {
+            "className": "{input}",
+            "value": "{auditId}",
+            "onChange": "{e=>setAuditId(e.target.value)}",
+            "disabled": "{!manager}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 51,
+          "attributes": {
+            "label": "\"Review conclusion or requested corrections\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 51,
+          "attributes": {
+            "aria-label": "\"Assessment review conclusion\"",
+            "className": "{input}",
+            "rows": "{4}",
+            "value": "{note}",
+            "onChange": "{e=>setNote(e.target.value)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 57,
+          "attributes": {
+            "label": "\"Applicability decision\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 57,
+          "attributes": {
+            "className": "{input}",
+            "value": "{String(applicable)}",
+            "onChange": "{e=>setApplicable(e.target.value==='true')}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 57,
+          "attributes": {
+            "label": "\"Reason and relevant risk / obligation references\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 57,
+          "attributes": {
+            "required": true,
+            "minLength": "{20}",
+            "maxLength": "{5000}",
+            "rows": "{5}",
+            "className": "{input}",
+            "value": "{justification}",
+            "onChange": "{e=>setJustification(e.target.value)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 57,
+          "attributes": {
+            "label": "\"Supporting evidence file\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 57,
+          "attributes": {
+            "required": "{!applicable&&s.profile.outcome==='validation'}",
+            "className": "{input}",
+            "value": "{evidenceId}",
+            "onChange": "{e=>setEvidenceId(e.target.value)}"
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "a",
+          "line": 41,
+          "attributes": {
+            "className": "\"font-semibold text-indigo-700 underline\"",
+            "href": "{s.profile.source}",
+            "target": "\"_blank\"",
+            "rel": "\"noreferrer\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 44,
+          "attributes": {
+            "className": "{secondary}",
+            "to": "{`/policies?frameworkId=${id}`}"
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 44,
+          "attributes": {
+            "className": "{button}",
+            "to": "{`/policy-templates?frameworkId=${id}`}"
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 47,
+          "attributes": {
+            "className": "{secondary}",
+            "to": "{`/controls?frameworkId=${id}`}"
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 49,
+          "attributes": {
+            "className": "{button}",
+            "to": "\"/tasks\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 49,
+          "attributes": {
+            "className": "{secondary}",
+            "to": "\"/audits\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 50,
+          "attributes": {
+            "className": "{secondary}",
+            "to": "\"/audits\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 52,
+          "attributes": {
+            "className": "{button}",
+            "to": "\"/audits\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 52,
+          "attributes": {
+            "className": "{secondary}",
+            "to": "\"/reports\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 52,
+          "attributes": {
+            "className": "{secondary}",
+            "to": "\"/audits\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 52,
+          "attributes": {
+            "className": "{secondary}",
+            "to": "\"/evidence\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 52,
+          "attributes": {
+            "className": "{secondary}",
+            "to": "\"/expiry\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\frameworks\\components\\evidence-picker.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 12,
+          "attributes": {
+            "aria-label": "\"Find saved evidence\"",
+            "className": "{input}",
+            "value": "{search}",
+            "onChange": "{e=>setSearch(e.target.value)}",
+            "placeholder": "\"Search by title or description\""
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 12,
+          "attributes": {
+            "label": "\"Saved evidence\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 12,
+          "attributes": {
+            "aria-label": "\"Saved evidence for this control\"",
+            "className": "{input}",
+            "value": "{selected}",
+            "onChange": "{e=>setSelected(e.target.value)}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\frameworks\\components\\implementation-overview.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 11,
+          "attributes": {
+            "className": "\"text-xs font-semibold text-brand-700\"",
+            "to": "\"/frameworks\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 13,
+          "attributes": {
+            "to": "\"/frameworks\"",
+            "className": "\"mt-3 inline-flex items-center gap-1 font-semibold underline\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 19,
+          "attributes": {
+            "key": "{x.framework.id}",
+            "to": "{`/frameworks?framework=${x.framework.id}`}",
+            "className": "\"group block rounded-lg border border-slate-200 p-3 transition hover:border-brand-300 hover:bg-brand-50/40\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 26,
+          "attributes": {
+            "to": "\"/frameworks\"",
+            "className": "\"mt-3 block text-xs font-semibold text-brand-700\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\frameworks\\components\\remove-framework-dialog.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 177,
+          "attributes": {
+            "autoFocus": true,
+            "value": "{typed}",
+            "onChange": "{(e) => setTyped(e.target.value)}",
+            "className": "\"mt-1.5 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-100\"",
+            "placeholder": "{name}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\frameworks\\pages\\frameworks.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 12,
+          "attributes": {
+            "aria-label": "\"Search frameworks\"",
+            "value": "{search}",
+            "onChange": "{e=>setSearch(e.target.value)}",
+            "placeholder": "\"Find a framework or law\"",
+            "className": "{input+' sm:max-w-xs'}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\guide\\DepartmentGuide.tsx",
+      "fields": [
+        {
+          "tag": "select",
+          "line": 25,
+          "attributes": {
+            "id": "{`${uid}-dept`}",
+            "value": "{dept.key}",
+            "onChange": "{e => choose(e.target.value)}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 27,
+          "attributes": {
+            "id": "{`${uid}-search`}",
+            "type": "\"search\"",
+            "value": "{query}",
+            "onChange": "{e => setQuery(e.target.value)}",
+            "placeholder": "\"Try payment, signature, report…\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\guide\\guide.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 30,
+          "attributes": {
+            "aria-label": "\"Search user guide\"",
+            "value": "{query}",
+            "onChange": "{event => setQuery(event.target.value)}",
+            "placeholder": "\"Search billing, signatures, renewals…\"",
+            "className": "\"w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 31,
+          "attributes": {
+            "key": "{section.id}",
+            "to": "{`/guide#${section.id}`}",
+            "onClick": "{() => setQuery('')}",
+            "className": "\"rounded px-2 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-50\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 38,
+          "attributes": {
+            "key": "{link.to}",
+            "to": "{link.to}",
+            "className": "\"rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\incidents\\pages\\incidents.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 121,
+          "attributes": {
+            "value": "{filters.q ?? ''}",
+            "onChange": "{(e) => setFilters((f) => ({ ...f, q: e.target.value || undefined, page: 1 }))}",
+            "placeholder": "\"Search reference, title or description…\"",
+            "className": "\"min-w-56 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 280,
+          "attributes": {
+            "value": "{value}",
+            "onChange": "{(e) => onChange(e.target.value)}",
+            "className": "\"rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 325,
+          "attributes": {
+            "value": "{title}",
+            "onChange": "{(e) => setTitle(e.target.value)}",
+            "required": true,
+            "autoFocus": true,
+            "placeholder": "\"Short description of what happened\"",
+            "className": "{field}"
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 331,
+          "attributes": {
+            "value": "{description}",
+            "onChange": "{(e) => setDescription(e.target.value)}",
+            "rows": "{4}",
+            "placeholder": "\"Facts known so far. This becomes the first entry in the incident record.\"",
+            "className": "{field}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 339,
+          "attributes": {
+            "value": "{category}",
+            "onChange": "{(e) => setCategory(e.target.value as IncidentCategory)}",
+            "className": "{field}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 345,
+          "attributes": {
+            "value": "{severity}",
+            "onChange": "{(e) => setSeverity(e.target.value as IncidentSeverity)}",
+            "className": "{field}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 352,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{isDataBreach}",
+            "onChange": "{(e) => setIsDataBreach(e.target.checked)}",
+            "className": "\"mt-0.5 h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 365,
+          "attributes": {
+            "type": "\"number\"",
+            "min": "{0}",
+            "value": "{affected}",
+            "onChange": "{(e) => setAffected(e.target.value)}",
+            "placeholder": "\"Leave blank if not yet known\"",
+            "className": "{field}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 418,
+          "attributes": {
+            "value": "{incident.status}",
+            "className": "{field}",
+            "onChange": "{(e) => patch.mutate({ status: e.target.value as IncidentStatus })}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 422,
+          "attributes": {
+            "value": "{incident.severity}",
+            "className": "{field}",
+            "onChange": "{(e) => patch.mutate({ severity: e.target.value as IncidentSeverity })}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 483,
+          "attributes": {
+            "value": "{note}",
+            "onChange": "{(e) => setNote(e.target.value)}",
+            "placeholder": "\"Add an entry…\"",
+            "className": "\"flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\integrations\\pages\\integrations.page.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "a",
+          "line": 178,
+          "attributes": {
+            "href": "{supportMailto(`Integration request: ${integration.name}`)}",
+            "className": "\"mt-4 inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\notifications\\pages\\notifications.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 29,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{unreadOnly}",
+            "onChange": "{(e) => { setUnreadOnly(e.target.checked); setPage(1); }}",
+            "className": "\"h-4 w-4 rounded border-slate-300\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\organizations\\components\\company-profile-form.tsx",
+      "fields": [
+        {
+          "tag": "Field",
+          "line": 101,
+          "attributes": {
+            "label": "\"Organisation Name\"",
+            "error": "{errors.name?.message}",
+            "required": true
+          }
+        },
+        {
+          "tag": "input",
+          "line": 102,
+          "attributes": {
+            "className": "{inputClass(!!errors.name)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 105,
+          "attributes": {
+            "label": "\"Industry\"",
+            "error": "{errors.industry?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 106,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 114,
+          "attributes": {
+            "label": "\"Company Size\"",
+            "error": "{errors.size?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 115,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 123,
+          "attributes": {
+            "label": "\"Website\"",
+            "error": "{errors.website?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 124,
+          "attributes": {
+            "type": "\"url\"",
+            "placeholder": "\"https://example.com\"",
+            "className": "{inputClass(!!errors.website)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 132,
+          "attributes": {
+            "label": "\"Phone\"",
+            "error": "{errors.phone?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 133,
+          "attributes": {
+            "type": "\"tel\"",
+            "placeholder": "\"+44 20 1234 5678\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 144,
+          "attributes": {
+            "label": "\"Country\"",
+            "error": "{errors.country?.message}",
+            "className": "\"sm:col-span-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 145,
+          "attributes": {
+            "placeholder": "\"United Kingdom\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 147,
+          "attributes": {
+            "label": "\"City\"",
+            "error": "{errors.city?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 148,
+          "attributes": {
+            "placeholder": "\"London\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 150,
+          "attributes": {
+            "label": "\"Postal Code\"",
+            "error": "{errors.postalCode?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 151,
+          "attributes": {
+            "placeholder": "\"EC1A 1BB\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 153,
+          "attributes": {
+            "label": "\"Street Address\"",
+            "error": "{errors.address?.message}",
+            "className": "\"sm:col-span-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 154,
+          "attributes": {
+            "placeholder": "\"123 Main Street\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "Field",
+          "line": 165,
+          "attributes": {
+            "label": "\"Date Format\"",
+            "error": "{errors.dateFormat?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 166,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\organizations\\components\\delete-organization.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 95,
+          "attributes": {
+            "id": "\"confirm-org\"",
+            "value": "{confirmName}",
+            "onChange": "{(e) => setConfirmName(e.target.value)}",
+            "autoComplete": "\"off\"",
+            "className": "\"mt-1 w-full max-w-sm rounded-lg border border-red-300 px-3 py-2 text-sm\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "a",
+          "line": 124,
+          "attributes": {
+            "className": "\"underline\"",
+            "href": "{`mailto:${SUPPORT_EMAIL}`}"
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\organizations\\components\\logo-upload.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 102,
+          "attributes": {
+            "ref": "{inputRef}",
+            "type": "\"file\"",
+            "accept": "{ALLOWED_TYPES.join(',')}",
+            "className": "\"sr-only\"",
+            "onChange": "{(e) => {\n            const file = e.target.files?.[0];\n            if (file) handleFile(file);\n            e.target.value = ''; // reset so same file can be re-uploaded\n          }}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\organizations\\components\\scoping-questionnaire.tsx",
+      "fields": [
+        {
+          "tag": "select",
+          "line": 213,
+          "attributes": {
+            "value": "{profile.hostingModel}",
+            "onChange": "{(e) => set('hostingModel', e.target.value as HostingModel)}",
+            "className": "\"block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 223,
+          "attributes": {
+            "value": "{profile.primaryDriver}",
+            "onChange": "{(e) => set('primaryDriver', e.target.value as PrimaryDriver)}",
+            "className": "\"block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 304,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{checked}",
+            "onChange": "{(e) => onChange(e.target.checked)}",
+            "className": "\"mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 112,
+          "attributes": {
+            "to": "{`/frameworks?framework=${fw.id}`}",
+            "className": "\"rounded-md border border-indigo-300 px-3 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\organizations\\pages\\onboarding.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 172,
+          "attributes": {
+            "autoFocus": true,
+            "placeholder": "\"Acme Corporation\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 183,
+          "attributes": {
+            "placeholder": "\"e.g. Financial Services\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 192,
+          "attributes": {
+            "defaultValue": "\"\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\policies\\components\\policy-form-modal.tsx",
+      "fields": [
+        {
+          "tag": "select",
+          "line": 145,
+          "attributes": {
+            "aria-label": "\"Choose policy template\"",
+            "defaultValue": "{initialTemplate?.id??''}",
+            "className": "{inputClass(false)}",
+            "onChange": "{e=>{const t=templates.find(t=>t.id===e.target.value);if(t){setValue('title',t.title,{shouldDirty:true});setValue('content',t.content,{shouldDirty:true});setValue('description',t.purpose,{shouldDirty:true});}}}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 146,
+          "attributes": {
+            "label": "\"Title\"",
+            "error": "{errors.title?.message}",
+            "required": true,
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 147,
+          "attributes": {
+            "autoFocus": true,
+            "className": "{inputClass(!!errors.title)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 150,
+          "attributes": {
+            "label": "\"Description\"",
+            "error": "{errors.description?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 151,
+          "attributes": {
+            "rows": "{3}",
+            "className": "{cn(inputClass(false), 'resize-none')}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 154,
+          "attributes": {
+            "label": "\"Document Type\"",
+            "error": "{errors.documentType?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 155,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 162,
+          "attributes": {
+            "label": "\"Status\"",
+            "error": "{errors.status?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 163,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 170,
+          "attributes": {
+            "label": "\"Review Due Date\"",
+            "error": "{errors.reviewDueDate?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 171,
+          "attributes": {
+            "type": "\"date\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 173,
+          "attributes": {
+            "label": "\"Responsible owner\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 173,
+          "attributes": {
+            "aria-label": "\"Policy owner\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 174,
+          "attributes": {
+            "label": "\"Linked frameworks\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 174,
+          "attributes": {
+            "multiple": true,
+            "aria-label": "\"Policy linked frameworks\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 176,
+          "attributes": {
+            "label": "\"Tags\"",
+            "error": "{errors.tags?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 177,
+          "attributes": {
+            "placeholder": "\"Comma separated\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 184,
+          "attributes": {
+            "label": "\"Content\"",
+            "error": "{errors.content?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 185,
+          "attributes": {
+            "rows": "{6}",
+            "className": "{cn(inputClass(false), 'resize-none')}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\policies\\pages\\policies.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 97,
+          "attributes": {
+            "type": "\"search\"",
+            "placeholder": "\"Search policies...\"",
+            "value": "{search}",
+            "onChange": "{(e) => resetToFirstPage(setSearch)(e.target.value)}",
+            "className": "\"w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 106,
+          "attributes": {
+            "value": "{statusFilter}",
+            "onChange": "{(e) => resetToFirstPage(setStatusFilter)(e.target.value as PolicyStatus | '')}",
+            "className": "\"rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 77,
+          "attributes": {
+            "className": "\"mt-2 inline-block text-sm font-semibold text-indigo-700 underline\"",
+            "to": "{routeParams.get('frameworkId')?`/policy-templates?frameworkId=${routeParams.get('frameworkId')}`:'/policy-templates'}"
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 92,
+          "attributes": {
+            "className": "\"font-semibold underline\"",
+            "to": "{routeParams.get('frameworkId')?`/frameworks?framework=${routeParams.get('frameworkId')}`:'/frameworks'}"
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\policies\\pages\\policy-templates.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 11,
+          "attributes": {
+            "aria-label": "\"Find policy templates\"",
+            "value": "{search}",
+            "onChange": "{e=>setSearch(e.target.value)}",
+            "placeholder": "\"Find a policy\"",
+            "className": "\"rounded-lg border px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 11,
+          "attributes": {
+            "aria-label": "\"Policy template area\"",
+            "value": "{family}",
+            "onChange": "{e=>setFamily(e.target.value)}",
+            "className": "\"rounded-lg border px-3 py-2 text-sm\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 11,
+          "attributes": {
+            "to": "{frameworkId?`/frameworks?framework=${frameworkId}`:'/frameworks'}",
+            "className": "\"text-sm font-semibold text-indigo-700 underline\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 11,
+          "attributes": {
+            "to": "{frameworkId?`/policies?frameworkId=${frameworkId}`:'/policies'}",
+            "className": "\"text-sm font-semibold text-indigo-700 underline\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\reports\\pages\\executive-dashboard.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 428,
+          "attributes": {
+            "required": true,
+            "value": "{form.name}",
+            "onChange": "{(e) => setForm((f) => ({ ...f, name: e.target.value }))}",
+            "className": "\"w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400\"",
+            "placeholder": "\"e.g. Monthly Executive Report\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 434,
+          "attributes": {
+            "value": "{form.frequency}",
+            "onChange": "{(e) => setForm((f) => ({ ...f, frequency: e.target.value as any }))}",
+            "className": "\"w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 445,
+          "attributes": {
+            "value": "{form.dayOfWeek ?? 1}",
+            "onChange": "{(e) => setForm((f) => ({ ...f, dayOfWeek: Number(e.target.value) }))}",
+            "className": "\"w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 455,
+          "attributes": {
+            "type": "\"number\"",
+            "min": "{1}",
+            "max": "{28}",
+            "value": "{form.dayOfMonth ?? 1}",
+            "onChange": "{(e) => setForm((f) => ({ ...f, dayOfMonth: Number(e.target.value) }))}",
+            "className": "\"w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 462,
+          "attributes": {
+            "value": "{form.hour ?? 6}",
+            "onChange": "{(e) => setForm((f) => ({ ...f, hour: Number(e.target.value) }))}",
+            "className": "\"w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 472,
+          "attributes": {
+            "value": "{form.format ?? 'pdf'}",
+            "onChange": "{(e) => setForm((f) => ({ ...f, format: e.target.value as any }))}",
+            "className": "\"w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 483,
+          "attributes": {
+            "value": "{recipientInput}",
+            "onChange": "{(e) => setRecipientInput(e.target.value)}",
+            "onKeyDown": "{(e) => e.key === 'Enter' && (e.preventDefault(), addRecipient())}",
+            "placeholder": "\"email@company.com — press Enter to add\"",
+            "className": "\"flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\risks\\components\\risk-form-modal.tsx",
+      "fields": [
+        {
+          "tag": "FormField",
+          "line": 152,
+          "attributes": {
+            "label": "\"Title\"",
+            "error": "{errors.title?.message}",
+            "required": true,
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 153,
+          "attributes": {
+            "autoFocus": true,
+            "className": "{inputClass(!!errors.title)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 156,
+          "attributes": {
+            "label": "\"Description\"",
+            "error": "{errors.description?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 157,
+          "attributes": {
+            "rows": "{3}",
+            "className": "{cn(inputClass(false), 'resize-none')}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 160,
+          "attributes": {
+            "label": "\"Category\"",
+            "error": "{errors.category?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 161,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 168,
+          "attributes": {
+            "label": "\"Status\"",
+            "error": "{errors.status?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 169,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 182,
+          "attributes": {
+            "label": "\"Likelihood\"",
+            "error": "{errors.inherentLikelihood?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 183,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 190,
+          "attributes": {
+            "label": "\"Impact\"",
+            "error": "{errors.inherentImpact?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 191,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 198,
+          "attributes": {
+            "label": "\"Treatment\"",
+            "error": "{errors.treatment?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 199,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 212,
+          "attributes": {
+            "label": "\"Residual Likelihood\"",
+            "error": "{errors.residualLikelihood?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 213,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 220,
+          "attributes": {
+            "label": "\"Residual Impact\"",
+            "error": "{errors.residualImpact?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 221,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 228,
+          "attributes": {
+            "label": "\"Mitigation Plan\"",
+            "error": "{errors.mitigationPlan?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 229,
+          "attributes": {
+            "rows": "{2}",
+            "className": "{cn(inputClass(false), 'resize-none')}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 232,
+          "attributes": {
+            "label": "\"Responsible risk owner\"",
+            "error": "{errors.ownerId?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 233,
+          "attributes": {
+            "aria-label": "\"Risk owner\"",
+            "className": "{inputClass(!!errors.ownerId)}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\risks\\pages\\risks.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 88,
+          "attributes": {
+            "type": "\"search\"",
+            "placeholder": "\"Search risks...\"",
+            "value": "{search}",
+            "onChange": "{(e) => resetToFirstPage(setSearch)(e.target.value)}",
+            "className": "\"w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 97,
+          "attributes": {
+            "value": "{statusFilter}",
+            "onChange": "{(e) => resetToFirstPage(setStatusFilter)(e.target.value as RiskStatus | '')}",
+            "className": "\"rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 108,
+          "attributes": {
+            "value": "{categoryFilter}",
+            "onChange": "{(e) => resetToFirstPage(setCategoryFilter)(e.target.value as RiskCategory | '')}",
+            "className": "\"rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 326,
+          "attributes": {
+            "aria-label": "\"Risk assessment framework\"",
+            "value": "{id}",
+            "onChange": "{e=>setParams(e.target.value?{frameworkId:e.target.value}:{})}",
+            "className": "\"ml-2 max-w-full rounded-lg border px-3 py-2\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 326,
+          "attributes": {
+            "className": "\"inline-block text-sm font-semibold text-indigo-700 underline\"",
+            "to": "{`/frameworks?framework=${id}`}"
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\settings\\components\\invite-member-modal.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 76,
+          "attributes": {
+            "type": "\"email\"",
+            "autoFocus": true,
+            "placeholder": "\"colleague@example.com\"",
+            "className": "{cn(\n                'block w-full rounded-md border px-3 py-2 text-sm',\n                'focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent',\n                errors.email ? 'border-rose-500 bg-rose-50' : 'border-slate-300',\n              )}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 94,
+          "attributes": {
+            "className": "{cn(\n                'block w-full rounded-md border px-3 py-2 text-sm',\n                'focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent',\n                errors.role ? 'border-rose-500 bg-rose-50' : 'border-slate-300',\n              )}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\settings\\components\\mfa-setup.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 96,
+          "attributes": {
+            "type": "\"password\"",
+            "autoComplete": "\"current-password\"",
+            "value": "{password}",
+            "onChange": "{(e) => setPassword(e.target.value)}",
+            "required": true,
+            "placeholder": "\"Current password\"",
+            "className": "\"block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 193,
+          "attributes": {
+            "inputMode": "\"numeric\"",
+            "autoComplete": "\"one-time-code\"",
+            "maxLength": "{6}",
+            "value": "{code}",
+            "onChange": "{(e) => setCode(e.target.value.replace(/\\D/g, ''))}",
+            "placeholder": "\"123456\"",
+            "className": "\"block w-40 rounded-md border border-slate-300 px-3 py-2 text-center font-mono text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\settings\\components\\settings-layout.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 57,
+          "attributes": {
+            "key": "{item.path}",
+            "to": "{item.path}",
+            "className": "{cn(\r\n                      'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',\r\n                      isActive\r\n                        ? 'bg-indigo-50 text-indigo-700'\r\n                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',\r\n                    )}",
+            "aria-current": "{isActive ? 'page' : undefined}"
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\settings\\pages\\settings-api-keys.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 188,
+          "attributes": {
+            "autoFocus": true,
+            "placeholder": "\"e.g. Production CI/CD\"",
+            "className": "{cn('block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600', errors.name ? 'border-rose-500' : 'border-slate-300')}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 204,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "value": "{p.value}",
+            "className": "\"h-4 w-4 rounded border-slate-300 text-indigo-600\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 223,
+          "attributes": {
+            "type": "\"date\"",
+            "min": "{new Date().toISOString().split('T')[0]}",
+            "className": "\"block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\settings\\pages\\settings-notifications.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 117,
+          "attributes": {
+            "type": "\"radio\"",
+            "value": "{opt.value}",
+            "className": "\"h-4 w-4 border-slate-300 text-indigo-600\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 142,
+          "attributes": {
+            "type": "\"url\"",
+            "placeholder": "\"https://hooks.slack.com/services/…\"",
+            "className": "\"block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 153,
+          "attributes": {
+            "type": "\"url\"",
+            "placeholder": "\"https://prod.webhooks.office.com/…\"",
+            "className": "\"block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\settings\\pages\\settings-security.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 247,
+          "attributes": {
+            "type": "\"password\"",
+            "autoComplete": "\"current-password\"",
+            "value": "{currentPassword}",
+            "onChange": "{(e) => setCurrentPassword(e.target.value)}",
+            "required": true,
+            "className": "{inputCls}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 258,
+          "attributes": {
+            "type": "\"password\"",
+            "autoComplete": "\"new-password\"",
+            "value": "{newPassword}",
+            "onChange": "{(e) => setNewPassword(e.target.value)}",
+            "required": true,
+            "className": "{inputCls}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 269,
+          "attributes": {
+            "type": "\"password\"",
+            "autoComplete": "\"new-password\"",
+            "value": "{confirmPassword}",
+            "onChange": "{(e) => setConfirmPassword(e.target.value)}",
+            "required": true,
+            "className": "{inputCls}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\settings\\pages\\settings-sso.page.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "a",
+          "line": 25,
+          "attributes": {
+            "href": "{supportMailto('SSO enquiry — Enterprise plan')}",
+            "className": "\"mt-4 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\settings\\pages\\settings-team.page.tsx",
+      "fields": [
+        {
+          "tag": "select",
+          "line": 150,
+          "attributes": {
+            "value": "{member.role}",
+            "onChange": "{(e) =>\n                              updateRole({ id: member.id, role: e.target.value })\n                            }",
+            "className": "\"appearance-none rounded-md bg-transparent py-1 pl-2.5 pr-7 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600 cursor-pointer\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\settings\\pages\\settings-webhooks.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 191,
+          "attributes": {
+            "autoFocus": true,
+            "className": "{cn('block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600', errors.name ? 'border-rose-500' : 'border-slate-300')}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 201,
+          "attributes": {
+            "type": "\"url\"",
+            "placeholder": "\"https://your-service.com/webhook\"",
+            "className": "{cn('block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600', errors.url ? 'border-rose-500' : 'border-slate-300')}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 215,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "value": "{evt.value}",
+            "className": "\"h-4 w-4 rounded border-slate-300 text-indigo-600\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\signatures\\components\\sign-document-dialog.tsx",
+      "fields": [
+        {
+          "tag": "select",
+          "line": 33,
+          "attributes": {
+            "aria-label": "\"Document type\"",
+            "value": "{type}",
+            "onChange": "{event=>{setType(event.target.value);setPage(1);setSearch('');resetReview();}}",
+            "className": "\"mt-1 block w-full rounded-lg border border-slate-300 p-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 33,
+          "attributes": {
+            "value": "{search}",
+            "onChange": "{event=>{setSearch(event.target.value);setPage(1);resetReview();}}",
+            "className": "\"mt-1 block w-full rounded-lg border border-slate-300 p-2\"",
+            "placeholder": "\"Search by name or title\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 34,
+          "attributes": {
+            "aria-label": "\"Saved record\"",
+            "value": "{id}",
+            "onChange": "{event=>{resetReview();setId(event.target.value);}}",
+            "className": "\"mt-1 block w-full rounded-lg border border-slate-300 p-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 39,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{draw}",
+            "onChange": "{event=>{setDraw(event.target.checked);setImage(undefined);}}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 40,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{ack}",
+            "onChange": "{event=>setAck(event.target.checked)}",
+            "className": "\"mt-1\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "a",
+          "line": 36,
+          "attributes": {
+            "href": "{`/${source.path}${type==='evidence'&&id?`/${id}`:''}`}",
+            "target": "\"_blank\"",
+            "rel": "\"noreferrer\"",
+            "className": "\"mt-3 inline-block text-xs font-medium text-indigo-700 underline\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 41,
+          "attributes": {
+            "to": "\"/guide#signatures\"",
+            "onClick": "{onClose}",
+            "className": "\"font-medium text-indigo-700 underline\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\signatures\\pages\\signatures.page.tsx",
+      "fields": [
+        {
+          "tag": "textarea",
+          "line": 167,
+          "attributes": {
+            "value": "{revokeReason}",
+            "maxLength": "{500}",
+            "onChange": "{(e) => setRevokeReason(e.target.value)}",
+            "rows": "{3}",
+            "placeholder": "\"e.g. Signed in error, document version superseded\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 resize-none mb-3\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 41,
+          "attributes": {
+            "to": "\"/guide#signatures\"",
+            "className": "\"mt-2 inline-block text-xs font-medium text-indigo-700 underline\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\tasks\\components\\task-comment.tsx",
+      "fields": [
+        {
+          "tag": "textarea",
+          "line": 104,
+          "attributes": {
+            "value": "{content}",
+            "onChange": "{(e) => setContent(e.target.value)}",
+            "rows": "{3}",
+            "placeholder": "\"Add a comment…\"",
+            "className": "\"w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-400 resize-none\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 114,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "checked": "{isInternal}",
+            "onChange": "{(e) => setIsInternal(e.target.checked)}",
+            "className": "\"h-3.5 w-3.5 rounded border-slate-300\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\tasks\\components\\task-form-modal.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 125,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 131,
+          "attributes": {
+            "rows": "{3}",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm resize-none outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 137,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 148,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 160,
+          "attributes": {
+            "aria-label": "\"Task responsible person\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 164,
+          "attributes": {
+            "type": "\"datetime-local\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 170,
+          "attributes": {
+            "placeholder": "\"e.g. security, audit, q4\"",
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 174,
+          "attributes": {
+            "type": "\"checkbox\"",
+            "className": "\"h-4 w-4 rounded border-slate-300\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 181,
+          "attributes": {
+            "className": "\"w-full rounded-md border border-slate-300 px-3 py-2 text-sm\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\tasks\\pages\\task-detail.page.tsx",
+      "fields": [],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 45,
+          "attributes": {
+            "to": "{PATHS.TASKS}",
+            "className": "\"text-sm text-slate-500 hover:underline\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 55,
+          "attributes": {
+            "to": "{PATHS.TASKS}",
+            "className": "\"mt-2 text-sm text-blue-600 hover:underline\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 158,
+          "attributes": {
+            "to": "{PATHS.TASK_DETAIL(sub.id)}",
+            "className": "\"flex-1 text-sm text-slate-700 hover:text-blue-600 truncate\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\tasks\\pages\\tasks.page.tsx",
+      "fields": [
+        {
+          "tag": "select",
+          "line": 81,
+          "attributes": {
+            "value": "{statusFilter}",
+            "onChange": "{(e) => setStatusFilter(e.target.value as any)}",
+            "className": "\"rounded-md border border-slate-300 px-2 py-1.5 text-xs\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 88,
+          "attributes": {
+            "value": "{priorityFilter}",
+            "onChange": "{(e) => setPriorityFilter(e.target.value as any)}",
+            "className": "\"rounded-md border border-slate-300 px-2 py-1.5 text-xs\""
+          }
+        }
+      ],
+      "links": [
+        {
+          "tag": "Link",
+          "line": 141,
+          "attributes": {
+            "to": "{PATHS.TASK_DETAIL(task.id)}",
+            "className": "\"font-medium text-slate-900 hover:text-blue-600 text-sm\""
+          }
+        },
+        {
+          "tag": "Link",
+          "line": 175,
+          "attributes": {
+            "to": "{PATHS.TASK_DETAIL(task.id)}",
+            "className": "\"text-xs text-blue-600 hover:underline\""
+          }
+        }
+      ]
+    },
+    {
+      "file": "frontend\\src\\features\\training\\components\\training-form-modal.tsx",
+      "fields": [
+        {
+          "tag": "FormField",
+          "line": 122,
+          "attributes": {
+            "label": "\"Title\"",
+            "error": "{errors.title?.message}",
+            "required": true,
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 123,
+          "attributes": {
+            "autoFocus": true,
+            "className": "{inputClass(!!errors.title)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 126,
+          "attributes": {
+            "label": "\"Description\"",
+            "error": "{errors.description?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 127,
+          "attributes": {
+            "rows": "{3}",
+            "className": "{cn(inputClass(false), 'resize-none')}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 130,
+          "attributes": {
+            "label": "\"Category\"",
+            "error": "{errors.category?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 131,
+          "attributes": {
+            "placeholder": "\"e.g. Security Awareness\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 138,
+          "attributes": {
+            "label": "\"Provider\"",
+            "error": "{errors.provider?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 139,
+          "attributes": {
+            "placeholder": "\"e.g. KnowBe4\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 146,
+          "attributes": {
+            "label": "\"Duration (minutes)\"",
+            "error": "{errors.durationMinutes?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 147,
+          "attributes": {
+            "type": "\"number\"",
+            "className": "{inputClass(!!errors.durationMinutes)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 150,
+          "attributes": {
+            "label": "\"Frequency (days)\"",
+            "error": "{errors.frequencyDays?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 151,
+          "attributes": {
+            "type": "\"number\"",
+            "className": "{inputClass(!!errors.frequencyDays)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 154,
+          "attributes": {
+            "label": "\"Status\"",
+            "error": "{errors.status?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 155,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 163,
+          "attributes": {
+            "id": "\"isMandatory\"",
+            "type": "\"checkbox\"",
+            "className": "\"h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\training\\pages\\training.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 82,
+          "attributes": {
+            "type": "\"search\"",
+            "placeholder": "\"Search programs...\"",
+            "value": "{search}",
+            "onChange": "{(e) => resetToFirstPage(setSearch)(e.target.value)}",
+            "className": "\"w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 91,
+          "attributes": {
+            "value": "{statusFilter}",
+            "onChange": "{(e) => resetToFirstPage(setStatusFilter)(e.target.value as TrainingStatus | '')}",
+            "className": "\"rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\vendors\\components\\vendor-form-modal.tsx",
+      "fields": [
+        {
+          "tag": "FormField",
+          "line": 130,
+          "attributes": {
+            "label": "\"Name\"",
+            "error": "{errors.name?.message}",
+            "required": true,
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "input",
+          "line": 131,
+          "attributes": {
+            "autoFocus": true,
+            "placeholder": "\"e.g. Acme Cloud Services\"",
+            "className": "{inputClass(!!errors.name)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 139,
+          "attributes": {
+            "label": "\"Description\"",
+            "error": "{errors.description?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 140,
+          "attributes": {
+            "rows": "{3}",
+            "className": "{cn(inputClass(false), 'resize-none')}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 143,
+          "attributes": {
+            "label": "\"Category\"",
+            "error": "{errors.category?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 144,
+          "attributes": {
+            "placeholder": "\"e.g. Infrastructure\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 151,
+          "attributes": {
+            "label": "\"Website\"",
+            "error": "{errors.website?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 152,
+          "attributes": {
+            "placeholder": "\"https://example.com\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 159,
+          "attributes": {
+            "label": "\"Contact Name\"",
+            "error": "{errors.contactName?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 160,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 163,
+          "attributes": {
+            "label": "\"Contact Email\"",
+            "error": "{errors.contactEmail?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 164,
+          "attributes": {
+            "className": "{inputClass(!!errors.contactEmail)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 167,
+          "attributes": {
+            "label": "\"Risk Level\"",
+            "error": "{errors.riskLevel?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 168,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 175,
+          "attributes": {
+            "label": "\"Status\"",
+            "error": "{errors.status?.message}"
+          }
+        },
+        {
+          "tag": "select",
+          "line": 176,
+          "attributes": {
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 183,
+          "attributes": {
+            "label": "\"Next Review Date\"",
+            "error": "{errors.nextReviewDate?.message}"
+          }
+        },
+        {
+          "tag": "input",
+          "line": 184,
+          "attributes": {
+            "type": "\"date\"",
+            "className": "{inputClass(false)}"
+          }
+        },
+        {
+          "tag": "FormField",
+          "line": 187,
+          "attributes": {
+            "label": "\"Data Processed\"",
+            "error": "{errors.dataProcessed?.message}",
+            "className": "\"col-span-2\""
+          }
+        },
+        {
+          "tag": "textarea",
+          "line": 188,
+          "attributes": {
+            "rows": "{2}",
+            "className": "{cn(inputClass(false), 'resize-none')}"
+          }
+        }
+      ],
+      "links": []
+    },
+    {
+      "file": "frontend\\src\\features\\vendors\\pages\\vendors.page.tsx",
+      "fields": [
+        {
+          "tag": "input",
+          "line": 93,
+          "attributes": {
+            "type": "\"search\"",
+            "placeholder": "\"Search vendors...\"",
+            "value": "{search}",
+            "onChange": "{(e) => resetToFirstPage(setSearch)(e.target.value)}",
+            "className": "\"w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 102,
+          "attributes": {
+            "value": "{statusFilter}",
+            "onChange": "{(e) => resetToFirstPage(setStatusFilter)(e.target.value as VendorStatus | '')}",
+            "className": "\"rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        },
+        {
+          "tag": "select",
+          "line": 113,
+          "attributes": {
+            "value": "{riskFilter}",
+            "onChange": "{(e) => resetToFirstPage(setRiskFilter)(e.target.value as VendorRiskLevel | '')}",
+            "className": "\"rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600\""
+          }
+        }
+      ],
+      "links": []
+    }
+  ]
+}
