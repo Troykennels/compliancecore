@@ -12,8 +12,12 @@ import { SettingsLayout } from '../components/settings-layout';
 import { useCurrentUser, useUserRole } from '@/stores/auth.store';
 import { useOrgFormat } from '@/lib/org-format';
 import { SkeletonTable } from '@/components/ui';
+import { hasPermission } from '@/config/role-permissions';
+import { ROLE_GUIDANCE } from '@/config/role-guidance';
 
 const ROLE_BADGE: Record<MemberRole, string> = {
+  msp_admin: 'bg-violet-100 text-violet-700',
+  msp_analyst: 'bg-sky-100 text-sky-700',
   owner:              'bg-indigo-100 text-indigo-700',
   admin:              'bg-violet-100 text-violet-700',
   compliance_manager: 'bg-sky-100 text-sky-700',
@@ -26,7 +30,7 @@ const ASSIGNABLE_ROLES: MemberRole[] = [
   'admin', 'compliance_manager', 'control_owner', 'auditor', 'viewer',
 ];
 
-export function SettingsTeamPage(): JSX.Element {
+export function SettingsTeamPage(): JSX.Element {
   const fmt = useOrgFormat();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
@@ -34,7 +38,8 @@ export function SettingsTeamPage(): JSX.Element {
 
   const currentUser = useCurrentUser();
   const myRole = useUserRole();
-  const canManage = myRole === 'owner' || myRole === 'admin';
+  const canManage = hasPermission(myRole ?? undefined, 'team:write');
+  const assignableRoles = myRole === 'owner' ? ['owner' as const, ...ASSIGNABLE_ROLES] : ASSIGNABLE_ROLES;
 
   const queryClient = useQueryClient();
 
@@ -74,7 +79,7 @@ export function SettingsTeamPage(): JSX.Element {
           <div>
             <h2 className="text-base font-semibold text-slate-900">Team Members</h2>
             <p className="mt-0.5 text-sm text-slate-500">
-              Manage who has access to your organisation.
+              Give each person the access they need. Only owners can change ownership.
             </p>
           </div>
           {canManage && (
@@ -140,7 +145,7 @@ export function SettingsTeamPage(): JSX.Element {
                       </div>
                     </td>
                     <td className="px-4 py-4">
-                      {canManage && !isMe && member.role !== 'owner' ? (
+                      {canManage && !isMe && (member.role !== 'owner' || myRole === 'owner') ? (
                         <div className="relative inline-block">
                           <select
                             value={member.role}
@@ -149,7 +154,8 @@ export function SettingsTeamPage(): JSX.Element {
                             }
                             className="appearance-none rounded-md bg-transparent py-1 pl-2.5 pr-7 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600 cursor-pointer"
                           >
-                            {ASSIGNABLE_ROLES.map((r) => (
+                            {!assignableRoles.includes(member.role) && <option value={member.role} disabled>{ROLE_LABELS[member.role]}</option>}
+                            {assignableRoles.map((r) => (
                               <option key={r} value={r}>{ROLE_LABELS[r]}</option>
                             ))}
                           </select>
@@ -179,7 +185,7 @@ export function SettingsTeamPage(): JSX.Element {
                     </td>
                     {canManage && (
                       <td className="px-4 py-4 text-right">
-                        {!isMe && (
+                        {!isMe && (member.role !== 'owner' || myRole === 'owner') && (
                           <div className="relative inline-block">
                             <button
                               onClick={() => setMenuOpenId(menuOpenId === member.id ? null : member.id)}
@@ -209,6 +215,11 @@ export function SettingsTeamPage(): JSX.Element {
         )}
       </div>
 
+      <details className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+        <summary className="cursor-pointer text-sm font-semibold text-brand-700">Which role should I choose?</summary>
+        <dl className="mt-4 grid gap-4 sm:grid-cols-2">{Object.entries(ROLE_GUIDANCE).map(([key, guidance]) => <div key={key}><dt className="text-sm font-semibold text-slate-900">{guidance.label}</dt><dd className="mt-1 text-xs leading-relaxed text-slate-600">{guidance.purpose}</dd></div>)}</dl>
+        <p className="mt-4 text-xs text-slate-500">Access belongs to the selected organisation. Independent reviewers must be separate from the people preparing the work. Service provider roles are reserved for managed client access.</p>
+      </details>
       <InviteMemberModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
 
       {confirmRemoveId && (

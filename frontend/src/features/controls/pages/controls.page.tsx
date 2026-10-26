@@ -145,7 +145,7 @@ export function ControlsPage(): JSX.Element {
         <select
           value={statusFilter}
           onChange={(e) => resetToFirstPage(setStatusFilter)(e.target.value as ControlImplementationStatus | '')}
-          aria-label="Filter by implementation status"
+          aria-label="Filter by operating status"
           className={selectClass}
         >
           <option value="">All statuses</option>
@@ -194,7 +194,7 @@ export function ControlsPage(): JSX.Element {
             <EmptyState
               icon={<ShieldCheck />}
               title="No controls yet"
-              description="Controls are safeguards you implement and evidence. Start a scoped framework implementation to prepare its control set, or add a custom control."
+              description="Controls are safeguards your organisation puts in place and checks. Start a scoped compliance assessment to prepare the relevant controls, or add a custom control."
               action={<PermissionAction scope="controls:write" managerOnly><Button onClick={openCreate}><Plus /> New control</Button></PermissionAction>}
             />
           )

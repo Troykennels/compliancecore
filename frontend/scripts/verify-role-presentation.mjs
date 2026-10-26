@@ -1,0 +1,18 @@
+﻿import fs from 'node:fs/promises';import path from 'node:path';import assert from 'node:assert/strict';import {chromium} from 'playwright';
+const base='http://127.0.0.1:5173';const access=JSON.parse(await fs.readFile(path.join(process.env.LOCALAPPDATA,'OrionSoft/ComplianceCore-Demo-Access.private.json'),'utf8'));
+const source=await fs.readFile('src/config/role-permissions.ts','utf8');const permissions=JSON.parse(source.match(/rolePermissions:Record<UserRole,string\[\]>=(\{[\s\S]*?\});/)[1]);
+const browser=await chromium.launch();const ctx=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});const page=await ctx.newPage();page.setDefaultTimeout(60000);const checks=[],errors=[];page.on('pageerror',e=>errors.push(e.message));
+await ctx.route('https://compliancecore-api-production.up.railway.app/api/**',async route=>{const headers={'access-control-allow-origin':base,'access-control-allow-credentials':'true','access-control-allow-headers':'Content-Type, Authorization, X-Request-ID','access-control-allow-methods':'GET, POST, PUT, PATCH, DELETE, OPTIONS'};if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers});try{const response=await route.fetch();await route.fulfill({response,headers:{...response.headers(),...headers}});}catch{await route.abort().catch(()=>{});}});
+try{
+ await page.goto(base+'/login');await page.locator('input[type=email]').fill(access.email);await page.locator('input[type=password]').fill(access.password);await page.locator('button[type=submit]').click();await page.waitForURL('**/dashboard');await page.getByRole('heading',{name:'Compliance overview',exact:true}).waitFor();
+ for(const [role,p]of Object.entries(permissions)){
+  // Deliberately a presentation-only fixture: never changes a server role.
+  await page.evaluate(async role=>{const {useAuthStore}=await import('/src/stores/auth.store.ts');useAuthStore.setState(s=>({activeTenant:{...s.activeTenant,role}}));},role);
+  await page.waitForTimeout(100);const nav=page.getByRole('navigation',{name:'Main',exact:true});const can=s=>p.includes('*')||p.includes(s);
+  for(const [href,scope]of [['/vendors','vendors:read'],['/audits','audits:read'],['/billing','billing:read'],['/integrations','integrations:read']])assert.equal(await nav.locator('a[href="'+href+'"]').count(),can(scope)?1:0,role+' '+href);
+  assert.equal(await page.locator('aside a[href="/billing/admin"]').count(),0,'Tenant owner is not platform superadmin');
+  await nav.getByRole('link',{name:'Controls',exact:true}).click();await page.getByRole('heading',{name:'Controls',exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'New control',exact:true}).count(),['owner','admin','compliance_manager','msp_admin'].includes(role)?1:0,role+' create control');
+  await nav.getByRole('link',{name:'Dashboard',exact:true}).click();await page.getByRole('heading',{name:'Compliance overview',exact:true}).waitFor();checks.push({role,passed:true,checks:6});
+ }
+ assert.deepEqual(errors,[]);await fs.mkdir('../verification/dashboard-simplicity-20261026',{recursive:true});await fs.writeFile('../verification/dashboard-simplicity-20261026/role-presentation-results.json',JSON.stringify({passed:true,checks,pageErrors:errors,scope:'Eight local UI role fixtures; server identity stays demo owner. Independent HTTP-router and service tests verify API enforcement.'},null,2));console.log(JSON.stringify({passed:true,roles:checks.length,checks:48}));
+}catch(error){console.error('Role presentation check failed: '+String(error.message).split('\n')[0]);process.exitCode=1;}finally{await ctx.unrouteAll({behavior:'ignoreErrors'});await ctx.close();await browser.close();}

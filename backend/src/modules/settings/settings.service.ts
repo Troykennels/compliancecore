@@ -103,6 +103,10 @@ const teamService = {
     const membership = await settingsRepository.findMembership(tenantId, membershipId);
     if (!membership) throw new NotFoundError('Team member not found.');
 
+    if (membership.role === 'owner' && actor.role !== 'owner') {
+      throw new ForbiddenError('Only an owner can change another owner\'s role.');
+    }
+
     // Widen to string: the invite/update role enum does not include 'owner',
     // but the stored membership role and actor role can be 'owner'.
     const requestedRole: string = input.role;
@@ -136,6 +140,10 @@ const teamService = {
   async removeMember(tenantId: string, membershipId: string, actor: Actor) {
     const membership = await settingsRepository.findMembership(tenantId, membershipId);
     if (!membership) throw new NotFoundError('Team member not found.');
+
+    if (membership.role === 'owner' && actor.role !== 'owner') {
+      throw new ForbiddenError('Only an owner can remove another owner.');
+    }
 
     // Cannot remove yourself
     if (membership.userId === actor.id) {

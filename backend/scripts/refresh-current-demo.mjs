@@ -124,6 +124,13 @@ try{
  for(const a of legacyAudits)await auditsService.update(schema,a.id,{status:'in_progress'},owner);
  const legacyFindings=(await c.query(`SELECT id FROM ${q('audit_findings')} WHERE status IN ('resolved','accepted') AND closure_evidence_version_id IS NULL`)).rows;
  for(const f of legacyFindings)await auditsService.updateFinding(schema,f.id,{status:'open'},owner);
+ // Keep a genuine independent-review action available to the owner demo login.
+ const pending=await existing('tasks','title=$1 AND deleted_at IS NULL',['Demo: review marine follow-up effectiveness']);
+ const coordinator=members.find(m=>m.role==='compliance_manager');
+ if(pending?.corrective_action?.state==='awaiting_verification'&&pending.assigned_to===owner.id&&coordinator){
+  await c.query(`UPDATE ${q('tasks')} SET assigned_to=$2,updated_at=NOW() WHERE id=$1`,[pending.id,coordinator.id]);
+  await s.action(schema,actionSchema.parse({...pending.corrective_action,taskId:pending.id,dueDate:day(14)}),reviewer);
+ }
  const consistency={passed:true,restored,trainingReturnedForVerification:resetTraining.rowCount,policiesReturnedToDraft:legacyPolicies.length,auditsReturnedForReview:legacyAudits.length,findingsReopened:legacyFindings.length,recordsDeleted:0};
  await fs.writeFile('../verification/demo-refresh-20261026/'+(restored?'restored':'online')+'-demo-consistency.json',JSON.stringify(consistency,null,2));console.log(JSON.stringify(consistency));
 }catch(error){console.error('Managed demo refresh failed at '+phase+': '+error.message);process.exitCode=1;}
