@@ -301,6 +301,7 @@ export async function initBillingTables(): Promise<void> {
   await initRecurringTables();
   await applyPricingCorrection();
   await (await import('./commercial-pricing')).initCommercialPricing();
+  await (await import('../payments/invoice-checkout')).initInvoicePayments();
 
   _initialized = true;
   logger.info('Billing tables initialised');

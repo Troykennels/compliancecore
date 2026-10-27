@@ -251,6 +251,12 @@ async function getTenantOwnerEmail(tenantId: string): Promise<string> {
 
 /** Exported so the renewal path can be tested without a scheduler or Redis. */
 export async function processRenewals(): Promise<void> {
+  try {
+    const { reconcilePendingInvoicePayments } = await import('../modules/payments/invoice-checkout');
+    await reconcilePendingInvoicePayments(undefined, 50);
+  } catch (err) {
+    logger.error({ err }, 'Invoice payment reconciliation failed');
+  }
   const cutoff = new Date();
   // Collect only once the paid period actually ends.
 

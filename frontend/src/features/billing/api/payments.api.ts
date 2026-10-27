@@ -54,6 +54,11 @@ export const paymentsApi = {
   }): Promise<CheckoutResult> =>
     (await apiClient.post('/payments/checkout', dto)).data.data,
 
+  // Pay an open invoice's balance, all of it or a part; every payment is
+  // added to that same invoice.
+  invoiceCheckout: async (dto: { invoiceId: string; amount?: number }): Promise<CheckoutResult> =>
+    (await apiClient.post('/payments/invoice-checkout', dto)).data.data,
+
   // Called on return from Paystack. Idempotent server-side, so a page refresh
   // cannot double-apply a payment.
   confirm: async (reference: string): Promise<ConfirmResult> =>
