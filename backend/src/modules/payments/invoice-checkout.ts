@@ -144,3 +144,27 @@ async function sendInvoiceReceipt(to: string, o: { number: string; amount: numbe
     logger.error({ err }, 'Failed to send invoice payment receipt');
   }
 }
+
+/**
+ * Fallback for a missed webhook (the Paystack account is shared across Orion
+ * products): verify recent unconfirmed invoice checkouts and settle the paid
+ * ones on their invoice. Optionally scoped to one organisation.
+ */
+export async function reconcilePendingInvoicePayments(tenantId?: string, limit = 10): Promise<number> {
+  if (!isPaystackConfigured()) return 0;
+  const rows = await prisma.$queryRawUnsafe<{ reference: string }[]>(`SELECT reference FROM global.payment_transactions
+    WHERE status='pending' AND invoice_id IS NOT NULL AND reference LIKE 'CCI-%' AND created_at > now() - interval '7 days'
+      ${tenantId ? `AND tenant_id=$2::uuid` : ''}
+    ORDER BY updated_at ASC LIMIT $1`, ...(tenantId ? [limit, tenantId] : [limit]));
+  const { confirmPendingInvoicePayment } = await import('./payments.service');
+  let settled = 0;
+  for (const { reference } of rows) {
+    try {
+      if ((await confirmPendingInvoicePayment(reference))?.status === 'success') settled++;
+      else await prisma.$executeRawUnsafe(`UPDATE global.payment_transactions SET updated_at=now() WHERE reference=$1 AND status='pending'`, reference);
+    } catch (err) {
+      logger.warn({ err, reference }, 'Invoice payment verification deferred');
+    }
+  }
+  return settled;
+}

@@ -239,6 +239,13 @@ export async function confirmByReference(tenantId: string, reference: string) {
   return { status: 'success' as const, alreadyApplied: !applied };
 }
 
+/** Background check of one pending invoice payment (no tenant context). */
+export async function confirmPendingInvoicePayment(reference: string) {
+  const tx = await repo.findTransactionByReference(reference);
+  if (!tx || tx.status !== 'pending' || !reference.startsWith('CCI-')) return null;
+  return confirmInvoicePayment(tx, reference);
+}
+
 /** Verifies a payment towards an open invoice and adds it to that invoice. */
 async function confirmInvoicePayment(tx: { amount: number; currency: string }, reference: string) {
   const verified = await verifyTransaction(reference);

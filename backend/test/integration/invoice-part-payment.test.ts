@@ -157,6 +157,16 @@ describe.skipIf(!TEST_DB)('invoice part-payments complete the same invoice', () 
     expect(chargeStub).not.toHaveBeenCalled();
   });
 
+  it('settles a payment whose payer closed the page, from the invoice list or the daily job', async () => {
+    const { createInvoiceCheckout, reconcilePendingInvoicePayments } = await import('../../src/modules/payments/invoice-checkout');
+    await createInvoiceCheckout({ tenantId, userId, email: 'payer@example.com', invoiceId, amount: 40000 });
+    const { getInvoices } = await import('../../src/modules/billing/billing.service');
+    const list = await getInvoices(tenantId);
+    expect(list.find((i) => i.id === invoiceId)?.amountPaid).toBe(40000);
+    expect(await reconcilePendingInvoicePayments()).toBe(0);
+    expect(Number((await invoice()).amount_paid)).toBe(40000);
+  });
+
   it('holds money that arrives after the invoice was settled another way', async () => {
     const { createInvoiceCheckout } = await import('../../src/modules/payments/invoice-checkout');
     const { confirmByReference } = await import('../../src/modules/payments/payments.service');

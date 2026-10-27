@@ -417,6 +417,11 @@ export async function removePaymentMethod(tenantId: string, id: string): Promise
 
 // ── Invoices ───────────────────────────────────────────────────────────────────
 export async function getInvoices(tenantId: string, filter: InvoiceListFilter = {}) {
+  // A payer who closed the page before returning still sees their payment.
+  try {
+    const { reconcilePendingInvoicePayments } = await import('../payments/invoice-checkout');
+    await reconcilePendingInvoicePayments(tenantId, 3);
+  } catch { /* the list still loads; the daily job retries */ }
   return repo.findInvoices({ ...filter, tenantId });
 }
 
