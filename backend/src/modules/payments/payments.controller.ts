@@ -44,6 +44,19 @@ export async function createCheckout(req: Request, res: Response): Promise<void>
   created(res, req, result);
 }
 
+const invoiceCheckoutSchema = z.object({
+  invoiceId: z.string().uuid('invoiceId must be a valid UUID'),
+  // Omitted = the whole balance; anything smaller is a part-payment.
+  amount: z.number().finite().positive().max(100_000_000).optional(),
+});
+
+export async function createInvoiceCheckout(req: Request, res: Response): Promise<void> {
+  const parsed = invoiceCheckoutSchema.safeParse(req.body);
+  if (!parsed.success) throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
+  const { createInvoiceCheckout: start } = await import('./invoice-checkout');
+  created(res, req, await start({ tenantId: req.tenant!.id, userId: req.user.id, email: req.user.email, ...parsed.data }));
+}
+
 export async function confirmPayment(req: Request, res: Response): Promise<void> {
   const reference = String(req.query.reference ?? '').trim();
   if (!reference) throw new ValidationError('reference is required');

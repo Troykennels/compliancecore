@@ -67,6 +67,11 @@ export async function createCheckout(input: {
     throw new ValidationError(`Plan "${plan.name}" has no price set for ${currency}.`);
   }
 
+  // A part-paid invoice is finished on that invoice, never replaced by a new one.
+  const { partPaidInvoice } = await import('./invoice-checkout');
+  const owed = await partPaidInvoice(input.tenantId);
+  if (owed) throw new AppError(`Invoice ${owed.number} is part-paid. Pay its balance of ${owed.currency} ${owed.balance.toFixed(2)} from Billing → Invoices first.`, 409, 'OPEN_INVOICE_BALANCE');
+
   const quote = await checkoutQuote(input);
   if (quote.previewOnly) throw new AppError('This is a demonstration workspace. Use your own organisation for a real purchase.',403,'DEMO_WORKSPACE');
   const amount = quote.total;
@@ -214,6 +219,7 @@ export async function confirmByReference(tenantId: string, reference: string) {
     return { status:outcome.status==='paid'?'success':'pending',alreadyApplied:tx.status==='success' };
   }
   if (tx.status === 'success') return { status: 'success' as const, alreadyApplied: true };
+  if (reference.startsWith('CCI-')) return confirmInvoicePayment(tx, reference);
 
   const verified = await verifyTransaction(reference);
 
@@ -231,6 +237,19 @@ export async function confirmByReference(tenantId: string, reference: string) {
     verified.customer?.email ?? null,
   );
   return { status: 'success' as const, alreadyApplied: !applied };
+}
+
+/** Verifies a payment towards an open invoice and adds it to that invoice. */
+async function confirmInvoicePayment(tx: { amount: number; currency: string }, reference: string) {
+  const verified = await verifyTransaction(reference);
+  if (verified.status !== 'success') {
+    if (verified.status === 'failed') await repo.markTransactionFailed(reference, 'failed', verified.status);
+    return { status: verified.status, alreadyApplied: false };
+  }
+  assertAmountMatches(tx, verified.amount, verified.currency, reference);
+  const { settleInvoicePayment } = await import('./invoice-checkout');
+  const settled = await settleInvoicePayment(reference, verified.reference, verified.paid_at ? new Date(verified.paid_at) : new Date(), verified.customer?.email ?? null);
+  return { status: 'success' as const, alreadyApplied: !settled, review: !!settled?.review };
 }
 
 /**
@@ -292,6 +311,10 @@ export async function handleWebhook(rawBody: Buffer, signature: string | undefin
   if (reference.startsWith('CCR-')) {
     const { reconcileRenewal } = await import('./recurring.service');
     await reconcileRenewal(reference);
+    return;
+  }
+  if (reference.startsWith('CCI-')) {
+    if (tx.status !== 'success') await confirmInvoicePayment(tx, reference);
     return;
   }
 

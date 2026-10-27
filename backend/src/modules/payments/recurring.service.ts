@@ -106,6 +106,9 @@ export async function collectRenewal(input: { tenantId:string; subscriptionId:st
     const subs = await tx.$queryRawUnsafe<any[]>(`SELECT * FROM global.subscriptions WHERE id=$1::uuid FOR UPDATE`, input.subscriptionId);
     const sub = subs[0];
     if (!sub || sub.cancel_at_period_end || +new Date(sub.current_period_end)!==+new Date(input.periodEnd) || +new Date(sub.current_period_end)>Date.now()) return { status:'unpaid' as const,reason:'This billing period is not due.' };
+    // Charging the full amount again would overcharge an invoice already part-paid.
+    const invs = await tx.$queryRawUnsafe<any[]>(`SELECT amount_paid,status FROM global.invoices WHERE id=$1::uuid`, input.invoiceId);
+    if (invs[0] && (invs[0].status !== 'open' || Number(invs[0].amount_paid) > 0)) return { status:'unpaid' as const,reason:'This invoice has been part-paid. Pay the balance in Billing → Invoices.' };
     const auths = await tx.$queryRawUnsafe<any[]>(`SELECT * FROM global.recurring_consents WHERE tenant_id=$1::uuid AND enabled FOR UPDATE`, input.tenantId);
     const auth = auths[0];
     if (!auth || Number(auth.amount)!==input.amount || auth.currency!==input.currency || auth.plan_id!==input.planId || auth.cycle!==input.cycle) return { status:'unpaid' as const,reason:'Approve automatic renewal at checkout for the current plan and price, or pay manually.' };
