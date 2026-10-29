@@ -1,7 +1,7 @@
 import { Search } from 'lucide-react';
 import { ComplianceRecordDetails } from './compliance-record-details';
 import { ComplianceRecordPicker } from "./compliance-record-picker";
-import { complianceDownload } from "./compliance-template-library";
+import { complianceDownload } from "../compliance-download";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

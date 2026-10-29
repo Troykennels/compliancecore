@@ -546,7 +546,7 @@ export function AppShell() {
             }
           >
             <CompliancePageHelp />
-            {permitted?<><LinkedComplianceRecord />{(location.pathname!=='/settings/security'||hasPermission(activeTenant?.role,'settings:read'))&&<ComplianceOperationsPanel key={location.pathname+location.search}/>}<Outlet key={location.pathname+location.search}/></>:<div role="alert" className="m-6 rounded-xl border bg-white p-6"><h1 className="text-xl font-semibold">This page needs additional access</h1><p className="mt-3 text-sm">Ask your organisation administrator if you need this permission. Your current role has not been changed.</p></div>}
+            {permitted?<><LinkedComplianceRecord />{(location.pathname!=='/settings/security'||hasPermission(activeTenant?.role,'settings:read'))&&<ComplianceOperationsPanel key={'operations:'+location.pathname+location.search}/>}<Outlet key={'page:'+location.pathname+location.search}/></>:<div role="alert" className="m-6 rounded-xl border bg-white p-6"><h1 className="text-xl font-semibold">This page needs additional access</h1><p className="mt-3 text-sm">Ask your organisation administrator if you need this permission. Your current role has not been changed.</p></div>}
           </Suspense>
         </main>
       </div>

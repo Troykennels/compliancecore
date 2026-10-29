@@ -2,17 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
-export async function complianceDownload(url: string, fallback: string) {
-  const res = await apiClient.get(url, { responseType: "blob" });
-  const disposition = String(res.headers["content-disposition"] ?? "");
-  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] ?? fallback;
-  const href = URL.createObjectURL(res.data as Blob);
-  const a = document.createElement("a");
-  a.href = href;
-  a.download = filename;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(href), 1000);
-}
+import { complianceDownload } from "../compliance-download";
 type Template = {
   id: string;
   title: string;
