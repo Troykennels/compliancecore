@@ -30,6 +30,7 @@ export function DashboardPage() {
     { title: 'Operating', value: controls.implemented, help: 'Recorded as in place', icon: CheckCircle, style: 'border-green-200 bg-green-50 text-green-800' },
     { title: 'Partly operating', value: controls.partiallyImplemented, help: 'Further work is needed', icon: Circle, style: 'border-amber-200 bg-amber-50 text-amber-800' },
     { title: 'Needs work', value: controls.notImplemented + controls.planned, help: 'Planned or not operating', icon: AlertTriangle, style: 'border-red-200 bg-red-50 text-red-800' },
+    { title: 'Not yet assessed', value: controls.notAssessed ?? 0, help: 'Waiting for an assessment', icon: Circle, style: 'border-slate-200 bg-slate-50 text-slate-700' },
     { title: 'Not applicable', value: controls.notApplicable, help: 'Recorded as outside scope', icon: ShieldCheck, style: 'border-violet-200 bg-violet-50 text-violet-800' },
   ];
   return <PageShell width="wide" className="!space-y-5 !py-5">

@@ -94,7 +94,7 @@ export function LinkedComplianceRecord() {
                     </dt>
                     <dd className="mt-1 max-h-80 overflow-auto whitespace-pre-wrap break-words text-sm text-slate-800">
                       {String(q.data?.[key]).replace(
-                        /^(open|in_treatment|in_review|not_implemented|partially_implemented)$/g,
+                        /^(open|in_treatment|in_review|not_assessed|not_implemented|partially_implemented)$/g,
                         (v) => v.replace(/_/g, " "),
                       )}
                     </dd>

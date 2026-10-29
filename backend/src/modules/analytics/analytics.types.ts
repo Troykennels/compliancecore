@@ -3,6 +3,7 @@ export interface AnalyticsOverview {
     implemented: number;
     partially_implemented: number;
     not_implemented: number;
+    not_assessed: number;
     planned: number;
     not_applicable: number;
   };

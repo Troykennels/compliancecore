@@ -188,7 +188,7 @@ export const frameworksRepository = {
       WITH scoped AS (
         SELECT
           c.id,
-          c.implementation_status <> 'not_implemented'                   AS is_implemented,
+          c.implementation_status NOT IN ('not_implemented','not_assessed') AS is_implemented,
           c.owner_id IS NOT NULL                                         AS has_owner,
           (COALESCE(NULLIF(TRIM(c.implementation_notes), ''), NULLIF(TRIM(c.testing_notes), '')) IS NOT NULL)
                                                                          AS has_notes,
@@ -275,7 +275,7 @@ export const frameworksRepository = {
         ${input.category},
         ${input.guidance},
         'medium',
-        'not_implemented',
+        'not_assessed',
         ${input.createdBy}::uuid,
         ${input.createdBy}::uuid
       )

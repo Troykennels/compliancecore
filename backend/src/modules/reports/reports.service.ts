@@ -136,7 +136,8 @@ export async function generateExecutivePdf(
     row('Total Controls',              data.kpis.totalControls);
     row('Implemented Controls',        `${data.kpis.implementedControls} (${data.kpis.totalControls ? Math.round(data.kpis.implementedControls / data.kpis.totalControls * 100) : 0}%)`);
     row('Partially Implemented',       data.kpis.partiallyImplementedControls);
-    row('Not Implemented',             data.kpis.notImplementedControls, data.kpis.notImplementedControls > 0 ? RED : SLATE);
+    row('Not operating',             data.kpis.notImplementedControls, data.kpis.notImplementedControls > 0 ? RED : SLATE);
+    row('Not yet assessed',          data.kpis.notAssessedControls);
     row('Open Tasks',                  data.kpis.openTasks);
     row('Overdue Tasks',               data.kpis.overdueTasks, data.kpis.overdueTasks > 0 ? RED : GREEN);
     row('Total Evidence Items',        data.kpis.totalEvidence);
@@ -149,7 +150,8 @@ export async function generateExecutivePdf(
     sectionHeader('Controls Analysis');
     row('Implemented',           data.controlsBreakdown.implemented);
     row('Partially Implemented', data.controlsBreakdown.partiallyImplemented);
-    row('Not Implemented',       data.controlsBreakdown.notImplemented, data.controlsBreakdown.notImplemented > 0 ? RED : SLATE);
+    row('Not operating',       data.controlsBreakdown.notImplemented, data.controlsBreakdown.notImplemented > 0 ? RED : SLATE);
+    row('Not yet assessed',    data.controlsBreakdown.notAssessed);
     row('Planned',               data.controlsBreakdown.planned);
     row('Not Applicable',        data.controlsBreakdown.notApplicable);
 
@@ -263,7 +265,8 @@ export async function generateExecutiveExcel(
     ['Total Controls',              data.kpis.totalControls],
     ['Implemented Controls',        data.kpis.implementedControls],
     ['Partially Implemented',       data.kpis.partiallyImplementedControls],
-    ['Not Implemented',             data.kpis.notImplementedControls],
+    ['Not operating',             data.kpis.notImplementedControls],
+    ['Not yet assessed',          data.kpis.notAssessedControls],
     ['Planned Controls',            data.kpis.plannedControls],
     ['Open Tasks',                  data.kpis.openTasks],
     ['Overdue Tasks',               data.kpis.overdueTasks],
@@ -286,7 +289,8 @@ export async function generateExecutiveExcel(
   const statusRows = [
     ['Implemented',          data.controlsBreakdown.implemented],
     ['Partially Implemented',data.controlsBreakdown.partiallyImplemented],
-    ['Not Implemented',      data.controlsBreakdown.notImplemented],
+    ['Not operating',      data.controlsBreakdown.notImplemented],
+    ['Not yet assessed',   data.controlsBreakdown.notAssessed],
     ['Planned',              data.controlsBreakdown.planned],
     ['Not Applicable',       data.controlsBreakdown.notApplicable],
   ];

@@ -47,6 +47,7 @@ export interface DashboardSummary {
     implemented: number;
     partiallyImplemented: number;
     notImplemented: number;
+    notAssessed: number;
     notApplicable: number;
     planned: number;
   };
@@ -93,7 +94,7 @@ export const dashboardService = {
       // Aggregate control counts
       const controlCounts = {
         total: 0, implemented: 0, partiallyImplemented: 0,
-        notImplemented: 0, notApplicable: 0, planned: 0,
+        notImplemented: 0, notAssessed: 0, notApplicable: 0, planned: 0,
       };
       for (const stat of controlStats) {
         const count = stat.count;
@@ -102,6 +103,7 @@ export const dashboardService = {
           case 'implemented':           controlCounts.implemented += count; break;
           case 'partially_implemented': controlCounts.partiallyImplemented += count; break;
           case 'not_implemented':       controlCounts.notImplemented += count; break;
+          case 'not_assessed':          controlCounts.notAssessed += count; break;
           case 'not_applicable':        controlCounts.notApplicable += count; break;
           case 'planned':               controlCounts.planned += count; break;
         }

@@ -2,6 +2,7 @@ export interface FrameworkControlCounts {
   implemented: number;
   partiallyImplemented: number;
   notImplemented: number;
+  notAssessed: number;
   notApplicable: number;
   planned: number;
   total: number;
@@ -34,6 +35,7 @@ export interface ScoreSnapshot {
     implemented: number;
     partiallyImplemented: number;
     notImplemented: number;
+    notAssessed?: number;
     notApplicable: number;
     planned: number;
   };

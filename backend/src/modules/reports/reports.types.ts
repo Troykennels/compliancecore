@@ -14,6 +14,7 @@ export interface ComplianceKpis {
   implementedControls: number;
   partiallyImplementedControls: number;
   notImplementedControls: number;
+  notAssessedControls: number;
   plannedControls: number;
   openTasks: number;
   overdueTasks: number;
@@ -34,6 +35,7 @@ export interface ControlsBreakdown {
   implemented: number;
   partiallyImplemented: number;
   notImplemented: number;
+  notAssessed: number;
   planned: number;
   notApplicable: number;
 }
@@ -43,6 +45,7 @@ export interface ControlsByCriticality {
   total: number;
   implemented: number;
   notImplemented: number;
+  notAssessed: number;
 }
 
 export interface FrameworkCoverage {

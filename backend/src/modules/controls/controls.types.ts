@@ -2,6 +2,7 @@ export type ControlCriticality = 'critical' | 'high' | 'medium' | 'low';
 export type ControlStatus =
   | 'implemented'
   | 'partially_implemented'
+  | 'not_assessed'
   | 'not_implemented'
   | 'not_applicable'
   | 'planned';

@@ -17,6 +17,7 @@ export async function getKpis(schemaName: string): Promise<ComplianceKpis> {
         SUM(CASE WHEN implementation_status = 'implemented'            THEN 1 ELSE 0 END)::int    AS implemented,
         SUM(CASE WHEN implementation_status = 'partially_implemented'  THEN 1 ELSE 0 END)::int    AS partial,
         SUM(CASE WHEN implementation_status = 'not_implemented'        THEN 1 ELSE 0 END)::int    AS not_impl,
+        SUM(CASE WHEN implementation_status = 'not_assessed'           THEN 1 ELSE 0 END)::int    AS not_assessed,
         SUM(CASE WHEN implementation_status = 'planned'                THEN 1 ELSE 0 END)::int    AS planned
       FROM controls WHERE deleted_at IS NULL
     `);
@@ -67,6 +68,7 @@ export async function getKpis(schemaName: string): Promise<ComplianceKpis> {
       implementedControls:           cRow?.implemented ?? 0,
       partiallyImplementedControls:  cRow?.partial ?? 0,
       notImplementedControls:        cRow?.not_impl ?? 0,
+      notAssessedControls:           cRow?.not_assessed ?? 0,
       plannedControls:               cRow?.planned ?? 0,
       openTasks:                     tRow?.open_tasks ?? 0,
       overdueTasks:                  tRow?.overdue ?? 0,
@@ -106,6 +108,7 @@ export async function getControlsBreakdown(schemaName: string): Promise<Controls
         SUM(CASE WHEN implementation_status = 'implemented'           THEN 1 ELSE 0 END)::int AS implemented,
         SUM(CASE WHEN implementation_status = 'partially_implemented' THEN 1 ELSE 0 END)::int AS partially_implemented,
         SUM(CASE WHEN implementation_status = 'not_implemented'       THEN 1 ELSE 0 END)::int AS not_implemented,
+        SUM(CASE WHEN implementation_status = 'not_assessed'          THEN 1 ELSE 0 END)::int AS not_assessed,
         SUM(CASE WHEN implementation_status = 'planned'               THEN 1 ELSE 0 END)::int AS planned,
         SUM(CASE WHEN implementation_status = 'not_applicable'        THEN 1 ELSE 0 END)::int AS not_applicable
       FROM controls WHERE deleted_at IS NULL
@@ -114,6 +117,7 @@ export async function getControlsBreakdown(schemaName: string): Promise<Controls
       implemented:          r?.implemented ?? 0,
       partiallyImplemented: r?.partially_implemented ?? 0,
       notImplemented:       r?.not_implemented ?? 0,
+      notAssessed:          r?.not_assessed ?? 0,
       planned:              r?.planned ?? 0,
       notApplicable:        r?.not_applicable ?? 0,
     };
@@ -127,7 +131,8 @@ export async function getControlsByCriticality(schemaName: string): Promise<Cont
         criticality,
         COUNT(*)::int                                                                       AS total,
         SUM(CASE WHEN implementation_status = 'implemented'    THEN 1 ELSE 0 END)::int    AS implemented,
-        SUM(CASE WHEN implementation_status = 'not_implemented' THEN 1 ELSE 0 END)::int   AS not_implemented
+        SUM(CASE WHEN implementation_status = 'not_implemented' THEN 1 ELSE 0 END)::int   AS not_implemented,
+        SUM(CASE WHEN implementation_status = 'not_assessed' THEN 1 ELSE 0 END)::int      AS not_assessed
       FROM controls WHERE deleted_at IS NULL
       GROUP BY criticality
       ORDER BY CASE criticality WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END
@@ -137,6 +142,7 @@ export async function getControlsByCriticality(schemaName: string): Promise<Cont
       total:           r.total ?? 0,
       implemented:     r.implemented ?? 0,
       notImplemented:  r.not_implemented ?? 0,
+      notAssessed:     r.not_assessed ?? 0,
     }));
   });
 }

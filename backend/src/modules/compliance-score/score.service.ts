@@ -9,6 +9,8 @@ import { CRITICALITY_WEIGHT } from '../controls/controls.types';
 //   implemented       → full weight
 //   partially_implemented → half weight
 //   All other statuses  → 0 points
+//   not_assessed counts in the denominator at 0, so an unassessed register never looks ready,
+//   but it is reported separately and never labelled as failing.
 export function buildFrameworkScore(
   stats: { implementationStatus: string; criticality: string; count: number }[],
   frameworkId: string | null,
@@ -16,7 +18,7 @@ export function buildFrameworkScore(
 ): FrameworkScore {
   let points = 0;
   let maxPoints = 0;
-  const counts = { implemented: 0, partiallyImplemented: 0, notImplemented: 0, notApplicable: 0, planned: 0, total: 0 };
+  const counts = { implemented: 0, partiallyImplemented: 0, notImplemented: 0, notAssessed: 0, notApplicable: 0, planned: 0, total: 0 };
 
   for (const stat of stats) {
     const weight = CRITICALITY_WEIGHT[stat.criticality as keyof typeof CRITICALITY_WEIGHT] ?? 1;
@@ -38,6 +40,10 @@ export function buildFrameworkScore(
         counts.notImplemented += count;
         maxPoints += weight * count;
         break;
+      case 'not_assessed':
+        counts.notAssessed += count;
+        maxPoints += weight * count;
+        break;
       case 'planned':
         counts.planned += count;
         maxPoints += weight * count;
@@ -56,6 +62,7 @@ export function buildFrameworkScore(
       implemented:          counts.implemented,
       partiallyImplemented: counts.partiallyImplemented,
       notImplemented:       counts.notImplemented,
+      notAssessed:          counts.notAssessed,
       notApplicable:        counts.notApplicable,
       planned:              counts.planned,
       total:                counts.total,

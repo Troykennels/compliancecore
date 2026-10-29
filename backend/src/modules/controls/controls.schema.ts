@@ -11,8 +11,8 @@ export const createControlSchema = z.object({
   guidance:             z.string().max(10000).optional().nullable(),
   criticality:          z.enum(['critical', 'high', 'medium', 'low']).default('medium'),
   implementationStatus: z.enum([
-    'implemented', 'partially_implemented', 'not_implemented', 'not_applicable', 'planned',
-  ]).default('not_implemented'),
+    'not_assessed', 'implemented', 'partially_implemented', 'not_implemented', 'not_applicable', 'planned',
+  ]).default('not_assessed'),
   implementationNotes:  z.string().max(5000).optional().nullable(),
   testingNotes:         z.string().max(5000).optional().nullable(),
   ownerId:              uuidSchema.optional().nullable(),
@@ -29,7 +29,7 @@ export const listControlsSchema = z.object({
   limit:                z.coerce.number().int().min(1).max(200).optional().default(50),
   frameworkId:          uuidSchema.optional(),
   status:               z.enum([
-    'implemented', 'partially_implemented', 'not_implemented', 'not_applicable', 'planned',
+    'not_assessed', 'implemented', 'partially_implemented', 'not_implemented', 'not_applicable', 'planned',
   ]).optional(),
   criticality:          z.enum(['critical', 'high', 'medium', 'low']).optional(),
   ownerId:              uuidSchema.optional(),

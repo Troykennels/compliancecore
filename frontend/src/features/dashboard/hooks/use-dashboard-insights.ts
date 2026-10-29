@@ -295,13 +295,13 @@ export function buildRecommendations(input: {
   const { controls, risks, tasks, policies, overdueExpiry, score } = input;
 
   const criticalOpen = controls.filter(
-    (c) => c.criticality === 'critical' && c.implementationStatus === 'not_implemented',
+    (c) => c.criticality === 'critical' && (c.implementationStatus === 'not_implemented' || c.implementationStatus === 'not_assessed'),
   );
   if (criticalOpen.length) {
     out.push({
       id: 'critical-controls',
       severity: 'high',
-      text: `${criticalOpen.length} critical control${criticalOpen.length === 1 ? '' : 's'} not implemented. These move your score most.`,
+      text: `${criticalOpen.length} critical control${criticalOpen.length === 1 ? '' : 's'} not yet operating or not yet assessed. These move your score most.`,
       action: 'Review controls',
     });
   }

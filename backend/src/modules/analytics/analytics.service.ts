@@ -73,6 +73,7 @@ export const analyticsService = {
         implemented: 0,
         partially_implemented: 0,
         not_implemented: 0,
+        not_assessed: 0,
         planned: 0,
         not_applicable: 0,
       };
@@ -87,6 +88,7 @@ export const analyticsService = {
           'implemented',
           'partially_implemented',
           'not_implemented',
+          'not_assessed',
           'planned',
           'not_applicable',
         ]);

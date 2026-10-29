@@ -6,10 +6,11 @@ import {
 import { AlertTriangle, RefreshCw, ShieldCheck, Flame, ScrollText, Store, GraduationCap, ClipboardCheck } from 'lucide-react';
 import { useAnalyticsOverview } from '../hooks/use-analytics';
 
-const label = (k: string) => k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+const LABELS: Record<string, string> = { implemented: 'Operating', partially_implemented: 'Partly operating', not_implemented: 'Not operating', not_assessed: 'Not yet assessed', not_applicable: 'Not applicable' };
+const label = (k: string) => LABELS[k] ?? k.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 const toData = (obj: Record<string, number>) => Object.entries(obj).map(([k, v]) => ({ name: label(k), value: v }));
 
-const CONTROL_COLORS = ['#22C55E', '#F59E0B', '#EF4444', '#3B82F6', '#94A3B8'];
+const CONTROL_COLORS = ['#22C55E', '#F59E0B', '#EF4444', '#CBD5E1', '#3B82F6', '#94A3B8'];
 const SEVERITY_COLORS: Record<string, string> = { High: '#EF4444', Medium: '#F59E0B', Low: '#22C55E', Critical: '#DC2626' };
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {

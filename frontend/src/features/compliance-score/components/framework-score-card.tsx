@@ -37,18 +37,22 @@ export function FrameworkScoreCard({ framework }: FrameworkScoreCardProps) {
       </div>
 
       {/* Control breakdown */}
-      <div className="grid grid-cols-3 gap-1.5 text-center">
+      <div className="grid grid-cols-2 gap-1.5 text-center sm:grid-cols-4">
         <div className="rounded-md bg-green-50 px-2 py-1.5">
           <p className="text-sm font-bold text-green-700">{c.implemented}</p>
-          <p className="text-[10px] text-green-600">Implemented</p>
+          <p className="text-[10px] text-green-600">Operating</p>
         </div>
         <div className="rounded-md bg-amber-50 px-2 py-1.5">
           <p className="text-sm font-bold text-amber-700">{c.partiallyImplemented}</p>
-          <p className="text-[10px] text-amber-600">Partial</p>
+          <p className="text-[10px] text-amber-600">Partly operating</p>
         </div>
         <div className="rounded-md bg-red-50 px-2 py-1.5">
           <p className="text-sm font-bold text-red-700">{c.notImplemented}</p>
-          <p className="text-[10px] text-red-600">Not Impl.</p>
+          <p className="text-[10px] text-red-600">Not operating</p>
+        </div>
+        <div className="rounded-md bg-slate-50 px-2 py-1.5">
+          <p className="text-sm font-bold text-slate-700">{c.notAssessed ?? 0}</p>
+          <p className="text-[10px] text-slate-500">Not yet assessed</p>
         </div>
       </div>
     </div>

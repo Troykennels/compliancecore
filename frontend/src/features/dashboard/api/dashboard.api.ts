@@ -6,6 +6,7 @@ export interface ControlCounts {
   implemented: number;
   partiallyImplemented: number;
   notImplemented: number;
+  notAssessed?: number;
   notApplicable: number;
   planned: number;
 }

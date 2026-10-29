@@ -8,6 +8,7 @@ export function ControlStatusChart({ controls }: { controls: ControlCounts }) {
     { name: 'Partly operating', value: controls.partiallyImplemented, color: '#b36405' },
     { name: 'Planned', value: controls.planned, color: '#2470e8' },
     { name: 'Not operating', value: controls.notImplemented, color: '#dc3545' },
+    { name: 'Not yet assessed', value: controls.notAssessed ?? 0, color: '#94a3b8' },
     { name: 'Not applicable', value: controls.notApplicable, color: '#8254c7' },
   ];
   const inScope = controls.total - controls.notApplicable;

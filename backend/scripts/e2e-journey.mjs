@@ -127,6 +127,10 @@ async function main() {
 
     const controls = data(await call('GET', '/api/controls'));
     assert('controls reflect the adoption', (controls?.total ?? 0) > 0);
+    // A freshly prepared register has not been assessed: nothing is shown as failing yet.
+    assert('prepared controls start as not yet assessed', (controls?.controls ?? []).length > 0 && controls.controls.every(c => c.implementationStatus === 'not_assessed'));
+    const dash = data(await call('GET', '/api/dashboard'));
+    assert('the dashboard counts unassessed controls separately', (dash?.controls?.notAssessed ?? 0) > 0 && (dash?.controls?.notImplemented ?? 0) === 0);
   }
 
   // ── Read every list endpoint ─────────────────────────────────────────────

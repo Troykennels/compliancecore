@@ -188,11 +188,12 @@ function ScoreTrendChart({ data }: { data: Array<{ date: string; score: number |
 
 // ── Controls status donut ──────────────────────────────────────────────────────
 
-function ControlsDonut({ breakdown }: { breakdown: { implemented: number; partiallyImplemented: number; notImplemented: number; planned: number; notApplicable: number } }) {
+function ControlsDonut({ breakdown }: { breakdown: { implemented: number; partiallyImplemented: number; notImplemented: number; notAssessed?: number; planned: number; notApplicable: number } }) {
   const chartData = [
     { name: 'Operating',    value: breakdown.implemented,          color: CHART_COLORS.implemented },
     { name: 'Partial',        value: breakdown.partiallyImplemented, color: CHART_COLORS.partial },
     { name: 'Not operating',value: breakdown.notImplemented,       color: CHART_COLORS.notImpl },
+    { name: 'Not yet assessed', value: breakdown.notAssessed ?? 0, color: '#cbd5e1' },
     { name: 'Planned',        value: breakdown.planned,              color: CHART_COLORS.planned },
     { name: 'N/A',            value: breakdown.notApplicable,        color: CHART_COLORS.notApplicable },
   ].filter((d) => d.value > 0);
@@ -659,7 +660,7 @@ export function ExecutiveDashboardPage() {
                 : `${data.kpis.implementedControls} of ${data.kpis.totalControls} controls`}
               color={scoreColor} />
             <KpiCard icon={ShieldCheck} label="Operating safeguards" value={data.kpis.implementedControls}
-              sub={`${data.kpis.notImplementedControls} not operating`}
+              sub={`${data.kpis.notImplementedControls} not operating · ${data.kpis.notAssessedControls ?? 0} not yet assessed`}
               color={data.kpis.notImplementedControls > 0 ? 'amber' : 'green'} />
             <KpiCard icon={CheckSquare} label="Overdue Tasks" value={data.kpis.overdueTasks}
               sub={`${data.kpis.openTasks} total open`}
