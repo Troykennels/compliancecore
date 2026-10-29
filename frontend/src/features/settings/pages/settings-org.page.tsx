@@ -6,8 +6,12 @@ import { LogoUpload } from '@/features/organizations/components/logo-upload';
 import { ScopingQuestionnaire } from '@/features/organizations/components/scoping-questionnaire';
 import { DataExport } from '@/features/organizations/components/data-export';
 import { DeleteOrganization } from '@/features/organizations/components/delete-organization';
+import { hasPermission } from '@/config/role-permissions';
+import { useUserRole } from '@/stores/auth.store';
 
 export function SettingsOrgPage(): JSX.Element {
+  const role = useUserRole();
+  const canWrite = hasPermission(role ?? undefined, 'org:write');
   const { data: org, isLoading, isError } = useOrganizationProfile();
 
   return (
@@ -17,7 +21,7 @@ export function SettingsOrgPage(): JSX.Element {
             in an admin corner: being able to leave with your records is a
             property of the organisation, and customers evaluating us will look
             for it. */}
-        <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
+        {(role === 'owner' || role === 'admin') && <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-200 px-6 py-4">
             <h2 className="text-base font-semibold text-slate-900">Your Data</h2>
             <p className="mt-0.5 text-sm text-slate-500">
@@ -27,7 +31,7 @@ export function SettingsOrgPage(): JSX.Element {
           <div className="p-6">
             <DataExport />
           </div>
-        </section>
+        </section>}
 
         {/* Compliance scope. Revisitable because the answers go stale — taking
             card payments or opening an EU office changes what applies. */}
@@ -40,7 +44,8 @@ export function SettingsOrgPage(): JSX.Element {
             </p>
           </div>
           <div className="p-6">
-            <ScopingQuestionnaire variant="settings" />
+            {!canWrite && <p className="mb-3 text-sm text-slate-600">You have read-only access. Ask an organisation administrator to update the scope.</p>}
+            <fieldset disabled={!canWrite}><ScopingQuestionnaire variant="settings" /></fieldset>
           </div>
         </section>
 
@@ -63,7 +68,7 @@ export function SettingsOrgPage(): JSX.Element {
                 Failed to load organisation profile. Please refresh.
               </p>
             ) : org ? (
-              <div className="space-y-6">
+              <fieldset disabled={!canWrite} className="space-y-6">
                 {/* Logo */}
                 <div className="space-y-2">
                   <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">
@@ -76,13 +81,13 @@ export function SettingsOrgPage(): JSX.Element {
 
                 {/* Form */}
                 <CompanyProfileForm organization={org} />
-              </div>
+              </fieldset>
             ) : null}
           </div>
         </section>
 
         {/* Danger Zone */}
-        {org && (
+        {org && role === 'owner' && (
           <section className="rounded-xl border border-rose-200 bg-white shadow-sm">
             <div className="border-b border-rose-200 px-6 py-4">
               <h2 className="text-base font-semibold text-rose-700">Danger Zone</h2>

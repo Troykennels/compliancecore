@@ -1,3 +1,6 @@
+import { ModalSurface } from '@/components/modal-surface';
+import { PermissionAction } from '@/components/permission-action';
+import { useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
 import {
   Plus, Search, Building2, MoreHorizontal, Pencil, Trash2,
@@ -17,9 +20,11 @@ import { SkeletonTable } from '@/components/ui';
 
 const PAGE_SIZE = 20;
 
-export function VendorsPage(): JSX.Element {
+export function VendorsPage(): JSX.Element {
+  const [routeParams]=useSearchParams();
+
   const fmt = useOrgFormat();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(routeParams.get('q')??'');
   const [statusFilter, setStatusFilter] = useState<VendorStatus | ''>('');
   const [riskFilter, setRiskFilter] = useState<VendorRiskLevel | ''>('');
   const [page, setPage] = useState(1);
@@ -73,13 +78,13 @@ export function VendorsPage(): JSX.Element {
               Manage your third-party vendors and track their risk and review status.
             </p>
           </div>
-          <button
+          <PermissionAction scope="vendors:write"><button
             onClick={openCreate}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
             New Vendor
-          </button>
+          </button></PermissionAction>
         </div>
 
         {/* Filters */}
@@ -92,14 +97,14 @@ export function VendorsPage(): JSX.Element {
               value={search}
               onChange={(e) => resetToFirstPage(setSearch)(e.target.value)}
               className="w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-            />
+             aria-label="Search vendors..." />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => resetToFirstPage(setStatusFilter)(e.target.value as VendorStatus | '')}
             className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          >
+           aria-label="Filter: All Statuses" >
             <option value="">All Statuses</option>
             {Object.entries(VENDOR_STATUS_CONFIG).map(([value, cfg]) => (
               <option key={value} value={value}>{cfg.label}</option>
@@ -110,7 +115,7 @@ export function VendorsPage(): JSX.Element {
             value={riskFilter}
             onChange={(e) => resetToFirstPage(setRiskFilter)(e.target.value as VendorRiskLevel | '')}
             className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          >
+           aria-label="Filter: All Risk Levels" >
             <option value="">All Risk Levels</option>
             {Object.entries(RISK_LEVEL_CONFIG).map(([value, cfg]) => (
               <option key={value} value={value}>{cfg.label}</option>
@@ -193,18 +198,18 @@ export function VendorsPage(): JSX.Element {
 
                           {menuOpenId === vendor.id && (
                             <div className="absolute right-0 top-full z-10 mt-1 w-44 rounded-lg border border-slate-200 bg-white shadow-lg py-1">
-                              <button
+                              <PermissionAction scope="vendors:write"><button
                                 onClick={() => { openEdit(vendor); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                               >
                                 <Pencil className="h-4 w-4" /> Edit
-                              </button>
-                              <button
+                              </button></PermissionAction>
+                              <PermissionAction scope="vendors:delete"><button
                                 onClick={() => { setConfirmDeleteId(vendor.id); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"
                               >
                                 <Trash2 className="h-4 w-4" /> Delete
-                              </button>
+                              </button></PermissionAction>
                             </div>
                           )}
                         </div>
@@ -253,7 +258,7 @@ export function VendorsPage(): JSX.Element {
 
       {/* Delete confirmation */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Delete Vendor?" onClose={() => setConfirmDeleteId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDeleteId(null)} />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-base font-semibold text-slate-900">Delete Vendor?</h3>
@@ -261,12 +266,12 @@ export function VendorsPage(): JSX.Element {
               This will permanently delete the vendor. This action cannot be undone.
             </p>
             <div className="mt-6 flex justify-end gap-3">
-              <button
+              <PermissionAction scope="vendors:delete"><button
                 onClick={() => setConfirmDeleteId(null)}
                 className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Cancel
-              </button>
+              </button></PermissionAction>
               <button
                 onClick={() => handleDelete(confirmDeleteId)}
                 disabled={isDeleting}
@@ -276,7 +281,7 @@ export function VendorsPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </div>
   );

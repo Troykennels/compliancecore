@@ -1,3 +1,4 @@
+import { auditCurrentActor } from '../lib/audit-context';
 import { Queue, Worker, type Job } from 'bullmq';
 import { redisForQueues } from '../config/redis';
 import { prisma } from '../config/database';
@@ -201,6 +202,7 @@ async function ensureRenewalInvoice(input: {
   billingPeriodStart:Date; billingPeriodEnd:Date; dueDate:Date; lineItems:unknown[];
 }): Promise<{id:string;number:string}> {
   return prisma.$transaction(async tx => {
+        await auditCurrentActor(tx);
     await tx.$queryRawUnsafe(`SELECT id FROM global.subscriptions WHERE id=$1::uuid FOR UPDATE`, input.subscriptionId);
     const existing = await tx.$queryRawUnsafe<Array<{id:string;number:string}>>(`SELECT id,number FROM global.invoices WHERE subscription_id=$1::uuid AND billing_period_start=$2::timestamptz AND status<>'void' ORDER BY created_at LIMIT 1`,input.subscriptionId,input.billingPeriodStart);
     if (existing[0]) return existing[0];

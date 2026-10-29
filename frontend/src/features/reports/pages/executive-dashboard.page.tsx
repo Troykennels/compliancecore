@@ -1,3 +1,5 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { ModalSurface } from '@/components/modal-surface';
 import React, { useState } from 'react';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
@@ -186,9 +188,9 @@ function ScoreTrendChart({ data }: { data: Array<{ date: string; score: number |
 
 function ControlsDonut({ breakdown }: { breakdown: { implemented: number; partiallyImplemented: number; notImplemented: number; planned: number; notApplicable: number } }) {
   const chartData = [
-    { name: 'Implemented',    value: breakdown.implemented,          color: CHART_COLORS.implemented },
+    { name: 'Operating',    value: breakdown.implemented,          color: CHART_COLORS.implemented },
     { name: 'Partial',        value: breakdown.partiallyImplemented, color: CHART_COLORS.partial },
-    { name: 'Not Implemented',value: breakdown.notImplemented,       color: CHART_COLORS.notImpl },
+    { name: 'Not operating',value: breakdown.notImplemented,       color: CHART_COLORS.notImpl },
     { name: 'Planned',        value: breakdown.planned,              color: CHART_COLORS.planned },
     { name: 'N/A',            value: breakdown.notApplicable,        color: CHART_COLORS.notApplicable },
   ].filter((d) => d.value > 0);
@@ -245,10 +247,10 @@ function CriticalityChart({ data }: { data: ControlsByCriticality[] }) {
         <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
         <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #e2e8f0' }} />
         <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-        <Bar dataKey="implemented"   name="Implemented"    fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={28}>
+        <Bar dataKey="implemented"   name="Operating"    fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={28}>
           {data.map((d, i) => <Cell key={i} fill={CRITICALITY_COLORS[d.criticality] ?? '#3b82f6'} />)}
         </Bar>
-        <Bar dataKey="notImplemented" name="Not Implemented" fill="#dc262620" radius={[4, 4, 0, 0]} maxBarSize={28} />
+        <Bar dataKey="notImplemented" name="Not operating" fill="#dc262620" radius={[4, 4, 0, 0]} maxBarSize={28} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -351,7 +353,7 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <ModalSurface label="Scheduled Reports" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 shrink-0">
@@ -359,7 +361,7 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
             <h2 className="font-semibold text-slate-900">Scheduled Reports</h2>
             <p className="text-xs text-slate-500 mt-0.5">Automatically deliver compliance reports via email</p>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">
+          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100" aria-label="Close dialog">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -408,7 +410,7 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
                     <button
                       onClick={() => del.mutate(r.id)}
                       className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
-                    >
+                     aria-label="Delete record">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -423,14 +425,14 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
               <p className="text-xs font-semibold text-blue-800">New Scheduled Report</p>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className="text-[11px] font-medium text-slate-600 mb-1 block">Report Name *</label>
+                <AccessibleField label={<>Report Name *</>} className="col-span-2">
+
                   <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"
                     placeholder="e.g. Monthly Executive Report" />
-                </div>
-                <div>
-                  <label className="text-[11px] font-medium text-slate-600 mb-1 block">Frequency *</label>
+                </AccessibleField>
+                <AccessibleField label={<>Frequency *</>} >
+
                   <select value={form.frequency}
                     onChange={(e) => setForm((f) => ({ ...f, frequency: e.target.value as any }))}
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400">
@@ -438,27 +440,27 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
                   </select>
-                </div>
+                </AccessibleField>
                 {form.frequency === 'weekly' && (
-                  <div>
-                    <label className="text-[11px] font-medium text-slate-600 mb-1 block">Day of Week</label>
+                  <AccessibleField label={<>Day of Week</>} >
+
                     <select value={form.dayOfWeek ?? 1}
                       onChange={(e) => setForm((f) => ({ ...f, dayOfWeek: Number(e.target.value) }))}
                       className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400">
                       {DOW_LABELS.map((d, i) => <option key={i} value={i}>{d}</option>)}
                     </select>
-                  </div>
+                  </AccessibleField>
                 )}
                 {form.frequency === 'monthly' && (
-                  <div>
-                    <label className="text-[11px] font-medium text-slate-600 mb-1 block">Day of Month</label>
+                  <AccessibleField label={<>Day of Month</>} >
+
                     <input type="number" min={1} max={28} value={form.dayOfMonth ?? 1}
                       onChange={(e) => setForm((f) => ({ ...f, dayOfMonth: Number(e.target.value) }))}
                       className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400" />
-                  </div>
+                  </AccessibleField>
                 )}
-                <div>
-                  <label className="text-[11px] font-medium text-slate-600 mb-1 block">Send Hour (UTC)</label>
+                <AccessibleField label={<>Send Hour (UTC)</>} >
+
                   <select value={form.hour ?? 6}
                     onChange={(e) => setForm((f) => ({ ...f, hour: Number(e.target.value) }))}
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400">
@@ -466,9 +468,9 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
                       <option key={i} value={i}>{String(i).padStart(2, '0')}:00 UTC</option>
                     ))}
                   </select>
-                </div>
-                <div>
-                  <label className="text-[11px] font-medium text-slate-600 mb-1 block">Format</label>
+                </AccessibleField>
+                <AccessibleField label={<>Format</>} >
+
                   <select value={form.format ?? 'pdf'}
                     onChange={(e) => setForm((f) => ({ ...f, format: e.target.value as any }))}
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400">
@@ -476,14 +478,14 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
                     <option value="excel">Excel</option>
                     <option value="both">PDF + Excel</option>
                   </select>
-                </div>
+                </AccessibleField>
                 <div className="col-span-2">
                   <label className="text-[11px] font-medium text-slate-600 mb-1 block">Recipients *</label>
                   <div className="flex gap-2">
                     <input value={recipientInput} onChange={(e) => setRecipientInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addRecipient())}
                       placeholder="email@company.com — press Enter to add"
-                      className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400" />
+                      className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"  aria-label="email@company.com — press Enter to add" />
                     <button type="button" onClick={addRecipient}
                       className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700">
                       Add
@@ -494,7 +496,7 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
                       {form.recipients.map((email) => (
                         <span key={email} className="inline-flex items-center gap-1 rounded-full bg-white border border-slate-200 px-2.5 py-0.5 text-[11px] text-slate-700">
                           {email}
-                          <button type="button" onClick={() => setForm((f) => ({ ...f, recipients: f.recipients.filter((r) => r !== email) }))}>
+                          <button type="button" onClick={() => setForm((f) => ({ ...f, recipients: f.recipients.filter((r) => r !== email) }))} aria-label="Close dialog">
                             <X className="h-2.5 w-2.5 text-slate-400 hover:text-red-500" />
                           </button>
                         </span>
@@ -527,7 +529,7 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </div>
-    </div>
+    </ModalSurface>
   );
 }
 
@@ -657,11 +659,11 @@ export function ExecutiveDashboardPage() {
             <KpiCard icon={TrendingUp} label="Compliance Score"
               value={score === null ? '—' : `${score}%`}
               sub={score === null
-                ? 'Not scored — adopt a framework'
+                ? 'Not scored — start an assessment'
                 : `${data.kpis.implementedControls} of ${data.kpis.totalControls} controls`}
               color={scoreColor} />
-            <KpiCard icon={ShieldCheck} label="Implemented Controls" value={data.kpis.implementedControls}
-              sub={`${data.kpis.notImplementedControls} not implemented`}
+            <KpiCard icon={ShieldCheck} label="Operating safeguards" value={data.kpis.implementedControls}
+              sub={`${data.kpis.notImplementedControls} not operating`}
               color={data.kpis.notImplementedControls > 0 ? 'amber' : 'green'} />
             <KpiCard icon={CheckSquare} label="Overdue Tasks" value={data.kpis.overdueTasks}
               sub={`${data.kpis.openTasks} total open`}
@@ -705,7 +707,7 @@ export function ExecutiveDashboardPage() {
         ) : data ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <Card>
-              <CardHeader title="Framework Coverage" subtitle="% controls implemented" />
+              <CardHeader title="Framework Coverage" subtitle="% safeguards recorded as operating" />
               <div className="p-4 h-56">
                 <FrameworkBar coverage={data.frameworkCoverage} />
               </div>
@@ -728,7 +730,7 @@ export function ExecutiveDashboardPage() {
         {/* ── Charts Row 3 — Controls by Criticality ───────────────────────── */}
         {!isLoading && data && data.controlsByCriticality.length > 0 && (
           <Card>
-            <CardHeader title="Controls by Criticality" subtitle="Implemented vs not implemented" />
+            <CardHeader title="Controls by Criticality" subtitle="Operating vs not operating" />
             <div className="p-4 h-48">
               <CriticalityChart data={data.controlsByCriticality} />
             </div>

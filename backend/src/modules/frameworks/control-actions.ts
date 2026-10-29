@@ -6,11 +6,11 @@ export async function closeResolvedControlActions(tx:Prisma.TransactionClient,co
  FROM controls c JOIN framework_control_applicability a ON a.control_id=c.id
  WHERE c.id=$1::uuid AND c.deleted_at IS NULL AND t.entity_type='control' AND t.entity_id=c.id
  AND t.framework_id=c.framework_id AND t.deleted_at IS NULL AND 'framework-implementation'=ANY(t.tags)
- AND t.status NOT IN ('completed','cancelled') AND (
+ AND t.corrective_action IS NULL AND t.status NOT IN ('completed','cancelled') AND (
  (NOT a.applicable AND c.implementation_status='not_applicable') OR
  (a.applicable AND c.implementation_status='implemented' AND c.owner_id IS NOT NULL
  AND length(trim(COALESCE(c.implementation_notes,'')))>0 AND length(trim(COALESCE(c.testing_notes,'')))>0
- AND c.last_reviewed_at+make_interval(days=>c.review_frequency_days)>NOW()
+ AND EXISTS(SELECT 1 FROM control_tests ct WHERE ct.control_id=c.id AND ct.status='approved' AND ct.result='pass' AND ct.tested_at>=c.updated_at AND ct.reviewed_at+make_interval(days=>c.review_frequency_days)>NOW() AND NOT EXISTS(SELECT 1 FROM jsonb_array_elements(ct.evidence_versions) item LEFT JOIN evidence proof ON proof.id=(item->>'id')::uuid WHERE proof.id IS NULL OR proof.deleted_at IS NOT NULL OR proof.status<>'active' OR (proof.retention_date IS NOT NULL AND proof.retention_date<=NOW()) OR proof.current_version_id IS DISTINCT FROM (item->>'current_version_id')::uuid))
  AND EXISTS(SELECT 1 FROM evidence_links l JOIN evidence e ON e.id=l.evidence_id JOIN evidence_versions v ON v.id=e.current_version_id WHERE l.linked_type='control' AND l.linked_id=c.id AND e.deleted_at IS NULL AND e.status='active' AND (e.retention_date IS NULL OR e.retention_date>NOW()) AND v.upload_status='completed')))
  `,controlId);
 }

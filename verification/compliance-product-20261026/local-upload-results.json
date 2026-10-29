@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "live": false,
+  "checks": [
+    "Upload initiation succeeds",
+    "File bytes reach configured object storage",
+    "Incomplete or mismatched byte count is refused",
+    "Upload confirmation succeeds",
+    "Repeated successful confirmation is idempotent",
+    "Saved evidence resolves to the uploaded file",
+    "Download URL can be obtained",
+    "Downloaded bytes match exactly",
+    "Version history contains completed upload",
+    "Evidence links to a real control",
+    "Read-only role cannot upload files",
+    "Read-only role cannot save risk assessment",
+    "Mislabelled file contents cannot be confirmed as an image",
+    "Synthetic evidence can be removed",
+    "Removed evidence is no longer accessible"
+  ],
+  "syntheticEvidenceId": "cc947ca3-8074-44ce-a847-0d55200bf8ca",
+  "bytes": 1354,
+  "removed": true
+}

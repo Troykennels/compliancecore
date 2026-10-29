@@ -19,7 +19,8 @@ function formatBytes(bytes: number) {
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${units[i]}`;
 }
 
-export function EvidenceVersionHistory({ evidenceId, currentVersionId }: EvidenceVersionHistoryProps) {
+export function EvidenceVersionHistory({ evidenceId, currentVersionId }: EvidenceVersionHistoryProps) {
+
   const fmt = useOrgFormat();
   const { data: versions = [], refetch } = useEvidenceVersions(evidenceId);
   const [showNewVersion, setShowNewVersion] = useState(false);
@@ -80,7 +81,7 @@ export function EvidenceVersionHistory({ evidenceId, currentVersionId }: Evidenc
             value={changeNote}
             onChange={(e) => setChangeNote(e.target.value)}
             className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
-          />
+           aria-label="Describe what changed in this version..." />
           {state.step === 'uploading' && (
             <div className="space-y-1">
               <div className="flex justify-between text-xs text-slate-600">

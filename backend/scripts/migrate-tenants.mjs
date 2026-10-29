@@ -26,8 +26,10 @@ const { Client } = pg;
 
 const templateDir = fileURLToPath(new URL('../../database/tenant-template', import.meta.url));
 const DRY_RUN = process.argv.includes('--dry-run');
+const VALIDATE = process.argv.includes('--validate'); // execute and roll back, including DDL
+const requestedSchema=process.argv.find(v=>v.startsWith('--schema='))?.slice(9);
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL = process.env.PROVISIONING_DATABASE_URL ?? process.env.DATABASE_URL;
 if (!DATABASE_URL) {
   console.error('[tenants] DATABASE_URL is required');
   process.exit(1);
@@ -64,6 +66,7 @@ async function main() {
 
   for (const tenant of tenants) {
     const schemaName = tenant.schema_name;
+    if(requestedSchema&&schemaName!==requestedSchema)continue;
 
     if (!SAFE_SCHEMA_RE.test(schemaName)) {
       console.warn(`[tenants] SKIP ${tenant.name} — unsafe schema name "${schemaName}"`);
@@ -79,8 +82,8 @@ async function main() {
     // rolling back everyone migrated so far.
     try {
       const sql = templates.map(({ raw }) => raw.split('{{SCHEMA}}').join(schemaName)).join(';\n');
-      await client.query(`BEGIN;\nSET LOCAL search_path TO "${schemaName}", public;\n${sql};\nCOMMIT`);
-      console.log(`[tenants] ok   ${schemaName} (${tenant.name})`);
+      await client.query(`BEGIN;\nSET LOCAL lock_timeout='5s';\nSET LOCAL statement_timeout='90s';\nSET LOCAL search_path TO "${schemaName}", public;\n${sql};\n${VALIDATE?'ROLLBACK':'COMMIT'}`);
+      console.log(`[tenants] ${VALIDATE?'validated (rolled back)':'ok'} ${schemaName}`);
       migrated++;
     } catch (err) {
       await client.query('ROLLBACK').catch(() => {});

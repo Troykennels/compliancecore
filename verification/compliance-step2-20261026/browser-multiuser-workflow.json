@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "Owner creates a source-backed obligation through the real form",
+    "Form refuses self-approval",
+    "Separate manager approves through the real review form",
+    "Revision returns to review and retains the prior approved source"
+  ],
+  "pageErrors": [],
+  "scope": "Synthetic local fixture only"
+}

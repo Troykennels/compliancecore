@@ -64,7 +64,7 @@ export function TagSelector({ selected, onChange, disabled }: TagSelectorProps) 
                 type="button"
                 onClick={(e) => { e.stopPropagation(); toggle(tag.id); }}
                 className="ml-0.5 rounded-full hover:opacity-80"
-              >
+               aria-label="Close dialog">
                 <X className="h-3 w-3" />
               </button>
             )}
@@ -89,7 +89,7 @@ export function TagSelector({ selected, onChange, disabled }: TagSelectorProps) 
               onChange={(e) => setSearch(e.target.value)}
               autoFocus
               className="w-full rounded border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-blue-500"
-            />
+             aria-label="Search or create tag..." />
           </div>
           <div className="max-h-48 overflow-y-auto">
             {isLoading && (

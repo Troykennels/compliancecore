@@ -101,7 +101,7 @@ function CouponSection({ couponCode, discountPercent, discountFixed }: {
           onClick={() => removeCoupon.mutate()}
           disabled={removeCoupon.isPending}
           className="ml-auto text-emerald-600 hover:text-red-600"
-        >
+         aria-label="Close dialog">
           <X className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -116,7 +116,7 @@ function CouponSection({ couponCode, discountPercent, discountFixed }: {
           onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
           placeholder="COUPON CODE"
           className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
+         aria-label="COUPON CODE" />
         <button
           onClick={() => applyCoupon.mutate(couponInput, { onSuccess: () => setShowInput(false) })}
           disabled={applyCoupon.isPending || !couponInput}
@@ -124,7 +124,7 @@ function CouponSection({ couponCode, discountPercent, discountFixed }: {
         >
           {applyCoupon.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Apply'}
         </button>
-        <button onClick={() => setShowInput(false)} className="text-slate-400 hover:text-slate-600">
+        <button onClick={() => setShowInput(false)} className="text-slate-400 hover:text-slate-600" aria-label="Close dialog">
           <X className="h-4 w-4" />
         </button>
       </div>
@@ -208,7 +208,8 @@ function QueryError({ onRetry, message = 'Something went wrong while loading thi
 }
 
 // ── Main page ──────────────────────────────────────────────────────────────────
-export function BillingOverviewPage(): JSX.Element {
+export function BillingOverviewPage(): JSX.Element {
+
   const fmt = useOrgFormat();
   const { data: overview, isLoading, isError, refetch } = useBillingOverview();
   const [downloading, setDownloading] = useState<string | null>(null);

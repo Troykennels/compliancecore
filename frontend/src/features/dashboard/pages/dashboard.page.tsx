@@ -1,312 +1,85 @@
-import { useNavigate } from 'react-router-dom';
-import { ImplementationOverview } from '@/features/frameworks/components/implementation-overview';
-import {
-  ShieldCheck, AlertTriangle, Calendar, Bell,
-  CheckCircle, BarChart2, ArrowRight,
-} from 'lucide-react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, BookOpen, CheckCircle, ChevronDown, Circle, ShieldCheck, AlertTriangle, ListChecks } from 'lucide-react';
 import { useDashboard } from '../hooks/use-dashboard';
-import { ScoreGauge } from '../../compliance-score/components/score-gauge';
+import { ComplianceWorkSummary } from '../components/compliance-work-summary';
+import { ImplementationOverview } from '@/features/frameworks/components/implementation-overview';
+import { ControlStatusChart } from '../components/control-status-chart';
 import { ScoreTrendChart } from '../../compliance-score/components/score-trend-chart';
-import { MetricCard } from '../components/metric-card';
 import { ExpiryWidget } from '../components/expiry-widget';
 import { ActivityFeed } from '../components/activity-feed';
-import { FrameworkCoverage } from '../components/framework-coverage';
-import { DashboardInsights } from '../components/dashboard-insights';
-import { useCurrentScore } from '../../compliance-score/hooks/use-score';
-import { EVENT_TYPE_COLORS } from '../../calendar/types/calendar.types';
-import type { CalendarEventType } from '../../calendar/types/calendar.types';
+import { useAuthStore } from '@/stores/auth.store';
+import { hasPermission } from '@/config/role-permissions';
+import { ROLE_GUIDANCE } from '@/config/role-guidance';
 import { useOrgFormat } from '@/lib/org-format';
-import { cn } from '@/lib/utils';
-import {
-  Card, CardHeader, ErrorState, PageHeader, PageShell, StatusPill,
-  SkeletonCard, SkeletonChart, SkeletonMetricCard, SkeletonRegion, Skeleton,
-  type StatusTone,
-} from '@/components/ui';
-
-const EVENT_STATUS_TONE: Record<string, StatusTone> = {
-  upcoming: 'info',
-  in_progress: 'warning',
-  completed: 'success',
-  overdue: 'danger',
-};
-
-/** Control status, ordered worst-first so the gaps read before the wins. */
-const CONTROL_BANDS = [
-  { key: 'notImplemented', label: 'Not implemented', bar: 'bg-red-500' },
-  { key: 'partiallyImplemented', label: 'Partially implemented', bar: 'bg-amber-500' },
-  { key: 'planned', label: 'Planned', bar: 'bg-brand-400' },
-  { key: 'implemented', label: 'Implemented', bar: 'bg-green-500' },
-  { key: 'notApplicable', label: 'Not applicable', bar: 'bg-slate-300' },
-] as const;
-
-function ViewAll({ onClick, label = 'View all' }: { onClick: () => void; label?: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group inline-flex items-center gap-1 rounded text-xs font-medium text-brand-600 transition-colors hover:text-brand-700"
-    >
-      {label}
-      <ArrowRight className="h-3 w-3 transition-transform duration-150 group-hover:translate-x-0.5" />
-    </button>
-  );
-}
-
-/**
- * Loading view.
- *
- * Mirrors the real layout rather than showing a spinner, so the page does not
- * reflow when the data lands — the cards are already where they will be.
- */
-function DashboardSkeleton() {
-  return (
-    <PageShell width="wide">
-      <div className="space-y-2">
-        <Skeleton className="h-7 w-44" />
-        <Skeleton className="h-3.5 w-64" />
-      </div>
-      <SkeletonRegion label="Loading dashboard" className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonMetricCard key={i} />)}
-        </div>
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          <SkeletonChart height={200} />
-          <SkeletonChart height={200} className="lg:col-span-2" />
-        </div>
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} rows={4} />)}
-        </div>
-      </SkeletonRegion>
-    </PageShell>
-  );
-}
+import { Card, CardHeader, ErrorState, PageShell, SkeletonRegion, SkeletonCard } from '@/components/ui';
 
 export function DashboardPage() {
   const fmt = useOrgFormat();
-  const navigate = useNavigate();
+  const role = useAuthStore(s => s.activeTenant?.role);
+  const can = (scope: string) => hasPermission(role, scope);
+  const [showDetails, setShowDetails] = useState(false);
   const { data, isLoading, isError, refetch } = useDashboard();
-  const { data: scoreData } = useCurrentScore();
-
-  if (isLoading) return <DashboardSkeleton />;
-
-  if (isError || !data) {
-    return (
-      <PageShell width="wide">
-        <Card flush>
-          <ErrorState
-            title="We couldn't load your dashboard"
-            description="Your compliance data is safe — this is a problem reaching the service, not a problem with your records."
-            onRetry={() => refetch()}
-          />
-        </Card>
-      </PageShell>
-    );
-  }
-
-  const { complianceScore, controls, expiry, calendar, notifications, recentActivity } = data;
-  const frameworks = scoreData?.frameworks ?? [];
-
-  const controlImplementedPct = controls.total > 0
-    ? Math.round((controls.implemented / controls.total) * 100)
-    : 0;
-
-  const expiryTotal = expiry.expiringSoon + expiry.expired;
-
-  return (
-    <PageShell width="wide">
-      <PageHeader
-        title="Organisation assurance overview"
-        description={`Compliance overview — ${fmt.formatDateMedium(new Date())}`}
-      />
-      <ImplementationOverview />
-
-      {/* Headline metrics. Single column on a phone: two 3xl figures side by
-          side at 375px truncate into meaninglessness. */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          title="Compliance Score"
-          value={complianceScore.overall !== null ? `${Math.round(complianceScore.overall)}%` : '—'}
-          subtitle={complianceScore.snapshotDate ? `as of ${fmt.formatDateShort(complianceScore.snapshotDate)}` : 'Real-time'}
-          icon={<ShieldCheck className="h-5 w-5" />}
-          tone="brand"
-          onClick={() => navigate('/compliance-score')}
-        />
-        <MetricCard
-          title="Controls Implemented"
-          value={`${controls.implemented}/${controls.total}`}
-          subtitle={`${controlImplementedPct}% complete`}
-          icon={<CheckCircle className="h-5 w-5" />}
-          tone={controlImplementedPct >= 80 ? 'success' : controlImplementedPct >= 50 ? 'warning' : 'danger'}
-          onClick={() => navigate('/controls')}
-        />
-        <MetricCard
-          title="Expiry Alerts"
-          value={expiryTotal}
-          subtitle={`${expiry.expired} expired · ${expiry.expiringSoon} expiring`}
-          icon={<AlertTriangle className="h-5 w-5" />}
-          tone={expiry.expired > 0 ? 'danger' : expiry.expiringSoon > 0 ? 'warning' : 'success'}
-          onClick={() => navigate('/expiry')}
-        />
-        <MetricCard
-          title="Unread Notifications"
-          value={notifications.unread}
-          subtitle={`${calendar.overdueCount} overdue events`}
-          icon={<Bell className="h-5 w-5" />}
-          tone={notifications.unread > 0 ? 'warning' : 'neutral'}
-          onClick={() => navigate('/notifications')}
-        />
+  if (isLoading) return <PageShell width="wide"><SkeletonRegion label="Loading compliance overview" className="space-y-5"><SkeletonCard rows={4} /><div className="grid gap-4 sm:grid-cols-2">{[0, 1].map(n => <SkeletonCard key={n} rows={5} />)}</div></SkeletonRegion></PageShell>;
+  if (isError || !data) return <PageShell width="wide"><Card><ErrorState title="Your overview could not be loaded" description="Please try again to see the latest recorded figures." onRetry={() => void refetch()} /></Card></PageShell>;
+  const { complianceScore, controls, expiry, calendar, recentActivity } = data;
+  const applicable = controls.total - controls.notApplicable;
+  const progress = applicable > 0 ? Math.round(100 * (controls.implemented + controls.partiallyImplemented * 0.5) / applicable) : null;
+  const cards = [
+    { title: 'Total controls', value: controls.total, help: 'All recorded safeguards', icon: ListChecks, style: 'border-blue-200 bg-blue-50 text-blue-800' },
+    { title: 'Operating', value: controls.implemented, help: 'Recorded as in place', icon: CheckCircle, style: 'border-green-200 bg-green-50 text-green-800' },
+    { title: 'Partly operating', value: controls.partiallyImplemented, help: 'Further work is needed', icon: Circle, style: 'border-amber-200 bg-amber-50 text-amber-800' },
+    { title: 'Needs work', value: controls.notImplemented + controls.planned, help: 'Planned or not operating', icon: AlertTriangle, style: 'border-red-200 bg-red-50 text-red-800' },
+    { title: 'Not applicable', value: controls.notApplicable, help: 'Recorded as outside scope', icon: ShieldCheck, style: 'border-violet-200 bg-violet-50 text-violet-800' },
+  ];
+  return <PageShell width="wide" className="!space-y-5 !py-5">
+    <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#073f40] via-[#086963] to-[#14857a] p-5 text-white shadow-sm sm:p-6" aria-labelledby="overview-title">
+      <div className="pointer-events-none absolute -right-14 -top-24 h-72 w-72 rounded-full border-[40px] border-white/5" aria-hidden="true" />
+      <div className="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
+        <div className="max-w-xl">
+          <p className="text-xs font-medium text-white/80">Your organisation at a glance · {fmt.formatDateMedium(new Date())}</p>
+          <h1 id="overview-title" className="mt-2 text-2xl font-semibold tracking-tight !text-white sm:text-3xl">Compliance overview</h1>
+          <p className="mt-2 text-sm leading-relaxed text-white/90">{role ? ROLE_GUIDANCE[role].purpose : 'See where things stand, what needs attention and what to do next.'}</p>
+          {role && <span className="mt-3 inline-block rounded-full border border-white/30 bg-white/10 px-2.5 py-1 text-[10px] font-semibold tracking-wide">{ROLE_GUIDANCE[role].label} view</span>}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {can('controls:read') && <Link to="/frameworks" className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#07534f] hover:bg-green-50">Review assessments <ArrowRight className="h-3.5 w-3.5" /></Link>}
+            {can('reports:read') && <Link to="/reports" className="rounded-lg border border-white/40 bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/20">Open management report</Link>}
+          </div>
+        </div>
+        <div className="shrink-0 rounded-xl border border-white/20 bg-white/10 p-4 lg:max-w-[260px]">
+          <p className="text-xs font-medium text-white/90">Current control progress</p>
+          <p className="mt-1 text-4xl font-semibold tabular-nums">{progress === null ? 'Not scored' : `${progress}%`}</p>
+          <p className="mt-2 text-xs leading-relaxed text-white/90">Operating controls count fully; partial controls count half. Excludes not applicable.</p>
+          {can('reports:read') && <Link to="/compliance-score" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold underline underline-offset-4">View score history <ArrowRight className="h-3 w-3" /></Link>}
+        </div>
       </div>
-
-      {/* Score gauge + trend */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <Card className="flex flex-col items-center justify-center py-7">
-          <ScoreGauge score={complianceScore.overall} size={180} />
-          <p className="eyebrow mt-3">Overall Compliance</p>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader
-            title="Score Trend"
-            description="Last 180 days"
-            action={<ViewAll onClick={() => navigate('/compliance-score')} label="Full view" />}
-          />
-          <div className="mt-4">
-            <ScoreTrendChart data={complianceScore.trend} height={172} />
-          </div>
-        </Card>
-      </div>
-
-      {/* Coverage, upcoming work, control posture */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <Card>
-          <CardHeader
-            title="Framework Coverage"
-            action={<BarChart2 className="h-4 w-4 text-slate-400" aria-hidden="true" />}
-          />
-          <div className="mt-4">
-            <FrameworkCoverage frameworks={frameworks} />
-          </div>
-        </Card>
-
-        <Card>
-          <CardHeader
-            title="Upcoming Events"
-            action={<ViewAll onClick={() => navigate('/calendar')} />}
-          />
-          <div className="mt-4">
-            {calendar.upcomingEvents.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <Calendar className="mb-2 h-7 w-7 text-slate-300" aria-hidden="true" />
-                <p className="text-xs font-medium text-slate-600">Nothing scheduled</p>
-                <p className="mt-0.5 text-2xs text-slate-400">
-                  Reviews and audits you plan will appear here.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-1.5">
-                {calendar.upcomingEvents.map((ev) => (
-                  <button
-                    key={ev.id}
-                    type="button"
-                    onClick={() => navigate('/calendar')}
-                    className="flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-left transition-colors hover:border-slate-200 hover:bg-slate-50"
-                  >
-                    <span
-                      className="h-6 w-1 shrink-0 rounded-full"
-                      style={{ backgroundColor: ev.color || EVENT_TYPE_COLORS[ev.eventType as CalendarEventType] }}
-                      aria-hidden="true"
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-xs font-medium text-slate-900">{ev.title}</span>
-                      <span className="block text-2xs text-slate-500">{fmt.formatDateShort(ev.startDate)}</span>
-                    </span>
-                    <StatusPill tone={EVENT_STATUS_TONE[ev.status] ?? 'neutral'} dot={false}>
-                      {ev.status.replace('_', ' ')}
-                    </StatusPill>
-                  </button>
-                ))}
-                {calendar.overdueCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => navigate('/calendar')}
-                    className="mt-1 flex w-full items-center gap-1.5 rounded-lg bg-red-50 px-2.5 py-2 text-xs font-medium text-red-700 transition-colors hover:bg-red-100"
-                  >
-                    <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-                    {calendar.overdueCount} overdue event{calendar.overdueCount > 1 ? 's' : ''}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        </Card>
-
-        <Card>
-          <CardHeader title="Control Status" description={`${controls.total} controls in scope`} />
-          <div className="mt-4 space-y-3">
-            {CONTROL_BANDS.map(({ key, label, bar }) => {
-              const value = controls[key] ?? 0;
-              const pct = controls.total > 0 ? (value / controls.total) * 100 : 0;
-              return (
-                <div key={key}>
-                  <div className="mb-1 flex items-baseline justify-between gap-2 text-xs">
-                    <span className="truncate text-slate-600">{label}</span>
-                    <span data-numeric className="shrink-0 font-semibold text-slate-900">
-                      {value}
-                      <span className="ml-1 font-normal text-slate-400">{Math.round(pct)}%</span>
-                    </span>
-                  </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                    <div
-                      className={cn('h-full rounded-full transition-[width] duration-500 ease-out', bar)}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      </div>
-
-      {/* Expiring items + evidence activity */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <Card>
-          <CardHeader
-            title="Urgent Expirations"
-            action={<ViewAll onClick={() => navigate('/expiry')} />}
-          />
-          <div className="mt-4">
-            <ExpiryWidget
-              items={expiry.urgentItems}
-              expiringSoon={expiry.expiringSoon}
-              expired={expiry.expired}
-            />
-          </div>
-        </Card>
-
-        <Card>
-          <CardHeader
-            title="Recent Evidence Activity"
-            action={<ViewAll onClick={() => navigate('/evidence')} />}
-          />
-          <div className="mt-4">
-            <ActivityFeed events={recentActivity} />
-          </div>
-        </Card>
-      </div>
-
-      {/* Insight panels. Rendered after the existing summary so the page still
-          reads top-down: headline numbers, then where the gaps are. Each panel
-          owns its own query, so a slow or failing module degrades that card
-          rather than the whole dashboard. */}
-      <DashboardInsights
-        trend={complianceScore.trend}
-        upcomingEvents={calendar.upcomingEvents}
-        urgentExpiry={expiry.urgentItems}
-        expiringSoon={expiry.expiringSoon}
-        score={complianceScore.overall}
-        frameworks={frameworks}
-      />
-    </PageShell>
-  );
+    </section>
+    <section aria-label="Control status totals" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+      {cards.map(({ title, value, help, icon: Icon, style }) => {
+        const content = <><div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold">{title}</span><Icon className="h-4 w-4 shrink-0" aria-hidden="true" /></div><p className="mt-2 text-3xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs opacity-90">{help}</p></>;
+        const className = `min-w-0 rounded-xl border p-4 text-left ${style}`;
+        return can('controls:read') ? <Link key={title} to="/controls" className={`${className} transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}>{content}</Link> : <div key={title} className={className}>{content}</div>;
+      })}
+    </section>
+    <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+      <ControlStatusChart controls={controls} />
+      {can('controls:read') ? <ImplementationOverview compact /> : <Card><CardHeader title="Your next step" description="Use the pages available to your role to keep your records current." /><Link to="/guide" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-700"><BookOpen className="h-4 w-4" /> Open your user guide</Link></Card>}
+    </div>
+    {can('reports:read') && <ComplianceWorkSummary />}
+    <section className="rounded-xl border border-slate-200 bg-white">
+      <button type="button" onClick={() => setShowDetails(v => !v)} aria-expanded={showDetails} aria-controls="overview-detail" className="flex w-full items-center justify-between gap-3 p-4 text-left">
+        <span><span className="block text-sm font-semibold text-slate-900">Dates, activity and score history</span><span className="mt-1 block text-xs text-slate-500">{calendar.overdueCount} overdue calendar events · {expiry.expired} expired tracked items</span></span>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
+      </button>
+      {showDetails && <div id="overview-detail" className="space-y-5 border-t border-slate-200 p-4">
+        <div className="grid gap-4 lg:grid-cols-2">
+          {can('expiry:read') && <Card><CardHeader title="Expiring items" action={<Link to="/expiry" className="text-xs font-semibold text-brand-700">View tracker</Link>} /><div className="mt-3"><ExpiryWidget items={expiry.urgentItems} expiringSoon={expiry.expiringSoon} expired={expiry.expired} /></div></Card>}
+          {can('evidence:read') && <Card><CardHeader title="Recent evidence activity" action={<Link to="/evidence" className="text-xs font-semibold text-brand-700">View evidence</Link>} /><div className="mt-3"><ActivityFeed events={recentActivity} /></div></Card>}
+        </div>
+        {can('reports:read') && <Card><CardHeader title="Recorded score history" description="Historical snapshots of recorded control status." /><div className="mt-4"><ScoreTrendChart data={complianceScore.trend} height={180} /></div></Card>}
+        {can('calendar:read') && <Link to="/calendar" className="inline-flex items-center gap-2 text-sm font-semibold text-brand-700">Open the review calendar <ArrowRight className="h-4 w-4" /></Link>}
+      </div>}
+    </section>
+    <p className="text-xs leading-relaxed text-slate-500">Figures describe your recorded work. An internal score or completed assessment is not a certification.</p>
+  </PageShell>;
 }

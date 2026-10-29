@@ -1,3 +1,4 @@
+import { hasPermission } from '@/config/role-permissions';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Building2, Users, Shield, Key, Bell, Webhook, Lock,
@@ -32,9 +33,7 @@ export function SettingsLayout({ children }: Props): JSX.Element {
   const role = useUserRole();
 
   const visibleItems = NAV_ITEMS.filter(
-    (item) =>
-      !item.requiresRole ||
-      (role && item.requiresRole.includes(role)),
+    (item) => (item.path===PATHS.SETTINGS_SECURITY || hasPermission(role??undefined,item.path===PATHS.SETTINGS_TEAM?'team:read':item.path===PATHS.SETTINGS_ORG?'org:read':'settings:read')) && (!item.requiresRole || Boolean(role && item.requiresRole.includes(role))),
   );
 
   return (
@@ -43,14 +42,14 @@ export function SettingsLayout({ children }: Props): JSX.Element {
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Manage your organisation's settings, team, and integrations.
+            Your account and authorised organisation settings.
           </p>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:gap-8">
           {/* Left Nav */}
-          <aside className="w-56 flex-shrink-0">
-            <nav className="space-y-0.5">
+          <aside className="w-full shrink-0 lg:w-56">
+            <nav className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:block lg:space-y-0.5" aria-label="Settings pages">
               {visibleItems.map((item) => {
                 const isActive = pathname === item.path;
                 const Icon = item.icon;

@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { X, Layers, Download, AlertTriangle } from 'lucide-react';
 import { useFramework } from '../hooks/use-frameworks';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +14,7 @@ export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Eleme
   const navigate=useNavigate();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <ModalSurface label=" " onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
 
@@ -70,7 +71,7 @@ export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Eleme
                 <Meta label="Version" value={framework.version} />
                 <Meta label="Jurisdiction" value={framework.jurisdiction} />
                 <Meta label="Categories" value={String(framework.categoryCount)} />
-                <Meta label="Adopted controls" value={String(framework.adoptedControlCount)} />
+                <Meta label="Organisation control records" value={String(framework.adoptedControlCount)} />
               </dl>
 
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
@@ -115,11 +116,11 @@ export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Eleme
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
           >
             <Download className="h-4 w-4" />
-            Open implementation steps
+            Open compliance assessment
           </button>
         </div>
       </div>
-    </div>
+    </ModalSurface>
   );
 }
 

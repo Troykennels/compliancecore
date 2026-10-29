@@ -1,3 +1,4 @@
+import { auditCurrentActor } from '../../lib/audit-context';
 import { prisma } from '../../config/database';
 import { AppError } from '../../lib/errors';
 import { periodEnd } from '../billing/billing.service';
@@ -9,6 +10,7 @@ export async function settlePaidCheckout(reference: string, providerRef: string 
   const initial = await prisma.$queryRawUnsafe<any[]>(`SELECT tenant_id FROM global.payment_transactions WHERE reference=$1`,reference);
   if (!initial[0]) return null;
   return prisma.$transaction(async tx => {
+        await auditCurrentActor(tx);
     await tx.$queryRawUnsafe(`SELECT id FROM global.tenants WHERE id=$1::uuid FOR UPDATE`,initial[0].tenant_id);
     const payments = await tx.$queryRawUnsafe<any[]>(`SELECT * FROM global.payment_transactions WHERE reference=$1 FOR UPDATE`,reference);
     const payment = payments[0];

@@ -1,4 +1,8 @@
+import { LinkedComplianceRecord } from './linked-compliance-record';
+import { hasPermission } from '@/config/role-permissions';
+import { ComplianceOperationsPanel, ComplianceSearch } from '@/features/frameworks/components/compliance-operations';
 import { CiDemoGuide } from './ci-demo-guide';
+import { CompliancePageHelp } from './compliance-page-help';
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -30,19 +34,22 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   { items: [
-    { label: 'Organisation overview', to: PATHS.DASHBOARD, icon: <LayoutDashboard className="h-4 w-4" /> },
+    { label: 'Dashboard', to: PATHS.DASHBOARD, icon: <LayoutDashboard className="h-4 w-4" /> },
     { label: 'My Guide', to: PATHS.GUIDE, icon: <BookOpen className="h-4 w-4" /> },
   ] },
-  { heading: 'Implementation', items: [
-    { label: 'Frameworks & SoA', to: PATHS.FRAMEWORKS, icon: <Library className="h-4 w-4" /> },
+  { heading: 'Compliance work', items: [
+    { label: 'Compliance assessments', to: PATHS.FRAMEWORKS, icon: <Library className="h-4 w-4" /> },
+    { label: 'Risk assessment', to: PATHS.RISKS, icon: <Flame className="h-4 w-4" /> },
     { label: 'Policies', to: PATHS.POLICIES, icon: <ScrollText className="h-4 w-4" /> },
+    { label: 'Policy templates', to: PATHS.POLICY_TEMPLATES, icon: <FileText className="h-4 w-4" /> },
     { label: 'Controls', to: PATHS.CONTROLS, icon: <ShieldCheck className="h-4 w-4" /> },
     { label: 'Evidence Hub', to: PATHS.EVIDENCE, icon: <FileArchive className="h-4 w-4" /> },
-    { label: 'Training', to: PATHS.TRAINING, icon: <GraduationCap className="h-4 w-4" /> },
+  ] },
+  { heading: 'Reviews and learning', items: [
     { label: 'Audits', to: PATHS.AUDITS, icon: <ClipboardCheck className="h-4 w-4" /> },
+    { label: 'Training', to: PATHS.TRAINING, icon: <GraduationCap className="h-4 w-4" /> },
   ] },
   { heading: 'Daily operations', items: [
-    { label: 'Risk Register', to: PATHS.RISKS, icon: <Flame className="h-4 w-4" /> },
     { label: 'Incidents', to: PATHS.INCIDENTS, icon: <Siren className="h-4 w-4" /> },
     { label: 'Vendors', to: PATHS.VENDORS, icon: <Store className="h-4 w-4" /> },
   ] },
@@ -52,7 +59,7 @@ const NAV_GROUPS: NavGroup[] = [
     { label: 'Signatures', to: PATHS.SIGNATURES, icon: <ShieldAlert className="h-4 w-4" /> },
     { label: 'Escalations', to: PATHS.ESCALATIONS, icon: <AlertTriangle className="h-4 w-4" /> },
   ] },
-  { heading: 'Monitor and report', items: [
+  { heading: 'Reports and dates', items: [
     { label: 'Compliance Score', to: PATHS.COMPLIANCE_SCORE, icon: <BarChart2 className="h-4 w-4" /> },
     { label: 'Calendar', to: PATHS.CALENDAR, icon: <Calendar className="h-4 w-4" /> },
     { label: 'Expiry Tracker', to: PATHS.EXPIRY, icon: <Clock className="h-4 w-4" /> },
@@ -124,6 +131,7 @@ export function AppShell() {
     () => typeof localStorage !== 'undefined' && localStorage.getItem(COLLAPSE_KEY) === '1',
   );
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ 'Compliance work': true });
   const [orgMenuOpen, setOrgMenuOpen] = useState(false);
   const [switching, setSwitching] = useState(false);
   const { user, activeTenant, allTenants, clearAuth, switchTenant } = useAuthStore();
@@ -143,6 +151,8 @@ export function AppShell() {
   useEffect(() => {
     setMobileOpen(false);
     setOrgMenuOpen(false);
+    const currentGroup = [...NAV_GROUPS, OWNER_NAV_GROUP].find(group => group.heading && group.items.some(item => location.pathname === item.to || location.pathname.startsWith(item.to + '/')));
+    if (currentGroup?.heading) setExpandedGroups(previous => ({ ...previous, [currentGroup.heading!]: true }));
   }, [location.pathname]);
 
   // The drawer is a modal layer: it must not scroll the page behind it.
@@ -196,7 +206,12 @@ export function AppShell() {
 
   // Append the owner group only for a platform superadmin, so customers never
   // see a link into cross-tenant billing.
-  const navGroups = user?.isSuperadmin ? [...NAV_GROUPS, OWNER_NAV_GROUP] : NAV_GROUPS;
+  const routeScope:Record<string,string>={
+    '/frameworks':'controls:read','/controls':'controls:read','/risks':'risks:read','/policies':'policies:read','/policy-templates':'policies:read','/evidence':'evidence:read','/training':'training:read','/audits':'audits:read','/incidents':'incidents:read','/vendors':'vendors:read','/tasks':'tasks:read','/approvals':'approvals:read','/signatures':'signatures:read','/escalations':'escalations:read','/calendar':'calendar:read','/expiry':'expiry:read','/reports':'reports:read','/analytics':'reports:read','/compliance-score':'reports:read','/branches':'org:read','/departments':'org:read','/ai-tools':'ai:use','/integrations':'integrations:read','/billing':'billing:read','/billing/plans':'billing:read','/billing/invoices':'billing:read','/settings':'settings:read','/settings/security':'notifications:read','/settings/notifications':'settings:read'
+  };
+  const navGroups = (user?.isSuperadmin ? [...NAV_GROUPS, OWNER_NAV_GROUP] : NAV_GROUPS).map(group=>({...group,items:group.items.filter(item=>!routeScope[item.to]||hasPermission(activeTenant?.role,routeScope[item.to]))})).filter(group=>group.items.length);
+  const requiredScope=routeScope[location.pathname]??routeScope['/'+location.pathname.split('/')[1]];
+  const permitted=!requiredScope||hasPermission(activeTenant?.role,requiredScope);
 
   async function handleLogout() {
     try { await authApi.logout(); } catch { /* ignore */ }
@@ -211,7 +226,7 @@ export function AppShell() {
       'group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium',
       'transition-colors duration-150',
       isActive
-        ? 'bg-brand-50 text-brand-700'
+        ? 'bg-[#e2f4ef] text-[#07534f]'
         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
       collapsed && 'lg:justify-center lg:px-0',
     );
@@ -220,10 +235,10 @@ export function AppShell() {
   const sidebarBody = (
     <>
       {/* Brand */}
-      <div className="flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 px-3">
+      <div className="flex h-14 shrink-0 items-center gap-2 border-b border-teal-100 bg-gradient-to-r from-[#e2f4ef] to-white px-3">
         <div
           className={cn(
-            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 shadow-xs',
+            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#086963] shadow-xs',
             collapsed && 'lg:mx-auto',
           )}
         >
@@ -336,18 +351,18 @@ export function AppShell() {
       )}
 
       {/* Navigation */}
-      <nav aria-label="Main" className="flex-1 space-y-5 overflow-y-auto px-2 py-3">
+      <nav aria-label="Main" className="flex-1 space-y-2 overflow-y-auto px-2 py-3">
         {navGroups.map((group, gi) => (
           <div key={gi}>
             {group.heading && (
-              <p className={cn('eyebrow mb-1 px-2.5', collapsed && 'lg:sr-only')}>{group.heading}</p>
+              <button type="button" aria-expanded={Boolean(expandedGroups[group.heading] ?? group.items.some(item => location.pathname === item.to || location.pathname.startsWith(item.to + '/')))} aria-controls={`nav-group-${gi}`} onClick={() => setExpandedGroups(previous => ({ ...previous, [group.heading!]: !(previous[group.heading!] ?? group.items.some(item => location.pathname === item.to || location.pathname.startsWith(item.to + '/'))) }))} className={cn('flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-semibold text-slate-600 hover:bg-slate-100', collapsed && 'lg:hidden')}><span>{group.heading}</span><ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', (expandedGroups[group.heading] ?? group.items.some(item => location.pathname === item.to || location.pathname.startsWith(item.to + '/'))) && 'rotate-180')} /></button>
             )}
             {/* A hairline stands in for the heading when the rail is collapsed,
                 so the groups stay distinguishable without their labels. */}
             {group.heading && collapsed && (
               <div className="mx-auto mb-2 hidden h-px w-5 bg-slate-200 lg:block" aria-hidden="true" />
             )}
-            <div className="space-y-0.5">
+            <div id={`nav-group-${gi}`} className={cn('space-y-0.5', group.heading && !(expandedGroups[group.heading] ?? group.items.some(item => location.pathname === item.to || location.pathname.startsWith(item.to + '/'))) && (collapsed ? 'hidden lg:block' : 'hidden'))}>
               {group.items.map((item) => (
                 <NavLink
                   key={item.to}
@@ -386,13 +401,13 @@ export function AppShell() {
       {/* Settings, sign out, identity */}
       <div className="shrink-0 space-y-0.5 border-t border-slate-200 p-2">
         <NavLink
-          to={PATHS.SETTINGS}
-          title={collapsed ? 'Settings' : undefined}
+          to={hasPermission(activeTenant?.role, 'settings:read') ? PATHS.SETTINGS : PATHS.SETTINGS_SECURITY}
+          title={collapsed ? (hasPermission(activeTenant?.role, 'settings:read') ? 'Settings' : 'Account security') : undefined}
           onClick={() => setMobileOpen(false)}
           className={navLinkClass}
         >
           <Settings className="h-4 w-4 shrink-0 text-slate-400" />
-          <span className={cn(collapsed && 'lg:hidden')}>Settings</span>
+          <span className={cn(collapsed && 'lg:hidden')}>{hasPermission(activeTenant?.role, 'settings:read') ? 'Settings' : 'Account security'}</span>
         </NavLink>
         <button
           type="button"
@@ -488,16 +503,16 @@ export function AppShell() {
           {/* On a phone the rail is hidden, so the header carries the context of
               which organisation you are acting in. Getting this wrong in a
               multi-tenant tool means editing the wrong company's records. */}
-          <span className="min-w-0 truncate text-sm font-semibold text-slate-800 lg:hidden">
+          <span className="hidden min-w-0 max-w-[180px] truncate text-sm font-semibold text-slate-800 sm:block lg:hidden">
             {activeTenant?.name ?? 'ComplianceCore'}
           </span>
 
-          <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <ComplianceSearch /><div className="ml-auto flex items-center gap-1 sm:gap-2">
             <NotificationBell />
             <div className="hidden h-5 w-px bg-slate-200 sm:block" aria-hidden="true" />
             <button
               type="button"
-              onClick={() => navigate(PATHS.SETTINGS)}
+              onClick={() => navigate('/settings/security')}
               className="flex items-center gap-2 rounded-full p-0.5 transition-opacity hover:opacity-80"
               aria-label="Account settings"
               title={displayName}
@@ -506,6 +521,7 @@ export function AppShell() {
             </button>
           </div>
         </header>
+        <div className="truncate border-b bg-white px-4 py-1.5 text-xs text-slate-600 sm:hidden">Organisation: {activeTenant?.name??'ComplianceCore'}</div>
 
         {/* Subscription state. Outside <main> so it stays visible while a page
             scrolls, and renders nothing at all on a healthy subscription. */}
@@ -529,7 +545,8 @@ export function AppShell() {
               </div>
             }
           >
-            <Outlet />
+            <CompliancePageHelp />
+            {permitted?<><LinkedComplianceRecord />{(location.pathname!=='/settings/security'||hasPermission(activeTenant?.role,'settings:read'))&&<ComplianceOperationsPanel key={'operations:'+location.pathname+location.search}/>}<Outlet key={'page:'+location.pathname+location.search}/></>:<div role="alert" className="m-6 rounded-xl border bg-white p-6"><h1 className="text-xl font-semibold">This page needs additional access</h1><p className="mt-3 text-sm">Ask your organisation administrator if you need this permission. Your current role has not been changed.</p></div>}
           </Suspense>
         </main>
       </div>

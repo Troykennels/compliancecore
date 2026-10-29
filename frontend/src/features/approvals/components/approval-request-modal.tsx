@@ -1,3 +1,6 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { ModalSurface } from '@/components/modal-surface';
+import { useImplementationMembers } from '@/features/frameworks/implementation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,7 +27,7 @@ const schema = z.object({
   deadline:     z.string().optional(),
   workflowId:   z.string().uuid().optional().or(z.literal('')),
   useWorkflow:  z.boolean().default(false),
-  steps:        z.array(stepSchema).optional(),
+  steps:        z.array(stepSchema.superRefine((v,ctx)=>{if(v.approverType==='user'&&!v.assignedTo)ctx.addIssue({code:'custom',path:['assignedTo'],message:'Choose the reviewer.'});if(v.approverType==='role'&&!v.assignedRole)ctx.addIssue({code:'custom',path:['assignedRole'],message:'Choose the reviewer role.'});})).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -38,6 +41,7 @@ interface ApprovalRequestModalProps {
 }
 
 export function ApprovalRequestModal({ open, onClose, entityType, entityId, entityTitle }: ApprovalRequestModalProps) {
+  const {data:members=[]}=useImplementationMembers(open);
   const create = useCreateApprovalRequest();
   const { data: workflows = [] } = useWorkflows();
 
@@ -85,44 +89,44 @@ export function ApprovalRequestModal({ open, onClose, entityType, entityId, enti
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <ModalSurface label="Request approval" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-xl rounded-xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 shrink-0">
           <div>
             <h2 className="text-base font-semibold text-slate-900">New Approval Request</h2>
             {entityTitle && <p className="text-xs text-slate-500 mt-0.5">for: {entityTitle}</p>}
           </div>
-          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close dialog"><X className="h-5 w-5" /></button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">Title *</label>
+            <AccessibleField label={<>Title *</>} >
+
               <input {...register('title')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
               {errors.title && <p className="mt-0.5 text-xs text-red-600">{errors.title.message}</p>}
-            </div>
+            </AccessibleField>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Priority</label>
+              <AccessibleField label={<>Priority</>} >
+
                 <select {...register('priority')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                   <option value="critical">Critical</option>
                   <option value="high">High</option>
                   <option value="medium">Medium</option>
                   <option value="low">Low</option>
                 </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Deadline</label>
+              </AccessibleField>
+              <AccessibleField label={<>Deadline</>} >
+
                 <input type="datetime-local" {...register('deadline')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              </div>
+              </AccessibleField>
             </div>
 
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">Description</label>
+            <AccessibleField label={<>Description</>} >
+
               <textarea {...register('description')} rows={2} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm resize-none outline-none focus:border-blue-500" />
-            </div>
+            </AccessibleField>
 
             {/* Workflow vs Ad-hoc */}
             {workflows.length > 0 && (
@@ -161,7 +165,7 @@ export function ApprovalRequestModal({ open, onClose, entityType, entityId, enti
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-slate-500">Step {idx + 1}</span>
                         {fields.length > 1 && (
-                          <button type="button" onClick={() => remove(idx)} className="text-red-400 hover:text-red-600">
+                          <button type="button" onClick={() => remove(idx)} className="text-red-400 hover:text-red-600" aria-label="Delete record">
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         )}
@@ -170,18 +174,15 @@ export function ApprovalRequestModal({ open, onClose, entityType, entityId, enti
                         {...register(`steps.${idx}.name`)}
                         placeholder="Step name"
                         className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white outline-none"
-                      />
+                       aria-label="Step name" />
                       <div className="grid grid-cols-2 gap-2">
                         <select {...register(`steps.${idx}.approverType`)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs bg-white">
                           <option value="user">Specific user</option>
                           <option value="role">Role</option>
-                          <option value="manager">Manager</option>
+
                         </select>
-                        <input
-                          {...register(`steps.${idx}.assignedTo`)}
-                          placeholder="Approver ID (UUID)"
-                          className="rounded-md border border-slate-300 px-2 py-1.5 text-xs bg-white outline-none"
-                        />
+                        {watch(`steps.${idx}.approverType`)==='role'?<select aria-label={`Reviewer role for step ${idx+1}`} {...register(`steps.${idx}.assignedRole`)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs"><option value="">Choose a role</option>{['owner','admin','compliance_manager','auditor','control_owner','msp_admin'].map(r=><option key={r} value={r}>{r.replace(/_/g,' ')}</option>)}</select>:<select aria-label={`Reviewer for step ${idx+1}`} {...register(`steps.${idx}.assignedTo`)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs"><option value="">Choose an authorised reviewer</option>{members.filter(m=>!m.role||['owner','admin','compliance_manager','auditor','control_owner','msp_admin'].includes(m.role)).map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select>}
+
                       </div>
                       <label className="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                         <input type="checkbox" {...register(`steps.${idx}.requireSignature`)} className="h-3.5 w-3.5 rounded border-slate-300" />
@@ -202,6 +203,6 @@ export function ApprovalRequestModal({ open, onClose, entityType, entityId, enti
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }

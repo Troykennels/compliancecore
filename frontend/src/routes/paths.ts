@@ -19,6 +19,7 @@ export const PATHS = {
   EVIDENCE_DETAIL: (id: string) => `/evidence/${id}`,
   EVIDENCE_SHARED: (token: string) => `/evidence/shared/${token}`,
   POLICIES: '/policies',
+  POLICY_TEMPLATES: '/policy-templates',
   POLICY_DETAIL: (id: string) => `/policies/${id}`,
   RISKS: '/risks',
   VENDORS: '/vendors',

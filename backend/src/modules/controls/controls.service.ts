@@ -1,6 +1,6 @@
 import { withTenantSchema } from '../../lib/prisma';
 import { setAuditSessionVars } from '../../middleware/audit.middleware';
-import { AppError, NotFoundError } from '../../lib/errors';
+import { AppError, ForbiddenError, NotFoundError } from '../../lib/errors';
 import { controlsRepository } from './controls.repository';
 import { closeResolvedControlActions } from '../frameworks/control-actions';
 import type { CreateControlInput, UpdateControlInput, ListControlsInput } from './controls.schema';
@@ -32,6 +32,8 @@ export const controlsService = {
   },
 
   async create(schemaName: string, input: CreateControlInput, actor: Actor) {
+    if(actor.role==='control_owner')throw new ForbiddenError('A coordinator prepares and assigns new controls. You can update your assigned safeguards.');
+    if(input.frameworkId&&input.implementationStatus==='not_applicable')throw new AppError('Create the control as planned, then record its applicability decision in the framework assessment.',409,'APPLICABILITY_WORKFLOW_REQUIRED');
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
       await checkControl(tx,input,actor);
@@ -46,6 +48,11 @@ export const controlsService = {
       await setAuditSessionVars(tx, actor);
       await tx.$queryRawUnsafe('SELECT id FROM controls WHERE id=$1::uuid FOR UPDATE',id);
       const before=await controlsRepository.findById(tx,id);if(!before)throw new NotFoundError('Control not found.');
+      if(actor.role==='control_owner'&&(before.ownerId!==actor.id||(input.ownerId!==undefined&&input.ownerId!==actor.id)))throw new ForbiddenError('You can update your assigned controls. A manager must change responsibility.');
+      const afterStatus=input.implementationStatus??before.implementationStatus;
+      if(actor.role==='control_owner'&&(afterStatus==='not_applicable'||before.implementationStatus==='not_applicable'))throw new ForbiddenError('A coordinator must review applicability. You cannot exclude an assigned safeguard.');
+      if(before.frameworkId&&(afterStatus!==before.implementationStatus&&(afterStatus==='not_applicable'||before.implementationStatus==='not_applicable')||before.implementationStatus==='not_applicable'&&input.implementationNotes!==undefined&&input.implementationNotes!==before.implementationNotes))throw new AppError('Change inclusion or exclusion and its justification in the framework applicability assessment.',409,'APPLICABILITY_WORKFLOW_REQUIRED');
+      if(input.frameworkId!==undefined&&input.frameworkId!==before.frameworkId)throw new AppError('Keep the assessed control in its framework. Create a separately scoped control if another framework is needed.',409,'CONTROL_FRAMEWORK_FIXED');
       await checkControl(tx,{...before,...input},actor,id);
       input={...input,lastReviewedAt:null};
       const ok = await controlsRepository.update(tx, id, { ...input, updatedBy: actor.id });
@@ -64,9 +71,11 @@ export const controlsService = {
   },
 
   async markReviewed(schemaName: string, id: string, actor: Actor) {
+    if(actor.role==='control_owner')throw new ForbiddenError('An independent coordinator reviews controls.');
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
       const before=await controlsRepository.findById(tx,id);if(!before)throw new NotFoundError('Control not found.');
+      if(before.ownerId===actor.id||before.createdBy===actor.id||before.updatedBy===actor.id)throw new ForbiddenError('Ask an independent reviewer to review this control.');
       if(before.implementationStatus!=='not_applicable'&&(!before.testingNotes?.trim()||!before.implementationNotes?.trim()||!before.ownerId))throw new AppError('Record responsibility, implementation notes and testing results before recording a review.',409,'CONTROL_NOT_READY');
       const ok = await controlsRepository.update(tx, id, {
         lastReviewedAt: new Date(),

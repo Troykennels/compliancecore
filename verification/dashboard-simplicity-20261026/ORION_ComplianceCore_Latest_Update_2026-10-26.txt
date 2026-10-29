@@ -1,0 +1,40 @@
+COMPLIANCECORE - CURRENT ONLINE RELEASE
+26 October 2026
+
+Live app: https://compliancecore-sand.vercel.app/
+Frontend deployment: dpl_D1zkgkajtwDLW435FucDPcLZCapZ
+Backend deployment: 675f699e-fcc8-4a92-ac00-6a3d2626e464
+Deployed runtime source: 4c9b978 (codex/compliance-step2-20261026).
+
+WHAT CHANGED
+A simpler, colourful overview with a teal header; clearly labelled control totals; a status chart; the next unfinished step for each assessment; and direct links to work needing review. History, dates and detailed activity expand only when needed. Supporting pages are grouped in the sidebar. Settings work at phone widths.
+
+The current control progress figure is calculated from current records, with partial controls weighted at half and recorded not-applicable controls excluded. Historical snapshots remain separate. Scores and internal assessment review do not establish certification.
+
+ROLE ACCESS
+Role-specific introductory guidance covers all eight roles. Page links and actions follow permissions. The team list now requires team:read. Non-owners cannot demote or remove owners. Existing last-owner and session-revocation safeguards remain. The team page explains roles, restricts ownership changes and recognises service-provider roles. Read-only organisation settings cannot be edited; only owners see organisation deletion. No actual customer membership or password was changed.
+
+DEMO CONTENT
+The existing demo login is unchanged. Its fictional examples fit the current scope, duties, risks, policies, control tests, corrective actions, audits and supporting-proof workflow. One pending corrective action is genuinely available for independent review by the demo owner. Sample completions require supporting review records. Wider assessments intentionally remain in progress.
+
+IMPLEMENTATION TERMINOLOGY
+Compliance work includes putting controls into practice and checking them. Framework selection is labelled Assess compliance; control records describe operating status. Selecting a framework does not mark it implemented or certified. ISO describes establishing, implementing, maintaining and improving an ISMS: https://committee.iso.org/standard/27001
+
+VERIFICATION PASSED
+- 103 backend tests, including 20 ownership regression cases and 33 settings-router/permission-parity cases.
+- Backend and frontend production builds; frontend type check and focused lint.
+- Eight role presentation fixtures, 48 browser assertions. These are local UI fixtures; separate real-router tests verify API permission enforcement with fixture identities. They do not represent eight real production sign-ins.
+- 42 live HTTP checks for the managed demonstration, including actual PDF, Word and Excel downloads.
+- All 37 pages at desktop and phone widths: 86 browser checks and six actual downloads.
+- Eight additional dashboard checks covering exact recorded totals, optional details and navigation.
+- Eight deliberate full phone reloads retained the session; secure HttpOnly cookie and absence of the stay-signed-in prompt checked (11 assertions).
+- Demo owner independent-review availability and authorised team-list access checked live.
+- Original non-demo business data: 430 tables unchanged; customer commercial terms: 10 subscription records unchanged.
+
+TEST SCOPE AND HISTORY
+Current full browser run has no page exceptions or HTTP 500 responses. Anonymous startup refresh 401 responses are expected before sign-in. Navigation-cancelled requests are retained in the evidence. An earlier full-navigation-only run had one sign-in interruption; subsequent instrumented full-route and deliberate reload runs passed. No definitive cause was established for that earlier interruption; its original failure receipt is preserved.
+
+The earlier backup and migration receipts remain preserved. The logical recovery rehearsal covers application rows; vector-extension, collation and external object-store/provider recovery limitations remain documented in the runbook. This release adds no database migration, external email or real payment. CIAsecured was not changed.
+
+Evidence folder: C:/Users/user/Desktop/ComplianceCore/verification/dashboard-simplicity-20261026
+Full workflow checks: C:/Users/user/Desktop/ComplianceCore/verification/demo-refresh-20261026

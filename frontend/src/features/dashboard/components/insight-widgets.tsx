@@ -67,7 +67,7 @@ export function ComplianceHeatmap({ categories, cells }: { categories: string[];
   return (
     <Panel title="Compliance Heatmap" icon={<Grid3x3 className="h-4 w-4" />}>
       {!categories.length ? (
-        <Empty>Adopt a framework to populate the heatmap.</Empty>
+        <Empty>Start an assessment to populate the heatmap.</Empty>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[440px] border-separate border-spacing-1 text-xs">
@@ -213,7 +213,7 @@ export function FrameworkProgress({
       action="Frameworks" onAction={() => navigate('/frameworks')}
     >
       {!frameworks.length ? (
-        <Empty>Adopt a framework to track completion.</Empty>
+        <Empty>Start an assessment to track reviewed work.</Empty>
       ) : (
         <ul className="space-y-3">
           {frameworks.slice(0, 6).map((f) => {

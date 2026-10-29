@@ -1,3 +1,5 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { ModalSurface } from '@/components/modal-surface';
 import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -73,7 +75,7 @@ export function EvidenceUploadModal({ open, onClose, onSuccess }: EvidenceUpload
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <ModalSurface label="Upload evidence" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-2xl rounded-xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
@@ -83,7 +85,7 @@ export function EvidenceUploadModal({ open, onClose, onSuccess }: EvidenceUpload
             onClick={onClose}
             disabled={isInProgress}
             className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 disabled:opacity-40"
-          >
+           aria-label="Close dialog">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -103,33 +105,33 @@ export function EvidenceUploadModal({ open, onClose, onSuccess }: EvidenceUpload
             </div>
 
             {/* Title */}
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
+            <AccessibleField label={<>
                 Title <span className="text-red-500">*</span>
-              </label>
+              </>} >
+
               <input
                 {...register('title')}
                 placeholder="e.g. Q1 2026 SOC 2 Evidence"
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
               {errors.title && <p className="mt-1 text-xs text-red-600">{errors.title.message}</p>}
-            </div>
+            </AccessibleField>
 
             {/* Description */}
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
+            <AccessibleField label={<>Description</>} >
+
               <textarea
                 {...register('description')}
                 rows={2}
                 placeholder="Brief description of this evidence item..."
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
               />
-            </div>
+            </AccessibleField>
 
             {/* Category + Tags row */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">Category</label>
+              <AccessibleField label={<>Category</>} >
+
                 <select
                   {...register('categoryId')}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
@@ -139,9 +141,9 @@ export function EvidenceUploadModal({ open, onClose, onSuccess }: EvidenceUpload
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">Tags</label>
+              </AccessibleField>
+              <AccessibleField label={<>Tags</>} >
+
                 <Controller
                   name="tagIds"
                   control={control}
@@ -153,42 +155,42 @@ export function EvidenceUploadModal({ open, onClose, onSuccess }: EvidenceUpload
                     />
                   )}
                 />
-              </div>
+              </AccessibleField>
             </div>
 
             {/* Dates row */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 flex items-center gap-1.5">
+              <AccessibleField label={<>
                   <Calendar className="h-3.5 w-3.5" /> Collection Date
-                </label>
+                </>} >
+
                 <input
                   type="date"
                   {...register('collectedAt')}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
                 />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 flex items-center gap-1.5">
+              </AccessibleField>
+              <AccessibleField label={<>
                   <Calendar className="h-3.5 w-3.5" /> Retention Date
-                </label>
+                </>} >
+
                 <input
                   type="date"
                   {...register('retentionDate')}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
                 />
-              </div>
+              </AccessibleField>
             </div>
 
             {/* Change note */}
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">Change Note (optional)</label>
+            <AccessibleField label={<>Change Note (optional)</>} >
+
               <input
                 {...register('changeNote')}
                 placeholder="Describe what this evidence covers..."
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
               />
-            </div>
+            </AccessibleField>
 
             {/* Confidential toggle */}
             <div className="flex items-start gap-3 rounded-lg bg-amber-50 border border-amber-200 p-3">
@@ -256,6 +258,6 @@ export function EvidenceUploadModal({ open, onClose, onSuccess }: EvidenceUpload
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }

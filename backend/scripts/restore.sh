@@ -17,7 +17,7 @@ if [[ ! -f "$DUMP" ]]; then
 fi
 
 echo "[restore] !! This will overwrite data in the target database."
-echo "[restore] target: ${DATABASE_URL%%\?*}"
+echo "[restore] target: configured DATABASE_URL (credentials withheld)"
 echo "[restore] source: $DUMP"
 read -r -p "[restore] Type 'yes' to continue: " CONFIRM
 [[ "$CONFIRM" == "yes" ]] || { echo "[restore] aborted"; exit 1; }

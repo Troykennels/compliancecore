@@ -2,6 +2,7 @@ import archiver from 'archiver';
 import type { Response } from 'express';
 import { prisma, withTenantSchema } from '../../lib/prisma';
 import { logger } from '../../lib/logger';
+import { csvCell } from '../../lib/spreadsheet';
 
 /**
  * Full organisation data export.
@@ -26,29 +27,21 @@ const SENSITIVE_COLUMNS = new Set([
   'email_verification_token_hash', 'password_reset_token_hash',
 ]);
 
-function scrub(rows: Record<string, unknown>[]): Record<string, unknown>[] {
-  return rows.map((row) => {
-    const clean: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(row)) {
-      if (SENSITIVE_COLUMNS.has(key.toLowerCase())) continue;
-      // BigInt (COUNT results, bigserial columns) is not JSON-serialisable.
-      clean[key] = typeof value === 'bigint' ? value.toString() : value;
-    }
-    return clean;
-  });
+function scrubValue(value:unknown):unknown {
+  if(typeof value==='bigint')return value.toString();
+  if(value instanceof Date)return value;
+  if(Array.isArray(value))return value.map(scrubValue);
+  if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).filter(([key])=>!SENSITIVE_COLUMNS.has(key.toLowerCase())&&!/^(?:shareToken|accessToken|refreshToken|passwordHash|webhookSecret|privateKey|secret)$/i.test(key)).map(([key,v])=>[key,scrubValue(v)]));
+  return value;
 }
+function scrub(rows:Record<string,unknown>[]):Record<string,unknown>[] {return rows.map(r=>scrubValue(r) as Record<string,unknown>);}
 
 /** RFC 4180 CSV. Excel needs the BOM or it mangles non-ASCII on open. */
 function toCsv(rows: Record<string, unknown>[]): string {
   if (!rows.length) return '';
   const headers = Object.keys(rows[0]);
 
-  const cell = (v: unknown): string => {
-    if (v === null || v === undefined) return '';
-    if (v instanceof Date) return v.toISOString();
-    const s = typeof v === 'object' ? JSON.stringify(v) : String(v);
-    return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  };
+  const cell = csvCell;
 
   return '﻿' + [
     headers.join(','),

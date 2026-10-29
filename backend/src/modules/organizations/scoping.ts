@@ -1,18 +1,7 @@
 import { z } from 'zod';
 
-/**
- * Compliance scoping questionnaire.
- *
- * Real GRC engagements start by establishing scope — ISO 27001 calls the output
- * a Statement of Applicability, PCI DSS uses a Self-Assessment Questionnaire to
- * decide which requirements apply. Without it every customer is shown the same
- * 18-framework catalogue and has to guess, which is the single most common way
- * a compliance programme starts wrong.
- *
- * The questions below are deliberately about how the business operates, not
- * about standards: an owner who has never done compliance can answer all of
- * them, and the mapping to frameworks is our job, not theirs.
- */
+/** Collect facts to identify candidate requirements. Applicability and control
+ * coverage are later human-reviewed decisions; this is not a Statement of Applicability. */
 export const scopingProfileSchema = z.object({
   // ── Where the organisation operates and whose data it holds ───────────────
   // Free-form ISO-ish region keys; the recommendation engine matches on these.
@@ -81,39 +70,39 @@ export function recommendFrameworks(p: ScopingProfile): FrameworkRecommendation[
 
   // ── Data-protection law follows the data subject, not the company address ──
   if (personal && regions.has('nigeria')) {
-    add('NDPR', 'required', 'You handle personal data of people in Nigeria, so the Nigeria Data Protection Act and NDPR apply.');
+    add('NDPR', 'recommended', 'Personal-data activity connected with Nigeria needs review against NDPA2023, final GAID2025 and relevant NDPR material. Confirm processing roles, scope and current requirements before deciding applicability.');
   }
   if (personal && regions.has('eu')) {
-    add('GDPR', 'required', 'You handle personal data of people in the EU, so the GDPR applies regardless of where your company is based.');
+    add('GDPR', 'recommended', 'Review GDPR territorial scope, establishment, offering goods/services and monitoring criteria. EU-related data alone does not establish applicability.');
   }
   if (personal && regions.has('uk')) {
-    add('UK_GDPR', 'required', 'You handle personal data of people in the UK, so the UK GDPR and Data Protection Act apply.');
+    add('UK_GDPR', 'recommended', 'Review UK territorial scope, processing roles, establishment and targeting/monitoring criteria before deciding which UK privacy duties apply.');
   }
   if (personal && regions.has('south_africa')) {
-    add('POPIA', 'required', 'You handle personal data of people in South Africa, so POPIA applies.');
+    add('POPIA', 'recommended', 'Review South African territorial scope, responsible-party/operator roles and exemptions before deciding applicability.');
   }
   if (personal && regions.has('california')) {
-    add('CCPA', 'required', 'You handle personal data of California residents, so the CCPA/CPRA applies.');
+    add('CCPA', 'recommended', 'Review California business thresholds, exemptions, organisational role and relevant processing. California-resident data alone does not establish CCPA/CPRA applicability.');
   }
   if (personal && regions.has('uae')) {
-    add('UAE_PDPL', 'required', 'You handle personal data of people in the UAE, so the UAE Personal Data Protection Law applies.');
+    add('UAE_PDPL', 'recommended', 'Review the relevant UAE jurisdiction, processing role, territorial criteria and free-zone or sector-specific regime.');
   }
   if (personal && regions.has('india')) {
-    add('DPDPA', 'required', 'You handle personal data of people in India, so the Digital Personal Data Protection Act applies.');
+    add('DPDPA', 'recommended', 'Review Indian territorial scope, operative provisions and commencement dates with the responsible legal reviewer.');
   }
 
   // ── Sector and activity obligations ───────────────────────────────────────
   if (p.handlesCardPayments) {
-    add('PCIDSS', 'required', 'You take card payments, so PCI DSS is contractually required by your acquirer and the card schemes.');
+    add('PCIDSS', 'recommended', 'Ask the acquirer or qualified adviser which payment-card scope and validation route apply. Taking payments alone does not determine every PCI requirement.');
   }
   if (p.handlesHealthData && (regions.has('usa') || regions.has('california'))) {
-    add('HIPAA', 'required', 'You handle health information in the United States, which brings you into scope of HIPAA.');
+    add('HIPAA', 'recommended', 'Review covered-entity/business-associate status, activities and applicable US requirements. Health information in the US alone does not establish HIPAA applicability.');
   }
   if (p.isPubliclyListed && regions.has('usa')) {
-    add('SOX', 'required', 'As a US-listed company you must demonstrate internal control over financial reporting under Sarbanes-Oxley.');
+    add('SOX', 'recommended', 'Review issuer status, applicable reporting requirements and internal-control obligations with the financial reporting adviser.');
   }
   if (p.isRegulatedFinancialInstitution && regions.has('saudi_arabia')) {
-    add('SAMA_CSF', 'required', 'SAMA requires its regulated financial institutions to implement the Cyber Security Framework.');
+    add('SAMA_CSF', 'recommended', 'Review the exact licence, regulated activities, regulator directions and current SAMA requirements with the regulatory lead.');
   }
 
   // ── Commercial and assurance drivers ──────────────────────────────────────
@@ -123,7 +112,7 @@ export function recommendFrameworks(p: ScopingProfile): FrameworkRecommendation[
   }
   if (p.buildsSoftware || p.hostingModel === 'cloud' || p.hostingModel === 'hybrid') {
     add('ISO27001', 'recommended', 'You build or host software, so a managed information security programme is the foundation everything else builds on.');
-    add('NIST_CSF', 'optional', 'NIST CSF 2.0 is a good free framework for structuring your security programme before you certify.');
+    add('NIST_CSF', 'optional', 'Consider NIST CSF2.0 for organising cybersecurity outcomes and monitoring; it does not provide a certification route.');
   }
   if (p.primaryDriver === 'investor_due_diligence') {
     add('SOC2', 'recommended', 'Investor technical due diligence commonly asks for SOC 2 or an equivalent independent report.');

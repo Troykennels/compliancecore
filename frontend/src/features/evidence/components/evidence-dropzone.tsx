@@ -80,7 +80,7 @@ export function EvidenceDropzone({ file, onFileSelect, onFileClear, disabled }: 
             type="button"
             onClick={onFileClear}
             className="shrink-0 rounded p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-600"
-          >
+           aria-label="Close dialog">
             <X className="h-4 w-4" />
           </button>
         )}
@@ -111,6 +111,7 @@ export function EvidenceDropzone({ file, onFileSelect, onFileClear, disabled }: 
         </span>
         <input
           type="file"
+          aria-label="Choose evidence files"
           className="sr-only"
           accept={ACCEPTED_EXTENSIONS.join(',')}
           onChange={onInputChange}

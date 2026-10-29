@@ -1,3 +1,4 @@
+import { AccessibleField } from '@/components/accessible-field';
 import { Filter } from 'lucide-react';
 import { useEvidenceCategories, useEvidenceTags } from '../hooks/use-evidence';
 import type { EvidenceFilters, EvidenceStatus } from '../types/evidence.types';
@@ -102,7 +103,7 @@ export function EvidenceFiltersPanel({ filters, onChange }: EvidenceFiltersProps
             value={filters.categoryId ?? ''}
             onChange={(e) => set('categoryId', e.target.value)}
             className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500"
-          >
+           aria-label="Filter: All categories" >
             <option value="">All categories</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -145,7 +146,7 @@ export function EvidenceFiltersPanel({ filters, onChange }: EvidenceFiltersProps
           value={filters.mimeType ?? ''}
           onChange={(e) => set('mimeType', e.target.value)}
           className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500"
-        >
+         aria-label="Filter: All types" >
           <option value="">All types</option>
           {FILE_TYPE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -157,7 +158,7 @@ export function EvidenceFiltersPanel({ filters, onChange }: EvidenceFiltersProps
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">OCR Status</p>
         <select
-          value={filters.ocrStatus ?? ''}
+          aria-label="Filter by text extraction status" value={filters.ocrStatus ?? ''}
           onChange={(e) => set('ocrStatus', e.target.value as never)}
           className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500"
         >
@@ -172,24 +173,24 @@ export function EvidenceFiltersPanel({ filters, onChange }: EvidenceFiltersProps
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Date Range</p>
         <div className="space-y-2">
-          <div>
-            <label className="mb-0.5 block text-xs text-slate-500">From</label>
+          <AccessibleField label={<>From</>} >
+
             <input
               type="date"
               value={filters.dateFrom ?? ''}
               onChange={(e) => set('dateFrom', e.target.value)}
               className="w-full rounded border border-slate-300 px-2 py-1.5 text-xs focus:outline-none focus:border-blue-500"
             />
-          </div>
-          <div>
-            <label className="mb-0.5 block text-xs text-slate-500">To</label>
+          </AccessibleField>
+          <AccessibleField label={<>To</>} >
+
             <input
               type="date"
               value={filters.dateTo ?? ''}
               onChange={(e) => set('dateTo', e.target.value)}
               className="w-full rounded border border-slate-300 px-2 py-1.5 text-xs focus:outline-none focus:border-blue-500"
             />
-          </div>
+          </AccessibleField>
         </div>
       </div>
     </aside>

@@ -1,0 +1,28 @@
+﻿import { beforeEach, describe, expect, it, vi } from 'vitest';
+import fs from 'node:fs';
+const m=vi.hoisted(()=>({query:vi.fn(),execute:vi.fn(),controlFind:vi.fn(),controlUpdate:vi.fn(),auditFind:vi.fn(),auditUpdate:vi.fn(),findMembership:vi.fn(),countActiveOwners:vi.fn(),updateMemberRole:vi.fn(),revoke:vi.fn()}));
+vi.mock('../../src/lib/prisma',()=>({prisma:{},withTenantSchema:async(_schema:any,callback:any)=>callback({$queryRawUnsafe:m.query,$executeRawUnsafe:m.execute})}));
+vi.mock('../../src/middleware/audit.middleware',()=>({setAuditSessionVars:vi.fn()}));
+vi.mock('../../src/lib/active-member',()=>({assertActiveMembers:vi.fn()}));
+vi.mock('../../src/modules/frameworks/control-actions',()=>({closeResolvedControlActions:vi.fn()}));
+vi.mock('../../src/modules/frameworks/implementation.service',()=>({implementationService:{overview:vi.fn()}}));
+vi.mock('../../src/modules/controls/controls.repository',()=>({controlsRepository:{findById:m.controlFind,update:m.controlUpdate}}));
+vi.mock('../../src/modules/audits/audits.repository',()=>({auditsRepository:{findById:m.auditFind,update:m.auditUpdate}}));
+vi.mock('../../src/modules/settings/settings.repository',()=>({settingsRepository:{findMembership:m.findMembership,countActiveOwners:m.countActiveOwners,updateMemberRole:m.updateMemberRole}}));
+vi.mock('../../src/lib/token-revocation',()=>({revokeUserTokens:m.revoke}));
+vi.mock('../../src/lib/email',()=>({email:{}}));
+import {controlsService} from '../../src/modules/controls/controls.service';
+import {auditsService} from '../../src/modules/audits/audits.service';
+import {settingsService} from '../../src/modules/settings/settings.service';
+import {createAuditSchema} from '../../src/modules/audits/audits.schema';
+import {createCalendarEventSchema} from '../../src/modules/calendar/calendar.schema';
+const actor={id:'person-a',email:'audit@example.invalid',role:'owner',tenantId:'fixture-tenant'};
+beforeEach(()=>vi.resetAllMocks());
+describe('Audit probes documenting CURRENT deficiencies, not acceptance tests',()=>{
+ it('assigned control owner can mark a safeguard N/A without the applicability workflow',async()=>{m.query.mockResolvedValue([{id:'fixture-control'}]);m.controlFind.mockResolvedValue({id:'fixture-control',ownerId:actor.id,frameworkId:'fixture-framework',implementationStatus:'planned'});m.controlUpdate.mockResolvedValue(true);await expect(controlsService.update('fixture','fixture-control',{implementationStatus:'not_applicable',implementationNotes:'Exclude this safeguard based on my own description'},{...actor,role:'control_owner'})).resolves.toBeDefined();expect(m.query.mock.calls.some(args=>String(args[0]).includes('framework_control_applicability'))).toBe(false);expect(m.controlUpdate).toHaveBeenCalled();});
+ it('audit form has no summary field although review requires one',()=>{const s=fs.readFileSync('../frontend/src/features/audits/components/audit-form-modal.tsx','utf8');expect(s.includes("register('summary')")).toBe(false);expect(s.includes('summary:')).toBe(false);});
+ it('an otherwise reviewed audit cannot be completed using the full edit-form payload',async()=>{m.auditFind.mockResolvedValue({id:'audit',auditType:'internal',frameworkRef:null});m.query.mockResolvedValue([{reviewed_by:'separate-reviewer'}]);await expect(auditsService.update('fixture','audit',{status:'completed',title:'Existing audit',auditType:'internal',scope:'Existing scope'},actor)).rejects.toThrow('Save report changes first');expect(m.auditUpdate).not.toHaveBeenCalled();});
+ it('audit schema accepts an end date before its start date',()=>{expect(createAuditSchema.safeParse({title:'Date probe',startDate:'2026-10-20',endDate:'2026-10-01'}).success).toBe(true);});
+ it('calendar schema accepts an end date before its start date',()=>{expect(createCalendarEventSchema.safeParse({title:'Date probe',startDate:'2026-10-20',endDate:'2026-10-01'}).success).toBe(true);});
+ it('two concurrent co-owner demotions can pass the separate count checks',async()=>{let owners=2;const roles:Record<string,string>={a:'owner',b:'owner'};m.findMembership.mockImplementation(async(_tenant,id)=>({role:roles[id],userId:id}));m.countActiveOwners.mockImplementation(async()=>owners);m.updateMemberRole.mockImplementation(async(id,role)=>{if(roles[id]==='owner')owners--;roles[id]=role;return{id,role};});await Promise.all([settingsService.team.updateMemberRole('fixture','b',{role:'viewer'},{...actor,id:'a'}),settingsService.team.updateMemberRole('fixture','a',{role:'viewer'},{...actor,id:'b'})]);expect(owners).toBe(0);});
+});

@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { refineDateRange } from '../../lib/date-range';
 
 const uuidSchema = z.string().uuid();
 
-export const createAuditSchema = z.object({
+const auditFields = z.object({
   title:        z.string().min(1).max(500),
   auditType:    z.enum(['internal', 'external', 'certification', 'surveillance']).default('internal'),
   frameworkRef: z.string().max(100).optional().nullable(),
@@ -15,7 +16,8 @@ export const createAuditSchema = z.object({
   ownerId:      uuidSchema.optional().nullable(),
 });
 
-export const updateAuditSchema = createAuditSchema.partial();
+export const createAuditSchema = auditFields.superRefine(refineDateRange);
+export const updateAuditSchema = auditFields.partial().superRefine(refineDateRange);
 
 export const listAuditsSchema = z.object({
   page:      z.coerce.number().int().min(1).optional().default(1),
@@ -29,6 +31,8 @@ export const listAuditsSchema = z.object({
 });
 
 export const createFindingSchema = z.object({
+  controlId:      uuidSchema.optional().nullable(),
+  testId:         uuidSchema.optional().nullable(),
   title:          z.string().min(1).max(500),
   description:    z.string().max(10000).optional().nullable(),
   severity:       z.enum(['critical', 'high', 'medium', 'low', 'observation']).default('medium'),

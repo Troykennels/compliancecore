@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "demoOwnerCanIndependentlyReviewPendingExample": true,
+  "actualTeamListAvailableToOwner": true,
+  "scope": "Managed demo read-only checks; no review decision made"
+}

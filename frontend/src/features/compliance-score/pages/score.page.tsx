@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { useCurrentScore, useScoreTrend, useTriggerSnapshot } from '../hooks/use-score';
@@ -13,7 +14,8 @@ const TREND_OPTIONS: { label: string; days: number }[] = [
   { label: '1y',  days: 365 },
 ];
 
-export function ScorePage() {
+export function ScorePage() {
+
   const fmt = useOrgFormat();
   const [trendDays, setTrendDays] = useState(180);
   const { data: scoreData, isLoading: scoreLoading, isError: scoreError, refetch: refetchScore } = useCurrentScore();
@@ -30,14 +32,14 @@ export function ScorePage() {
           <h1 className="text-xl font-semibold text-slate-900">Compliance Score</h1>
           <p className="text-sm text-slate-500 mt-0.5">Weighted score across all active frameworks</p>
         </div>
-        <button
+        <PermissionAction scope="controls:write"><button
           onClick={() => triggerSnapshot.mutate()}
           disabled={triggerSnapshot.isPending}
           className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50"
         >
           <RefreshCw className={`h-4 w-4 ${triggerSnapshot.isPending ? 'animate-spin' : ''}`} />
           Take Snapshot
-        </button>
+        </button></PermissionAction>
       </div>
 
       {scoreLoading ? (

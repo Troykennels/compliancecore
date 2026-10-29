@@ -1,4 +1,4 @@
-export type MemberRole = 'owner' | 'admin' | 'compliance_manager' | 'control_owner' | 'auditor' | 'viewer';
+export type MemberRole = 'owner' | 'admin' | 'compliance_manager' | 'control_owner' | 'auditor' | 'viewer' | 'msp_admin' | 'msp_analyst';
 
 export interface TeamMember {
   id: string;
@@ -63,6 +63,8 @@ export interface NotificationSettings {
 }
 
 export const ROLE_LABELS: Record<MemberRole, string> = {
+  msp_admin: 'Service provider administrator',
+  msp_analyst: 'Service provider analyst',
   owner:              'Owner',
   admin:              'Admin',
   compliance_manager: 'Compliance Manager',

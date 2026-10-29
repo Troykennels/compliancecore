@@ -1,3 +1,5 @@
+import { getPermissionsForRole, hasPermission } from '../../middleware/rbac.middleware';
+import { ForbiddenError } from '../../lib/errors';
 import type { Request, Response } from 'express';
 import * as service from './tasks.service';
 import { createTaskSchema, updateTaskSchema, addCommentSchema, listTasksSchema } from './tasks.schema';
@@ -20,6 +22,8 @@ export async function getTask(req: Request, res: Response) {
 
 export async function createTask(req: Request, res: Response) {
   const dto = validate(createTaskSchema, req.body);
+  if(dto.assignedTo&&dto.assignedTo!==req.user!.id&&!hasPermission(getPermissionsForRole(req.user!.role!), 'tasks:assign'))throw new ForbiddenError('Your role can prepare your own tasks. Ask a coordinator to assign another person.');
+  if(!hasPermission(getPermissionsForRole(req.user!.role!), 'tasks:assign'))dto.assignedTo=req.user!.id;
   const task = await service.createTask(
     req.tenant!.schemaName, dto, req.user!.id, req.user!.email, userName(req),
   );
@@ -28,6 +32,8 @@ export async function createTask(req: Request, res: Response) {
 
 export async function updateTask(req: Request, res: Response) {
   const dto = validate(updateTaskSchema, req.body);
+  const existing=await service.getTask(req.tenant!.schemaName,req.params.id);
+  if(!hasPermission(getPermissionsForRole(req.user!.role!), 'tasks:assign')&&(existing.assignedTo!==req.user!.id||(dto.assignedTo!==undefined&&dto.assignedTo!==req.user!.id)))throw new ForbiddenError('You can update your assigned tasks. Ask a coordinator to change responsibility.');
   const task = await service.updateTask(
     req.tenant!.schemaName, req.params.id, dto, req.user!.id, userName(req),
   );
@@ -40,6 +46,8 @@ export async function getSubtasks(req: Request, res: Response) {
 }
 
 export async function deleteTask(req: Request, res: Response) {
+  const existing=await service.getTask(req.tenant!.schemaName,req.params.id);
+  if(!hasPermission(getPermissionsForRole(req.user!.role!), 'tasks:assign')&&existing.assignedTo!==req.user!.id)throw new ForbiddenError('You can remove only your assigned tasks.');
   await service.deleteTask(req.tenant!.schemaName, req.params.id);
   res.json({ success: true, data: null });
 }

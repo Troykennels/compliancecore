@@ -1,5 +1,6 @@
 import express, { type Express, type Request } from 'express';
 import { asyncHandler } from './lib/asyncHandler';
+import { auditRequestContext } from './lib/audit-context';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -40,6 +41,7 @@ import { env } from './config/env';
 
 export function createApp(): Express {
   const app = express();
+  app.use((req, _res, next) => auditRequestContext.run({actor:()=>req.user},next));
 
   // ─── Trust Proxy (Railway / load balancer) ───────────────────────────────
   app.set('trust proxy', 1);

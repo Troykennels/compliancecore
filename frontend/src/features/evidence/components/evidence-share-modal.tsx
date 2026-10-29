@@ -1,3 +1,5 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { ModalSurface } from '@/components/modal-surface';
 import { useState } from 'react';
 import { X, Link2, Mail, Clock, Lock, Copy, Check, AlertCircle, Trash2 } from 'lucide-react';
 import { useEvidenceShares, useCreateShare, useRevokeShare } from '../hooks/use-evidence';
@@ -50,7 +52,7 @@ export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }:
   const activeShares = shares.filter((s) => !s.isRevoked);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <ModalSurface label="Share evidence" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg rounded-xl bg-white shadow-2xl flex flex-col max-h-[85vh]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 shrink-0">
@@ -58,7 +60,7 @@ export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }:
             <h2 className="text-base font-semibold text-slate-900">Share Evidence</h2>
             <p className="mt-0.5 text-xs text-slate-500 truncate max-w-xs">{evidenceTitle}</p>
           </div>
-          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100">
+          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close dialog">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -89,8 +91,8 @@ export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }:
 
             {/* Email recipient */}
             {form.shareType === 'email' && (
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-600">Recipient Email</label>
+              <AccessibleField label={<>Recipient Email</>} >
+
                 <input
                   type="email"
                   placeholder="colleague@company.com"
@@ -98,28 +100,28 @@ export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }:
                   onChange={(e) => setForm((f) => ({ ...f, recipientEmail: e.target.value }))}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
                 />
-              </div>
+              </AccessibleField>
             )}
 
             <div className="grid grid-cols-2 gap-3">
               {/* Expiry */}
-              <div>
-                <label className="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
+              <AccessibleField label={<>
                   <Clock className="h-3 w-3" /> Expiry Date (optional)
-                </label>
+                </>} >
+
                 <input
                   type="date"
                   value={form.expiresAt ?? ''}
                   onChange={(e) => setForm((f) => ({ ...f, expiresAt: e.target.value || null }))}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
                 />
-              </div>
+              </AccessibleField>
 
               {/* Password */}
-              <div>
-                <label className="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
+              <AccessibleField label={<>
                   <Lock className="h-3 w-3" /> Password (optional)
-                </label>
+                </>} >
+
                 <input
                   type="password"
                   placeholder="Leave blank for no password"
@@ -127,7 +129,7 @@ export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }:
                   onChange={(e) => setForm((f) => ({ ...f, password: e.target.value || null }))}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
                 />
-              </div>
+              </AccessibleField>
             </div>
 
             <button
@@ -228,6 +230,6 @@ export function EvidenceShareModal({ open, onClose, evidenceId, evidenceTitle }:
           )}
         </div>
       </div>
-    </div>
+    </ModalSurface>
   );
 }

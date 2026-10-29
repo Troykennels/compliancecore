@@ -1,3 +1,5 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { ModalSurface } from '@/components/modal-surface';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -88,35 +90,35 @@ export function WorkflowBuilder({ open, onClose }: WorkflowBuilderProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <ModalSurface label="New Workflow Template" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-2xl rounded-xl bg-white shadow-2xl flex flex-col max-h-[92vh]">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 shrink-0">
           <div>
             <h2 className="text-base font-semibold text-slate-900">New Workflow Template</h2>
             <p className="text-xs text-slate-500 mt-0.5">Define reusable multi-step approval workflows</p>
           </div>
-          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close dialog"><X className="h-5 w-5" /></button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
             {/* Workflow metadata */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
-                <label className="mb-1 block text-xs font-medium text-slate-700">Workflow Name *</label>
+              <AccessibleField label={<>Workflow Name *</>} className="col-span-2">
+
                 <input {...register('name')} placeholder="e.g. Policy Approval — Two-Level" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
                 {errors.name && <p className="mt-0.5 text-xs text-red-600">{errors.name.message}</p>}
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Applies To</label>
+              </AccessibleField>
+              <AccessibleField label={<>Applies To</>} >
+
                 <select {...register('entityType')} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                   {ENTITY_TYPE_OPTIONS.map((t) => <option key={t} value={t}>{t}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Description</label>
+              </AccessibleField>
+              <AccessibleField label={<>Description</>} >
+
                 <input {...register('description')} placeholder="Optional description" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500" />
-              </div>
+              </AccessibleField>
             </div>
 
             {/* Steps */}
@@ -165,57 +167,57 @@ export function WorkflowBuilder({ open, onClose }: WorkflowBuilderProps) {
                       </div>
 
                       <div className="p-4 space-y-3">
-                        <div>
-                          <label className="mb-1 block text-xs font-medium text-slate-600">Step Name *</label>
+                        <AccessibleField label={<>Step Name *</>} >
+
                           <input
                             {...register(`steps.${idx}.name`)}
                             placeholder="e.g. Manager Review"
                             className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white outline-none focus:border-blue-500"
                           />
-                        </div>
+                        </AccessibleField>
 
                         <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="mb-1 block text-xs font-medium text-slate-600">Approver Type</label>
+                          <AccessibleField label={<>Approver Type</>} >
+
                             <select {...register(`steps.${idx}.approverType`)} className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white">
                               <option value="user">Specific User</option>
                               <option value="role">By Role</option>
                               <option value="manager">Requester's Manager</option>
                             </select>
-                          </div>
+                          </AccessibleField>
 
                           {approverType === 'role' && (
-                            <div>
-                              <label className="mb-1 block text-xs font-medium text-slate-600">Role</label>
+                            <AccessibleField label={<>Role</>} >
+
                               <select {...register(`steps.${idx}.assignedRole`)} className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white">
                                 {ROLE_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
                               </select>
-                            </div>
+                            </AccessibleField>
                           )}
 
                           {approverType === 'user' && (
-                            <div>
-                              <label className="mb-1 block text-xs font-medium text-slate-600">User ID (UUID)</label>
+                            <AccessibleField label={<>User ID (UUID)</>} >
+
                               <input {...register(`steps.${idx}.assignedTo`)} placeholder="User UUID" className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white outline-none" />
-                            </div>
+                            </AccessibleField>
                           )}
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="mb-1 block text-xs font-medium text-slate-600">Min Approvals</label>
+                          <AccessibleField label={<>Min Approvals</>} >
+
                             <input type="number" min={1} {...register(`steps.${idx}.minApprovals`)} className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white" />
-                          </div>
-                          <div>
-                            <label className="mb-1 block text-xs font-medium text-slate-600">Deadline (hours)</label>
+                          </AccessibleField>
+                          <AccessibleField label={<>Deadline (hours)</>} >
+
                             <input type="number" min={1} placeholder="Optional" {...register(`steps.${idx}.deadlineHours`)} className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white" />
-                          </div>
+                          </AccessibleField>
                         </div>
 
-                        <div>
-                          <label className="mb-1 block text-xs font-medium text-slate-600">Instructions (shown to approver)</label>
+                        <AccessibleField label={<>Instructions (shown to approver)</>} >
+
                           <input {...register(`steps.${idx}.instructions`)} placeholder="Optional guidance for the approver" className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm bg-white outline-none" />
-                        </div>
+                        </AccessibleField>
 
                         <div className="flex items-center gap-4">
                           <label className="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
@@ -243,6 +245,6 @@ export function WorkflowBuilder({ open, onClose }: WorkflowBuilderProps) {
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }

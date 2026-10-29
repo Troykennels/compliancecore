@@ -1,3 +1,4 @@
+import { AccessibleField } from '@/components/accessible-field';
 import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -165,10 +166,10 @@ export function OnboardingPage() {
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700">
+          <AccessibleField label={<>
               Organization name *
-            </label>
+            </>} >
+
             <input
               {...register('name')}
               autoFocus
@@ -176,19 +177,19 @@ export function OnboardingPage() {
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500"
             />
             {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
-          </div>
+          </AccessibleField>
 
-          <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700">Industry</label>
+          <AccessibleField label={<>Industry</>} >
+
             <input
               {...register('industry')}
               placeholder="e.g. Financial Services"
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500"
             />
-          </div>
+          </AccessibleField>
 
-          <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700">Company size</label>
+          <AccessibleField label={<>Company size</>} >
+
             <select
               {...register('size')}
               defaultValue=""
@@ -203,7 +204,7 @@ export function OnboardingPage() {
                 </option>
               ))}
             </select>
-          </div>
+          </AccessibleField>
 
           <button
             type="submit"

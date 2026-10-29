@@ -1,0 +1,30 @@
+import {beforeEach,describe,expect,it,vi} from 'vitest';
+const m=vi.hoisted(()=>({query:vi.fn(),execute:vi.fn(),controlFind:vi.fn(),controlUpdate:vi.fn(),auditFind:vi.fn(),auditUpdate:vi.fn(),calendarFind:vi.fn(),calendarUpdate:vi.fn()}));
+vi.mock('../../src/lib/prisma',()=>({withTenantSchema:async(_schema:unknown,callback:any)=>callback({$queryRawUnsafe:m.query,$executeRawUnsafe:m.execute})}));
+vi.mock('../../src/middleware/audit.middleware',()=>({setAuditSessionVars:vi.fn()}));
+vi.mock('../../src/lib/active-member',()=>({assertActiveMembers:vi.fn()}));
+vi.mock('../../src/modules/frameworks/control-actions',()=>({closeResolvedControlActions:vi.fn()}));
+vi.mock('../../src/modules/frameworks/implementation.service',()=>({implementationService:{overview:vi.fn()}}));
+vi.mock('../../src/modules/controls/controls.repository',()=>({controlsRepository:{findById:m.controlFind,update:m.controlUpdate}}));
+vi.mock('../../src/modules/audits/audits.repository',()=>({auditsRepository:{findById:m.auditFind,update:m.auditUpdate}}));
+vi.mock('../../src/modules/calendar/calendar.repository',()=>({calendarRepository:{findById:m.calendarFind,update:m.calendarUpdate}}));
+import {controlsService} from '../../src/modules/controls/controls.service';
+import {auditsService} from '../../src/modules/audits/audits.service';
+import {calendarService} from '../../src/modules/calendar/calendar.service';
+import {createAuditSchema} from '../../src/modules/audits/audits.schema';
+import {createCalendarEventSchema} from '../../src/modules/calendar/calendar.schema';
+const actor={id:'person-a',email:'audit@example.invalid',role:'owner',tenantId:'fixture-tenant'};
+beforeEach(()=>{vi.resetAllMocks();m.query.mockResolvedValue([]);m.auditFind.mockResolvedValue({id:'audit',auditType:'internal',startDate:new Date('2026-10-10'),endDate:new Date('2026-10-20')});m.auditUpdate.mockResolvedValue(true);m.calendarFind.mockResolvedValue({id:'event',startDate:new Date('2026-10-10'),endDate:new Date('2026-10-20')});});
+describe('Readiness corrections: server boundaries',()=>{
+ for(const role of ['control_owner','owner','compliance_manager'])it(role+' cannot exclude a framework control outside applicability review',async()=>{m.controlFind.mockResolvedValue({id:'control',ownerId:actor.id,frameworkId:'framework',implementationStatus:'planned'});await expect(controlsService.update('fixture','control',{implementationStatus:'not_applicable',implementationNotes:'Exclude based on narrative alone'},{...actor,role})).rejects.toThrow();expect(m.controlUpdate).not.toHaveBeenCalled();});
+ it('cannot turn an excluded framework control back on outside applicability review',async()=>{m.controlFind.mockResolvedValue({id:'control',ownerId:actor.id,frameworkId:'framework',implementationStatus:'not_applicable'});await expect(controlsService.update('fixture','control',{implementationStatus:'planned'},actor)).rejects.toThrow();expect(m.controlUpdate).not.toHaveBeenCalled();});
+ it('cannot detach a control to bypass framework rules',async()=>{m.controlFind.mockResolvedValue({id:'control',ownerId:actor.id,frameworkId:'framework',implementationStatus:'planned'});await expect(controlsService.update('fixture','control',{frameworkId:null},actor)).rejects.toThrow();expect(m.controlUpdate).not.toHaveBeenCalled();});
+ for(const [name,schema] of [['audit',createAuditSchema],['calendar',createCalendarEventSchema]] as const){it(name+' rejects a reversed range',()=>expect(schema.safeParse({title:'Date check',startDate:'2026-10-20',endDate:'2026-10-01'}).success).toBe(false));it(name+' accepts equal dates',()=>expect(schema.safeParse({title:'Date check',startDate:'2026-10-20',endDate:'2026-10-20'}).success).toBe(true));}
+ it('audit partial update checks the stored end date',async()=>{await expect(auditsService.update('fixture','audit',{startDate:new Date('2026-10-25')},actor)).rejects.toThrow('End date');expect(m.auditUpdate).not.toHaveBeenCalled();});
+ it('calendar partial update checks the stored start date',async()=>{await expect(calendarService.update('fixture','event',{endDate:new Date('2026-10-01')},actor)).rejects.toThrow('End date');expect(m.calendarUpdate).not.toHaveBeenCalled();});
+ it('requires report approval before completion',async()=>{await expect(auditsService.update('fixture','audit',{status:'completed'},actor)).rejects.toThrow('independent review');expect(m.auditUpdate).not.toHaveBeenCalled();});
+ it('completes a reviewed audit using the dedicated status action',async()=>{m.query.mockResolvedValue([{reviewed_by:'independent-reviewer'}]);await auditsService.update('fixture','audit',{status:'completed'},actor);expect(m.auditUpdate).toHaveBeenCalledWith(expect.anything(),'audit',{status:'completed',updatedBy:actor.id});});
+ it('reopens a completed audit when a partial report edit is saved',async()=>{m.auditFind.mockResolvedValue({id:'audit',auditType:'internal',status:'completed'});await auditsService.update('fixture','audit',{summary:'Revised report details'},actor);expect(m.auditUpdate).toHaveBeenCalledWith(expect.anything(),'audit',expect.objectContaining({status:'in_progress'}));});
+ it('does not complete a cancelled audit directly',async()=>{m.auditFind.mockResolvedValue({id:'audit',auditType:'internal',status:'cancelled'});await expect(auditsService.update('fixture','audit',{status:'completed'},actor)).rejects.toThrow('Reopen this cancelled audit');expect(m.auditUpdate).not.toHaveBeenCalled();});
+ it('does not complete a reviewed audit together with report changes',async()=>{m.query.mockResolvedValue([{reviewed_by:'independent-reviewer'}]);await expect(auditsService.update('fixture','audit',{status:'completed',summary:'Changed report'},actor)).rejects.toThrow('Save report changes first');expect(m.auditUpdate).not.toHaveBeenCalled();});
+});

@@ -32,15 +32,15 @@ export const settingsRepository = {
     return rows;
   },
 
-  async findMembership(tenantId: string, membershipId: string) {
-    return prisma.tenantMembership.findFirst({
+  async findMembership(tenantId: string, membershipId: string, db: Prisma.TransactionClient = prisma) {
+    return db.tenantMembership.findFirst({
       where: { id: membershipId, tenantId, deletedAt: null },
-      include: { user: { select: { id: true, email: true } } },
+      include: { user: { select: { id: true, email: true, isActive: true, deletedAt: true } } },
     });
   },
 
-  async findMembershipByUserId(tenantId: string, userId: string) {
-    return prisma.tenantMembership.findFirst({
+  async findMembershipByUserId(tenantId: string, userId: string, db: Prisma.TransactionClient = prisma) {
+    return db.tenantMembership.findFirst({
       where: { tenantId, userId, deletedAt: null },
     });
   },
@@ -135,27 +135,28 @@ export const settingsRepository = {
     `;
   },
 
-  async updateMemberRole(membershipId: string, role: string) {
-    return prisma.tenantMembership.update({
+  async updateMemberRole(membershipId: string, role: string, db: Prisma.TransactionClient = prisma) {
+    return db.tenantMembership.update({
       where: { id: membershipId },
       data: { role: role as never },
     });
   },
 
-  async deactivateMember(membershipId: string) {
-    return prisma.tenantMembership.update({
+  async deactivateMember(membershipId: string, db: Prisma.TransactionClient = prisma) {
+    return db.tenantMembership.update({
       where: { id: membershipId },
       data: { isActive: false, deletedAt: new Date() },
     });
   },
 
-  async countActiveOwners(tenantId: string): Promise<number> {
-    return prisma.tenantMembership.count({
+  async countActiveOwners(tenantId: string, db: Prisma.TransactionClient = prisma): Promise<number> {
+    return db.tenantMembership.count({
       where: {
         tenantId,
         role: 'owner',
         isActive: true,
         deletedAt: null,
+        user: { isActive: true, deletedAt: null },
       },
     });
   },

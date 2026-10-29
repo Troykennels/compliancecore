@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { parseISO, isPast } from 'date-fns';
@@ -10,7 +11,8 @@ import { STATUS_CONFIG, PRIORITY_CONFIG } from '../types/tasks.types';
 import type { Task } from '../types/tasks.types';
 import { useOrgFormat } from '@/lib/org-format';
 
-export function TaskDetailPage() {
+export function TaskDetailPage() {
+
   const fmt = useOrgFormat();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -252,7 +254,7 @@ export function TaskDetailPage() {
 
       {/* Delete confirm */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <ModalSurface label="Delete Task?" onClose={() => setDeleteConfirm(false)} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="rounded-xl bg-white p-6 shadow-2xl w-80">
             <h3 className="text-sm font-semibold text-slate-900 mb-2">Delete Task?</h3>
             <p className="text-xs text-slate-600 mb-4">All subtasks and comments will also be deleted. This cannot be undone.</p>
@@ -270,7 +272,7 @@ export function TaskDetailPage() {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
 
       <TaskFormModal open={showEdit} onClose={() => setShowEdit(false)} task={task} />

@@ -27,6 +27,7 @@ export interface Control {
   lastReviewedAt: Date | null;
   reviewedBy: string | null;
   createdBy: string | null;
+  updatedBy: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

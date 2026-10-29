@@ -1,3 +1,4 @@
+import { auditCurrentActor } from '../../lib/audit-context';
 import { prisma } from '../../config/database';
 
 export const COMMERCIAL_PRICES = [
@@ -21,6 +22,7 @@ export async function initCommercialPricing() {
     amount numeric(12,2) NOT NULL DEFAULT 0, currency text NOT NULL DEFAULT 'NGN',
     payment_reference text UNIQUE, settled_at timestamptz NOT NULL DEFAULT now())`);
   await prisma.$transaction(async tx => {
+        await auditCurrentActor(tx);
     const claimed = await tx.$executeRawUnsafe(`INSERT INTO global.schema_migrations(version,description)
       VALUES('014_commercial_pricing_20261023','Commercial onboarding fees and annual ten-month subscription pricing') ON CONFLICT DO NOTHING`);
     if (!claimed) return;

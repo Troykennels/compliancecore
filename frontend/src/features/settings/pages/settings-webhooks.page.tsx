@@ -1,3 +1,6 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { PermissionAction } from '@/components/permission-action';
+import { ModalSurface } from '@/components/modal-surface';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -20,7 +23,8 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export function SettingsWebhooksPage(): JSX.Element {
+export function SettingsWebhooksPage(): JSX.Element {
+
   const fmt = useOrgFormat();
   const [createOpen, setCreateOpen] = useState(false);
   const [createdWebhook, setCreatedWebhook] = useState<WebhookCreated | null>(null);
@@ -85,12 +89,12 @@ export function SettingsWebhooksPage(): JSX.Element {
                 Send real-time event notifications to your services.
               </p>
             </div>
-            <button
+            <PermissionAction scope="settings:write"><button
               onClick={() => { setCreateOpen(true); reset(); }}
               className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
             >
               <Plus className="h-4 w-4" /> Add Webhook
-            </button>
+            </button></PermissionAction>
           </div>
 
           {isLoading ? (
@@ -143,7 +147,7 @@ export function SettingsWebhooksPage(): JSX.Element {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
+                    <PermissionAction scope="settings:write"><button
                       onClick={() => toggleActive({ id: wh.id, isActive: !wh.isActive })}
                       className={cn(
                         'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
@@ -153,13 +157,13 @@ export function SettingsWebhooksPage(): JSX.Element {
                       )}
                     >
                       {wh.isActive ? 'Disable' : 'Enable'}
-                    </button>
-                    <button
+                    </button></PermissionAction>
+                    <PermissionAction scope="settings:write"><button
                       onClick={() => setDeleteId(wh.id)}
                       className="rounded-md p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50"
-                    >
+                     aria-label="Delete record">
                       <Trash2 className="h-4 w-4" />
-                    </button>
+                    </button></PermissionAction>
                   </div>
                 </div>
               ))}
@@ -175,28 +179,28 @@ export function SettingsWebhooksPage(): JSX.Element {
 
       {/* Create Modal */}
       {createOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Add Webhook" onClose={() => setCreateOpen(false)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setCreateOpen(false)} />
           <div className="relative z-10 w-full max-w-md rounded-xl bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
               <h3 className="text-base font-semibold text-slate-900">Add Webhook</h3>
-              <button onClick={() => setCreateOpen(false)} className="rounded-md p-1 text-slate-400 hover:text-slate-600">
+              <button onClick={() => setCreateOpen(false)} className="rounded-md p-1 text-slate-400 hover:text-slate-600" aria-label="Close dialog">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleSubmit((v) => createWebhook(v))} className="p-6 space-y-4">
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-700">Name *</label>
+              <AccessibleField label={<>Name *</>} className="space-y-1.5">
+
                 <input
                   {...register('name')}
                   autoFocus
                   className={cn('block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600', errors.name ? 'border-rose-500' : 'border-slate-300')}
                 />
                 {errors.name && <p className="text-xs text-rose-600">{errors.name.message}</p>}
-              </div>
+              </AccessibleField>
 
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-700">Endpoint URL *</label>
+              <AccessibleField label={<>Endpoint URL *</>} className="space-y-1.5">
+
                 <input
                   {...register('url')}
                   type="url"
@@ -204,7 +208,7 @@ export function SettingsWebhooksPage(): JSX.Element {
                   className={cn('block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600', errors.url ? 'border-rose-500' : 'border-slate-300')}
                 />
                 {errors.url && <p className="text-xs text-rose-600">{errors.url.message}</p>}
-              </div>
+              </AccessibleField>
 
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-slate-700">Events *</label>
@@ -233,12 +237,12 @@ export function SettingsWebhooksPage(): JSX.Element {
               </div>
             </form>
           </div>
-        </div>
+        </ModalSurface>
       )}
 
       {/* Webhook Created — Show Secret */}
       {createdWebhook && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Webhook Created" onClose={() => setCreatedWebhook(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" />
           <div className="relative z-10 w-full max-w-md rounded-xl bg-white shadow-xl">
             <div className="border-b border-slate-200 px-6 py-4">
@@ -267,12 +271,12 @@ export function SettingsWebhooksPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
 
       {/* Delete Confirm */}
       {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Delete Webhook?" onClose={() => setDeleteId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setDeleteId(null)} />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-base font-semibold text-slate-900">Delete Webhook?</h3>
@@ -286,7 +290,7 @@ export function SettingsWebhooksPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </SettingsLayout>
   );

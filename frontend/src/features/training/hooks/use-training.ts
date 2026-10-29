@@ -87,6 +87,9 @@ export function useAssignTrainingRecords() {
     mutationFn: ({ id, input }: { id: string; input: AssignTrainingRecordsInput }) =>
       trainingApi.assignRecords(id, input).then((r) => r.data.data),
     onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: trainingKeys.all });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['work-queue'] });
       qc.invalidateQueries({ queryKey: trainingKeys.records(variables.id) });
       qc.invalidateQueries({ queryKey: trainingKeys.detail(variables.id) });
       toast.success('Users assigned successfully.');

@@ -56,7 +56,7 @@ export function CalendarGrid({ events, onDayClick, onEventClick }: CalendarGridP
         <button
           onClick={() => setCurrentMonth((m) => subMonths(m, 1))}
           className="rounded-lg p-2 hover:bg-slate-100 text-slate-600"
-        >
+         aria-label="Previous">
           <ChevronLeft className="h-5 w-5" />
         </button>
         <h2 className="text-base font-semibold text-slate-900">
@@ -65,7 +65,7 @@ export function CalendarGrid({ events, onDayClick, onEventClick }: CalendarGridP
         <button
           onClick={() => setCurrentMonth((m) => addMonths(m, 1))}
           className="rounded-lg p-2 hover:bg-slate-100 text-slate-600"
-        >
+         aria-label="Next">
           <ChevronRight className="h-5 w-5" />
         </button>
       </div>

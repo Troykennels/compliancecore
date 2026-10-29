@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "checks": [
+    "late401: normal cookie restore works",
+    "late401: explicit sign-in survives an older refresh",
+    "late401: no stay-signed-in prompt",
+    "lateSuccess: normal cookie restore works",
+    "lateSuccess: explicit sign-in survives an older refresh",
+    "lateSuccess: no stay-signed-in prompt",
+    "logout: normal cookie restore works",
+    "Late refresh cannot resurrect a signed-out session",
+    "logout: no stay-signed-in prompt"
+  ]
+}

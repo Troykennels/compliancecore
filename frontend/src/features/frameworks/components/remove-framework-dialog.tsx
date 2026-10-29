@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { useState } from 'react';
 import { AlertTriangle, Loader2, Trash2, X } from 'lucide-react';
 import { useUnadoptFramework, useUnadoptImpact } from '../hooks/use-frameworks';
@@ -84,12 +85,7 @@ export function RemoveFrameworkDialog({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="removeFrameworkTitle"
-    >
+    <ModalSurface label="Remove ?" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
       <div className="w-full max-w-lg rounded-xl bg-white shadow-xl">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 border-b border-slate-200 p-5">
@@ -153,11 +149,11 @@ export function RemoveFrameworkDialog({
                     </p>
                     <ul className="mt-2 space-y-1 text-sm text-rose-800">
                       {shown.implemented > 0 && (
-                        <li>· {shown.implemented} with an implementation status set</li>
+                        <li>· {shown.implemented} with an operating status recorded</li>
                       )}
                       {shown.withOwner > 0 && <li>· {shown.withOwner} with an assigned owner</li>}
                       {shown.withNotes > 0 && (
-                        <li>· {shown.withNotes} with implementation or testing notes</li>
+                        <li>· {shown.withNotes} with operating descriptions or check notes</li>
                       )}
                       {shown.withEvidence > 0 && (
                         <li>
@@ -186,7 +182,7 @@ export function RemoveFrameworkDialog({
               ) : (
                 <p className="mt-3 text-sm text-slate-500">
                   Nothing has been recorded against these controls yet, so nothing is lost. You can
-                  adopt {name} again at any time.
+                  assess {name} again at any time.
                 </p>
               )}
             </>
@@ -215,6 +211,6 @@ export function RemoveFrameworkDialog({
           </button>
         </div>
       </div>
-    </div>
+    </ModalSurface>
   );
 }

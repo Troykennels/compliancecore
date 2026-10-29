@@ -1,0 +1,12 @@
+{
+  "source": "frontend/src/features/training/components/training-form-modal.tsx",
+  "blankOptionalFrequencyRejected": true,
+  "errors": [
+    {
+      "field": "frequencyDays",
+      "message": "Number must be greater than or equal to 1"
+    }
+  ],
+  "omittedOptionalFrequencyAccepted": true,
+  "scope": "Actual client schema executed locally; no browser form submitted or live record created"
+}

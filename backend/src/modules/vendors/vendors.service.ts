@@ -1,3 +1,4 @@
+import { assertActiveMembers } from '../../lib/active-member';
 import { withTenantSchema } from '../../lib/prisma';
 import { setAuditSessionVars } from '../../middleware/audit.middleware';
 import { NotFoundError } from '../../lib/errors';
@@ -27,6 +28,7 @@ export const vendorsService = {
   },
 
   async create(schemaName: string, input: CreateVendorInput, actor: Actor) {
+    await assertActiveMembers(schemaName,[input.ownerId]);
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
       const { id } = await vendorsRepository.create(tx, { ...input, createdBy: actor.id });
@@ -35,6 +37,7 @@ export const vendorsService = {
   },
 
   async update(schemaName: string, id: string, input: UpdateVendorInput, actor: Actor) {
+    await assertActiveMembers(schemaName,[input.ownerId]);
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
       const ok = await vendorsRepository.update(tx, id, { ...input, updatedBy: actor.id });

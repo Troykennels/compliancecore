@@ -7,6 +7,9 @@ const schema = z.object({
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
 
   DATABASE_URL: z.string().url(),
+  PROVISIONING_DATABASE_URL: z.string().url().optional(),
+  RUNTIME_DATABASE_ROLE: z.string().regex(/^[a-z_][a-z0-9_]{0,62}$/).optional(),
+  ALLOW_EXTERNAL_DOCUMENT_PREVIEW: z.string().transform(v=>v==='true').default('false'),
   REDIS_URL: z.string().url(),
   // Set to 'false' ONLY for local development without a Redis server: rate
   // limiting falls back to an in-process store, the cache becomes an in-memory

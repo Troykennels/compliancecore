@@ -1,3 +1,4 @@
+import { auditCurrentActor } from '../../lib/audit-context';
 import { randomUUID } from 'node:crypto';
 import { organizationRepository } from './organization.repository';
 import { UpdateOrganizationInput, CreateOrganizationInput } from './organization.schema';
@@ -73,6 +74,7 @@ export const organizationService = {
 
     try {
       const created = await prisma.$transaction(async (tx) => {
+        await auditCurrentActor(tx);
         const tenant = await tx.tenant.create({
           data: {
             id,
@@ -154,6 +156,7 @@ export const organizationService = {
     if (!org) throw new NotFoundError('Organization not found.');
 
     const updated = await prisma.$transaction(async (tx) => {
+        await auditCurrentActor(tx);
       await setAuditSessionVars(tx, actor);
       return tx.tenant.update({
         where: { id: tenantId },

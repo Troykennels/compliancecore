@@ -44,7 +44,7 @@ function NotificationRow({ n, onRead, onDismiss }: {
       <button
         onClick={(e) => { e.stopPropagation(); onDismiss(n.id); }}
         className="shrink-0 mt-1 rounded p-0.5 text-slate-300 hover:text-slate-500 hover:bg-slate-100"
-      >
+       aria-label="Close dialog">
         <X className="h-3.5 w-3.5" />
       </button>
     </div>

@@ -1,10 +1,14 @@
+import { useFrameworks } from '@/features/frameworks/hooks/use-frameworks';
+import { ModalSurface } from '@/components/modal-surface';
+import { PermissionAction } from '@/components/permission-action';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
 import {
   Plus, Search, ClipboardCheck, MoreHorizontal, Pencil, Trash2,
   AlertTriangle, RefreshCw, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAudits, useDeleteAudit } from '../hooks/use-audits';
+import { useAudits, useDeleteAudit, useUpdateAudit } from '../hooks/use-audits';
 import { AuditFormModal } from '../components/audit-form-modal';
 import type {
   Audit,
@@ -17,9 +21,13 @@ import { SkeletonTable } from '@/components/ui';
 
 const PAGE_SIZE = 20;
 
-export function AuditsPage(): JSX.Element {
+export function AuditsPage(): JSX.Element {
+  const [routeParams]=useSearchParams();
+
   const fmt = useOrgFormat();
-  const [search, setSearch] = useState('');
+  const completeAudit = useUpdateAudit();
+  const {data:frameworks=[]}=useFrameworks();
+  const [search, setSearch] = useState(routeParams.get('q')??'');
   const [statusFilter, setStatusFilter] = useState<AuditStatus | ''>('');
   const [typeFilter, setTypeFilter] = useState<AuditType | ''>('');
   const [page, setPage] = useState(1);
@@ -70,16 +78,16 @@ export function AuditsPage(): JSX.Element {
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Audits</h1>
             <p className="mt-1 text-sm text-slate-500">
-              Plan and track audit engagements and their findings.
+              Save scope and report details, attach the report, obtain an independent review, then complete the audit.
             </p>
           </div>
-          <button
+          <PermissionAction scope="audits:write"><button
             onClick={openCreate}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
             New Audit
-          </button>
+          </button></PermissionAction>
         </div>
 
         {/* Filters */}
@@ -92,14 +100,14 @@ export function AuditsPage(): JSX.Element {
               value={search}
               onChange={(e) => resetToFirstPage(setSearch)(e.target.value)}
               className="w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-            />
+             aria-label="Search audits..." />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => resetToFirstPage(setStatusFilter)(e.target.value as AuditStatus | '')}
             className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          >
+           aria-label="Filter: All Statuses" >
             <option value="">All Statuses</option>
             {Object.entries(AUDIT_STATUS_CONFIG).map(([value, cfg]) => (
               <option key={value} value={value}>{cfg.label}</option>
@@ -110,7 +118,7 @@ export function AuditsPage(): JSX.Element {
             value={typeFilter}
             onChange={(e) => resetToFirstPage(setTypeFilter)(e.target.value as AuditType | '')}
             className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          >
+           aria-label="Filter: All Types" >
             <option value="">All Types</option>
             {Object.entries(AUDIT_TYPE_CONFIG).map(([value, cfg]) => (
               <option key={value} value={value}>{cfg.label}</option>
@@ -142,6 +150,7 @@ export function AuditsPage(): JSX.Element {
               <tbody className="divide-y divide-slate-100">
                 {audits.map((audit) => {
                   const typeCfg = AUDIT_TYPE_CONFIG[audit.auditType];
+                  const framework=frameworks.find(f=>f.id===audit.frameworkRef||f.code===audit.frameworkRef);
                   const statusCfg = AUDIT_STATUS_CONFIG[audit.status];
                   return (
                     <tr key={audit.id} className="hover:bg-slate-50 transition-colors">
@@ -157,7 +166,7 @@ export function AuditsPage(): JSX.Element {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-slate-600">
-                        {audit.frameworkRef ?? <span className="text-slate-400">—</span>}
+                        {(framework?.shortName||framework?.name||audit.frameworkRef) ?? <span className="text-slate-400">—</span>}
                       </td>
                       <td className="px-6 py-4">
                         <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium', statusCfg.bgColor, statusCfg.color)}>
@@ -190,18 +199,20 @@ export function AuditsPage(): JSX.Element {
 
                           {menuOpenId === audit.id && (
                             <div className="absolute right-0 top-full z-10 mt-1 w-44 rounded-lg border border-slate-200 bg-white shadow-lg py-1">
-                              <button
+                              <PermissionAction scope="audits:write"><button
                                 onClick={() => { openEdit(audit); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                               >
                                 <Pencil className="h-4 w-4" /> Edit
-                              </button>
-                              <button
+                              </button></PermissionAction>
+                              {audit.reviewedAt && audit.reportCurrent && !['completed','cancelled'].includes(audit.status) && <PermissionAction scope="audits:write"><button disabled={completeAudit.isPending} className="flex w-full px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50" onClick={() => completeAudit.mutate({id:audit.id,input:{status:'completed'}},{onSuccess:()=>setMenuOpenId(null)})}>Complete reviewed audit</button></PermissionAction>}
+                              <Link className="block px-3 py-2 text-sm text-indigo-700" to="/audits?workflow=audits" onClick={()=>setMenuOpenId(null)}>Report and independent review</Link>
+                              <PermissionAction scope="audits:delete"><button
                                 onClick={() => { setConfirmDeleteId(audit.id); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"
                               >
                                 <Trash2 className="h-4 w-4" /> Delete
-                              </button>
+                              </button></PermissionAction>
                             </div>
                           )}
                         </div>
@@ -250,7 +261,7 @@ export function AuditsPage(): JSX.Element {
 
       {/* Delete confirmation */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Delete Audit?" onClose={() => setConfirmDeleteId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDeleteId(null)} />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-base font-semibold text-slate-900">Delete Audit?</h3>
@@ -258,12 +269,12 @@ export function AuditsPage(): JSX.Element {
               This will permanently delete the audit and its findings. This action cannot be undone.
             </p>
             <div className="mt-6 flex justify-end gap-3">
-              <button
+              <PermissionAction scope="audits:delete"><button
                 onClick={() => setConfirmDeleteId(null)}
                 className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Cancel
-              </button>
+              </button></PermissionAction>
               <button
                 onClick={() => handleDelete(confirmDeleteId)}
                 disabled={isDeleting}
@@ -273,7 +284,7 @@ export function AuditsPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </div>
   );

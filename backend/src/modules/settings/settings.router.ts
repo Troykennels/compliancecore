@@ -25,7 +25,7 @@ router.use(authenticate());
 router.use(enforceEntitlement());
 
 // ── Team ─────────────────────────────────────────────────────────────────────
-router.get('/team/members', settingsController.listMembers);
+router.get('/team/members', requirePermission('team:read'), settingsController.listMembers);
 
 router.post(
   '/team/members/invite',

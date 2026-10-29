@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { auditCurrentActor } from '../../lib/audit-context';
 import { prisma } from '../../config/database';
 import { env } from '../../config/env';
 import { logger } from '../../lib/logger';
@@ -86,6 +87,7 @@ export async function settleInvoicePayment(reference: string, providerRef: strin
   const initial = await prisma.$queryRawUnsafe<any[]>(`SELECT tenant_id FROM global.payment_transactions WHERE reference=$1`, reference);
   if (!initial[0]) return null;
   const outcome = await prisma.$transaction(async (tx) => {
+    await auditCurrentActor(tx);
     await tx.$queryRawUnsafe(`SELECT id FROM global.tenants WHERE id=$1::uuid FOR UPDATE`, initial[0].tenant_id);
     const payment = (await tx.$queryRawUnsafe<any[]>(`SELECT * FROM global.payment_transactions WHERE reference=$1 FOR UPDATE`, reference))[0];
     if (!payment || payment.status !== 'pending' || !payment.invoice_id) return null;

@@ -1,3 +1,4 @@
+import { auditCurrentActor } from '../../lib/audit-context';
 import { prisma } from '../../config/database';
 import { AppError } from '../../lib/errors';
 export async function reserveCheckout(input: {
@@ -5,6 +6,7 @@ export async function reserveCheckout(input: {
   amount:number;onboardingFee:number;subscriptionAmount:number;recurringConsent?:boolean;
 }) {
   return prisma.$transaction(async tx => {
+        await auditCurrentActor(tx);
     await tx.$queryRawUnsafe(`SELECT id FROM global.tenants WHERE id=$1::uuid FOR UPDATE`,input.tenantId);
     if (input.onboardingFee>0) {
       const pending = await tx.$queryRawUnsafe<any[]>(`SELECT * FROM global.payment_transactions WHERE tenant_id=$1::uuid AND status='pending' AND onboarding_fee>0 ORDER BY created_at DESC LIMIT 1`,input.tenantId);

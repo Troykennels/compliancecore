@@ -1,3 +1,5 @@
+import { ModalSurface } from '@/components/modal-surface';
+import { PermissionAction } from '@/components/permission-action';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth.store';
@@ -24,7 +26,7 @@ export function PoliciesPage(): JSX.Element {
   const {mutate:approvePolicy}=useApprovePolicy();
 
   const fmt = useOrgFormat();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(routeParams.get('q')??'');
   const [statusFilter, setStatusFilter] = useState<PolicyStatus | ''>('');
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
@@ -73,22 +75,22 @@ export function PoliciesPage(): JSX.Element {
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Policies</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Policies</h1><Link className="mt-2 inline-block text-sm font-semibold text-indigo-700 underline" to={routeParams.get('frameworkId')?`/policy-templates?frameworkId=${routeParams.get('frameworkId')}`:'/policy-templates'}>Browse policy templates and Word downloads</Link>
             <p className="mt-1 text-sm text-slate-500">
               Author, review and publish the policies and procedures that govern your organization.
             </p>
           </div>
-          <button
+          <PermissionAction scope="policies:write"><button
             onClick={openCreate}
             disabled={!canWrite}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
             New Policy
-          </button>
+          </button></PermissionAction>
         </div>
 
-        <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3 text-sm text-indigo-950">Draft → independent approval → publication → scheduled review. A changed approved policy returns to draft. <Link className="font-semibold underline" to={routeParams.get('frameworkId')?`/frameworks?framework=${routeParams.get('frameworkId')}`:'/frameworks'}>Return to implementation steps</Link></div>
+        <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3 text-sm text-indigo-950">Draft → independent approval → publication → scheduled review. A changed approved policy returns to draft. <Link className="font-semibold underline" to={routeParams.get('frameworkId')?`/frameworks?framework=${routeParams.get('frameworkId')}`:'/frameworks'}>Return to compliance assessment</Link></div>
         {/* Filters */}
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <div className="relative">
@@ -99,14 +101,14 @@ export function PoliciesPage(): JSX.Element {
               value={search}
               onChange={(e) => resetToFirstPage(setSearch)(e.target.value)}
               className="w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-            />
+             aria-label="Search policies..." />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => resetToFirstPage(setStatusFilter)(e.target.value as PolicyStatus | '')}
             className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          >
+           aria-label="Filter: All Statuses" >
             <option value="">All Statuses</option>
             {Object.entries(POLICY_STATUS_CONFIG).map(([value, cfg]) => (
               <option key={value} value={value}>{cfg.label}</option>
@@ -187,12 +189,12 @@ export function PoliciesPage(): JSX.Element {
 
                           {menuOpenId === policy.id && (
                             <div className="absolute right-0 top-full z-10 mt-1 w-44 rounded-lg border border-slate-200 bg-white shadow-lg py-1">
-                              <button
+                              <PermissionAction scope="policies:write"><button
                                 onClick={() => { openEdit(policy); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                               >
                                 <Pencil className="h-4 w-4" /> {canWrite?'Edit':'View'}
-                              </button>
+                              </button></PermissionAction>
                               {canWrite&&policy.status==='in_review'&&policy.ownerId!==user?.id&&policy.createdBy!==user?.id&&policy.updatedBy!==user?.id&&<button className="flex w-full items-center gap-2 px-3 py-2 text-sm text-indigo-700 hover:bg-slate-50" onClick={()=>{approvePolicy(policy.id);setMenuOpenId(null);}}>Approve policy</button>}
                               {canWrite&&policy.status === 'approved' && (
                                 <button
@@ -202,12 +204,12 @@ export function PoliciesPage(): JSX.Element {
                                   <Send className="h-4 w-4" /> Publish
                                 </button>
                               )}
-                              <button
+                              <PermissionAction scope="policies:delete"><button
                                 onClick={() => { setConfirmDeleteId(policy.id); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"
                               >
                                 <Trash2 className="h-4 w-4" /> Delete
-                              </button>
+                              </button></PermissionAction>
                             </div>
                           )}
                         </div>
@@ -257,7 +259,7 @@ export function PoliciesPage(): JSX.Element {
 
       {/* Delete confirmation */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Delete Policy?" onClose={() => setConfirmDeleteId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDeleteId(null)} />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-base font-semibold text-slate-900">Delete Policy?</h3>
@@ -265,12 +267,12 @@ export function PoliciesPage(): JSX.Element {
               This will permanently delete the policy. This action cannot be undone.
             </p>
             <div className="mt-6 flex justify-end gap-3">
-              <button
+              <PermissionAction scope="policies:delete"><button
                 onClick={() => setConfirmDeleteId(null)}
                 className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Cancel
-              </button>
+              </button></PermissionAction>
               <button
                 onClick={() => handleDelete(confirmDeleteId)}
                 disabled={isDeleting}
@@ -280,7 +282,7 @@ export function PoliciesPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </div>
   );

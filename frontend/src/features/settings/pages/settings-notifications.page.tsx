@@ -1,3 +1,7 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { hasPermission } from '@/config/role-permissions';
+import { useAuthStore } from '@/stores/auth.store';
+import { PermissionAction } from '@/components/permission-action';
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
@@ -28,6 +32,7 @@ const DIGEST_OPTIONS: { value: NotificationSettings['digestFrequency']; label: s
 
 export function SettingsNotificationsPage(): JSX.Element {
   const queryClient = useQueryClient();
+  const canWrite=hasPermission(useAuthStore(s=>s.activeTenant?.role),'settings:write');
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['settings', 'notifications'],
@@ -73,8 +78,10 @@ export function SettingsNotificationsPage(): JSX.Element {
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit((v) => save(v))} className="space-y-4">
-            {/* Email Alerts */}
+          <form onSubmit={handleSubmit((v) => {if(canWrite)save(v);})} className="space-y-4">
+            {!canWrite&&<p className="rounded bg-slate-100 p-3 text-sm text-slate-600">Your role can view organisation preferences. An administrator can change them.</p>}
+              <fieldset disabled={!canWrite||isSaving} className="space-y-4">
+              {/* Email Alerts */}
             <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
               <div className="border-b border-slate-200 px-6 py-4">
                 <h2 className="text-base font-semibold text-slate-900">Email Alerts</h2>
@@ -135,34 +142,34 @@ export function SettingsNotificationsPage(): JSX.Element {
                 </p>
               </div>
               <div className="p-6 space-y-4">
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-slate-700">
+                <AccessibleField label={<>
                     Slack Webhook URL
-                  </label>
+                  </>} className="space-y-1.5">
+
                   <input
                     {...register('slackWebhookUrl')}
                     type="url"
                     placeholder="https://hooks.slack.com/services/…"
                     className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-slate-700">
+                </AccessibleField>
+                <AccessibleField label={<>
                     Microsoft Teams Webhook URL
-                  </label>
+                  </>} className="space-y-1.5">
+
                   <input
                     {...register('teamsWebhookUrl')}
                     type="url"
                     placeholder="https://prod.webhooks.office.com/…"
                     className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   />
-                </div>
+                </AccessibleField>
               </div>
             </section>
 
             {/* Save */}
             <div className="flex justify-end">
-              <button
+              <PermissionAction scope="settings:write"><button
                 type="submit"
                 disabled={isSaving}
                 className={cn(
@@ -172,9 +179,9 @@ export function SettingsNotificationsPage(): JSX.Element {
               >
                 {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Save Preferences
-              </button>
+              </button></PermissionAction>
             </div>
-          </form>
+          </fieldset></form>
         )}
       </div>
     </SettingsLayout>

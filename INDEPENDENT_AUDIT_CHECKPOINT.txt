@@ -1,0 +1,10 @@
+INDEPENDENT READINESS AUDIT COMPLETE - 26 OCTOBER 2026
+Latest user asked an end-to-end compliance audit and to reference Vanta.
+Verdict: NOT READY FOR UNRESTRICTED PRODUCTION USE. Four High and four Medium findings remain; no application fix or deployment was made in this audit.
+H1 missing audit summary UI and full edit payload prevents reviewed completion. H2 training enrolment API/hook is not connected to UI. H3 ordinary assigned-control-owner PATCH can mark N/A without applicability workflow. H4 separate owner count/update permits concurrent co-owner demotions to leave zero owners in an isolated repository fixture.
+M1 blank optional training frequency coerces to0 then fails. M2 reversed audit/calendar dates accepted. M3 read-only role buttons offer forbidden writes. M4 label association/dialog/landmark accessibility.
+Evidence: Audit_2026-10-26/Independent_Readiness_Audit/audit-findings.json and Word report in same folder, copied to Downloads. Six isolated deficiency probes reproduced; one actual client-schema blank-input probe reproduced. Their passing means defects were observed.
+Source AST inventoried134 TSX files,484 field/label nodes,90 JSX link nodes. Local current-source UI with managed-demo read API rendered37 routes;9 workflow panels inspected. Evidence selector issue rechecked successfully. Fresh canonical browser attempts timed out before sign-in; public HTML/entry script retrieved and deployment ID unchanged. Do not claim fresh full online lifecycle pass. Earlier live86/HTTP42/reload evidence remains historical and does not cover fresh-user workflow completeness.
+Vanta public docs benchmark used for audit collaboration, policies, risk ownership and evidence collection. No Vanta private workspace was accessed. No customer record, external message or real payment changed. Private demo credentials never copied to report.
+Runtime remains source4c9b978, frontend dpl_D1zkgkajtwDLW435FucDPcLZCapZ, backend675f699e-fcc8-4a92-ac00-6a3d2626e464.
+The prior unrelated .claude/settings.json modification and academic files remain untouched. Own temporary probe removed from backend/test/unit; a copy retained in the audit folder.

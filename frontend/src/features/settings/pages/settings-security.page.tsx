@@ -1,3 +1,4 @@
+import { AccessibleField } from '@/components/accessible-field';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -242,8 +243,8 @@ export function SettingsSecurityPage(): JSX.Element {
 
             {showPasswordForm && (
               <form onSubmit={handleChangePassword} className="mt-5 max-w-md space-y-4">
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-slate-700">Current password</label>
+                <AccessibleField label={<>Current password</>} className="space-y-1.5">
+
                   <input
                     type="password"
                     autoComplete="current-password"
@@ -252,9 +253,9 @@ export function SettingsSecurityPage(): JSX.Element {
                     required
                     className={inputCls}
                   />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-slate-700">New password</label>
+                </AccessibleField>
+                <AccessibleField label={<>New password</>} className="space-y-1.5">
+
                   <input
                     type="password"
                     autoComplete="new-password"
@@ -263,9 +264,9 @@ export function SettingsSecurityPage(): JSX.Element {
                     required
                     className={inputCls}
                   />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-slate-700">Confirm new password</label>
+                </AccessibleField>
+                <AccessibleField label={<>Confirm new password</>} className="space-y-1.5">
+
                   <input
                     type="password"
                     autoComplete="new-password"
@@ -274,7 +275,7 @@ export function SettingsSecurityPage(): JSX.Element {
                     required
                     className={inputCls}
                   />
-                </div>
+                </AccessibleField>
                 <div className="flex items-center gap-3">
                   <button
                     type="submit"

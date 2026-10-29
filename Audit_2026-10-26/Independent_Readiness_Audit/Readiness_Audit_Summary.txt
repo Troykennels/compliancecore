@@ -1,0 +1,114 @@
+COMPLIANCECORE READINESS AUDIT - 26 OCTOBER 2026
+NOT READY FOR UNRESTRICTED PRODUCTION USE
+
+Four High and four Medium confirmed findings. No product fixes or deployment made during this audit.
+
+H1 [High] Audit report and completion journey is blocked
+The audit edit form has no report-summary input, while independent report review requires a non-empty summary. The form also sends all edited fields when status is changed to completed, but the service permits a reviewed completion request to contain status only. A seeded completed demo audit masks the fresh-user problem.
+Correction: Add a report summary and accountable owner; pick the framework from actual records. Save report changes, obtain independent review, then offer a separate completion action that sends status only.
+Acceptance: A new audit can be created, have its summary and report saved, be reviewed by another authorised person, and be completed entirely through the UI.
+
+H2 [High] Training participants cannot be assigned through the connected UI
+The training page creates and edits programmes but offers no participant-assignment journey. An assignment API and hook exist, but the hook has no page/component caller. The verification workflow expects records that already exist, so a new organisation cannot complete the advertised journey without operator/API help.
+Correction: Connect programme -> assign people and due dates -> participant records -> evidence -> independent verification. Keep unverified assignments separate from completions.
+Acceptance: A newly created programme can be assigned to active members and completed with independently verified proof using normal screens.
+
+H3 [High] Ordinary control updates can bypass applicability decision controls
+An assigned control owner can change their control status to not applicable using the normal update service with only a justification. This path does not call the framework applicability service or its preceding risk/obligation checks and PCI evidence rule. The final framework gate detects inconsistent SoA records, but the control status and dashboard denominator can already change. This is not evidence of a successful certification-signoff bypass.
+Correction: Centralise applicability changes in the authorised applicability workflow. Prevent ordinary control-owner edits from excluding a requirement. Keep pending exclusions visible and out of approved-scope scoring.
+Acceptance: A direct PATCH and the ordinary edit form cannot exclude a mapped control without the appropriate applicability authorisation and required proof.
+
+H4 [High] Concurrent owner changes can defeat the last-owner safeguard
+The owner count and membership update are separate operations. A controlled concurrency probe executed two co-owner demotions that both observed two owners, leaving zero in the repository fixture. The service does not serialise those checks and updates. No production owner account was changed during this audit.
+Correction: Perform ownership changes under a transaction and a per-tenant lock or equivalent invariant enforcement. Preserve session revocation after a successful authorised change.
+Acceptance: Concurrent demotion/removal tests against an isolated real database always retain at least one active owner; rollback and revoked-session behaviour are verified.
+
+M1 [Medium] An optional training-frequency field rejects a blank value
+The actual client schema coerces an empty frequency string into zero and then rejects it because frequency must be at least one. Omission is accepted, so the optional form field behaves inconsistently for one-time training.
+Correction: Convert blank optional numeric inputs to undefined/null before number validation; explain recurrence and units.
+Acceptance: A one-time programme saves with blank frequency; zero, negative and invalid populated values are rejected clearly.
+
+M2 [Medium] Audit and calendar date ranges are not validated chronologically
+Both schemas accepted an end date earlier than the start date in local probes. The inspected services add no chronological check. These probes validate schema/service logic, not a live database insert.
+Correction: Validate start/end ordering in the UI and service on both create and partial updates; compare against stored dates where needed.
+Acceptance: Reversed ranges are rejected with a field-specific message, and valid historical ranges remain possible.
+
+M3 [Medium] Several visible actions do not match role permissions
+Examples: notification preferences exposes Save to a compliance manager with settings:read but no settings:write; the score page offers Take Snapshot to read-only roles although the API requires controls:write; the framework evidence step includes an attachment action for msp_analyst despite no evidence:write permission. API rejection protects the operation, but users are offered actions that cannot succeed.
+Correction: Use the same permission checks for action visibility, form editability, direct-page access and API calls. Retain readable views for read-only roles.
+Acceptance: Every role sees a usable action set; forbidden write attempts stay blocked by the API even if a user crafts a request.
+
+M4 [Medium] Form labels and page landmarks need accessibility corrections
+Several reusable FormField helpers render a label beside an input without htmlFor/id association or wrapping it. Visible text is therefore not necessarily the field accessible name. The evidence screen also nests a main landmark inside the application main. These affect assistive technology and reliable keyboard/form automation.
+Correction: Associate every label, hint and error with its field; give dialogs accessible names and focus behaviour; use one main landmark.
+Acceptance: Keyboard and screen-reader checks pass on create/edit/review forms; getByLabel works for each named input; dialog focus is trapped and restored appropriately.
+
+VANTA BENCHMARK
+
+Overview and next actions
+The dashboard gives labelled status cards and assessment next steps. Keep recorded status distinct from verified evidence.
+Useful foundation; applicability accuracy needs H3.
+
+Policies and employee acceptance
+Vanta links drafting, approval, published policies and employee acceptance. ComplianceCore already has corresponding versioned approval/readership records.
+Broadly aligned in concept; retain the stricter independent-review policy where chosen.
+
+Risk ownership and assessment
+Vanta supports owners preparing assessments and designated approvers reviewing them. ComplianceCore has asset scenarios, ratings, treatment links and independent reviews, but preparation is coordinator-led.
+Add explicit risk-owner participation/acceptance and organisation-approved scoring/acceptance criteria. Do not equate a free-text note with every required governance decision.
+
+Audit workspace and evidence review
+Vanta provides audit-scoped evidence, requests, review states and collaboration. ComplianceCore stores proof and review decisions, but its fresh audit journey is blocked and collaboration is more limited.
+Fix H1 first. Add a coherent audit workspace with request, submission, return/comment and approval context, with deliberate auditor sharing scope.
+
+People and training
+ComplianceCore has programme and verification concepts but lacks a connected participant-assignment journey.
+Fix H2 and M1 before using it as the training compliance record.
+
+Evidence and automation
+Vanta documents connected evidence collection and continuing tests. ComplianceCore has manual uploads, version-pinned proof, APIs and webhooks; broad automated collection was not established in this audit.
+Describe manual and automated coverage accurately. Add only verified connectors; show last collection time, collection failures and evidence age.
+
+Roles and access
+ComplianceCore has organisation-bound roles and API checks. Some UI actions mismatch them, and ownership changes have a concurrency defect in the service probe.
+Close H4 and M3. Use real multi-user acceptance tests and granular audit sharing before enterprise rollout.
+
+Framework-specific completeness
+A framework catalogue and a generic workflow do not establish complete/current coverage for privacy, financial, continuity or security obligations. Existing profile notes warn about older catalogue editions.
+Validate licensed/current requirements and organisation applicability. Retain scheme-specific evidence and do not promise certification or automatic legal compliance.
+
+SCOPE AND LIMITATIONS
+
+This is a product/workflow and engineering readiness review, using publicly available Vanta documentation as a benchmark. It is not an independent certification, legal opinion, penetration test or a claim of Vanta equivalence.
+Current-source inspection covered 134 TSX files, including 484 field/label nodes and 90 JSX link nodes. Static enumeration does not validate every dynamic destination or every possible field value.
+All 37 principal routes rendered in a local current-source preview against the managed demo API, with writes blocked, plus nine workflow panels. Seven create/upload forms were inspected across that run and the evidence recheck. A selector issue caused the first evidence snapshot to fail; its dedicated recheck rendered successfully.
+Fresh browser checks of the canonical online frontend timed out before reaching sign-in fields. The frontend project still pointed to the expected deployment; HTML and the entry script were retrieved, but delivery was intermittently slow. This audit does not attribute those timeouts conclusively to an application defect or declare the live site freshly passed.
+The earlier 86 live browser checks, 42 HTTP checks, download checks and reload checks remain historical functional evidence for this source release. They do not prove that a newly created organisation can complete every workflow. Demo records prepared by a seed script can hide UI gaps.
+Six isolated probes reproduced current deficiencies: a control-owner N/A change, the missing audit summary field, full-payload completion rejection, reversed audit dates, reversed calendar dates and concurrent co-owner demotion. Passing these probes means the defect was observed; it is not a readiness pass.
+The ownership race used controlled repository fixtures, not simultaneous writes to a production database. Date probes checked schemas/services rather than a live insert. The training optional-number issue was reproduced by executing the actual client schema locally.
+No application change, deployment, production business-record mutation, external message or real payment was made. Sign-in/sign-out created normal authentication-session activity. New-user onboarding, real payment/email/provider delivery, accessibility with assistive hardware, load/concurrency at scale, and full object-store disaster recovery require separate acceptance evidence.
+
+BEFORE USE
+Close H1-H4 with targeted regression tests and a real isolated-database concurrency test.
+Close M1-M4: optional-field handling, chronological validation, role-correct actions and accessible fields/dialogs.
+Run a fresh-organisation lifecycle through scope, duties, risk ownership/treatment, applicability, approved policies/readership, uploads and version changes, passing/failing tests, corrective action, audit report review/completion, training enrolment and management reporting.
+Test each role with separate real identities, including negative API calls, ownership changes, session revocation, record scope and independent-review restrictions. UI role simulation alone is insufficient.
+Validate framework editions and full requirement mapping for the exact scope with a competent compliance lead. Record risk acceptance criteria and authorised risk-owner decisions.
+Confirm protected uploads, retention/access configuration, recovery of both database and stored evidence, operational monitoring, provider delivery and the intended business support arrangements.
+Retest the canonical online deployment on desktop and phone under stable connectivity, including actual downloads and saved-record lifecycles. Resolve or explain delivery timeouts before customer rollout.
+
+PUBLIC SOURCES
+Vanta: audit workflows and collaboration
+https://www.vanta.com/products/audit
+Vanta: audit evidence states
+https://help.vanta.com/en/articles/11345427-audit-evidence
+Vanta: policy lifecycle
+https://help.vanta.com/en/articles/11345363-getting-started-with-policies
+Vanta: risk assessments
+https://help.vanta.com/en/articles/15089313-completing-risk-assessments
+Vanta: product feature reference
+https://www.vanta.com/features
+NIST: conducting risk assessments
+https://csrc.nist.gov/pubs/sp/800/30/r1/final
+ISO: ISO/IEC 27001 overview
+https://committee.iso.org/standard/27001

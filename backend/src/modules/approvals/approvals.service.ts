@@ -6,6 +6,7 @@ import type {
   DecideApprovalDto, ApprovalListFilters,
 } from './approvals.types';
 import { AppError } from '../../lib/errors';
+import { assertActiveMembers } from '../../lib/active-member';
 
 export async function listWorkflows(schemaName: string) {
   return repo.findWorkflows(schemaName);
@@ -18,11 +19,13 @@ export async function getWorkflow(schemaName: string, id: string) {
 }
 
 export async function createWorkflow(schemaName: string, dto: CreateWorkflowDto, userId: string) {
+  await assertActiveMembers(schemaName,(dto.steps??[]).flatMap(step=>[step.approverId,...(step.approverUserList??[])]));
   const id = await repo.createWorkflow(schemaName, dto, userId);
   return repo.findWorkflowById(schemaName, id);
 }
 
 export async function updateWorkflow(schemaName: string, id: string, dto: Partial<CreateWorkflowDto>) {
+  await assertActiveMembers(schemaName,(dto.steps??[]).flatMap(step=>[step.approverId,...(step.approverUserList??[])]));
   const existing = await repo.findWorkflowById(schemaName, id);
   if (!existing) throw new AppError('Workflow not found', 404);
   await repo.updateWorkflow(schemaName, id, dto);
@@ -89,6 +92,12 @@ export async function createRequest(
     throw new AppError('Either workflowId or at least one step is required', 400);
   }
 
+  await assertActiveMembers(schemaName,stepsInput.flatMap(step=>[step.assignedTo,...(step.approverUserList??[])]));
+  for(const step of stepsInput){
+    if(step.approverType==='user'&&!step.assignedTo)throw new AppError('Choose a named reviewer for each individual approval step.',422,'REVIEWER_REQUIRED');
+    if(step.approverType==='role'&&!step.assignedRole)throw new AppError('Choose the authorised reviewer role for each role-based step.',422,'REVIEWER_REQUIRED');
+    if(step.approverType==='manager')throw new AppError('Choose a named reviewer or an explicit role; an automatic line-manager hierarchy is not configured.',422,'REVIEWER_REQUIRED');
+  }
   const id = await repo.createRequest(schemaName, dto, userId, stepsInput);
 
   // Notify first-step approvers

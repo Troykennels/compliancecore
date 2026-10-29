@@ -4,6 +4,7 @@ import pg from 'pg';
 import { env } from '../config/env';
 import { tenantSchemaName } from './prisma';
 import { logger } from './logger';
+import { runtimeTenantGrants } from './runtime-privileges';
 
 // Tenant-table templates live at repo-root/database/tenant-template. __dirname
 // resolves correctly both in dev (src/lib) and in the built CommonJS image
@@ -32,7 +33,7 @@ export async function provisionTenantSchema(schemaName: string): Promise<void> {
     throw new Error(`No tenant templates found in ${templateDir}`);
   }
 
-  const client = new pg.Client({ connectionString: env.DATABASE_URL });
+  const client = new pg.Client({ connectionString: env.PROVISIONING_DATABASE_URL??env.DATABASE_URL });
   await client.connect();
   try {
     // Read every template up front, then send the whole thing as ONE statement
@@ -51,7 +52,7 @@ export async function provisionTenantSchema(schemaName: string): Promise<void> {
 
     // schemaName is validated against SAFE_SCHEMA_RE above, so interpolation is safe.
     await client.query(
-      ['BEGIN', `CREATE SCHEMA IF NOT EXISTS "${schemaName}"`, ...templates, 'COMMIT'].join(';\n'),
+      ['BEGIN', `CREATE SCHEMA IF NOT EXISTS "${schemaName}"`, ...templates, ...(env.RUNTIME_DATABASE_ROLE?[runtimeTenantGrants(schemaName,env.RUNTIME_DATABASE_ROLE)]:[]), 'COMMIT'].join(';\n'),
     );
     logger.info({ schemaName, templates: files.length }, 'Provisioned tenant schema');
   } catch (err) {
@@ -64,14 +65,15 @@ export async function provisionTenantSchema(schemaName: string): Promise<void> {
 }
 
 /** Best-effort teardown used when tenant creation fails after provisioning. */
-export async function dropTenantSchema(schemaName: string): Promise<void> {
+export async function dropTenantSchema(schemaName: string, strict=false): Promise<void> {
   if (!SAFE_SCHEMA_RE.test(schemaName)) return;
-  const client = new pg.Client({ connectionString: env.DATABASE_URL });
+  const client = new pg.Client({ connectionString: env.PROVISIONING_DATABASE_URL??env.DATABASE_URL });
   try {
     await client.connect();
     await client.query(`DROP SCHEMA IF EXISTS "${schemaName}" CASCADE`);
   } catch (err) {
     logger.error({ err, schemaName }, 'Failed to drop tenant schema during rollback');
+    if(strict)throw err;
   } finally {
     await client.end().catch(() => {});
   }

@@ -1,3 +1,5 @@
+import { ModalSurface } from '@/components/modal-surface';
+import { AccessibleField } from '@/components/accessible-field';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api';
 import { useAuthStore } from '@/stores/auth.store';
+import { usePolicyTemplates, type PolicyTemplate } from '../policy-templates';
 
 const schema = z.object({
   title:         z.string().min(1, 'Title is required').max(500),
@@ -33,6 +36,7 @@ interface Props {
   onClose: () => void;
   policy?: Policy; // if set, editing; otherwise creating
   initialFrameworkId?: string;
+  initialTemplate?: PolicyTemplate;
 }
 
 const DEFAULTS: FormValues = {
@@ -47,7 +51,8 @@ const DEFAULTS: FormValues = {
   tags:          '',
 };
 
-export function PolicyFormModal({ open, onClose, policy, initialFrameworkId }: Props): JSX.Element | null {
+export function PolicyFormModal({ open, onClose, policy, initialFrameworkId, initialTemplate }: Props): JSX.Element | null {
+  const {data:templates=[]}=usePolicyTemplates();
   const role=useAuthStore(s=>s.activeTenant?.role);
   const canWrite=['owner','admin','compliance_manager','msp_admin'].includes(role??'');
   const {data:members=[]}=useImplementationMembers(open);
@@ -62,6 +67,7 @@ export function PolicyFormModal({ open, onClose, policy, initialFrameworkId }: P
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -83,9 +89,9 @@ export function PolicyFormModal({ open, onClose, policy, initialFrameworkId }: P
         tags:          policy.tags.join(', '),
       });
     } else {
-      reset({...DEFAULTS,frameworkIds:initialFrameworkId?[initialFrameworkId]:[]});
+      reset({...DEFAULTS,frameworkIds:initialFrameworkId?[initialFrameworkId]:[],title:initialTemplate?.title??'',content:initialTemplate?.content??'',description:initialTemplate?.purpose??''});
     }
-  }, [open, policy, reset, initialFrameworkId]);
+  }, [open, policy, reset, initialFrameworkId, initialTemplate]);
 
   const onSubmit = (values: FormValues) => {
     if(!canWrite)return;
@@ -113,7 +119,7 @@ export function PolicyFormModal({ open, onClose, policy, initialFrameworkId }: P
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <ModalSurface label="Policy form" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
 
@@ -138,6 +144,7 @@ export function PolicyFormModal({ open, onClose, policy, initialFrameworkId }: P
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-5">
             <div className="grid grid-cols-2 gap-4">
+              {!policy&&<div className="col-span-2 space-y-2 rounded-lg bg-indigo-50 p-3"><label className="block text-sm font-semibold">Start from a policy template<select aria-label="Choose policy template" defaultValue={initialTemplate?.id??''} className={inputClass(false)} onChange={e=>{const t=templates.find(t=>t.id===e.target.value);if(t){setValue('title',t.title,{shouldDirty:true});setValue('content',t.content,{shouldDirty:true});setValue('description',t.purpose,{shouldDirty:true});}}}><option value="">Blank draft</option>{templates.map(t=><option key={t.id} value={t.id}>{t.title}</option>)}</select></label><p className="text-xs text-indigo-950">Choosing a template replaces the draft title and content. Replace every [placeholder] before review; the app checks this before approval.</p></div>}
               <FormField label="Title" error={errors.title?.message} required className="col-span-2">
                 <input {...register('title')} autoFocus className={inputClass(!!errors.title)} />
               </FormField>
@@ -203,7 +210,7 @@ export function PolicyFormModal({ open, onClose, policy, initialFrameworkId }: P
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }
 
@@ -215,18 +222,7 @@ interface FormFieldProps {
   children: React.ReactNode;
 }
 
-function FormField({ label, error, required, className, children }: FormFieldProps): JSX.Element {
-  return (
-    <div className={cn('space-y-1', className)}>
-      <label className="block text-sm font-medium text-slate-700">
-        {label}
-        {required && <span className="ml-1 text-rose-500">*</span>}
-      </label>
-      {children}
-      {error && <p className="text-xs text-rose-600">{error}</p>}
-    </div>
-  );
-}
+function FormField({ label, error, required, className, children }: FormFieldProps): JSX.Element { return <AccessibleField label={label} error={error} required={required} className={className}>{children}</AccessibleField>; }
 
 function inputClass(hasError: boolean): string {
   return cn(

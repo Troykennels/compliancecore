@@ -1,3 +1,4 @@
+import { ModalSurface } from '@/components/modal-surface';
 import { useState } from 'react';
 import { Plus, Search, Users, MoreHorizontal, Pencil, Trash2, ChevronRight, AlertTriangle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -58,7 +59,7 @@ export function DepartmentsPage(): JSX.Element {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full max-w-xs rounded-md border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          />
+           aria-label="Search departments..." />
         </div>
 
         {/* Table */}
@@ -133,7 +134,7 @@ export function DepartmentsPage(): JSX.Element {
                         <button
                           onClick={() => setMenuOpenId(menuOpenId === dept.id ? null : dept.id)}
                           className="rounded-md p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-                        >
+                         aria-label="More actions">
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
                         {menuOpenId === dept.id && (
@@ -175,7 +176,7 @@ export function DepartmentsPage(): JSX.Element {
       />
 
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Delete Department?" onClose={() => setConfirmDeleteId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDeleteId(null)} />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-base font-semibold text-slate-900">Delete Department?</h3>
@@ -199,7 +200,7 @@ export function DepartmentsPage(): JSX.Element {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </div>
   );

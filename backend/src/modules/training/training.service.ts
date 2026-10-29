@@ -1,6 +1,7 @@
 import { withTenantSchema } from '../../lib/prisma';
 import { setAuditSessionVars } from '../../middleware/audit.middleware';
-import { NotFoundError } from '../../lib/errors';
+import { AppError, NotFoundError } from '../../lib/errors';
+import { assertActiveMembers } from '../../lib/active-member';
 import { trainingRepository } from './training.repository';
 import type {
   CreateTrainingInput,
@@ -27,6 +28,7 @@ export const trainingService = {
   },
 
   async create(schemaName: string, input: CreateTrainingInput, actor: Actor) {
+    await assertActiveMembers(schemaName,[input.ownerId]);
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
       const { id } = await trainingRepository.create(tx, { ...input, createdBy: actor.id });
@@ -35,6 +37,7 @@ export const trainingService = {
   },
 
   async update(schemaName: string, id: string, input: UpdateTrainingInput, actor: Actor) {
+    await assertActiveMembers(schemaName,[input.ownerId]);
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
       const ok = await trainingRepository.update(tx, id, { ...input, updatedBy: actor.id });
@@ -65,10 +68,13 @@ export const trainingService = {
     input: AssignTrainingRecordsInput,
     actor: Actor,
   ) {
+    await assertActiveMembers(schemaName,input.userIds);
+    if(input.status==='completed')throw new AppError('Assign the participant first, then verify completion using attendance or assessment evidence.',409,'TRAINING_PROOF_REQUIRED');
     return withTenantSchema(schemaName, async (tx) => {
       await setAuditSessionVars(tx, actor);
       const program = await trainingRepository.findById(tx, programId);
       if (!program) throw new NotFoundError('Training program not found.');
+      if(program.status!=='active')throw new AppError('Reactivate this training programme before assigning new participants.',409,'TRAINING_ARCHIVED');
       await trainingRepository.assignRecords(tx, programId, input);
       return trainingRepository.findRecords(tx, programId);
     });

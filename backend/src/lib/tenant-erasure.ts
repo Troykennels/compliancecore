@@ -78,7 +78,7 @@ export async function purgeDueTenants(): Promise<{ purged: number; failed: numbe
       // The schema first: it holds the overwhelming majority of the personal
       // data, so if anything fails afterwards the important part is already
       // gone rather than still sitting there.
-      await dropTenantSchema(tenant.schema_name);
+      await dropTenantSchema(tenant.schema_name,true);
 
       // Billing rows carry tenant_id with NO foreign key, so nothing would ever
       // have flagged these as orphans. Named explicitly rather than relying on
@@ -105,8 +105,12 @@ export async function purgeDueTenants(): Promise<{ purged: number; failed: numbe
       await prisma.$executeRawUnsafe(`DELETE FROM global.api_keys WHERE tenant_id = $1::uuid`, tenant.id);
       await prisma.$executeRawUnsafe(`DELETE FROM global.webhooks WHERE tenant_id = $1::uuid`, tenant.id);
       await prisma.$executeRawUnsafe(`DELETE FROM global.tenant_memberships WHERE tenant_id = $1::uuid`, tenant.id);
-      await prisma.$executeRawUnsafe(`DELETE FROM global.tenant_invitations WHERE tenant_id = $1::uuid`, tenant.id)
-        .catch(() => { /* table is optional across versions */ });
+      // Current installations use team_invitations; older ones may retain the
+      // former table. Check presence rather than swallowing a deletion failure.
+      for (const table of ['global.team_invitations', 'global.tenant_invitations']) {
+        const present=await prisma.$queryRawUnsafe<Array<{name:string|null}>>('SELECT to_regclass($1)::text name',table);
+        if(present[0]?.name)await prisma.$executeRawUnsafe(`DELETE FROM ${table} WHERE tenant_id=$1::uuid`,tenant.id);
+      }
 
       await prisma.$executeRawUnsafe(`DELETE FROM global.tenants WHERE id = $1::uuid`, tenant.id);
 

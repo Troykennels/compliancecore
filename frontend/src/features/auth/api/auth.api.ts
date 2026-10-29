@@ -1,4 +1,4 @@
-import { apiClient, refreshSession } from '@/lib/api-client';
+import { apiClient, refreshSession, beginAuthChange } from '@/lib/api-client';
 import { stopDeviceAlerts } from '@/lib/device-alerts';
 import type { ApiResponse } from '@/types/api';
 import type {
@@ -18,21 +18,31 @@ export const authApi = {
   register: async (data: RegisterRequest) =>
     apiClient.post<ApiResponse<{ message: string }>>('/auth/register', data),
 
-  login: async (data: LoginRequest) =>
-    apiClient.post<ApiResponse<LoginResponse>>('/auth/login', data),
+  login: async (data: LoginRequest) => {
+    beginAuthChange();
+    return apiClient.post<ApiResponse<LoginResponse>>('/auth/login', data);
+  },
 
-  completeMfaChallenge: async (data: MfaChallengeRequest) =>
-    apiClient.post<ApiResponse<LoginResponse>>('/auth/mfa/challenge', data),
+  completeMfaChallenge: async (data: MfaChallengeRequest) => {
+    beginAuthChange();
+    return apiClient.post<ApiResponse<LoginResponse>>('/auth/mfa/challenge', data);
+  },
 
-  completeMfaWithBackupCode: async (data: MfaBackupCodeRequest) =>
-    apiClient.post<ApiResponse<LoginResponse>>('/auth/mfa/challenge/backup', data),
+  completeMfaWithBackupCode: async (data: MfaBackupCodeRequest) => {
+    beginAuthChange();
+    return apiClient.post<ApiResponse<LoginResponse>>('/auth/mfa/challenge/backup', data);
+  },
 
   logout: async () => {
+    beginAuthChange();
     await stopDeviceAlerts(endpoint => apiClient.delete('/notifications/push',{data:{endpoint},timeout:3000})).catch(()=>{});
     return apiClient.post<ApiResponse<{ message: string }>>('/auth/logout');
   },
 
-  logoutAll: async () => apiClient.post<ApiResponse<{ message: string }>>('/auth/logout-all'),
+  logoutAll: async () => {
+    beginAuthChange();
+    return apiClient.post<ApiResponse<{ message: string }>>('/auth/logout-all');
+  },
 
   refresh: refreshSession,
 
@@ -63,11 +73,13 @@ export const authApi = {
   disableMfa: async (password: string) =>
     apiClient.delete<ApiResponse<{ message: string }>>('/auth/mfa', { data: { password } }),
 
-  switchTenant: async (tenantId: string) =>
-    apiClient.post<ApiResponse<{ accessToken: string; activeTenant: TenantSummary }>>(
+  switchTenant: async (tenantId: string) => {
+    beginAuthChange();
+    return apiClient.post<ApiResponse<{ accessToken: string; activeTenant: TenantSummary }>>(
       '/auth/switch-tenant',
       { tenantId },
-    ),
+    );
+  },
 
   getSessions: async () =>
     apiClient.get<ApiResponse<SessionInfo[]>>('/auth/sessions'),

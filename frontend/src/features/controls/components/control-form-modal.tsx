@@ -1,3 +1,6 @@
+import { useAuthStore } from '@/stores/auth.store';
+import { ModalSurface } from '@/components/modal-surface';
+import { AccessibleField } from '@/components/accessible-field';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -53,6 +56,7 @@ const DEFAULTS: FormValues = {
 
 export function ControlFormModal({ open, onClose, control }: Props): JSX.Element | null {
   const isEditing = !!control;
+  const role = useAuthStore(s=>s.activeTenant?.role);
   const {data:members=[]}=useImplementationMembers(open);
   const { mutate: create, isPending: isCreating } = useCreateControl();
   const { mutate: update, isPending: isUpdating } = useUpdateControl();
@@ -114,7 +118,7 @@ export function ControlFormModal({ open, onClose, control }: Props): JSX.Element
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <ModalSurface label="Control form" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
 
@@ -172,9 +176,10 @@ export function ControlFormModal({ open, onClose, control }: Props): JSX.Element
                 </select>
               </FormField>
 
-              <FormField label="Implementation Status" error={errors.implementationStatus?.message}>
-                <select {...register('implementationStatus')} className={inputClass(false)}>
-                  {Object.entries(IMPLEMENTATION_STATUS_CONFIG).map(([value, cfg]) => (
+              {control?.frameworkId&&<p className="col-span-2 text-sm text-indigo-800">Applicability is decided in Frameworks, under the framework's applicability review. This keeps exclusions and supporting reasons together.</p>}
+              <FormField label="Current safeguard status" error={errors.implementationStatus?.message}>
+                <select {...register('implementationStatus')} disabled={!!control?.frameworkId && control.implementationStatus==='not_applicable'} className={inputClass(false)}>
+                  {Object.entries(IMPLEMENTATION_STATUS_CONFIG).filter(([value])=>value!=='not_applicable'||control?.implementationStatus==='not_applicable'||(!control?.frameworkId&&role!=='control_owner')).map(([value, cfg]) => (
                     <option key={value} value={value}>{cfg.label}</option>
                   ))}
                 </select>
@@ -195,11 +200,11 @@ export function ControlFormModal({ open, onClose, control }: Props): JSX.Element
                 />
               </FormField>
 
-              <FormField label="Implementation Notes" error={errors.implementationNotes?.message} className="col-span-2">
+              <FormField label="How the safeguard operates" error={errors.implementationNotes?.message} className="col-span-2">
                 <textarea {...register('implementationNotes')} rows={2} className={cn(inputClass(false), 'resize-none')} />
               </FormField>
 
-              <FormField label="Testing Notes" error={errors.testingNotes?.message} className="col-span-2">
+              <FormField label="Checks performed and result" error={errors.testingNotes?.message} className="col-span-2">
                 <textarea {...register('testingNotes')} rows={2} className={cn(inputClass(false), 'resize-none')} />
               </FormField>
             </div>
@@ -225,7 +230,7 @@ export function ControlFormModal({ open, onClose, control }: Props): JSX.Element
           </div>
         </form>
       </div>
-    </div>
+    </ModalSurface>
   );
 }
 
@@ -237,18 +242,7 @@ interface FormFieldProps {
   children: React.ReactNode;
 }
 
-function FormField({ label, error, required, className, children }: FormFieldProps): JSX.Element {
-  return (
-    <div className={cn('space-y-1', className)}>
-      <label className="block text-sm font-medium text-slate-700">
-        {label}
-        {required && <span className="ml-1 text-rose-500">*</span>}
-      </label>
-      {children}
-      {error && <p className="text-xs text-rose-600">{error}</p>}
-    </div>
-  );
-}
+function FormField({ label, error, required, className, children }: FormFieldProps): JSX.Element { return <AccessibleField label={label} error={error} required={required} className={className}>{children}</AccessibleField>; }
 
 function inputClass(hasError: boolean): string {
   return cn(

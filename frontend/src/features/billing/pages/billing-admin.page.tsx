@@ -1,3 +1,5 @@
+import { AccessibleField } from '@/components/accessible-field';
+import { ModalSurface } from '@/components/modal-surface';
 import { SignupDirectory } from '../components/signup-directory';
 import { useState } from 'react';
 import {
@@ -117,9 +119,9 @@ function PlanForm({ initial, onDone }: {
         </F>
         <F label="Monthly Price (USD)"><input type="number" step="0.01" min="0" value={form.priceMonthly} onChange={(e) => setForm({ ...form, priceMonthly: e.target.value })} required className={inp} /></F>
         <F label="Yearly Price (USD)"><input type="number" step="0.01" min="0" value={form.priceYearly} onChange={(e) => setForm({ ...form, priceYearly: e.target.value })} required className={inp} /></F>
-        <F label="Max Users (blank = unlimited)"><input type="number" min="1" value={form.maxUsers} onChange={(e) => setForm({ ...form, maxUsers: e.target.value })} placeholder="Unlimited" className={inp} /></F>
-        <F label="Max Frameworks"><input type="number" min="1" value={form.maxFrameworks} onChange={(e) => setForm({ ...form, maxFrameworks: e.target.value })} placeholder="Unlimited" className={inp} /></F>
-        <F label="Max Evidence GB"><input type="number" step="0.1" min="0" value={form.maxEvidenceGb} onChange={(e) => setForm({ ...form, maxEvidenceGb: e.target.value })} placeholder="Unlimited" className={inp} /></F>
+        <F label="Max Users (blank = unlimited)"><input type="number" min="1" value={form.maxUsers} onChange={(e) => setForm({ ...form, maxUsers: e.target.value })} placeholder="Unlimited" className={inp}  aria-label="Unlimited" /></F>
+        <F label="Max Frameworks"><input type="number" min="1" value={form.maxFrameworks} onChange={(e) => setForm({ ...form, maxFrameworks: e.target.value })} placeholder="Unlimited" className={inp}  aria-label="Unlimited" /></F>
+        <F label="Max Evidence GB"><input type="number" step="0.1" min="0" value={form.maxEvidenceGb} onChange={(e) => setForm({ ...form, maxEvidenceGb: e.target.value })} placeholder="Unlimited" className={inp}  aria-label="Unlimited" /></F>
         <F label="Sort Order"><input type="number" min="0" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: e.target.value })} className={inp} /></F>
         <div className="sm:col-span-2">
           <F label="Description"><input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={inp} /></F>
@@ -243,41 +245,41 @@ function CouponForm({ onDone }: { onDone: () => void }) {
     <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-indigo-200 bg-indigo-50/20 p-5">
       <h3 className="font-semibold text-slate-900">Create Coupon</h3>
       <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1">Code *</label>
+        <AccessibleField label={<>Code *</>} >
+
           <input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} required className={`${inp} font-mono uppercase`} placeholder="SUMMER20" />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1">Name *</label>
+        </AccessibleField>
+        <AccessibleField label={<>Name *</>} >
+
           <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className={inp} placeholder="Summer Discount" />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1">Discount Type</label>
+        </AccessibleField>
+        <AccessibleField label={<>Discount Type</>} >
+
           <select value={form.discountType} onChange={(e) => setForm({ ...form, discountType: e.target.value as 'percentage' | 'fixed' })} className={inp}>
             <option value="percentage">Percentage (%)</option>
             <option value="fixed">Fixed Amount ($)</option>
           </select>
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1">Discount Value *</label>
+        </AccessibleField>
+        <AccessibleField label={<>Discount Value *</>} >
+
           <input type="number" step="0.01" min="0" value={form.discountValue} onChange={(e) => setForm({ ...form, discountValue: e.target.value })} required className={inp} />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1">Max Uses (blank = unlimited)</label>
+        </AccessibleField>
+        <AccessibleField label={<>Max Uses (blank = unlimited)</>} >
+
           <input type="number" min="1" value={form.maxUses} onChange={(e) => setForm({ ...form, maxUses: e.target.value })} placeholder="Unlimited" className={inp} />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1">Min Amount ($)</label>
+        </AccessibleField>
+        <AccessibleField label={<>Min Amount ($)</>} >
+
           <input type="number" step="0.01" min="0" value={form.minAmount} onChange={(e) => setForm({ ...form, minAmount: e.target.value })} className={inp} />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1">Expires At</label>
+        </AccessibleField>
+        <AccessibleField label={<>Expires At</>} >
+
           <input type="datetime-local" value={form.expiresAt} onChange={(e) => setForm({ ...form, expiresAt: e.target.value })} className={inp} />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1">Applicable Plans (comma-separated slugs)</label>
+        </AccessibleField>
+        <AccessibleField label={<>Applicable Plans (comma-separated slugs)</>} >
+
           <input value={form.applicableSlugs} onChange={(e) => setForm({ ...form, applicableSlugs: e.target.value })} placeholder="professional,enterprise" className={inp} />
-        </div>
+        </AccessibleField>
       </div>
       <div className="flex gap-2 justify-end">
         <button type="button" onClick={onDone} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
@@ -427,7 +429,7 @@ function TenantsTab() {
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search tenants…"
         className="w-full max-w-xs rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      />
+       aria-label="Search tenants…" />
       <div className="rounded-xl border border-slate-200 bg-white overflow-hidden overflow-x-auto">
         <table className="w-full text-sm min-w-[800px]">
           <thead className="border-b border-slate-100 bg-slate-50">
@@ -512,7 +514,7 @@ function TenantsTab() {
       </div>
 
       {deleting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Delete ?" onClose={() => { setDeleting(null); setConfirmName(''); }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-slate-900/50"
             onClick={() => { setDeleting(null); setConfirmName(''); }}
@@ -569,7 +571,7 @@ function TenantsTab() {
               </button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </div>
   );

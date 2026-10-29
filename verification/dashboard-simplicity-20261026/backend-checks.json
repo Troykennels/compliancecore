@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "unitTests": 103,
+  "testFiles": 10,
+  "newOwnershipTests": 20,
+  "newSettingsRouterAndPermissionParityTests": 33,
+  "backendBuild": true,
+  "frontendTypeCheck": true,
+  "focusedFrontendLint": true,
+  "scope": "Real services with mocked persistence; real settings HTTP router with fixture identity and isolated controller; no production memberships changed"
+}

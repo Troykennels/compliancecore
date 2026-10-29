@@ -42,9 +42,9 @@ export function FrameworkCoverage({ frameworks }: FrameworkCoverageProps) {
     return (
       <div className="flex h-40 flex-col items-center justify-center text-center">
         <Library className="mb-2 h-7 w-7 text-slate-300" aria-hidden="true" />
-        <p className="text-xs font-medium text-slate-600">No frameworks adopted</p>
+        <p className="text-xs font-medium text-slate-600">No frameworks assessed</p>
         <p className="mt-0.5 text-2xs text-slate-400">
-          Adopt a framework to see coverage by standard.
+          Start a compliance assessment to see coverage by standard.
         </p>
       </div>
     );

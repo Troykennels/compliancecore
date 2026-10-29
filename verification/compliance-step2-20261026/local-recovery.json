@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "scope": "Local PostgreSQL17 test clone only; not a production restore or object-store recovery test",
+  "tables": 283,
+  "rows": 1974,
+  "sha256": "bcf919b339f82c04a92290e06567eb6faab3b797066436f75aa25c4f2555c3c0",
+  "restoreDatabase": "compliance_step2_restore_418593164d",
+  "backupStoredPrivately": true
+}

@@ -1,3 +1,5 @@
+import { ModalSurface } from '@/components/modal-surface';
+import { PermissionAction } from '@/components/permission-action';
 import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { parseISO, isPast } from 'date-fns';
@@ -24,7 +26,7 @@ const PAGE_SIZE = 20;
 export function ControlsPage(): JSX.Element {
   const [routeParams]=useSearchParams();
   const fmt = useOrgFormat();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(routeParams.get('q')??'');
   const [statusFilter, setStatusFilter] = useState<ControlImplementationStatus | ''>('');
   const [criticalityFilter, setCriticalityFilter] = useState<ControlCriticality | ''>('');
   const [page, setPage] = useState(1);
@@ -117,12 +119,12 @@ export function ControlsPage(): JSX.Element {
         title="Controls"
         description="Define and track the compliance controls that power your compliance score."
         actions={
-          <Button onClick={openCreate}>
+          <PermissionAction scope="controls:write" managerOnly><Button onClick={openCreate}>
             <Plus /> New control
-          </Button>
+          </Button></PermissionAction>
         }
       />
-      <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-3 text-sm text-indigo-950">Work from the agreed scope and SoA, assign responsibility, record how the safeguard operates, attach evidence and review the result. <Link className="font-semibold underline" to={routeParams.get('frameworkId')?`/frameworks?framework=${routeParams.get('frameworkId')}`:'/frameworks'}>Return to implementation steps</Link></div>
+      <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-3 text-sm text-indigo-950">Work from the agreed scope and SoA, assign responsibility, record how the safeguard operates, attach evidence and review the result. <Link className="font-semibold underline" to={routeParams.get('frameworkId')?`/frameworks?framework=${routeParams.get('frameworkId')}`:'/frameworks'}>Return to compliance assessment</Link></div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
@@ -144,7 +146,7 @@ export function ControlsPage(): JSX.Element {
         <select
           value={statusFilter}
           onChange={(e) => resetToFirstPage(setStatusFilter)(e.target.value as ControlImplementationStatus | '')}
-          aria-label="Filter by implementation status"
+          aria-label="Filter by operating status"
           className={selectClass}
         >
           <option value="">All statuses</option>
@@ -193,8 +195,8 @@ export function ControlsPage(): JSX.Element {
             <EmptyState
               icon={<ShieldCheck />}
               title="No controls yet"
-              description="Controls are safeguards you implement and evidence. Start a scoped framework implementation to prepare its control set, or add a custom control."
-              action={<Button onClick={openCreate}><Plus /> New control</Button>}
+              description="Controls are safeguards your organisation puts in place and checks. Start a scoped compliance assessment to prepare the relevant controls, or add a custom control."
+              action={<PermissionAction scope="controls:write" managerOnly><Button onClick={openCreate}><Plus /> New control</Button></PermissionAction>}
             />
           )
         ) : (
@@ -288,31 +290,31 @@ export function ControlsPage(): JSX.Element {
                               role="menu"
                               className="absolute right-0 top-full z-20 mt-1 w-44 animate-scale-in rounded-xl border border-slate-200 bg-white p-1 text-left shadow-lg"
                             >
-                              <button
+                              <PermissionAction scope="controls:write" assignedOnly managerOnly={control.implementationStatus==='not_applicable'} ownerId={control.ownerId}><button
                                 role="menuitem"
                                 type="button"
                                 onClick={() => { openEdit(control); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50"
                               >
                                 <Pencil className="h-4 w-4 text-slate-400" /> Edit
-                              </button>
-                              <button
+                              </button></PermissionAction>
+                              <PermissionAction scope="controls:write" managerOnly><button
                                 role="menuitem"
                                 type="button"
                                 onClick={() => { markReviewed(control.id); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50"
                               >
                                 <CheckCircle2 className="h-4 w-4 text-slate-400" /> Mark reviewed
-                              </button>
+                              </button></PermissionAction>
                               <div className="my-1 h-px bg-slate-100" role="none" />
-                              <button
+                              <PermissionAction scope="controls:delete"><button
                                 role="menuitem"
                                 type="button"
                                 onClick={() => { setConfirmDeleteId(control.id); setMenuOpenId(null); }}
                                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-red-600 transition-colors hover:bg-red-50"
                               >
                                 <Trash2 className="h-4 w-4" /> Delete
-                              </button>
+                              </button></PermissionAction>
                             </div>
                           )}
                         </div>
@@ -366,7 +368,7 @@ export function ControlsPage(): JSX.Element {
 
       {/* Delete confirmation */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ModalSurface label="Delete this control?" onClose={() => setConfirmDeleteId(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 animate-fade-in bg-slate-900/50 backdrop-blur-[2px]"
             onClick={() => setConfirmDeleteId(null)}
@@ -391,9 +393,9 @@ export function ControlsPage(): JSX.Element {
               cannot be undone.
             </p>
             <div className="mt-6 flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => setConfirmDeleteId(null)}>
+              <PermissionAction scope="controls:delete"><Button variant="secondary" onClick={() => setConfirmDeleteId(null)}>
                 Cancel
-              </Button>
+              </Button></PermissionAction>
               <Button
                 variant="danger"
                 loading={isDeleting}
@@ -403,7 +405,7 @@ export function ControlsPage(): JSX.Element {
               </Button>
             </div>
           </div>
-        </div>
+        </ModalSurface>
       )}
     </PageShell>
   );

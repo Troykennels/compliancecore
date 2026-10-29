@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "format": "PostgreSQL custom-format consistent native snapshot",
+  "bytes": 3011816,
+  "sha256": "310b5db2370dd048f7d0b1dc11c9dfbb1564c4c4abacd1941eaf7858d12a32c2",
+  "createdAt": "2026-10-26T21:29:28.634Z",
+  "cloudReadOnly": true
+}

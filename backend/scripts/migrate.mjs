@@ -37,7 +37,7 @@ const prismaBaseline = fileURLToPath(
 );
 const PRISMA_BASELINE_VERSION = '001b_prisma_global';
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL = process.env.PROVISIONING_DATABASE_URL ?? process.env.DATABASE_URL;
 if (!DATABASE_URL) {
   console.error('[migrate] DATABASE_URL is required');
   process.exit(1);

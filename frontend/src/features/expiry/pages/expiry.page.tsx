@@ -93,13 +93,13 @@ export function ExpiryPage() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search items..."
             className="w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500"
-          />
+           aria-label="Search items..." />
         </div>
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value as ExpiryStatus | '')}
           className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700"
-        >
+         aria-label="Filter: All Statuses" >
           <option value="">All Statuses</option>
           {(Object.keys(STATUS_CONFIG) as ExpiryStatus[]).map((s) => (
             <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
@@ -109,7 +109,7 @@ export function ExpiryPage() {
           value={filterEntityType}
           onChange={(e) => setFilterEntityType(e.target.value as ExpiryEntityType | '')}
           className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700"
-        >
+         aria-label="Filter: All Types" >
           <option value="">All Types</option>
           {(Object.entries(ENTITY_TYPE_LABELS) as [ExpiryEntityType, string][]).map(([v, l]) => (
             <option key={v} value={v}>{l}</option>

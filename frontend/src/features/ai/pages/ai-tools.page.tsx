@@ -1,3 +1,5 @@
+import { useEvidence } from '@/features/evidence/hooks/use-evidence';
+import { AccessibleField } from '@/components/accessible-field';
 import React, { useState } from 'react';
 import {
   FileText, ShieldCheck, AlertTriangle, ListChecks,
@@ -80,6 +82,22 @@ function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   );
 }
 
+function EvidenceDocumentSelect({value,onChange}:{value:string;onChange:(id:string)=>void}) {
+  const [query,setQuery]=useState(''),[selectedTitle,setSelectedTitle]=useState('');
+  const {data,isLoading,isError,refetch}=useEvidence({q:query||undefined,status:'active',limit:100});
+  const documents=(data?.evidence??[]).filter(e=>Boolean(e.currentVersionId));
+  return <div className="space-y-2">
+    <input aria-label="Find an uploaded document" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search documents by title" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"/>
+    <select aria-label="Uploaded document to analyse" required value={value} disabled={isLoading||isError} onChange={e=>{setSelectedTitle(documents.find(d=>d.id===e.target.value)?.title??'');onChange(e.target.value);}} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+      <option value="">{isLoading?'Loading documents...':'Choose an uploaded document'}</option>
+      {value&&!documents.some(d=>d.id===value)&&<option value={value}>{selectedTitle||'Previously selected document'}</option>}
+      {documents.map(d=><option key={d.id} value={d.id}>{d.title}</option>)}
+    </select>
+    {isError&&<p role="alert" className="text-xs text-red-700">Documents could not be loaded. <button type="button" className="underline" onClick={()=>void refetch()}>Try again</button></p>}
+    {!isLoading&&!isError&&!documents.length&&<p className="text-xs text-slate-500">No matching documents. Upload the file in Evidence Hub first, then return here.</p>}
+  </div>;
+}
+
 function RunButton({ loading, children }: { loading: boolean; children: React.ReactNode }) {
   return (
     <button
@@ -132,24 +150,19 @@ function ContractSummarizer() {
   return (
     <div className="space-y-5">
       <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
-        <div>
-          <Label>Evidence ID (UUID of the uploaded contract)</Label>
-          <Input
-            value={evidenceId}
-            onChange={(e) => setEvidenceId(e.target.value)}
-            placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
-            required
-          />
-          <p className="mt-1 text-[11px] text-slate-400">Navigate to Evidence, open the contract, and copy the ID from the URL.</p>
-        </div>
-        <div>
-          <Label>Focus Areas (optional, comma-separated)</Label>
+        <AccessibleField label={<>Uploaded contract</>} >
+
+          <EvidenceDocumentSelect value={evidenceId} onChange={setEvidenceId}/>
+          <p className="mt-1 text-[11px] text-slate-400">Choose the contract by its title. Upload it in Evidence Hub first if it is missing.</p>
+        </AccessibleField>
+        <AccessibleField label={<>Focus Areas (optional, comma-separated)</>} >
+
           <Input
             value={focusAreas}
             onChange={(e) => setFocusAreas(e.target.value)}
             placeholder="e.g. payment terms, termination clauses, liability"
           />
-        </div>
+        </AccessibleField>
         <RunButton loading={isPending}>Summarise Contract</RunButton>
       </form>
 
@@ -265,25 +278,25 @@ function PolicyGenerator() {
                 </Select>
             }
           </div>
-          <div>
-            <Label>Framework (optional)</Label>
+          <AccessibleField label={<>Framework (optional)</>} >
+
             <Select value={framework} onChange={(e) => setFramework(e.target.value)}>
               <option value="">None</option>
               {FRAMEWORKS.map((f) => <option key={f}>{f}</option>)}
             </Select>
-          </div>
-          <div>
-            <Label>Organisation Name (optional)</Label>
+          </AccessibleField>
+          <AccessibleField label={<>Organisation Name (optional)</>} >
+
             <Input value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder="Acme Corp" />
-          </div>
-          <div className="col-span-2">
-            <Label>Scope (optional)</Label>
+          </AccessibleField>
+          <AccessibleField label={<>Scope (optional)</>} className="col-span-2">
+
             <Input value={scope} onChange={(e) => setScope(e.target.value)} placeholder="e.g. All employees, contractors, and third-party vendors" />
-          </div>
-          <div className="col-span-2">
-            <Label>Additional Context (optional)</Label>
+          </AccessibleField>
+          <AccessibleField label={<>Additional Context (optional)</>} className="col-span-2">
+
             <Textarea value={context} onChange={(e) => setContext(e.target.value)} rows={2} placeholder="Industry, specific requirements, existing controls…" />
-          </div>
+          </AccessibleField>
         </div>
         <RunButton loading={isPending}>Generate Policy</RunButton>
       </form>
@@ -342,27 +355,27 @@ function RiskAnalyzer() {
   return (
     <div className="space-y-5">
       <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
-        <div>
-          <Label>Risk Title *</Label>
+        <AccessibleField label={<>Risk Title *</>} >
+
           <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Unauthorised access to customer PII" required />
-        </div>
-        <div>
-          <Label>Risk Description *</Label>
+        </AccessibleField>
+        <AccessibleField label={<>Risk Description *</>} >
+
           <Textarea value={description} onChange={(e) => setDesc(e.target.value)} rows={4}
             placeholder="Describe the risk scenario, existing controls, and potential threat vectors…" required />
-        </div>
+        </AccessibleField>
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Industry (optional)</Label>
+          <AccessibleField label={<>Industry (optional)</>} >
+
             <Select value={industry} onChange={(e) => setIndustry(e.target.value)}>
               <option value="">Select industry…</option>
               {INDUSTRIES.map((i) => <option key={i}>{i}</option>)}
             </Select>
-          </div>
-          <div>
-            <Label>Business Context (optional)</Label>
+          </AccessibleField>
+          <AccessibleField label={<>Business Context (optional)</>} >
+
             <Input value={context} onChange={(e) => setContext(e.target.value)} placeholder="e.g. SaaS, 50k users, SOC 2 audit pending" />
-          </div>
+          </AccessibleField>
         </div>
         <RunButton loading={isPending}>Analyse Risk</RunButton>
       </form>
@@ -474,29 +487,29 @@ function ChecklistGenerator() {
     <div className="space-y-5">
       <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <div className="col-span-2">
-            <Label>Framework *</Label>
+          <AccessibleField label={<>Framework *</>} className="col-span-2">
+
             <Select value={framework} onChange={(e) => setFramework(e.target.value)}>
               {CHECKLIST_FRAMEWORKS.map((f) => <option key={f}>{f}</option>)}
             </Select>
-          </div>
-          <div>
-            <Label>Organisation Size</Label>
+          </AccessibleField>
+          <AccessibleField label={<>Organisation Size</>} >
+
             <Select value={orgSize} onChange={(e) => setOrgSize(e.target.value as any)}>
               <option value="small">Small (1-50)</option>
               <option value="medium">Medium (51-500)</option>
               <option value="large">Large (501-5000)</option>
               <option value="enterprise">Enterprise (5000+)</option>
             </Select>
-          </div>
-          <div>
-            <Label>Scope (optional)</Label>
+          </AccessibleField>
+          <AccessibleField label={<>Scope (optional)</>} >
+
             <Input value={scope} onChange={(e) => setScope(e.target.value)} placeholder="e.g. cloud infrastructure only" />
-          </div>
-          <div className="col-span-2">
-            <Label>Additional Context (optional)</Label>
+          </AccessibleField>
+          <AccessibleField label={<>Additional Context (optional)</>} className="col-span-2">
+
             <Textarea value={context} onChange={(e) => setContext(e.target.value)} rows={2} placeholder="Industry, existing controls, audit date…" />
-          </div>
+          </AccessibleField>
         </div>
         <RunButton loading={isPending}>Generate Checklist</RunButton>
       </form>
@@ -591,17 +604,12 @@ function DocumentQa() {
   return (
     <div className="space-y-5">
       <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
-        <div>
-          <Label>Evidence ID (UUID of the document)</Label>
-          <Input
-            value={evidenceId}
-            onChange={(e) => setEvidenceId(e.target.value)}
-            placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
-            required
-          />
-        </div>
-        <div>
-          <Label>Your Question *</Label>
+        <AccessibleField label={<>Uploaded document</>} >
+
+          <EvidenceDocumentSelect value={evidenceId} onChange={setEvidenceId}/>
+        </AccessibleField>
+        <AccessibleField label={<>Your Question *</>} >
+
           <Textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
@@ -621,7 +629,7 @@ function DocumentQa() {
               </button>
             ))}
           </div>
-        </div>
+        </AccessibleField>
         <RunButton loading={isPending}>Ask Question</RunButton>
       </form>
 
@@ -683,7 +691,7 @@ function AiSearchPanel() {
               placeholder="Search across all your compliance documents…"
               required
               className="w-full rounded-md border border-slate-300 pl-9 pr-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-            />
+             aria-label="Search across all your compliance documents…" />
           </div>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {SAMPLE_SEARCHES.map((s) => (

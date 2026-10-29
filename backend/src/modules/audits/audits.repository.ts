@@ -12,6 +12,9 @@ type Tx = Prisma.TransactionClient;
 
 function mapRow(row: Record<string, unknown>): Audit {
   return {
+    reviewedBy: row.reviewedBy as string | null,
+    reviewedAt: row.reviewedAt ? new Date(row.reviewedAt as string) : null,
+    reportCurrent: row.reportCurrent === true,
     id:           row.id as string,
     title:        row.title as string,
     auditType:    row.auditType as Audit['auditType'],
@@ -83,6 +86,8 @@ export const auditsRepository = {
         SELECT
           a.id, a.title, a.audit_type AS "auditType", a.framework_ref AS "frameworkRef",
           a.status, a.auditor_name AS "auditorName", a.scope, a.summary,
+          a.reviewed_by AS "reviewedBy", a.reviewed_at AS "reviewedAt",
+          EXISTS(SELECT 1 FROM evidence e JOIN evidence_versions v ON v.id=e.current_version_id WHERE e.id=a.report_evidence_id AND a.report_evidence_version_id=e.current_version_id AND e.deleted_at IS NULL AND e.status='active' AND v.upload_status='completed' AND (e.retention_date IS NULL OR e.retention_date>NOW())) AS "reportCurrent",
           a.start_date AS "startDate", a.end_date AS "endDate",
           a.owner_id AS "ownerId",
           u.first_name || ' ' || u.last_name AS "ownerName",
@@ -113,6 +118,8 @@ export const auditsRepository = {
       SELECT
         a.id, a.title, a.audit_type AS "auditType", a.framework_ref AS "frameworkRef",
         a.status, a.auditor_name AS "auditorName", a.scope, a.summary,
+          a.reviewed_by AS "reviewedBy", a.reviewed_at AS "reviewedAt",
+          EXISTS(SELECT 1 FROM evidence e JOIN evidence_versions v ON v.id=e.current_version_id WHERE e.id=a.report_evidence_id AND a.report_evidence_version_id=e.current_version_id AND e.deleted_at IS NULL AND e.status='active' AND v.upload_status='completed' AND (e.retention_date IS NULL OR e.retention_date>NOW())) AS "reportCurrent",
         a.start_date AS "startDate", a.end_date AS "endDate",
         a.owner_id AS "ownerId",
         u.first_name || ' ' || u.last_name AS "ownerName",

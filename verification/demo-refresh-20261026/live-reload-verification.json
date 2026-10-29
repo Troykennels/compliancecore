@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "checks": [
+    "Demo signs in",
+    "Phone-width reload 1 preserves the session",
+    "Phone-width reload 2 preserves the session",
+    "Phone-width reload 3 preserves the session",
+    "Phone-width reload 4 preserves the session",
+    "Phone-width reload 5 preserves the session",
+    "Phone-width reload 6 preserves the session",
+    "Phone-width reload 7 preserves the session",
+    "Phone-width reload 8 preserves the session",
+    "Secure HttpOnly session cookie retained",
+    "No stay-signed-in prompt"
+  ],
+  "authErrors": [
+    {
+      "path": "/api/auth/refresh",
+      "status": 401,
+      "code": "UNAUTHORIZED"
+    }
+  ],
+  "failedRequests": [
+    {
+      "path": "/api/frameworks/implementation-overview",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/api/frameworks/records/summary",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/api/frameworks/implementation-overview",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/api/frameworks/implementation-overview",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/api/frameworks/implementation-overview",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/api/frameworks/records/summary",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "scope": "Managed demo; eight deliberate full reloads at phone width"
+}

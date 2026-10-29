@@ -1,0 +1,20 @@
+COMPLIANCECORE ONLINE DEMO UPDATE - 26 OCTOBER 2026
+
+Live address: https://compliancecore-sand.vercel.app/
+The existing demo email and password are unchanged.
+
+Added current workflow examples:
+- Audits: Demo: quarterly evidence review - awaiting independent review.
+  Includes a responsible owner, scope, report summary and dates. It stays in progress until the required independent review is recorded.
+- Training: Demo: evidence handling and independent review.
+  Includes two assigned participants, a due date and explanatory instructions. Assignments do not claim completion; attendance or assessment evidence must be verified.
+- Existing completed examples and retained evidence remain available.
+
+Verification:
+- Tested the refresh on a restored database copy first.
+- 45 live API checks passed, including the new examples, existing password, current workflow records, Word/Excel downloads and PDF checksum.
+- 520 tables belonging to other organisations and 10 customer subscription agreements remained unchanged.
+- No records deleted, password reset, customer charge or external message sent.
+
+Limit:
+The latest full live browser sweep has not passed. It encountered loading timeouts and an earlier sign-in interruption. API checks do not establish that every browser interaction is fault-free. The targeted rerun reached the audit and participant screens before a test-selector error; a subsequent full rerun timed out waiting for the dashboard after sign-in. Full browser approval remains outstanding.

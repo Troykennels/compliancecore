@@ -1,0 +1,511 @@
+{
+  "base": "http://127.0.0.1:5174",
+  "results": [
+    {
+      "route": "evidence",
+      "page": {
+        "headings": [
+          "Evidence Hub"
+        ],
+        "links": [
+          {
+            "text": "Controls and checks",
+            "href": "/controls"
+          },
+          {
+            "text": "Policies",
+            "href": "/policies"
+          },
+          {
+            "text": "Audit records",
+            "href": "/audits"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Upload Evidence",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Search",
+            "name": null,
+            "disabled": false
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "radio",
+            "name": "status",
+            "aria": null,
+            "labels": [
+              "Active"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "radio",
+            "name": "status",
+            "aria": null,
+            "labels": [
+              "Archived"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "radio",
+            "name": "status",
+            "aria": null,
+            "labels": [
+              "Expired"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All types",
+                "value": ""
+              },
+              {
+                "text": "PDF",
+                "value": "application/pdf"
+              },
+              {
+                "text": "Word (DOCX)",
+                "value": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              },
+              {
+                "text": "Excel (XLSX)",
+                "value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              },
+              {
+                "text": "Images",
+                "value": "image/"
+              },
+              {
+                "text": "Text files",
+                "value": "text/"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Any",
+                "value": ""
+              },
+              {
+                "text": "OCR Complete",
+                "value": "completed"
+              },
+              {
+                "text": "OCR Pending",
+                "value": "pending"
+              },
+              {
+                "text": "OCR Failed",
+                "value": "failed"
+              },
+              {
+                "text": "No OCR",
+                "value": "not_applicable"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "From",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "To",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Sort by",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Newest first",
+                "value": "created_at:desc"
+              },
+              {
+                "text": "Oldest first",
+                "value": "created_at:asc"
+              },
+              {
+                "text": "Recently updated",
+                "value": "updated_at:desc"
+              },
+              {
+                "text": "Title A–Z",
+                "value": "title:asc"
+              },
+              {
+                "text": "Largest first",
+                "value": "file_size:desc"
+              }
+            ]
+          }
+        ]
+      },
+      "primaryAction": "Upload Evidence",
+      "openForm": {
+        "headings": [
+          "Evidence Hub",
+          "Upload Evidence"
+        ],
+        "links": [
+          {
+            "text": "Controls and checks",
+            "href": "/controls"
+          },
+          {
+            "text": "Policies",
+            "href": "/policies"
+          },
+          {
+            "text": "Audit records",
+            "href": "/audits"
+          },
+          {
+            "text": "Complete user guide",
+            "href": "/guide"
+          }
+        ],
+        "buttons": [
+          {
+            "text": "Upload Evidence",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Search",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Cancel",
+            "name": null,
+            "disabled": false
+          },
+          {
+            "text": "Upload Evidence",
+            "name": null,
+            "disabled": true
+          }
+        ],
+        "fields": [
+          {
+            "tag": "INPUT",
+            "type": "search",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "radio",
+            "name": "status",
+            "aria": null,
+            "labels": [
+              "Active"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "radio",
+            "name": "status",
+            "aria": null,
+            "labels": [
+              "Archived"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "radio",
+            "name": "status",
+            "aria": null,
+            "labels": [
+              "Expired"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "All types",
+                "value": ""
+              },
+              {
+                "text": "PDF",
+                "value": "application/pdf"
+              },
+              {
+                "text": "Word (DOCX)",
+                "value": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              },
+              {
+                "text": "Excel (XLSX)",
+                "value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              },
+              {
+                "text": "Images",
+                "value": "image/"
+              },
+              {
+                "text": "Text files",
+                "value": "text/"
+              }
+            ]
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Any",
+                "value": ""
+              },
+              {
+                "text": "OCR Complete",
+                "value": "completed"
+              },
+              {
+                "text": "OCR Pending",
+                "value": "pending"
+              },
+              {
+                "text": "OCR Failed",
+                "value": "failed"
+              },
+              {
+                "text": "No OCR",
+                "value": "not_applicable"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "From",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "To",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": null,
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Sort by",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "Newest first",
+                "value": "created_at:desc"
+              },
+              {
+                "text": "Oldest first",
+                "value": "created_at:asc"
+              },
+              {
+                "text": "Recently updated",
+                "value": "updated_at:desc"
+              },
+              {
+                "text": "Title A–Z",
+                "value": "title:asc"
+              },
+              {
+                "text": "Largest first",
+                "value": "file_size:desc"
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "file",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Drop file here or browsePDF, DOCX, XLSX, images, ZIP and more · Max 200 MB"
+            ],
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "title",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Title *",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "TEXTAREA",
+            "type": null,
+            "name": "description",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Description",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "SELECT",
+            "type": null,
+            "name": "categoryId",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Category",
+            "required": false,
+            "disabled": false,
+            "options": [
+              {
+                "text": "No category",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": "collectedAt",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Collection Date",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "date",
+            "name": "retentionDate",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Retention Date",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": null,
+            "name": "changeNote",
+            "aria": null,
+            "labels": [],
+            "nearbyLabel": "Change Note (optional)",
+            "required": false,
+            "disabled": false
+          },
+          {
+            "tag": "INPUT",
+            "type": "checkbox",
+            "name": null,
+            "aria": null,
+            "labels": [
+              "Mark as ConfidentialConfidential evidence is only visible to compliance managers, admins, and owners."
+            ],
+            "nearbyLabel": "Mark as ConfidentialConfidential evidence is only visible to compliance managers, admins, and owners.",
+            "required": false,
+            "disabled": false
+          }
+        ]
+      },
+      "opened": true
+    }
+  ],
+  "pageErrors": [],
+  "blockedWrites": []
+}

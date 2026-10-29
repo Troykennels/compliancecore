@@ -1,0 +1,20 @@
+﻿number,work,step2_status,evidence_and_limits
+1,Review this audit and reconcile local drafts against the approved scope,Complete,"Step 2 authorised by user; local source reconciled, unrelated changes preserved."
+2,Establish backup/restore and safe deployment baseline,Prepared; recovery limits recorded,Native read-only cloud backup; application restore fingerprint match; staging and rollback procedures. Unused vector/collation/provider limits explicit.
+3,Harden runtime DB identity and install actual append-protected audit history,Local verified; live configuration pending approval,Append-protected tenant/global metadata history and separated restricted runtime/provisioning role tested locally.
+4,Repair upload/OCR and spreadsheet export safety; verify demo sessions,Core repaired; provider acceptance pending,"Stored file roundtrip, format/size/refusal, retry, OCR error handling, CSV safety and sign-in races verified; live OCR transport unverified."
+5,"Fix permission-aware navigation, assignees, forms, errors and broken lifecycle transitions",Core verified,"Role-aware navigation/actions, active assignees, inline errors and workflow transitions."
+6,Confirm organisation profile and stakeholder scope; correct legal suggestions,Core verified,"Stakeholder scope, real consultation/asset records and conditional legal suggestions."
+7,Version reference catalogue and add reviewed obligations without duplication,Governed obligations delivered,"Source/edition/effective/check dates, applicability, independent review and snapshots; full licensed catalogue maintenance remains human-governed."
+8,"Complete risk register, treatment review and control mapping",Core verified,"Shared risk worksheet, real XLSX, control links, independent residual review and stale sign-off reopening."
+9,Complete framework coverage and later applicability/SoA,Core verified,Framework-specific outcomes and later applicability/SoA; no certification inference.
+10,"Complete editable policy templates, approval, publication and acknowledgement",Core verified,"Ten templates, tailored drafts, independent publication gate and exact-version readers."
+11,Activate dated control testing and evidence requests,Core verified,"Dated independent control workpapers; evidence requests reuse tasks, evidence and optional form."
+12,Complete audit/findings and CAPA closure,Core verified,Current report/closure proof; linked findings/tests; task-based CAPA effectiveness and reopen.
+13,Govern incident decisions and notification clocks,Core verified,"Verified duty-specific clock, rationale/receipt, source/proof/fact changes invalidate closure."
+14,"Complete vendor due diligence, training and declarations",Core verified; optional forms limited,"Versioned supplier answers, proof, training verification; conflict/gift forms use controlled existing records, not automatic registers."
+15,"Finish shared calendars, notifications, retries and provider status",Core connected; delivery acceptance pending,"Stable review events, existing preferences/jobs/escalations reused; external delivery/outage acceptance remains environment-specific."
+16,"Connect traceability, role dashboards, search and board snapshots",Core connected,"Stable source links, permission-aware search/queues, existing executive reports and optional board working form."
+17,"Validate privacy/retention, encryption evidence and subscription controls",Partial operational assurance,"Billing/account regression, safeguards and recovery checks. Legal holds, full encryption evidence and provider recovery require operator acceptance."
+18,"Run lifecycle, role/tenant, accessibility, provider and volume acceptance; update guides/runbook",Core checks and guides delivered,"Builds, unit/integration/role/tenant/browser/file/auth checks; full WCAG, provider and enterprise-volume acceptance remain explicit limits."
+19,Publish approved incremental release and verify live version/rollback,Pending production approval,No production write or deployment performed; reviewable release source/pack and migration/rollback runbook ready.

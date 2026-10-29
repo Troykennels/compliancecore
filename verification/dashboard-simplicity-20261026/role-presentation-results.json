@@ -1,0 +1,47 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "role": "owner",
+      "passed": true,
+      "checks": 6
+    },
+    {
+      "role": "admin",
+      "passed": true,
+      "checks": 6
+    },
+    {
+      "role": "compliance_manager",
+      "passed": true,
+      "checks": 6
+    },
+    {
+      "role": "control_owner",
+      "passed": true,
+      "checks": 6
+    },
+    {
+      "role": "auditor",
+      "passed": true,
+      "checks": 6
+    },
+    {
+      "role": "viewer",
+      "passed": true,
+      "checks": 6
+    },
+    {
+      "role": "msp_admin",
+      "passed": true,
+      "checks": 6
+    },
+    {
+      "role": "msp_analyst",
+      "passed": true,
+      "checks": 6
+    }
+  ],
+  "pageErrors": [],
+  "scope": "Eight local UI role fixtures; server identity stays demo owner. Independent HTTP-router and service tests verify API enforcement."
+}
