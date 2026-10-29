@@ -148,6 +148,7 @@ export const rolePermissions:Record<UserRole,string[]>={
     "incidents:read",
     "notifications:read",
     "policies:read",
+    "privacy:read",
     "reports:read",
     "risks:read",
     "signatures:read",

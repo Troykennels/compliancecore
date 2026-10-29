@@ -11,7 +11,7 @@ import {
   ChevronDown, Building2, GitBranch, Calendar, Clock, ChevronsLeft,
   ChevronsRight, FileArchive, CheckSquare, ShieldAlert, ListChecks, Sparkles, PieChart,
   CreditCard, Loader2, ScrollText, Flame, Store, ClipboardCheck, GraduationCap,
-  Library, TrendingUp, Plug, Siren, Menu, X, Check, BookOpen,
+  Library, TrendingUp, Plug, Siren, Menu, X, Check, BookOpen, Lock, UserCheck, Scale, Target,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth.store';
@@ -32,51 +32,59 @@ interface NavGroup {
   items: NavItem[];
 }
 
+// Ordered as a compliance programme runs: scope, assess, prove, review, respond, report.
+// Each group keeps to six links or fewer. Names match each page's own heading.
 const NAV_GROUPS: NavGroup[] = [
   { items: [
     { label: 'Dashboard', to: PATHS.DASHBOARD, icon: <LayoutDashboard className="h-4 w-4" /> },
-    { label: 'My Guide', to: PATHS.GUIDE, icon: <BookOpen className="h-4 w-4" /> },
+    { label: 'My guide', to: PATHS.GUIDE, icon: <BookOpen className="h-4 w-4" /> },
   ] },
-  { heading: 'Compliance work', items: [
+  { heading: 'Scope', items: [
+    { label: 'Scoping questions', to: PATHS.SETTINGS_ORG, icon: <Target className="h-4 w-4" /> },
+    { label: 'Departments', to: PATHS.DEPARTMENTS, icon: <Building2 className="h-4 w-4" /> },
+    { label: 'Branches', to: PATHS.BRANCHES, icon: <GitBranch className="h-4 w-4" /> },
+  ] },
+  { heading: 'Assess', items: [
     { label: 'Compliance assessments', to: PATHS.FRAMEWORKS, icon: <Library className="h-4 w-4" /> },
     { label: 'Risk assessment', to: PATHS.RISKS, icon: <Flame className="h-4 w-4" /> },
+  ] },
+  { heading: 'Prove', items: [
+    { label: 'Controls', to: PATHS.CONTROLS, icon: <ShieldCheck className="h-4 w-4" /> },
     { label: 'Policies', to: PATHS.POLICIES, icon: <ScrollText className="h-4 w-4" /> },
     { label: 'Policy templates', to: PATHS.POLICY_TEMPLATES, icon: <FileText className="h-4 w-4" /> },
-    { label: 'Controls', to: PATHS.CONTROLS, icon: <ShieldCheck className="h-4 w-4" /> },
-    { label: 'Evidence Hub', to: PATHS.EVIDENCE, icon: <FileArchive className="h-4 w-4" /> },
+    { label: 'Evidence', to: PATHS.EVIDENCE, icon: <FileArchive className="h-4 w-4" /> },
   ] },
-  { heading: 'Reviews and learning', items: [
+  { heading: 'Review', items: [
     { label: 'Audits', to: PATHS.AUDITS, icon: <ClipboardCheck className="h-4 w-4" /> },
-    { label: 'Training', to: PATHS.TRAINING, icon: <GraduationCap className="h-4 w-4" /> },
-  ] },
-  { heading: 'Daily operations', items: [
-    { label: 'Incidents', to: PATHS.INCIDENTS, icon: <Siren className="h-4 w-4" /> },
-    { label: 'Vendors', to: PATHS.VENDORS, icon: <Store className="h-4 w-4" /> },
-  ] },
-  { heading: 'Actions and decisions', items: [
-    { label: 'Tasks', to: PATHS.TASKS, icon: <CheckSquare className="h-4 w-4" /> },
     { label: 'Approvals', to: PATHS.APPROVALS, icon: <ListChecks className="h-4 w-4" /> },
     { label: 'Signatures', to: PATHS.SIGNATURES, icon: <ShieldAlert className="h-4 w-4" /> },
+    { label: 'Training', to: PATHS.TRAINING, icon: <GraduationCap className="h-4 w-4" /> },
+  ] },
+  { heading: 'Respond', items: [
+    { label: 'Tasks', to: PATHS.TASKS, icon: <CheckSquare className="h-4 w-4" /> },
+    { label: 'Incidents', to: PATHS.INCIDENTS, icon: <Siren className="h-4 w-4" /> },
+    { label: 'Vendors', to: PATHS.VENDORS, icon: <Store className="h-4 w-4" /> },
     { label: 'Escalations', to: PATHS.ESCALATIONS, icon: <AlertTriangle className="h-4 w-4" /> },
   ] },
-  { heading: 'Reports and dates', items: [
-    { label: 'Compliance Score', to: PATHS.COMPLIANCE_SCORE, icon: <BarChart2 className="h-4 w-4" /> },
-    { label: 'Calendar', to: PATHS.CALENDAR, icon: <Calendar className="h-4 w-4" /> },
-    { label: 'Expiry Tracker', to: PATHS.EXPIRY, icon: <Clock className="h-4 w-4" /> },
-    { label: 'Executive Dashboard', to: PATHS.REPORTS, icon: <PieChart className="h-4 w-4" /> },
-    { label: 'Analytics', to: PATHS.ANALYTICS, icon: <TrendingUp className="h-4 w-4" /> },
+  { heading: 'Privacy', items: [
+    { label: 'Records of processing', to: PATHS.PRIVACY_ROPA, icon: <Lock className="h-4 w-4" /> },
+    { label: 'Data subject requests', to: PATHS.PRIVACY_DSAR, icon: <UserCheck className="h-4 w-4" /> },
+    { label: 'Impact assessments', to: PATHS.PRIVACY_DPIA, icon: <Scale className="h-4 w-4" /> },
   ] },
-  { heading: 'Organisation', items: [
-    { label: 'Branches', to: PATHS.BRANCHES, icon: <GitBranch className="h-4 w-4" /> },
-    { label: 'Departments', to: PATHS.DEPARTMENTS, icon: <Building2 className="h-4 w-4" /> },
+  { heading: 'Report', items: [
+    { label: 'Reports', to: PATHS.REPORTS, icon: <PieChart className="h-4 w-4" /> },
+    { label: 'Compliance score', to: PATHS.COMPLIANCE_SCORE, icon: <BarChart2 className="h-4 w-4" /> },
+    { label: 'Analytics', to: PATHS.ANALYTICS, icon: <TrendingUp className="h-4 w-4" /> },
+    { label: 'Calendar', to: PATHS.CALENDAR, icon: <Calendar className="h-4 w-4" /> },
+    { label: 'Expiry tracker', to: PATHS.EXPIRY, icon: <Clock className="h-4 w-4" /> },
   ] },
   { heading: 'Tools', items: [
-    { label: 'AI Tools', to: PATHS.AI_TOOLS, icon: <Sparkles className="h-4 w-4" /> },
+    { label: 'AI tools', to: PATHS.AI_TOOLS, icon: <Sparkles className="h-4 w-4" /> },
     { label: 'Integrations', to: PATHS.INTEGRATIONS, icon: <Plug className="h-4 w-4" /> },
   ] },
   { heading: 'Billing', items: [
-    { label: 'Billing Overview', to: PATHS.BILLING, icon: <CreditCard className="h-4 w-4" /> },
-    { label: 'Plans & Upgrade', to: PATHS.BILLING_PLANS, icon: <ShieldCheck className="h-4 w-4" /> },
+    { label: 'Billing overview', to: PATHS.BILLING, icon: <CreditCard className="h-4 w-4" /> },
+    { label: 'Plans and upgrade', to: PATHS.BILLING_PLANS, icon: <ShieldCheck className="h-4 w-4" /> },
     { label: 'Invoices', to: PATHS.BILLING_INVOICES, icon: <FileText className="h-4 w-4" /> },
   ] },
 ];
@@ -131,7 +139,7 @@ export function AppShell() {
     () => typeof localStorage !== 'undefined' && localStorage.getItem(COLLAPSE_KEY) === '1',
   );
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ 'Compliance work': true });
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ Assess: true, Prove: true });
   const [orgMenuOpen, setOrgMenuOpen] = useState(false);
   const [switching, setSwitching] = useState(false);
   const { user, activeTenant, allTenants, clearAuth, switchTenant } = useAuthStore();
@@ -207,10 +215,12 @@ export function AppShell() {
   // Append the owner group only for a platform superadmin, so customers never
   // see a link into cross-tenant billing.
   const routeScope:Record<string,string>={
-    '/frameworks':'controls:read','/controls':'controls:read','/risks':'risks:read','/policies':'policies:read','/policy-templates':'policies:read','/evidence':'evidence:read','/training':'training:read','/audits':'audits:read','/incidents':'incidents:read','/vendors':'vendors:read','/tasks':'tasks:read','/approvals':'approvals:read','/signatures':'signatures:read','/escalations':'escalations:read','/calendar':'calendar:read','/expiry':'expiry:read','/reports':'reports:read','/analytics':'reports:read','/compliance-score':'reports:read','/branches':'org:read','/departments':'org:read','/ai-tools':'ai:use','/integrations':'integrations:read','/billing':'billing:read','/billing/plans':'billing:read','/billing/invoices':'billing:read','/settings':'settings:read','/settings/security':'notifications:read','/settings/notifications':'settings:read'
+    '/frameworks':'controls:read','/controls':'controls:read','/risks':'risks:read','/policies':'policies:read','/policy-templates':'policies:read','/evidence':'evidence:read','/training':'training:read','/audits':'audits:read','/incidents':'incidents:read','/vendors':'vendors:read','/tasks':'tasks:read','/approvals':'approvals:read','/signatures':'signatures:read','/escalations':'escalations:read','/calendar':'calendar:read','/expiry':'expiry:read','/reports':'reports:read','/analytics':'reports:read','/compliance-score':'reports:read','/branches':'org:read','/departments':'org:read','/ai-tools':'ai:use','/integrations':'integrations:read','/billing':'billing:read','/billing/plans':'billing:read','/billing/invoices':'billing:read','/settings':'settings:read','/privacy':'privacy:read','/settings/security':'notifications:read','/settings/notifications':'settings:read'
   };
-  const navGroups = (user?.isSuperadmin ? [...NAV_GROUPS, OWNER_NAV_GROUP] : NAV_GROUPS).map(group=>({...group,items:group.items.filter(item=>!routeScope[item.to]||hasPermission(activeTenant?.role,routeScope[item.to]))})).filter(group=>group.items.length);
-  const requiredScope=routeScope[location.pathname]??routeScope['/'+location.pathname.split('/')[1]];
+  // Menu links and page access use the same rule: an exact path entry, otherwise the first path segment.
+  const scopeFor=(path:string)=>routeScope[path]??routeScope['/'+path.split('/')[1]];
+  const navGroups = (user?.isSuperadmin ? [...NAV_GROUPS, OWNER_NAV_GROUP] : NAV_GROUPS).map(group=>({...group,items:group.items.filter(item=>!scopeFor(item.to)||hasPermission(activeTenant?.role,scopeFor(item.to)))})).filter(group=>group.items.length);
+  const requiredScope=scopeFor(location.pathname);
   const permitted=!requiredScope||hasPermission(activeTenant?.role,requiredScope);
 
   async function handleLogout() {

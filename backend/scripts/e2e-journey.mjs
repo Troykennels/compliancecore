@@ -212,6 +212,27 @@ async function main() {
     assert('notifying the regulator clears overdue', after?.notificationOverdue === false);
   }
 
+  // Privacy registers: a record of processing, a data subject request with the default 30-day deadline,
+  // and an impact assessment that its own author cannot approve.
+  r = await call('POST', '/api/privacy/activities', {
+    name: 'E2E payroll', purpose: 'Pay staff and meet tax duties.', lawfulBasis: 'contract', dataSubjects: 'Employees',
+    dataCategories: 'Names, bank details, tax numbers', retention: '6 years after employment ends', status: 'draft',
+  });
+  const activityId = data(r)?.id;
+  assert('records of processing can be created', Boolean(activityId));
+  r = await call('POST', '/api/privacy/requests', { requester: 'E2E requester', requestType: 'access', receivedOn: '2026-01-05' });
+  assert('a data subject request gets a reference and a 30-day due date', /^DSR-2026-\d{4}$/.test(data(r)?.reference ?? '') && String(data(r)?.dueDate).startsWith('2026-02-04'));
+  r = await call('POST', '/api/privacy/assessments', {
+    title: 'E2E monitoring DPIA', activityId, description: 'Monitoring of staff access to payroll records.', necessity: 'Needed to detect misuse.',
+    risks: 'Intrusion into staff privacy.', mitigations: 'Limited to payroll systems; reviewed quarterly.', residualRisk: 'low',
+  });
+  const dpia = data(r)?.id;
+  if (dpia) {
+    await call('POST', `/api/privacy/assessments/${dpia}/decision`, { decision: 'submit' });
+    r = await call('POST', `/api/privacy/assessments/${dpia}/decision`, { decision: 'approve', note: 'Approving my own assessment.' });
+    assert('an impact assessment cannot be approved by its author', r.status === 403);
+  }
+
   r = await call('POST', '/api/tasks', { title: 'E2E task', priority: 'high' });
   made.task = data(r)?.id;
   if (made.task) {

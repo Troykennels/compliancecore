@@ -88,6 +88,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     // The incident register and its timeline are primary audit evidence — an
     // auditor who cannot read them cannot test incident-response controls.
     'incidents:read',
+    // Records of processing, data subject requests and impact assessments are sampled in privacy audits.
+    'privacy:read',
     'reports:read',
     'calendar:read',
     'expiry:read',

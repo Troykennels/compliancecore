@@ -34,6 +34,7 @@ const PolicyTemplatesPage = lazyPage(() => import('./features/policies/pages/pol
 const RisksPage = lazyPage(() => import('./features/risks/pages/risks.page'), 'RisksPage');
 const VendorsPage = lazyPage(() => import('./features/vendors/pages/vendors.page'), 'VendorsPage');
 const IncidentsPage = lazyPage(() => import('./features/incidents/pages/incidents.page'), 'IncidentsPage');
+const PrivacyPage = lazyPage(() => import('./features/privacy/privacy.page'), 'PrivacyPage');
 const AuditsPage = lazyPage(() => import('./features/audits/pages/audits.page'), 'AuditsPage');
 const TrainingPage = lazyPage(() => import('./features/training/pages/training.page'), 'TrainingPage');
 const FrameworksPage = lazyPage(() => import('./features/frameworks/pages/frameworks.page'), 'FrameworksPage');
@@ -161,6 +162,9 @@ export default function App(): JSX.Element {
                 <Route path={PATHS.AUDITS}       element={<AuditsPage />} />
                 <Route path={PATHS.TRAINING}     element={<TrainingPage />} />
                 <Route path={PATHS.INCIDENTS}    element={<IncidentsPage />} />
+                <Route path={PATHS.PRIVACY_ROPA} element={<PrivacyPage />} />
+                <Route path={PATHS.PRIVACY_DSAR} element={<PrivacyPage />} />
+                <Route path={PATHS.PRIVACY_DPIA} element={<PrivacyPage />} />
                 <Route path={PATHS.ANALYTICS}    element={<AnalyticsPage />} />
                 <Route path={PATHS.REPORTS}      element={<ExecutiveDashboardPage />} />
 
