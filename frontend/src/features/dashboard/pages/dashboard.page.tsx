@@ -24,14 +24,16 @@ export function DashboardPage() {
   if (isError || !data) return <PageShell width="wide"><Card><ErrorState title="Your overview could not be loaded" description="Please try again to see the latest recorded figures." onRetry={() => void refetch()} /></Card></PageShell>;
   const { complianceScore, controls, expiry, calendar, recentActivity } = data;
   const applicable = controls.total - controls.notApplicable;
-  const progress = applicable > 0 ? Math.round(100 * (controls.implemented + controls.partiallyImplemented * 0.5) / applicable) : null;
+  // One headline figure, the same rule as the status chart: operating controls out of all controls in scope.
+  const progress = applicable > 0 ? Math.round(100 * controls.implemented / applicable) : null;
   const cards = [
-    { title: 'Total controls', value: controls.total, help: 'All recorded safeguards', icon: ListChecks, style: 'border-blue-200 bg-blue-50 text-blue-800' },
-    { title: 'Operating', value: controls.implemented, help: 'Recorded as in place', icon: CheckCircle, style: 'border-green-200 bg-green-50 text-green-800' },
-    { title: 'Partly operating', value: controls.partiallyImplemented, help: 'Further work is needed', icon: Circle, style: 'border-amber-200 bg-amber-50 text-amber-800' },
-    { title: 'Needs work', value: controls.notImplemented + controls.planned, help: 'Planned or not operating', icon: AlertTriangle, style: 'border-red-200 bg-red-50 text-red-800' },
-    { title: 'Not yet assessed', value: controls.notAssessed ?? 0, help: 'Waiting for an assessment', icon: Circle, style: 'border-slate-200 bg-slate-50 text-slate-700' },
-    { title: 'Not applicable', value: controls.notApplicable, help: 'Recorded as outside scope', icon: ShieldCheck, style: 'border-violet-200 bg-violet-50 text-violet-800' },
+    { title: 'Total controls', status: '', value: controls.total, help: 'All recorded safeguards', icon: ListChecks, style: 'border-blue-200 bg-blue-50 text-blue-800' },
+    { title: 'Operating', status: 'implemented', value: controls.implemented, help: 'Recorded as in place', icon: CheckCircle, style: 'border-green-200 bg-green-50 text-green-800' },
+    { title: 'Partly operating', status: 'partially_implemented', value: controls.partiallyImplemented, help: 'Further work is needed', icon: Circle, style: 'border-amber-200 bg-amber-50 text-amber-800' },
+    { title: 'Not operating', status: 'not_implemented', value: controls.notImplemented, help: 'Recorded as not in place', icon: AlertTriangle, style: 'border-red-200 bg-red-50 text-red-800' },
+    { title: 'Planned', status: 'planned', value: controls.planned, help: 'Agreed but not yet in place', icon: Circle, style: 'border-slate-200 bg-slate-50 text-slate-700' },
+    { title: 'Not yet assessed', status: 'not_assessed', value: controls.notAssessed ?? 0, help: 'Waiting for an assessment', icon: Circle, style: 'border-slate-200 bg-slate-50 text-slate-700' },
+    { title: 'Not applicable', status: 'not_applicable', value: controls.notApplicable, help: 'Recorded as outside scope', icon: ShieldCheck, style: 'border-violet-200 bg-violet-50 text-violet-800' },
   ];
   return <PageShell width="wide" className="!space-y-5 !py-5">
     <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#073f40] via-[#086963] to-[#14857a] p-5 text-white shadow-sm sm:p-6" aria-labelledby="overview-title">
@@ -48,18 +50,18 @@ export function DashboardPage() {
           </div>
         </div>
         <div className="shrink-0 rounded-xl border border-white/20 bg-white/10 p-4 lg:max-w-[260px]">
-          <p className="text-xs font-medium text-white/90">Current control progress</p>
+          <p className="text-xs font-medium text-white/90">Controls operating</p>
           <p className="mt-1 text-4xl font-semibold tabular-nums">{progress === null ? 'Not scored' : `${progress}%`}</p>
-          <p className="mt-2 text-xs leading-relaxed text-white/90">Operating controls count fully; partial controls count half. Excludes not applicable.</p>
-          {can('reports:read') && <Link to="/compliance-score" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold underline underline-offset-4">View score history <ArrowRight className="h-3 w-3" /></Link>}
+          <p className="mt-2 text-xs leading-relaxed text-white/90">{controls.implemented} of {applicable} controls in scope are recorded as operating. The weighted compliance score is on the score page.</p>
+          {can('reports:read') && <Link to="/compliance-score" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold underline underline-offset-4">View compliance score <ArrowRight className="h-3 w-3" /></Link>}
         </div>
       </div>
     </section>
-    <section aria-label="Control status totals" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
-      {cards.map(({ title, value, help, icon: Icon, style }) => {
+    <section aria-label="Control status totals" className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-7">
+      {cards.map(({ title, status, value, help, icon: Icon, style }) => {
         const content = <><div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold">{title}</span><Icon className="h-4 w-4 shrink-0" aria-hidden="true" /></div><p className="mt-2 text-3xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs opacity-90">{help}</p></>;
         const className = `min-w-0 rounded-xl border p-4 text-left ${style}`;
-        return can('controls:read') ? <Link key={title} to="/controls" className={`${className} transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}>{content}</Link> : <div key={title} className={className}>{content}</div>;
+        return can('controls:read') ? <Link key={title} to={status ? `/controls?status=${status}` : '/controls'} aria-label={`${title}: ${value}. Open the controls list`} className={`${className} transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}>{content}</Link> : <div key={title} className={className}>{content}</div>;
       })}
     </section>
     <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">

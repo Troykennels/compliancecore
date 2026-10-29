@@ -27,7 +27,8 @@ export function ControlsPage(): JSX.Element {
   const [routeParams]=useSearchParams();
   const fmt = useOrgFormat();
   const [search, setSearch] = useState(routeParams.get('q')??'');
-  const [statusFilter, setStatusFilter] = useState<ControlImplementationStatus | ''>('');
+  // A status in the address (from a dashboard tile) opens the list already filtered.
+  const [statusFilter, setStatusFilter] = useState<ControlImplementationStatus | ''>(() => { const s = routeParams.get('status'); return s && s in IMPLEMENTATION_STATUS_CONFIG ? s as ControlImplementationStatus : ''; });
   const [criticalityFilter, setCriticalityFilter] = useState<ControlCriticality | ''>('');
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
