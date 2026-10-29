@@ -1,3 +1,4 @@
+import { AssessmentStepBar } from '@/features/frameworks/components/assessment-step-bar';
 import { LinkedComplianceRecord } from './linked-compliance-record';
 import { hasPermission } from '@/config/role-permissions';
 import { ComplianceOperationsPanel, ComplianceSearch } from '@/features/frameworks/components/compliance-operations';
@@ -560,7 +561,7 @@ export function AppShell() {
               </div>
             }
           >
-            {permitted?<><LinkedComplianceRecord />{(location.pathname!=='/settings/security'||hasPermission(activeTenant?.role,'settings:read'))&&<ComplianceOperationsPanel key={'operations:'+location.pathname+location.search}/>}<Outlet key={'page:'+location.pathname+location.search}/></>:<div role="alert" className="m-6 rounded-xl border bg-white p-6"><h1 className="text-xl font-semibold">This page needs additional access</h1><p className="mt-3 text-sm">Ask your organisation administrator if you need this permission. Your current role has not been changed.</p></div>}
+            {permitted?<><LinkedComplianceRecord />{(location.pathname!=='/settings/security'||hasPermission(activeTenant?.role,'settings:read'))&&<ComplianceOperationsPanel key={'operations:'+location.pathname+location.search}/>}<AssessmentStepBar /><Outlet key={'page:'+location.pathname+location.search}/></>:<div role="alert" className="m-6 rounded-xl border bg-white p-6"><h1 className="text-xl font-semibold">This page needs additional access</h1><p className="mt-3 text-sm">Ask your organisation administrator if you need this permission. Your current role has not been changed.</p></div>}
           </Suspense>
         </main>
       </div>
