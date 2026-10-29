@@ -1,3 +1,4 @@
+import { GettingStarted } from '../components/getting-started';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, CheckCircle, ChevronDown, Circle, ShieldCheck, AlertTriangle, ListChecks } from 'lucide-react';
@@ -57,6 +58,7 @@ export function DashboardPage() {
         </div>
       </div>
     </section>
+    {['owner', 'admin', 'compliance_manager', 'msp_admin'].includes(role ?? '') && <GettingStarted />}
     <section aria-label="Control status totals" className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-7">
       {cards.map(({ title, status, value, help, icon: Icon, style }) => {
         const content = <><div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold">{title}</span><Icon className="h-4 w-4 shrink-0" aria-hidden="true" /></div><p className="mt-2 text-3xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs opacity-90">{help}</p></>;
