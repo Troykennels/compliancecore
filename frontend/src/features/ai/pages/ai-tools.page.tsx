@@ -1,4 +1,5 @@
 import { useEvidence } from '@/features/evidence/hooks/use-evidence';
+import { PageHeader } from '@/components/page-header';
 import { AccessibleField } from '@/components/accessible-field';
 import React, { useState } from 'react';
 import {
@@ -94,7 +95,7 @@ function EvidenceDocumentSelect({value,onChange}:{value:string;onChange:(id:stri
       {documents.map(d=><option key={d.id} value={d.id}>{d.title}</option>)}
     </select>
     {isError&&<p role="alert" className="text-xs text-red-700">Documents could not be loaded. <button type="button" className="underline" onClick={()=>void refetch()}>Try again</button></p>}
-    {!isLoading&&!isError&&!documents.length&&<p className="text-xs text-slate-500">No matching documents. Upload the file in Evidence Hub first, then return here.</p>}
+    {!isLoading&&!isError&&!documents.length&&<p className="text-xs text-slate-500">No matching documents. Upload the file in Evidence first, then return here.</p>}
   </div>;
 }
 
@@ -153,7 +154,7 @@ function ContractSummarizer() {
         <AccessibleField label={<>Uploaded contract</>} >
 
           <EvidenceDocumentSelect value={evidenceId} onChange={setEvidenceId}/>
-          <p className="mt-1 text-[11px] text-slate-400">Choose the contract by its title. Upload it in Evidence Hub first if it is missing.</p>
+          <p className="mt-1 text-[11px] text-slate-400">Choose the contract by its title. Upload it in Evidence first if it is missing.</p>
         </AccessibleField>
         <AccessibleField label={<>Focus Areas (optional, comma-separated)</>} >
 
@@ -807,14 +808,8 @@ export function AiToolsPage() {
   const Panel = PANELS[activeTab];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <Sparkles className="h-5 w-5 text-blue-500" />
-          <h1 className="text-xl font-bold text-slate-900">AI Compliance Tools</h1>
-        </div>
-        <p className="text-sm text-slate-500">Powered by Groq AI — intelligent analysis for contracts, policies, risks, and compliance documents</p>
-      </div>
+    <div className="mx-auto max-w-7xl p-4 sm:p-6">
+      <div className="mb-6"><PageHeader eyebrow="Tools" title="AI tools" description="Assisted drafting and analysis for contracts, policies, risks and compliance documents. Every result is a suggestion for a person to review." /></div>
 
       {/* Tab navigation */}
       <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 mb-6">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { PageHeader } from '@/components/page-header';
 import { ArrowLeft, Download, Search, Loader2, FileText, AlertTriangle, RefreshCw, CreditCard } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -97,15 +98,8 @@ export function BillingInvoicesPage(): JSX.Element {
   return (
     <div className="mx-auto max-w-5xl p-6 space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link to={PATHS.BILLING} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Invoices</h1>
-          <p className="text-sm text-slate-500">Download and manage your billing history</p>
-        </div>
-      </div>
+      <PageHeader eyebrow="Billing" title="Invoices" description="Download invoices and pay open ones in full or in parts."
+        actions={<Link to={PATHS.BILLING} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"><ArrowLeft className="h-4 w-4" /> Billing overview</Link>} />
 
       {confirmMsg && (
         <div role="status" className={`rounded-lg px-4 py-3 text-sm ${confirmMsg.ok ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>{confirmMsg.text}</div>

@@ -1,4 +1,5 @@
 import { ModalSurface } from '@/components/modal-surface';
+import { PageHeader } from '@/components/page-header';
 import React, { useState } from 'react';
 import { Plus, AlertTriangle, CheckCircle, Power, Trash2, ChevronRight, RefreshCw } from 'lucide-react';
 import {
@@ -65,18 +66,12 @@ export function EscalationsPage() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Escalation Rules</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Automated escalation chains evaluated hourly by the BullMQ scheduler</p>
-        </div>
-        <button
+      <div className="mb-6"><PageHeader eyebrow="Respond" title="Escalations" description={"Automated escalation chains evaluated hourly by the BullMQ scheduler"} actions={<><button
           onClick={() => setShowForm(true)}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" /> New Rule
-        </button>
-      </div>
+        </button></>} /></div>
 
       {/* Tabs */}
       <div className="flex gap-1 rounded-lg bg-slate-100 p-1 w-fit mb-5">

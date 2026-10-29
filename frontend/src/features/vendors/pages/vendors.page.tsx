@@ -1,4 +1,5 @@
 import { ModalSurface } from '@/components/modal-surface';
+import { PageHeader } from '@/components/page-header';
 import { PermissionAction } from '@/components/permission-action';
 import { useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
@@ -69,23 +70,15 @@ export function VendorsPage(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl p-4 sm:p-6">
         {/* Page Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Vendors</h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Manage your third-party vendors and track their risk and review status.
-            </p>
-          </div>
-          <PermissionAction scope="vendors:write"><button
+        <div className="mb-6"><PageHeader eyebrow="Respond" title="Vendors" description={"Manage your third-party vendors and track their risk and review status."} actions={<><PermissionAction scope="vendors:write"><button
             onClick={openCreate}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
             New Vendor
-          </button></PermissionAction>
-        </div>
+          </button></PermissionAction></>} /></div>
 
         {/* Filters */}
         <div className="mb-4 flex flex-wrap items-center gap-3">

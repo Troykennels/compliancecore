@@ -1,3 +1,5 @@
+import { ReportTabs } from '@/features/reports/components/report-tabs';
+import { PageHeader } from '@/components/page-header';
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
@@ -69,11 +71,9 @@ export function AnalyticsPage() {
   const hasControls = controlData.some((d) => d.value > 0);
 
   return (
-    <div className="flex h-full flex-col gap-6 overflow-y-auto px-6 py-6">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-900">Analytics</h1>
-        <p className="mt-0.5 text-sm text-slate-500">Cross-module insights across your compliance program</p>
-      </div>
+    <div className="mx-auto flex max-w-7xl flex-col gap-6 p-4 sm:p-6">
+      <PageHeader eyebrow="Report" title="Analytics" description="Cross-module insights across your compliance programme." />
+      <ReportTabs />
 
       {/* KPI row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">

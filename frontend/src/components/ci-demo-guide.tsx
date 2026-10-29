@@ -2,14 +2,16 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth.store';
 import { hasPermission } from '@/config/role-permissions';
 
-export function CiDemoGuide() {
+export function CiDemoGuide({ onHide }: { onHide?: () => void }) {
   const role = useAuthStore(s => s.activeTenant?.role);
   const link = (to: string, label: string, scope: string) => hasPermission(role, scope)
     ? <Link to={to} className="underline">{label}</Link>
     : <span>{label}</span>;
   return (
-    <details className="border-b border-indigo-100 bg-indigo-50 px-4 py-3 text-xs text-indigo-950 sm:px-5">
-      <summary className="cursor-pointer font-semibold">Demonstration workspace — explore the compliance workflow</summary>
+    <div className="relative border-b border-indigo-100 bg-indigo-50 text-xs text-indigo-950">
+    {onHide && <button type="button" onClick={onHide} className="absolute right-4 top-2.5 z-10 rounded px-2 py-0.5 font-semibold text-indigo-800 hover:bg-indigo-100 sm:right-5">Hide</button>}
+    <details className="px-4 py-3 sm:px-5">
+      <summary className="cursor-pointer pr-16 font-semibold">Demonstration workspace — explore the compliance workflow</summary>
       <p className="mt-2 max-w-4xl leading-relaxed">Start with stakeholder scope, review the duties that apply, then assess risks and collect proof. This fictional workspace includes a completed corrective-action example and work still awaiting review. Its wider framework assessments remain in progress. Sample records and non-payable invoices do not describe C&amp;I’s actual compliance position.</p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {[
@@ -29,5 +31,6 @@ export function CiDemoGuide() {
       <p className="mt-3">{link('/policy-templates', 'Explore editable policies and working forms', 'policies:read')}, or <Link to="/guide" className="font-semibold underline">open the plain-language user guide</Link>.</p>
       <p className="mt-3 leading-relaxed">Applicability follows scope, duties, risks and treatment. ISO 27001 uses a later Statement of Applicability; other frameworks use their appropriate coverage record. Explore {link('/vendors?workflow=vendors', 'supplier due diligence', 'vendors:read')}, {link('/training?workflow=training', 'verified training', 'training:read')}, {link('/incidents?workflow=incidents', 'incident decisions', 'incidents:read')} and {link('/calendar', 'review dates', 'calendar:read')}. External example automations are disabled; no vehicles, vessels, payroll or tracking devices are connected.</p>
     </details>
+    </div>
   );
 }

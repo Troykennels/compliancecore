@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { PageHeader } from '@/components/page-header';
 import {
   Key,
   Webhook,
@@ -85,14 +86,8 @@ export function IntegrationsPage(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">Integrations</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Connect ComplianceCore to the tools your team already uses.
-          </p>
-        </div>
+      <div className="mx-auto max-w-7xl p-4 sm:p-6">
+        <div className="mb-8"><PageHeader eyebrow="Tools" title="Integrations" description="Connect ComplianceCore to the tools your team already uses." /></div>
 
         {/* Live / Available */}
         <section className="mb-10">

@@ -72,7 +72,7 @@ const date = (name: string, label: string): Field => ({
 });
 const proof = select(
   "evidenceId",
-  "Supporting document (upload it in Evidence Hub first)",
+  "Supporting document (upload it in Evidence first)",
   "evidence",
 );
 const workspaces: Record<string, Workspace> = {
@@ -441,13 +441,13 @@ function Operations({
   };
   return (
     <details
-      className="mx-4 my-4 rounded-xl border border-indigo-200 bg-white shadow-sm sm:mx-6"
+      className="mx-auto mt-3 max-w-7xl rounded-lg border border-slate-200 bg-white px-0 sm:w-[calc(100%-3rem)] w-[calc(100%-2rem)]"
       open={open}
       onToggle={(e) => setOpen(e.currentTarget.open)}
     >
-      <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-indigo-900">
-        {config.title}
-        <span className="ml-2 font-normal text-slate-500">— open workflow</span>
+      <summary className="cursor-pointer px-4 py-2 text-sm text-slate-600">
+        <span className="font-medium text-slate-500">Related workflow:</span>{" "}
+        <span className="font-semibold text-brand-800">{config.title}</span>
       </summary>
       <div className="space-y-4 border-t p-4">
         <p className="max-w-4xl text-sm leading-relaxed text-slate-600">

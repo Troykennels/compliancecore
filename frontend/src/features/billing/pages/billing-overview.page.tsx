@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PageHeader } from '@/components/page-header';
 import { Link } from 'react-router-dom';
 import {
   CreditCard, AlertTriangle, CheckCircle2, Clock, XCircle, Pause,
@@ -246,18 +247,12 @@ export function BillingOverviewPage(): JSX.Element {
   return (
     <div className="mx-auto max-w-5xl p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Billing</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage your subscription, payment methods, and invoices</p>
-        </div>
-        <Link
+      <div className="mb-6"><PageHeader eyebrow="Billing" title="Billing overview" description={"Manage your subscription, payment methods, and invoices"} actions={<><Link
           to={PATHS.BILLING_PLANS}
           className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
         >
           <CreditCard className="h-4 w-4" /> Change Plan
-        </Link>
-      </div>
+        </Link></>} /></div>
 
       {/* Subscription card */}
       <Card title="Current Subscription">

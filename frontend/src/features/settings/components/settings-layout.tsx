@@ -1,4 +1,5 @@
 import { hasPermission } from '@/config/role-permissions';
+import { PageHeader } from '@/components/page-header';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Building2, Users, Shield, Key, Bell, Webhook, Lock,
@@ -19,7 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Team',           path: PATHS.SETTINGS_TEAM,          icon: Users },
   { label: 'Security',       path: PATHS.SETTINGS_SECURITY,      icon: Shield },
   { label: 'SSO',            path: PATHS.SETTINGS_SSO,           icon: Lock,    requiresRole: ['owner', 'admin'] },
-  { label: 'API Keys',       path: PATHS.SETTINGS_API_KEYS,      icon: Key,     requiresRole: ['owner', 'admin'] },
+  { label: 'API keys',       path: PATHS.SETTINGS_API_KEYS,      icon: Key,     requiresRole: ['owner', 'admin'] },
   { label: 'Webhooks',       path: PATHS.SETTINGS_WEBHOOKS,      icon: Webhook, requiresRole: ['owner', 'admin'] },
   { label: 'Notifications',  path: PATHS.SETTINGS_NOTIFICATIONS, icon: Bell },
 ];
@@ -38,13 +39,8 @@ export function SettingsLayout({ children }: Props): JSX.Element {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Your account and authorised organisation settings.
-          </p>
-        </div>
+      <div className="mx-auto max-w-7xl p-4 sm:p-6">
+        <div className="mb-6"><PageHeader eyebrow="Settings" title={NAV_ITEMS.find(item => pathname === item.path)?.label ?? 'Settings'} description="Your account and authorised organisation settings." /></div>
 
         <div className="flex flex-col gap-5 lg:flex-row lg:gap-8">
           {/* Left Nav */}

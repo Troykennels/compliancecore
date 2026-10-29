@@ -226,5 +226,5 @@ export const complianceTemplates = [
   ...t,
   purpose:
     "Editable working form. Complete with verified organisational facts; it does not establish legal compliance.",
-  content: `${t.title}\n\nOrganisation: [Organisation]\nPrepared by: [Author]\nVersion / period: [Version and period]\n\n${t.fields.map((f, i) => `${i + 1}. ${f}\n[Record the facts, source references and responsible person.]`).join("\n\n")}\n\nSave the completed record in the linked ComplianceCore workflow. Upload supporting documents to Evidence Hub. Use independent approval where required. Blank forms are optional drafting aids; imports are not automatic. Confirm applicable requirements with the responsible reviewer before approval.`,
+  content: `${t.title}\n\nOrganisation: [Organisation]\nPrepared by: [Author]\nVersion / period: [Version and period]\n\n${t.fields.map((f, i) => `${i + 1}. ${f}\n[Record the facts, source references and responsible person.]`).join("\n\n")}\n\nSave the completed record in the linked ComplianceCore workflow. Upload supporting documents to Evidence. Use independent approval where required. Blank forms are optional drafting aids; imports are not automatic. Confirm applicable requirements with the responsible reviewer before approval.`,
 }));

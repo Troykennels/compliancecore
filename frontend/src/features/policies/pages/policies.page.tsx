@@ -1,4 +1,5 @@
 import { ModalSurface } from '@/components/modal-surface';
+import { PageHeader } from '@/components/page-header';
 import { PermissionAction } from '@/components/permission-action';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -71,24 +72,16 @@ export function PoliciesPage(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl p-4 sm:p-6">
         {/* Page Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Policies</h1><Link className="mt-2 inline-block text-sm font-semibold text-indigo-700 underline" to={routeParams.get('frameworkId')?`/policy-templates?frameworkId=${routeParams.get('frameworkId')}`:'/policy-templates'}>Browse policy templates and Word downloads</Link>
-            <p className="mt-1 text-sm text-slate-500">
-              Author, review and publish the policies and procedures that govern your organization.
-            </p>
-          </div>
-          <PermissionAction scope="policies:write"><button
+        <div className="mb-6"><PageHeader eyebrow="Prove" title="Policies" description={<>Author, review and publish the policies and procedures that govern your organization.{' '}<Link className="mt-2 inline-block text-sm font-semibold text-indigo-700 underline" to={routeParams.get('frameworkId')?`/policy-templates?frameworkId=${routeParams.get('frameworkId')}`:'/policy-templates'}>Browse policy templates and Word downloads</Link></>} actions={<><PermissionAction scope="policies:write"><button
             onClick={openCreate}
             disabled={!canWrite}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
             New Policy
-          </button></PermissionAction>
-        </div>
+          </button></PermissionAction></>} /></div>
 
         <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3 text-sm text-indigo-950">Draft → independent approval → publication → scheduled review. A changed approved policy returns to draft. <Link className="font-semibold underline" to={routeParams.get('frameworkId')?`/frameworks?framework=${routeParams.get('frameworkId')}`:'/frameworks'}>Return to compliance assessment</Link></div>
         {/* Filters */}

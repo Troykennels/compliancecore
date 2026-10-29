@@ -1,4 +1,6 @@
 import { PermissionAction } from '@/components/permission-action';
+import { ReportTabs } from '@/features/reports/components/report-tabs';
+import { PageHeader } from '@/components/page-header';
 import { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { useCurrentScore, useScoreTrend, useTriggerSnapshot } from '../hooks/use-score';
@@ -27,20 +29,14 @@ export function ScorePage() {
   return (
     <div className="flex flex-col h-full px-6 py-6 gap-6 overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Compliance Score</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Weighted score across all active frameworks</p>
-        </div>
-        <PermissionAction scope="controls:write"><button
+      <div className="mb-6"><PageHeader eyebrow="Report" title="Compliance score" description={"Weighted score across all active frameworks"} actions={<><PermissionAction scope="controls:write"><button
           onClick={() => triggerSnapshot.mutate()}
           disabled={triggerSnapshot.isPending}
           className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50"
         >
           <RefreshCw className={`h-4 w-4 ${triggerSnapshot.isPending ? 'animate-spin' : ''}`} />
           Take Snapshot
-        </button></PermissionAction>
-      </div>
+        </button></PermissionAction></>} /></div><div className="mb-6"><ReportTabs /></div>
 
       {scoreLoading ? (
         <div className="flex flex-1 items-center justify-center text-slate-400 text-sm">Calculating score…</div>

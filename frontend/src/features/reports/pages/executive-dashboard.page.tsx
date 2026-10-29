@@ -1,4 +1,6 @@
 import { AccessibleField } from '@/components/accessible-field';
+import { PageHeader } from '@/components/page-header';
+import { ReportTabs } from '../components/report-tabs';
 import { ModalSurface } from '@/components/modal-surface';
 import React, { useState } from 'react';
 import {
@@ -582,21 +584,14 @@ export function ExecutiveDashboardPage() {
         </div>
 
         {/* ── Page Header ───────────────────────────────────────────────────── */}
-        <div data-print="hide" className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <BarChart2 className="h-5 w-5 text-brand-600" aria-hidden="true" />
-              <h1 className="text-2xl font-semibold text-slate-900">Executive Dashboard</h1>
-            </div>
-            <p className="mt-1 text-sm text-slate-500">
-              {data
-                ? `Last updated ${fmt.formatDateTime(data.generatedAt)}`
+        <div data-print="hide" className="space-y-4">
+          <PageHeader eyebrow="Report" title="Reports"
+            description={data
+                ? `Management view of priorities, ownership and supporting records. Last updated ${fmt.formatDateTime(data.generatedAt)}.`
                 : isError
-                ? 'Failed to load compliance overview'
+                ? 'The compliance overview could not be loaded.'
                 : 'Loading compliance overview…'}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
+            actions={<div className="flex flex-wrap items-center gap-2">
             <DateRangePicker filter={filter} onChange={setFilter} />
             <Button variant="secondary" size="sm" onClick={() => refetch()}>
               <RefreshCw className={isFetching ? 'animate-spin' : ''} />
@@ -626,7 +621,8 @@ export function ExecutiveDashboardPage() {
               <Calendar />
               Scheduled reports
             </Button>
-          </div>
+          </div>} />
+          <ReportTabs />
         </div>
 
         {/* ── Error state ──────────────────────────────────────────────────── */}
@@ -656,7 +652,7 @@ export function ExecutiveDashboardPage() {
           </div>
         ) : data ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <KpiCard icon={TrendingUp} label="Compliance Score"
+            <KpiCard icon={TrendingUp} label="Compliance score"
               value={score === null ? '—' : `${score}%`}
               sub={score === null
                 ? 'Not scored — start an assessment'
@@ -683,7 +679,7 @@ export function ExecutiveDashboardPage() {
         ) : data ? (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <Card className="lg:col-span-2">
-              <CardHeader title="Compliance Score Trend" subtitle={`Last ${filter.days ?? 90} days`} />
+              <CardHeader title="Compliance score trend" subtitle={`Last ${filter.days ?? 90} days`} />
               <div className="h-56 p-4">
                 <ScoreTrendChart data={data.scoreTrend} />
               </div>

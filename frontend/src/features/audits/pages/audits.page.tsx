@@ -1,4 +1,5 @@
 import { useFrameworks } from '@/features/frameworks/hooks/use-frameworks';
+import { PageHeader } from '@/components/page-header';
 import { ModalSurface } from '@/components/modal-surface';
 import { PermissionAction } from '@/components/permission-action';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -72,23 +73,15 @@ export function AuditsPage(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl p-4 sm:p-6">
         {/* Page Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Audits</h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Save scope and report details, attach the report, obtain an independent review, then complete the audit.
-            </p>
-          </div>
-          <PermissionAction scope="audits:write"><button
+        <div className="mb-6"><PageHeader eyebrow="Review" title="Audits" description={"Save scope and report details, attach the report, obtain an independent review, then complete the audit."} actions={<><PermissionAction scope="audits:write"><button
             onClick={openCreate}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
             New Audit
-          </button></PermissionAction>
-        </div>
+          </button></PermissionAction></>} /></div>
 
         {/* Filters */}
         <div className="mb-4 flex flex-wrap items-center gap-3">

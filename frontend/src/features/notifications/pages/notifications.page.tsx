@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PageHeader } from '@/components/page-header';
 import { useNotifications, useMarkAllRead } from '../hooks/use-notifications';
 import { NotificationPanel } from '../components/notification-panel';
 
@@ -17,14 +18,7 @@ export function NotificationsPage() {
 
   return (
     <div className="flex flex-col h-full px-6 py-6 gap-5">
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Notifications</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
+      <div className="mb-6"><PageHeader eyebrow="Account" title="Notifications" description={<>{unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}</>} actions={<><div className="flex items-center gap-3">
           <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -33,9 +27,7 @@ export function NotificationsPage() {
               className="h-4 w-4 rounded border-slate-300"
             />
             Unread only
-          </label>
-        </div>
-      </div>
+          </label></div></>} /></div>
 
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center text-slate-400 text-sm">Loading…</div>

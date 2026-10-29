@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/page-header';
 import { AccessibleField } from '@/components/accessible-field';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -133,22 +134,17 @@ export function EvidencePage() {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Page header */}
-      <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Evidence Hub</h1>
-          <p className="mt-0.5 text-sm text-slate-500">
-            {total.toLocaleString()} evidence item{total !== 1 ? 's' : ''}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setUploadOpen(true)}
-          className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          <Upload className="h-4 w-4" />
-          Upload Evidence
-        </button>
+      <div className="px-4 pt-4 sm:px-6 sm:pt-6">
+        <PageHeader eyebrow="Prove" title="Evidence"
+          description={`Records that support a compliance claim, such as an approved policy, a completed review or a test result. ${total.toLocaleString()} item${total !== 1 ? 's' : ''}.`}
+          actions={<button
+            type="button"
+            onClick={() => setUploadOpen(true)}
+            className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            <Upload className="h-4 w-4" />
+            Upload Evidence
+          </button>} />
       </div>
 
       {/* Search bar */}

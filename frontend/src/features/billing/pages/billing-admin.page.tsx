@@ -677,7 +677,7 @@ export function BillingAdminPage(): JSX.Element {
           <ShieldAlert className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Billing Admin</h1>
+          <h1 className="text-xl font-bold text-slate-900">Billing admin</h1>
           <p className="text-sm text-slate-500">Platform-level billing management — superadmin only</p>
         </div>
       </div>

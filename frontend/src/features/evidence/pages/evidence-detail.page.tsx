@@ -59,7 +59,7 @@ export function EvidenceDetailPage() {
           onClick={() => navigate(PATHS.EVIDENCE)}
           className="text-sm text-blue-600 hover:underline"
         >
-          Back to Evidence Hub
+          Back to Evidence
         </button>
       </div>
     );

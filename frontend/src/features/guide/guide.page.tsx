@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { PageHeader } from '@/components/page-header';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Download, Search } from 'lucide-react';
+import { Download, Search } from 'lucide-react';
 import { guideSections } from './guide-content';
 import DepartmentGuide from './DepartmentGuide';
 import { useAuthStore } from '@/stores/auth.store';
@@ -21,11 +22,9 @@ export function CompleteGuidePage() {
     const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'ComplianceCore-User-Guide.txt'; anchor.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
-  return <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
-    <header className="flex flex-wrap items-start justify-between gap-4">
-      <div><p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-indigo-700"><BookOpen className="h-4 w-4" /> Orion Soft Limited</p><h1 className="text-2xl font-bold text-slate-900">User guide</h1><p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">From your first setup to daily work, approvals, signatures and management reports. Follow the steps in order, or search for the task you need.</p></div>
-      <button onClick={download} className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium"><Download className="h-4 w-4" /> Download guide</button>
-    </header>
+  return <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+    <PageHeader eyebrow="Help" title="User guide" description="From your first setup to daily work, approvals, signatures and management reports. Follow the steps in order, or search for the task you need."
+      actions={<button onClick={download} className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium"><Download className="h-4 w-4" /> Download guide</button>} />
     <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-sm leading-relaxed text-indigo-950">Start with setup and billing, then follow one complete example: stakeholder scope → risk assessment → obligations and controls → evidence → review → reporting. Your role and plan determine which actions are available.</div>
     <div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" /><input aria-label="Search user guide" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search billing, signatures, renewals…" className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm" /></div>
     <nav aria-label="Guide chapters" className="grid gap-2 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-3">{guideSections.map(section => <Link key={section.id} to={`/guide#${section.id}`} onClick={() => setQuery('')} className="rounded px-2 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-50">{section.title}</Link>)}</nav>
@@ -62,5 +61,5 @@ export function GuidePage(){
   const location=useLocation();
   const [complete,setComplete]=useState(()=>!!location.hash);
   useEffect(()=>{if(location.hash)setComplete(true);},[location.hash]);
-  return <><div className="px-4 pt-4"><button type="button" onClick={()=>setComplete(!complete)} className="rounded-lg border px-3 py-2 text-sm">{complete?'Back to My Guide':'Open complete guide with page links and download'}</button></div>{complete?<CompleteGuidePage/>:<DepartmentGuide key={role} content={departmentContent} role={role} canTrain={['owner','admin','compliance_manager','msp_admin'].includes(role)}/>}</>;
+  return <><div className="px-4 pt-4"><button type="button" onClick={()=>setComplete(!complete)} className="rounded-lg border px-3 py-2 text-sm">{complete?'Back to My guide':'Open complete guide with page links and download'}</button></div>{complete?<CompleteGuidePage/>:<DepartmentGuide key={role} content={departmentContent} role={role} canTrain={['owner','admin','compliance_manager','msp_admin'].includes(role)}/>}</>;
 }

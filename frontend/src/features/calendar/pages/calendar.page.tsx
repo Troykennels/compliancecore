@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PageHeader } from '@/components/page-header';
 import { format, parseISO, isValid } from 'date-fns';
 import { Plus, Calendar, List, AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useCalendarEvents, useDeleteCalendarEvent } from '../hooks/use-calendar';
@@ -63,14 +64,9 @@ export function CalendarPage() {
   }
 
   return (
-    <div className="flex flex-col h-full px-6 py-6 gap-4">
+    <div className="mx-auto flex h-full max-w-7xl flex-col gap-4 p-4 sm:p-6">
       {/* Page header */}
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Compliance Calendar</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Deadlines, reviews, audits and renewals</p>
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="mb-6"><PageHeader eyebrow="Report" title="Calendar" description={"Deadlines, reviews, audits and renewals"} actions={<><div className="flex items-center gap-2">
           {/* View toggle */}
           <div className="flex items-center rounded-lg border border-slate-200 p-0.5 bg-white">
             <button
@@ -96,8 +92,7 @@ export function CalendarPage() {
           >
             <Plus className="h-4 w-4" /> New Event
           </button>
-        </div>
-      </div>
+        </div></>} /></div>
 
       {/* Filters */}
       <div className="flex items-center gap-3 shrink-0">

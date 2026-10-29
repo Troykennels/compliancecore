@@ -2,16 +2,16 @@ import { LinkedComplianceRecord } from './linked-compliance-record';
 import { hasPermission } from '@/config/role-permissions';
 import { ComplianceOperationsPanel, ComplianceSearch } from '@/features/frameworks/components/compliance-operations';
 import { CiDemoGuide } from './ci-demo-guide';
-import { CompliancePageHelp } from './compliance-page-help';
+import { PageHelpButton } from './compliance-page-help';
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, ShieldCheck, FileText, AlertTriangle,
-  BarChart2, Settings, LogOut,
+  Settings, LogOut,
   ChevronDown, Building2, GitBranch, Calendar, Clock, ChevronsLeft,
   ChevronsRight, FileArchive, CheckSquare, ShieldAlert, ListChecks, Sparkles, PieChart,
   CreditCard, Loader2, ScrollText, Flame, Store, ClipboardCheck, GraduationCap,
-  Library, TrendingUp, Plug, Siren, Menu, X, Check, BookOpen, Lock, UserCheck, Scale, Target,
+  Library, Plug, Siren, Menu, X, Check, BookOpen, Lock, UserCheck, Scale, Target,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth.store';
@@ -25,6 +25,8 @@ interface NavItem {
   label: string;
   to: string;
   icon: React.ReactNode;
+  /** Other paths that belong to this item, such as the tabs of one page. */
+  also?: string[];
 }
 
 interface NavGroup {
@@ -72,9 +74,7 @@ const NAV_GROUPS: NavGroup[] = [
     { label: 'Impact assessments', to: PATHS.PRIVACY_DPIA, icon: <Scale className="h-4 w-4" /> },
   ] },
   { heading: 'Report', items: [
-    { label: 'Reports', to: PATHS.REPORTS, icon: <PieChart className="h-4 w-4" /> },
-    { label: 'Compliance score', to: PATHS.COMPLIANCE_SCORE, icon: <BarChart2 className="h-4 w-4" /> },
-    { label: 'Analytics', to: PATHS.ANALYTICS, icon: <TrendingUp className="h-4 w-4" /> },
+    { label: 'Reports', to: PATHS.REPORTS, icon: <PieChart className="h-4 w-4" />, also: [PATHS.COMPLIANCE_SCORE, PATHS.ANALYTICS] },
     { label: 'Calendar', to: PATHS.CALENDAR, icon: <Calendar className="h-4 w-4" /> },
     { label: 'Expiry tracker', to: PATHS.EXPIRY, icon: <Clock className="h-4 w-4" /> },
   ] },
@@ -141,8 +141,11 @@ export function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ Assess: true, Prove: true });
   const [orgMenuOpen, setOrgMenuOpen] = useState(false);
+  const [demoHidden, setDemoHidden] = useState(() => { try { return localStorage.getItem('cc:demo-banner-hidden') === '1'; } catch { return false; } });
+  const hideDemo = () => { setDemoHidden(true); try { localStorage.setItem('cc:demo-banner-hidden', '1'); } catch { /* private window */ } };
   const [switching, setSwitching] = useState(false);
   const { user, activeTenant, allTenants, clearAuth, switchTenant } = useAuthStore();
+  const isDemo = activeTenant?.slug === 'orionsoftlimited-demo';
   const navigate = useNavigate();
   const location = useLocation();
   const orgMenuRef = useRef<HTMLDivElement>(null);
@@ -382,9 +385,9 @@ export function AppShell() {
                   // entry for the page you are already on changes nothing, so
                   // the drawer would sit there over the content you asked for.
                   onClick={() => setMobileOpen(false)}
-                  className={navLinkClass}
+                  className={({ isActive }) => navLinkClass({ isActive: isActive || Boolean(item.also?.includes(location.pathname)) })}
                 >
-                  {({ isActive }) => (
+                  {({ isActive: exact }) => { const isActive = exact || Boolean(item.also?.includes(location.pathname)); return (
                     <>
                       {/* Active marker on the rail edge — reads instantly in
                           peripheral vision, and works when collapsed. */}
@@ -400,7 +403,7 @@ export function AppShell() {
                       </span>
                       <span className={cn('truncate', collapsed && 'lg:hidden')}>{item.label}</span>
                     </>
-                  )}
+                  ); }}
                 </NavLink>
               ))}
             </div>
@@ -518,6 +521,8 @@ export function AppShell() {
           </span>
 
           <ComplianceSearch /><div className="ml-auto flex items-center gap-1 sm:gap-2">
+            {isDemo && demoHidden && <button type="button" onClick={() => setDemoHidden(false)} className="hidden rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-900 sm:inline-flex">Demo workspace</button>}
+            <PageHelpButton />
             <NotificationBell />
             <div className="hidden h-5 w-px bg-slate-200 sm:block" aria-hidden="true" />
             <button
@@ -536,9 +541,9 @@ export function AppShell() {
         {/* Subscription state. Outside <main> so it stays visible while a page
             scrolls, and renders nothing at all on a healthy subscription. */}
         <EntitlementBanner />
-        {activeTenant?.slug === 'orionsoftlimited-demo' && (activeTenant.name.includes('C&I') ? <CiDemoGuide /> : (
+        {isDemo && !demoHidden && (activeTenant.name.includes('C&I') ? <CiDemoGuide onHide={hideDemo} /> : (
           <div className="border-b border-indigo-100 bg-indigo-50 px-4 py-2 text-xs text-indigo-900 sm:px-5">
-            <strong>Orion presentation demo</strong><span className="ml-2">Fictional sample records. Draft invoices are examples; no payment is required.</span>
+            <strong>Orion presentation demo</strong><span className="ml-2">Fictional sample records. Draft invoices are examples; no payment is required.</span><button type="button" onClick={hideDemo} className="ml-3 font-semibold underline">Hide</button>
           </div>
         ))}
 
@@ -555,7 +560,6 @@ export function AppShell() {
               </div>
             }
           >
-            <CompliancePageHelp />
             {permitted?<><LinkedComplianceRecord />{(location.pathname!=='/settings/security'||hasPermission(activeTenant?.role,'settings:read'))&&<ComplianceOperationsPanel key={'operations:'+location.pathname+location.search}/>}<Outlet key={'page:'+location.pathname+location.search}/></>:<div role="alert" className="m-6 rounded-xl border bg-white p-6"><h1 className="text-xl font-semibold">This page needs additional access</h1><p className="mt-3 text-sm">Ask your organisation administrator if you need this permission. Your current role has not been changed.</p></div>}
           </Suspense>
         </main>

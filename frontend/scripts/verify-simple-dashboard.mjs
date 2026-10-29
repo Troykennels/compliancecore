@@ -30,7 +30,7 @@ try {
    await page.getByRole('button',{name:'Dates, activity and score history'}).click();await page.getByRole('heading',{name:'Recorded score history',exact:true}).waitFor();await page.getByRole('button',{name:'Dates, activity and score history'}).click();assert.equal(await page.locator('#overview-detail').count(),0);checks.push({width,check:'Optional history expands and collapses'});
    if(width<1024)await page.getByRole('button',{name:'Open navigation',exact:true}).click();
    const nav=page.getByRole('navigation',{name:'Main',exact:true}).filter({visible:true});
-   const reports=nav.getByRole('button',{name:'Reports and dates',exact:true});assert.equal(await reports.getAttribute('aria-expanded'),'false');await reports.click();await nav.getByRole('link',{name:'Executive Dashboard',exact:true}).click();await page.waitForURL('**/reports');await page.locator('main h1:visible').first().waitFor();
+   const reports=nav.getByRole('button',{name:'Report',exact:true});assert.equal(await reports.getAttribute('aria-expanded'),'false');await reports.click();await nav.getByRole('link',{name:'Reports',exact:true}).click();await page.waitForURL('**/reports');await page.locator('main h1:visible').first().waitFor();
    if(width<1024)assert.equal(await page.getByRole('button',{name:'Close navigation',exact:true}).count(),0);
    checks.push({width,check:'Grouped navigation opens report and dismisses phone drawer'});
    await page.goto(base+'/dashboard');await page.getByRole('heading',{name:'Compliance overview',exact:true}).waitFor();checks.push({width,check:'Reload retains sign-in'});

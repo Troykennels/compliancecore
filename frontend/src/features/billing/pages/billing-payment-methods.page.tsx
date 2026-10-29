@@ -1,4 +1,5 @@
 import { AccessibleField } from '@/components/accessible-field';
+import { PageHeader } from '@/components/page-header';
 import { useState } from 'react';
 import { ArrowLeft, Plus, Star, Trash2, CreditCard, Loader2, Building2, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -174,7 +175,7 @@ function AddPaymentMethodForm({ onCancel }: { onCancel: () => void }) {
           disabled={addPm.isPending || !label}
           className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
         >
-          {addPm.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add Method'}
+          {addPm.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add method'}
         </button>
       </div>
     </form>
@@ -192,23 +193,16 @@ export function BillingPaymentMethodsPage(): JSX.Element {
 
   return (
     <div className="mx-auto max-w-2xl p-6 space-y-5">
-      <div className="flex items-center gap-3">
-        <Link to={PATHS.BILLING} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
-        <div className="flex-1">
-          <h1 className="text-xl font-bold text-slate-900">Payment Methods</h1>
-          <p className="text-sm text-slate-500">Manage your payment methods for billing</p>
-        </div>
+      <PageHeader eyebrow="Billing" title="Payment methods" description="Manage the payment methods used for billing."
+        actions={<><Link to={PATHS.BILLING} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"><ArrowLeft className="h-4 w-4" /> Billing overview</Link>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
             className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
-            <Plus className="h-4 w-4" /> Add Method
+            <Plus className="h-4 w-4" /> Add method
           </button>
-        )}
-      </div>
+        )}</>} />
 
       {showForm && <AddPaymentMethodForm onCancel={() => setShowForm(false)} />}
 

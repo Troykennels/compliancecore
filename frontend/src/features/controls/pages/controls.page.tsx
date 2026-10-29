@@ -116,6 +116,7 @@ export function ControlsPage(): JSX.Element {
   return (
     <PageShell>
       <PageHeader
+        eyebrow="Prove"
         title="Controls"
         description="Define and track the compliance controls that power your compliance score."
         actions={

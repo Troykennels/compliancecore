@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, HelpCircle, X } from 'lucide-react';
 type Help={purpose:string;steps:string[];next:Array<[string,string]>};
 const help:Record<string,Help>={
  '/controls':{purpose:'Controls are the checks and safeguards that support your obligations. Record who performs each one, how it works and the proof that it was checked.',steps:['Select the relevant framework and responsible person.','Describe the current safeguard and attach evidence.','Record the check result and follow up any failures.'],next:[['Assess risks','/risks'],['Supporting evidence','/evidence'],['Corrective actions','/tasks']]},
@@ -26,4 +27,52 @@ const help:Record<string,Help>={
 };
 const settings:Help={purpose:'Settings control the organisation profile, people, access and notifications. Confirm the correct organisation and involve an authorised administrator before changing shared settings.',steps:['Keep organisation details, scope and responsible people current.','Give each person only the access needed for their work.','Review security, notification recipients and approved connections.'],next:[['Organisation','/settings/organization'],['Team and access','/settings/team'],['Account security','/settings/security'],['Notifications','/settings/notifications']]};
 const billing:Help={purpose:'Review the agreed plan, charges and invoices. Subscription and onboarding charges are separate from compliance assessment results.',steps:['Read onboarding and recurring fees separately.','Review the exact amount before any payment.','Keep invoices and renewal consent with the authorised account owner.'],next:[['Billing overview','/billing'],['Plans and charges','/billing/plans'],['Invoices','/billing/invoices']]};
-export function CompliancePageHelp(){const {pathname}=useLocation();const root='/'+pathname.split('/').filter(Boolean)[0];const item=help[root]??(root==='/settings'?settings:root==='/billing'?billing:null);if(!item)return null;return <aside aria-label="Page guidance" className="mx-4 mt-4 max-w-7xl rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm sm:mx-6"><p className="leading-relaxed text-slate-600">{item.purpose}</p><details className="mt-2"><summary className="flex cursor-pointer items-center gap-2 font-semibold text-indigo-700"><BookOpen className="h-4 w-4"/>How to use this page</summary><ol className="mt-3 list-decimal space-y-1 pl-5 text-slate-600">{item.steps.map(s=><li key={s}>{s}</li>)}</ol><div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">{item.next.map(([label,to])=><Link key={to} to={to} className="font-medium text-indigo-700 underline">{label}</Link>)}<Link to="/guide" className="font-medium text-indigo-700 underline">Complete user guide</Link></div></details></aside>;}
+
+function helpFor(pathname: string): Help | null {
+  const root = '/' + pathname.split('/').filter(Boolean)[0];
+  return help[root] ?? (root === '/settings' ? settings : root === '/billing' ? billing : null);
+}
+
+/** Page guidance on demand: a Help button in the top bar opens a side panel, so guidance never pushes the page title down. */
+export function PageHelpButton(): JSX.Element | null {
+  const { pathname } = useLocation();
+  const [open, setOpen] = useState(false);
+  const item = helpFor(pathname);
+  useEffect(() => { setOpen(false); }, [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+  if (!item) return null;
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open}
+        className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+        <HelpCircle className="h-4 w-4" aria-hidden="true" /><span className="hidden sm:inline">Help</span>
+      </button>
+      {open && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={() => setOpen(false)}>
+          <aside role="dialog" aria-modal="true" aria-label="Help for this page" onClick={e => e.stopPropagation()}
+            className="flex h-full w-full max-w-md flex-col gap-4 overflow-y-auto bg-white p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-lg font-semibold text-slate-900">Help for this page</h2>
+              <button type="button" aria-label="Close help" onClick={() => setOpen(false)}><X className="h-5 w-5" /></button>
+            </div>
+            <p className="text-sm leading-relaxed text-slate-700">{item.purpose}</p>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">How to use it</h3>
+              <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-slate-700">{item.steps.map(s => <li key={s}>{s}</li>)}</ol>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">Related pages</h3>
+              <ul className="mt-2 space-y-1.5 text-sm">{item.next.map(([label, to]) => <li key={to}><Link to={to} className="font-medium text-brand-700 underline">{label}</Link></li>)}</ul>
+            </div>
+            <Link to="/guide" className="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-brand-700"><BookOpen className="h-4 w-4" />Open the full guide</Link>
+          </aside>
+        </div>
+      )}
+    </>
+  );
+}

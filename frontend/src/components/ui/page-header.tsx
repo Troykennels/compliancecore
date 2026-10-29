@@ -15,30 +15,38 @@ interface PageHeaderProps {
   description?: React.ReactNode;
   /** Primary and secondary actions, right-aligned on desktop. */
   actions?: React.ReactNode;
-  /** Small contextual line above the title — a parent record, a framework name. */
+  /** The menu group or parent record, shown above the title. */
   eyebrow?: React.ReactNode;
+  /** Short facts shown under the title, such as status, owner and dates. */
+  meta?: React.ReactNode[];
+  /** Anything that belongs inside the header card, such as summary chips. */
+  children?: React.ReactNode;
   className?: string;
 }
 
-export function PageHeader({ title, description, actions, eyebrow, className }: PageHeaderProps) {
+/** The one page header: eyebrow, title, facts, purpose and actions in one bordered card, the same on every page. */
+export function PageHeader({ title, description, actions, eyebrow, meta, children, className }: PageHeaderProps) {
   return (
-    <div
+    <header
       className={cn(
-        // Stacks on a phone so the action never squeezes the title to two
-        // characters wide; sits inline from `sm` upwards.
-        'flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between',
+        // Stacks on a phone so the action never squeezes the title; sits inline from `sm` upwards.
+        'flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6',
         className,
       )}
     >
       <div className="min-w-0">
-        {eyebrow && <div className="eyebrow mb-1.5">{eyebrow}</div>}
-        <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
-        {description && (
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500">{description}</p>
+        {eyebrow && <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand-700">{eyebrow}</p>}
+        <h1 className="mt-2 text-2xl font-bold text-slate-900">{title}</h1>
+        {meta && meta.length > 0 && (
+          <p className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-slate-600">
+            {meta.map((m, i) => <span key={i} className="inline-flex items-center">{m}</span>)}
+          </p>
         )}
+        {description && <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600">{description}</p>}
+        {children}
       </div>
-      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
-    </div>
+      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">{actions}</div>}
+    </header>
   );
 }
 
@@ -61,8 +69,8 @@ export function PageShell({
     <div className="min-h-full bg-slate-50">
       <div
         className={cn(
-          'mx-auto space-y-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8',
-          width === 'default' && 'max-w-6xl',
+          'mx-auto space-y-6 p-4 sm:p-6',
+          width === 'default' && 'max-w-7xl',
           width === 'wide' && 'max-w-[90rem]',
           className,
         )}

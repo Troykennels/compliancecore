@@ -21,7 +21,7 @@ export default function DepartmentGuide({ content, role = '', canTrain = false }
   function choose(key: string) { setChosen(key); setQuery(''); }
   return <div className="odg" data-product={content.product}>
     <style>{CSS}</style>
-    <header><div><p className="odg-brand">{content.product}{content.edition ? ` · ${content.edition}` : ''}</p><h1>My Guide</h1><p>How to use {content.product} in {dept.label}, one small step at a time.</p></div><button className="odg-no-print" type="button" onClick={() => window.print()}>Print guide</button></header>
+    <header><div><p className="odg-brand">{content.product}{content.edition ? ` · ${content.edition}` : ''}</p><h1>My guide</h1><p>How to use {content.product} in {dept.label}, one small step at a time.</p></div><button className="odg-no-print" type="button" onClick={() => window.print()}>Print guide</button></header>
     <div className="odg-chooser odg-no-print"><label htmlFor={`${uid}-dept`}>{canTrain ? 'Choose a department to train your team' : 'Your department / role'}</label><select id={`${uid}-dept`} value={dept.key} onChange={e => choose(e.target.value)}>{content.departments.map(d => <option key={d.key} value={d.key}>{d.label}</option>)}</select><p>These are training instructions. Your account role still controls the pages and actions you can use.</p></div>
     <p><mark>Highlighted words</mark> are page names or labels to look for on your screen.</p>
     <label className="odg-search odg-no-print" htmlFor={`${uid}-search`}>Search this guide<input id={`${uid}-search`} type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Try payment, signature, report…" /></label>

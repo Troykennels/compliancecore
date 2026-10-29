@@ -1,4 +1,5 @@
 import { ModalSurface } from '@/components/modal-surface';
+import { PageHeader } from '@/components/page-header';
 import { PermissionAction } from '@/components/permission-action';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useFrameworks } from '@/features/frameworks/hooks/use-frameworks';
@@ -64,23 +65,15 @@ function LegacyRisksPage(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl p-4 sm:p-6">
         {/* Page Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Risks</h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Maintain your risk register — assess inherent and residual risk and track treatment.
-            </p>
-          </div>
-          <PermissionAction scope="risks:write"><button
+        <div className="mb-6"><PageHeader eyebrow="Assess" title="Risk register" description={"Maintain your risk register — assess inherent and residual risk and track treatment."} actions={<><PermissionAction scope="risks:write"><button
             onClick={openCreate}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
             New Risk
-          </button></PermissionAction>
-        </div>
+          </button></PermissionAction></>} /></div>
 
         {/* Filters */}
         <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -324,5 +317,5 @@ export function RisksPage():JSX.Element {
  const [params,setParams]=useSearchParams();const {data:frameworks=[]}=useFrameworks();const [legacy,setLegacy]=useState(params.get('view')==='register');
  const id=params.get('frameworkId')??frameworks.find(f=>f.adoptedControlCount>0)?.id??'';
  if(legacy)return <><div className="mx-4 mt-4 flex flex-wrap items-center gap-3 rounded-lg bg-indigo-50 p-3 text-sm"><p>All saved risk records are retained here.</p><button className="font-semibold text-indigo-700 underline" onClick={()=>setLegacy(false)}>Return to framework risk worksheet</button></div><LegacyRisksPage/></>;
- return <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6"><header><h1 className="text-2xl font-bold">Risk assessment</h1><p className="mt-2 text-sm text-slate-600">Use the spreadsheet-style register for the chosen requirements. Review assets, risks, ratings and treatment decisions together.</p></header><div className="flex flex-wrap items-center gap-3"><label className="text-sm font-medium">Assessment framework<select aria-label="Risk assessment framework" value={id} onChange={e=>setParams(e.target.value?{frameworkId:e.target.value}:{})} className="ml-2 max-w-full rounded-lg border px-3 py-2"><option value="">Choose a framework</option>{frameworks.map(f=><option key={f.id} value={f.id}>{f.shortName||f.name}</option>)}</select></label><button className="text-sm font-semibold text-indigo-700 underline" onClick={()=>setLegacy(true)}>Other / existing risk records</button></div>{id?<><Link className="inline-block text-sm font-semibold text-indigo-700 underline" to={`/frameworks?framework=${id}`}>Open scope, assessment criteria and compliance review</Link><RiskAssessmentSheet key={id} id={id}/></>:<p className="rounded-lg border bg-white p-4 text-sm">Choose the relevant framework to open its worksheet. Save its scope and assessment basis before confirming risk ratings.</p>}</div>;
+ return <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6"><PageHeader eyebrow="Assess" title="Risk assessment" description="Use the spreadsheet-style register for the chosen requirements. Review assets, risks, ratings and treatment decisions together." /><div className="flex flex-wrap items-center gap-3"><label className="text-sm font-medium">Assessment framework<select aria-label="Risk assessment framework" value={id} onChange={e=>setParams(e.target.value?{frameworkId:e.target.value}:{})} className="ml-2 max-w-full rounded-lg border px-3 py-2"><option value="">Choose a framework</option>{frameworks.map(f=><option key={f.id} value={f.id}>{f.shortName||f.name}</option>)}</select></label><button className="text-sm font-semibold text-indigo-700 underline" onClick={()=>setLegacy(true)}>Other / existing risk records</button></div>{id?<><Link className="inline-block text-sm font-semibold text-indigo-700 underline" to={`/frameworks?framework=${id}`}>Open scope, assessment criteria and compliance review</Link><RiskAssessmentSheet key={id} id={id}/></>:<p className="rounded-lg border bg-white p-4 text-sm">Choose the relevant framework to open its worksheet. Save its scope and assessment basis before confirming risk ratings.</p>}</div>;
 }

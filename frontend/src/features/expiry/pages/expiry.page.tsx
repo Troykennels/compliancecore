@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PageHeader } from '@/components/page-header';
 import { format, parseISO, differenceInDays, isValid } from 'date-fns';
 import { Plus, AlertTriangle, ShieldCheck, Clock, XCircle, Search, RefreshCw } from 'lucide-react';
 import { useExpiryItems, useExpiryStats, useDeleteExpiryItem } from '../hooks/use-expiry';
@@ -63,18 +64,12 @@ export function ExpiryPage() {
   return (
     <div className="flex flex-col h-full px-6 py-6 gap-5">
       {/* Header */}
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Expiry Tracker</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Certificates, policies, contracts and renewals</p>
-        </div>
-        <button
+      <div className="mb-6"><PageHeader eyebrow="Report" title="Expiry tracker" description={"Certificates, policies, contracts and renewals"} actions={<><button
           onClick={openCreate}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" /> Track Item
-        </button>
-      </div>
+        </button></>} /></div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 shrink-0">

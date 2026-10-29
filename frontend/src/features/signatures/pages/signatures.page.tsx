@@ -1,4 +1,5 @@
 import { ModalSurface } from '@/components/modal-surface';
+import { PageHeader } from '@/components/page-header';
 import { useState } from 'react';
 import { ShieldCheck, ShieldX, RotateCcw, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useOrgFormat } from '@/lib/org-format';
@@ -34,15 +35,10 @@ export function SignaturesPage() {
   const totalPages = Math.ceil(total / 20);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-        <h1 className="text-xl font-bold text-slate-900">Digital Signatures</h1>
-        <p className="mt-1 max-w-xl text-sm text-slate-500">Sign a reviewed document and keep a record of the signer, time and document snapshot.</p>
-        <Link to="/guide#signatures" className="mt-2 inline-block text-xs font-medium text-indigo-700 underline">How to add and verify a signature</Link>
-        </div>
-        {canSign && <button onClick={()=>setShowSign(true)} className="rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white">Sign a document</button>}
-      </div>
+    <div className="mx-auto max-w-7xl p-4 sm:p-6">
+      <div className="mb-6"><PageHeader eyebrow="Review" title="Signatures"
+        description={<>Sign a reviewed document and keep a record of the signer, time and document snapshot.{' '}<Link to="/guide#signatures" className="font-medium text-brand-700 underline">How to add and verify a signature</Link></>}
+        actions={canSign ? <button onClick={()=>setShowSign(true)} className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">Sign a document</button> : undefined} /></div>
       {showSign && <SignDocumentDialog onClose={()=>setShowSign(false)} />}
 
       {/* Filters */}

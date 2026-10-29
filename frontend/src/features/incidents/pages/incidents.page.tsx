@@ -1,10 +1,11 @@
 import { ModalSurface } from '@/components/modal-surface';
+import { PageHeader } from '@/components/page-header';
 import { PermissionAction } from '@/components/permission-action';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
-  Flame, Loader2, Plus, AlertTriangle, ShieldAlert, Clock, RefreshCw, X,
+  Loader2, Plus, AlertTriangle, ShieldAlert, Clock, RefreshCw, X,
 } from 'lucide-react';
 import { useOrgFormat } from '@/lib/org-format';
 import { incidentsApi } from '../api/incidents.api';
@@ -59,25 +60,16 @@ export function IncidentsPage(): JSX.Element {
   const stats = statsQuery.data;
 
   return (
-    <div className="space-y-5 p-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="flex items-center gap-2 text-xl font-semibold text-slate-900">
-            <Flame className="h-5 w-5 text-rose-600" /> Incidents
-          </h1>
-          <p className="mt-0.5 text-sm text-slate-500">
-            Security and privacy incident register, with statutory breach-notification tracking.
-          </p>
-        </div>
-        <PermissionAction scope="incidents:write"><button
+    <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6">
+      <PageHeader eyebrow="Respond" title="Incidents"
+        description="Security and privacy incident register, with statutory breach-notification tracking."
+        actions={<PermissionAction scope="incidents:write"><button
           type="button"
           onClick={() => setShowForm(true)}
           className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700"
         >
           <Plus className="h-4 w-4" /> Report incident
-        </button></PermissionAction>
-      </div>
+        </button></PermissionAction>} />
 
       {/* Breach-notification warning takes priority over everything else: this is
           the one number on the page with a legal deadline attached. */}

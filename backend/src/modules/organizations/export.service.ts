@@ -176,7 +176,7 @@ export async function streamOrganizationExport(res: Response, ctx: ExportContext
       '  * The evidence FILES themselves. Their metadata, versions and checksums',
       '    are included (see data/evidence.json and data/evidence_versions.json),',
       '    but the documents are stored separately and can run to many gigabytes.',
-      '    Download them from the Evidence Hub, or ask us for a bulk transfer.',
+      '    Download them from the Evidence, or ask us for a bulk transfer.',
       '  * Secrets. Password hashes, MFA secrets, API key hashes, webhook secrets',
       '    and share tokens are deliberately excluded. They are of no use to you',
       '    and would be a liability in a file like this.',

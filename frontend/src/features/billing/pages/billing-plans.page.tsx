@@ -371,9 +371,9 @@ export function BillingPlansPage(): JSX.Element {
       {/* Header */}
       <div className="mb-8 text-center">
         <Link to={PATHS.BILLING} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-4">
-          <ArrowLeft className="h-4 w-4" /> Back to Billing
+          <ArrowLeft className="h-4 w-4" /> Back to billing
         </Link>
-        <h1 className="text-3xl font-extrabold text-slate-900">Choose your plan</h1>
+        <h1 className="text-3xl font-extrabold text-slate-900">Plans and upgrade</h1>
         <p className="mt-2 text-slate-500">Simple, transparent pricing. No hidden fees.</p>
 
         {/* Billing cycle toggle */}

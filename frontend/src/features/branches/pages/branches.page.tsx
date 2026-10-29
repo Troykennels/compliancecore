@@ -1,4 +1,5 @@
 import { ModalSurface } from '@/components/modal-surface';
+import { PageHeader } from '@/components/page-header';
 import { useState } from 'react';
 import { Plus, Search, MapPin, Building2, Star, MoreHorizontal, Pencil, Trash2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -33,23 +34,15 @@ export function BranchesPage(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl p-4 sm:p-6">
         {/* Page Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Branches</h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Manage your organisation's physical locations and offices.
-            </p>
-          </div>
-          <button
+        <div className="mb-6"><PageHeader eyebrow="Scope" title="Branches" description={"Manage your organisation's physical locations and offices."} actions={<><button
             onClick={openCreate}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
             Add Branch
-          </button>
-        </div>
+          </button></>} /></div>
 
         {/* Search */}
         <div className="mb-4 relative">
