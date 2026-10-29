@@ -204,7 +204,8 @@ async function main() {
   made.incident = data(r)?.id;
   if (made.incident) {
     const inc = data(await call('GET', `/api/incidents/${made.incident}`));
-    assert('breach past its deadline is flagged overdue', inc?.notificationOverdue === true);
+    // The notification clock starts from a recorded notification decision against a reviewed obligation, never from an assumed default.
+    assert('breach has no assumed deadline before a notification decision', inc?.notificationDueAt == null && inc?.notificationOverdue === false);
     await call('POST', `/api/incidents/${made.incident}/updates`, { body: 'Contained.', entryType: 'containment' });
     await call('PATCH', `/api/incidents/${made.incident}`, { regulatorNotifiedAt: new Date().toISOString() });
     const after = data(await call('GET', `/api/incidents/${made.incident}`));
