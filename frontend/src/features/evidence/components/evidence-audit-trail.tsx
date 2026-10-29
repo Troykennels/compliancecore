@@ -1,3 +1,4 @@
+import { humanize } from '@/lib/labels';
 import React from 'react';
 import { Activity, Upload, Eye, Download, Share2, FileSearch, Tag, Link, Archive, UserX, RefreshCw } from 'lucide-react';
 import { useEvidenceAuditTrail } from '../hooks/use-evidence';
@@ -58,7 +59,7 @@ export function EvidenceAuditTrail({ evidenceId }: EvidenceAuditTrailProps) {
       <ol className="relative border-l border-slate-200 pl-6 space-y-5">
         {events.map((event) => {
           const config = EVENT_CONFIG[event.eventType] ?? {
-            icon: Activity, label: event.eventType.replace(/_/g, ' '), color: 'text-slate-600 bg-slate-100',
+            icon: Activity, label: humanize(event.eventType), color: 'text-slate-600 bg-slate-100',
           };
           const Icon = config.icon;
           return (

@@ -1,3 +1,4 @@
+import { humanize } from '@/lib/labels';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Download, Loader2, Mail, RefreshCw, Search, Users, X } from 'lucide-react';
@@ -28,7 +29,7 @@ const dateTime = (value: string | null) => value ? new Date(value).toLocaleStrin
 function trialText(org: Organisation) {
   if (org.subscriptionStatus === 'trial' && org.trialEndsAt && Date.parse(org.trialEndsAt) <= Date.now() && org.paidThrough && Date.parse(org.paidThrough) > Date.now()) return 'Access period active';
   if (org.subscriptionStatus === 'trial') return org.trialEndsAt && Date.parse(org.trialEndsAt) <= Date.now() ? 'Trial ended' : 'Trial';
-  return org.subscriptionStatus?.replace(/_/g, ' ') || 'No subscription';
+  return humanize(org.subscriptionStatus) || 'No subscription';
 }
 function csvCell(value: unknown) {
   let text = String(value ?? '');

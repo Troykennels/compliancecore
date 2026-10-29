@@ -1,3 +1,4 @@
+import { humanize } from '@/lib/labels';
 import React from 'react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import {
@@ -132,7 +133,7 @@ export function ActivityFeed({ events }: ActivityFeedProps) {
             <div className="min-w-0 flex-1 pt-1">
               <p className="text-sm leading-snug text-slate-700">
                 <span className="font-medium text-slate-900">{ev.actorEmail ?? 'System'}</span>
-                {' '}{EVENT_VERB[ev.eventType] ?? ev.eventType.replace(/_/g, ' ')}
+                {' '}{EVENT_VERB[ev.eventType] ?? humanize(ev.eventType)}
                 {subject ? (
                   <span className="font-medium text-slate-900"> &ldquo;{subject}&rdquo;</span>
                 ) : ' an evidence item'}

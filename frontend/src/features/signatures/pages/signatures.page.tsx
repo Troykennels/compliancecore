@@ -1,3 +1,4 @@
+import { humanize } from '@/lib/labels';
 import { ModalSurface } from '@/components/modal-surface';
 import { PageHeader } from '@/components/page-header';
 import { useState } from 'react';
@@ -106,7 +107,7 @@ export function SignaturesPage() {
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-xs capitalize text-slate-700">{sig.documentType.replace(/_/g,' ')}</td>
+                  <td className="px-4 py-3 text-xs capitalize text-slate-700">{humanize(sig.documentType)}</td>
                   <td className="px-4 py-3">
                     <p className="font-medium text-slate-900 text-xs">{sig.certificateData?.signerName ?? sig.signerName ?? '—'}</p>
                     <p className="text-slate-400 text-[11px]">{sig.certificateData?.signerEmail}</p>

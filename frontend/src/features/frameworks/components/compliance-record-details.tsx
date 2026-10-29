@@ -1,3 +1,4 @@
+import { humanize } from '@/lib/labels';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '@/lib/api-client';
@@ -28,7 +29,7 @@ export function ComplianceRecordDetails({ kind, record, options, expanded }: {
     fields.push(['Review period', data.period], ['Expected result', data.criteria], ['Population and sample', data.sample], ['How the test was performed', data.method], ['Observed result', record.result], ['Recorded observations', record.notes]);
     if (Array.isArray(record.evidence_versions)) for (const value of record.evidence_versions) { const v = object(value); proof(v.id, v.current_version_id); }
   } else if (kind === 'actions') {
-    fields.push(['Root cause', action.rootCause], ['Immediate correction', action.correction], ['Preventing a repeat', action.prevention], ['Effectiveness criteria', action.effectivenessCriteria], ['Due date', action.dueDate], ['Verification outcome', text(action.state).replace(/_/g, ' ')], ['Reviewer conclusion', action.reviewNote]);
+    fields.push(['Root cause', action.rootCause], ['Immediate correction', action.correction], ['Preventing a repeat', action.prevention], ['Effectiveness criteria', action.effectivenessCriteria], ['Due date', action.dueDate], ['Verification outcome', humanize(text(action.state))], ['Reviewer conclusion', action.reviewNote]);
     proof(action.evidenceId, action.evidenceVersionId);
   } else if (kind === 'vendors') {
     const data = object(record.responses);
@@ -38,13 +39,13 @@ export function ComplianceRecordDetails({ kind, record, options, expanded }: {
     const risk = object(record.risk_snapshot);
     fields.push(['Asset or service', risk.asset_name], ['Threat or event', risk.threat], ['Weakness or exposure', risk.vulnerability], ['Business consequence', risk.consequence], ['Initial likelihood / impact', `${text(risk.inherent_likelihood)} / ${text(risk.inherent_impact)}`], ['Treatment decision', risk.treatment], ['Treatment plan', risk.mitigation_plan], ['Remaining likelihood / impact', `${text(risk.residual_likelihood)} / ${text(risk.residual_impact)}`], ['Basis for remaining risk', risk.residual_basis], ['Independent review reasoning', record.notes], ['Review valid until', record.expires_on]);
   } else if (kind === 'incidents') {
-    fields.push(['Notification decision', text(decision.decision).replace(/_/g, ' ')], ['When the organisation became aware', decision.awarenessAt], ['Verified reporting deadline', decision.deadlineAt], ['Intended recipient', decision.recipient], ['Facts and reason', decision.rationale], ['Decision recorded', decision.decidedAt]);
+    fields.push(['Notification decision', humanize(text(decision.decision))], ['When the organisation became aware', decision.awarenessAt], ['Verified reporting deadline', decision.deadlineAt], ['Intended recipient', decision.recipient], ['Facts and reason', decision.rationale], ['Decision recorded', decision.decidedAt]);
     proof(decision.evidenceId, decision.evidenceVersionId);
   } else if (kind === 'training') {
     fields.push(['Assigned person', person(record.user_id)], ['Completion date', record.completed_at], ['What the verifier checked', record.completion_note]);
     proof(record.completion_evidence_id, record.completion_evidence_version_id);
   } else if (kind === 'obligations') {
-    fields.push(['Authority', record.authority], ['Source edition', record.source_version], ['Jurisdiction', record.jurisdiction], ['Relevant sector', record.sector], ['Source last checked', record.verified_on], ['Confirmed effective date', record.effective_on], ['Applicability decision', text(record.applicability).replace(/_/g, ' ')], ['Duty deadline', record.due_date], ['Next source review', record.review_date]);
+    fields.push(['Authority', record.authority], ['Source edition', record.source_version], ['Jurisdiction', record.jurisdiction], ['Relevant sector', record.sector], ['Source last checked', record.verified_on], ['Confirmed effective date', record.effective_on], ['Applicability decision', humanize(text(record.applicability))], ['Duty deadline', record.due_date], ['Next source review', record.review_date]);
     proof(record.evidence_id);
   } else if (kind === 'audits') {
     fields.push(['Report review date', record.reviewed_at], ['Report review conclusion', record.report_review_note]);

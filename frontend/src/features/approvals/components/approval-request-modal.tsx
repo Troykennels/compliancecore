@@ -1,3 +1,4 @@
+import { humanize } from '@/lib/labels';
 import { AccessibleField } from '@/components/accessible-field';
 import { ModalSurface } from '@/components/modal-surface';
 import { useImplementationMembers } from '@/features/frameworks/implementation';
@@ -181,7 +182,7 @@ export function ApprovalRequestModal({ open, onClose, entityType, entityId, enti
                           <option value="role">Role</option>
 
                         </select>
-                        {watch(`steps.${idx}.approverType`)==='role'?<select aria-label={`Reviewer role for step ${idx+1}`} {...register(`steps.${idx}.assignedRole`)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs"><option value="">Choose a role</option>{['owner','admin','compliance_manager','auditor','control_owner','msp_admin'].map(r=><option key={r} value={r}>{r.replace(/_/g,' ')}</option>)}</select>:<select aria-label={`Reviewer for step ${idx+1}`} {...register(`steps.${idx}.assignedTo`)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs"><option value="">Choose an authorised reviewer</option>{members.filter(m=>!m.role||['owner','admin','compliance_manager','auditor','control_owner','msp_admin'].includes(m.role)).map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select>}
+                        {watch(`steps.${idx}.approverType`)==='role'?<select aria-label={`Reviewer role for step ${idx+1}`} {...register(`steps.${idx}.assignedRole`)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs"><option value="">Choose a role</option>{['owner','admin','compliance_manager','auditor','control_owner','msp_admin'].map(r=><option key={r} value={r}>{humanize(r)}</option>)}</select>:<select aria-label={`Reviewer for step ${idx+1}`} {...register(`steps.${idx}.assignedTo`)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs"><option value="">Choose an authorised reviewer</option>{members.filter(m=>!m.role||['owner','admin','compliance_manager','auditor','control_owner','msp_admin'].includes(m.role)).map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select>}
 
                       </div>
                       <label className="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">

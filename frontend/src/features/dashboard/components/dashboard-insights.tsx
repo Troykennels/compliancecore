@@ -1,3 +1,4 @@
+import { humanize } from '@/lib/labels';
 import { useMemo } from 'react';
 import {
   useControlsForInsights, useRisksForInsights, useTasksForInsights,
@@ -65,7 +66,7 @@ export function DashboardInsights({
         id: `event-${e.id}`,
         label: e.title,
         date: e.startDate,
-        kind: e.eventType.replace(/_/g, ' '),
+        kind: humanize(e.eventType),
         overdue: new Date(e.startDate).getTime() < now,
       })),
       ...urgentExpiry.map((x) => ({

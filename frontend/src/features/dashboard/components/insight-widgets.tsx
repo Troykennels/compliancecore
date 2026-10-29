@@ -1,3 +1,4 @@
+import { humanize } from '@/lib/labels';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -363,7 +364,7 @@ export function ExpiringPolicies({ policies }: { policies: PolicyRow[] }): JSX.E
                 {overdue && <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-rose-500" />}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-medium text-slate-900">{p.title}</p>
-                  <p className="text-[10px] capitalize text-slate-500">{p.status.replace(/_/g, ' ')}</p>
+                  <p className="text-[10px] capitalize text-slate-500">{humanize(p.status)}</p>
                 </div>
                 <span className={`shrink-0 text-[11px] ${overdue ? 'font-semibold text-rose-600' : 'text-slate-500'}`}>
                   {fmt.formatDateShort(p.reviewDueDate)}
