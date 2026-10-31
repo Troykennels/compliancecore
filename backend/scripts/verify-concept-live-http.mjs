@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 const root=path.join(process.env.LOCALAPPDATA,'OrionSoft');
 const access=JSON.parse(await fs.readFile(path.join(root,'ComplianceCore-Demo-Access.private.json'),'utf8'));
 const privateFolder=path.join(root,'ComplianceCore-private-20261023/concept-release-20261031');
-const out=path.resolve('../verification/live-20261031');
+const out=path.resolve(process.env.COMPLIANCE_VERIFICATION_OUT??'../verification/live-20261031');
 const base='https://compliancecore-api-production.up.railway.app/api';
 const checks=[];let token,cookies;
 async function call(route,{method='GET',body,status=200,anonymous=false,binary=false}={}){

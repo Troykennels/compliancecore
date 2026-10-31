@@ -70,3 +70,28 @@ The final connector rerun also covers Brevo payloads and exact SMTP passwords.
 Both production builds and frontend lint passed. Sixteen browser checks passed
 at desktop/phone widths, including all three connector lifecycles, pasted text
 in both document tools, DNS interruption and genuine authentication rejection.
+
+LIVE ACCEPTANCE — 31 October 2026
+Application source: 6a62d4551d5849957f702e639a2fbabc1a61f736
+Railway: 619aa1b0-8330-4dff-91a2-d5399da526ce — SUCCESS
+Vercel: dpl_BxvpV7M1UnQSRH4TuuJ6exQ5WL8j — READY and promoted
+Promoted: 2026-10-31T06:46:37.564Z (07:46 WAT)
+URL: https://compliancecore-sand.vercel.app
+
+Fourteen live API checks passed, covering all six AI tools with fictional
+prompts, input validation, connector reads and test-before-enable validation.
+Twenty-nine read-only regression checks passed for existing compliance modules.
+Ten live browser checks passed at 1440px and 390px, including six deliberate
+full reloads with sign-in retained. Published screenshots were visually reviewed.
+No Slack, Teams or email test messages were sent. Customer business records,
+existing accounts, memberships and subscription terms were preserved.
+
+Slack, Teams and email are available for administrator setup, not connected to
+an organisation account automatically. Use Tools > Integrations: configure,
+save, send a connection test, confirm receipt, then enable. Jira, Google Drive
+and Okta remain explicitly planned. Production OCR is disabled; the Paste text
+path supports document analysis without claiming uploaded-file extraction works.
+
+The owned PostgreSQL 18 verification cluster was stopped after acceptance.
+Later documentation/operator-tool commits do not change deployed application
+source. Receipts identify the exact source and provider deployment IDs above.

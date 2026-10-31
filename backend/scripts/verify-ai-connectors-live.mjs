@@ -5,8 +5,10 @@ import assert from 'node:assert/strict';
 const out=path.resolve('../verification/ai-connectors-20261031');await fs.mkdir(out,{recursive:true});
 const access=JSON.parse(await fs.readFile(path.join(process.env.LOCALAPPDATA,'OrionSoft/ComplianceCore-Demo-Access.private.json'),'utf8'));
 const api='https://compliancecore-api-production.up.railway.app/api';let token;const checks=[];
-async function call(route,{method='GET',body,expected=200,anonymous=false}={}){
- const start=Date.now();const r=await fetch(api+route,{method,headers:{'Content-Type':'application/json',...(!anonymous&&token?{Authorization:'Bearer '+token}:{})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(90000)});const result=await r.json();checks.push({route,method,status:r.status,ms:Date.now()-start,code:result.error?.code});assert.equal(r.status,expected,route+': '+JSON.stringify(result.error??{}));return result.data;
+async function call(route,{method='GET',body,expected=200,anonymous=false,attempt=0}={}){
+ const start=Date.now();const r=await fetch(api+route,{method,headers:{'Content-Type':'application/json',...(!anonymous&&token?{Authorization:'Bearer '+token}:{})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(90000)});const result=await r.json();checks.push({route,method,status:r.status,ms:Date.now()-start,code:result.error?.code});
+ if(r.status===429&&expected===200&&attempt<3){await new Promise(resolve=>setTimeout(resolve,20000));return call(route,{method,body,expected,anonymous,attempt:attempt+1});}
+ assert.equal(r.status,expected,route+': '+JSON.stringify(result.error??{}));return result.data;
 }
 try{
  await call('/integrations',{expected:401,anonymous:true});

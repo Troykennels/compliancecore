@@ -1,0 +1,159 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "route": "/health",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/controls",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "route": "/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/controls?limit=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/risks?limit=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/policies?limit=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/evidence?limit=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/audits?limit=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/tasks?limit=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/incidents?limit=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/vendors?limit=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/training",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/approvals/requests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/approvals/workflows",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/notifications/preferences",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/analytics/overview",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/calendar",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/privacy/summary",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/privacy/activities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/privacy/requests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/privacy/assessments",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/frameworks/implementation-overview",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/frameworks/records/history",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/billing/entitlement",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/frameworks/dfb284c1-8c50-4023-912b-d32d8cfcfb86/implementation",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/frameworks/dfb284c1-8c50-4023-912b-d32d8cfcfb86/assessment/workbook",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/audits/0d56c099-5346-46ee-b618-7f6d5f5e8950/room",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/auth/me",
+      "status": 200
+    }
+  ],
+  "managedDemoOnly": true,
+  "customerRecordWrites": false,
+  "realPayments": false,
+  "externalMessagesSent": false,
+  "readOnlyNewModules": [
+    "privacy",
+    "audit room",
+    "assessment outcome",
+    "notification preferences"
+  ]
+}

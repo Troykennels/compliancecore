@@ -30,9 +30,9 @@ try{
   const commit=(await command('git',['rev-parse','HEAD'])).trim();assert.match(commit,/^[a-f0-9]{40}$/);
   const actual=JSON.parse(await command(process.execPath,[railway,'variable','list','--project',project,'--service',service,'--environment','production','--json']));assert.equal(actual.FRONTEND_URL,'https://compliancecore-sand.vercel.app');await save('provider-env.private.json',actual);
   const previousBackend=(await backends()).find(d=>d.status==='SUCCESS');const previousFrontend=(await vc(`/v9/projects/${target.projectId}?teamId=${target.orgId}`)).targets.production;assert(previousBackend&&previousFrontend);
-  const source=path.join(folder,'source-'+commit.slice(0,12)),archive=source+'.zip';
+  const source=path.join(folder,'source-'+commit.slice(0,12)+'-prepared'),archive=source+'.zip';
   await command('git',['archive','--format=zip','--output',archive,commit]);
-  await command('powershell.exe',['-NoProfile','-NonInteractive','-Command','Expand-Archive -LiteralPath $env:RELEASE_ARCHIVE -DestinationPath $env:RELEASE_SOURCE'],{env:{...process.env,RELEASE_ARCHIVE:archive,RELEASE_SOURCE:source}});
+  await command('python',['-c',"import os,pathlib,zipfile\nroot=pathlib.Path(os.environ['RELEASE_SOURCE']).resolve()\nassert not root.exists(), 'Release destination already exists'\nwith zipfile.ZipFile(os.environ['RELEASE_ARCHIVE']) as archive:\n assert all((root/i.filename).resolve().is_relative_to(root) for i in archive.infolist()), 'Archive member escapes destination'\n archive.extractall(root)"],{env:{...process.env,RELEASE_ARCHIVE:archive,RELEASE_SOURCE:source}});
   await fs.mkdir(path.join(source,'frontend/.vercel'),{recursive:true});await fs.writeFile(path.join(source,'frontend/.vercel/project.json'),JSON.stringify(target));
   await save('release.private.json',{commit,source,previousBackend:previousBackend.id,previousFrontend:previousFrontend.id,createdAt:new Date().toISOString()});await receipt('source.json',{commit,previousBackend:previousBackend.id,previousFrontend:previousFrontend.id,cleanGitArchive:true});
  }else if(action==='migrate'){

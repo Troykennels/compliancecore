@@ -1,0 +1,104 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "route": "/integrations",
+      "method": "GET",
+      "status": 401,
+      "ms": 1741,
+      "code": "UNAUTHORIZED"
+    },
+    {
+      "route": "/auth/login",
+      "method": "POST",
+      "status": 200,
+      "ms": 921
+    },
+    {
+      "route": "/integrations",
+      "method": "GET",
+      "status": 200,
+      "ms": 350
+    },
+    {
+      "route": "/integrations/slack/deliveries",
+      "method": "GET",
+      "status": 200,
+      "ms": 486
+    },
+    {
+      "route": "/integrations/teams/deliveries",
+      "method": "GET",
+      "status": 200,
+      "ms": 363
+    },
+    {
+      "route": "/integrations/email/deliveries",
+      "method": "GET",
+      "status": 200,
+      "ms": 298
+    },
+    {
+      "route": "/integrations/slack",
+      "method": "PATCH",
+      "status": 422,
+      "ms": 312,
+      "code": "VALIDATION_ERROR"
+    },
+    {
+      "route": "/ai/analyze-risk",
+      "method": "POST",
+      "status": 200,
+      "ms": 2036
+    },
+    {
+      "route": "/ai/generate-policy",
+      "method": "POST",
+      "status": 200,
+      "ms": 2215
+    },
+    {
+      "route": "/ai/summarize-contract",
+      "method": "POST",
+      "status": 200,
+      "ms": 1332
+    },
+    {
+      "route": "/ai/document-qa",
+      "method": "POST",
+      "status": 200,
+      "ms": 613
+    },
+    {
+      "route": "/ai/generate-checklist",
+      "method": "POST",
+      "status": 200,
+      "ms": 2329
+    },
+    {
+      "route": "/ai/search",
+      "method": "POST",
+      "status": 200,
+      "ms": 566
+    },
+    {
+      "route": "/ai/generate-policy",
+      "method": "POST",
+      "status": 422,
+      "ms": 402,
+      "code": "VALIDATION_ERROR"
+    }
+  ],
+  "source": "Managed demonstration workspace; fictional prompts only",
+  "externalConnectorMessagesSent": false,
+  "customerBusinessRecordsChanged": false,
+  "aiChecks": [
+    "risk ratings and calculated score",
+    "policy draft",
+    "pasted contract summary",
+    "pasted document Q&A and verified quotations",
+    "structured checklist",
+    "empty evidence search",
+    "input validation"
+  ]
+}
