@@ -1,0 +1,2170 @@
+{
+  "passed": true,
+  "pages": [
+    {
+      "route": "/frameworks",
+      "width": 1440,
+      "title": "Compliance assessments",
+      "headings": 1,
+      "overflow": false,
+      "unlabelled": [],
+      "screenshot": "live-frameworks-1440.png"
+    },
+    {
+      "route": "/risks",
+      "width": 1440,
+      "title": "Risk assessment",
+      "headings": 1,
+      "overflow": false,
+      "unlabelled": [],
+      "screenshot": "live-risks-1440.png"
+    },
+    {
+      "route": "/policies",
+      "width": 1440,
+      "title": "Policies",
+      "headings": 1,
+      "overflow": false,
+      "unlabelled": [],
+      "screenshot": "live-policies-1440.png"
+    },
+    {
+      "route": "/evidence",
+      "width": 1440,
+      "title": "Evidence",
+      "headings": 1,
+      "overflow": false,
+      "unlabelled": [],
+      "screenshot": "live-evidence-1440.png"
+    },
+    {
+      "route": "/approvals",
+      "width": 1440,
+      "title": "Approvals",
+      "headings": 1,
+      "overflow": false,
+      "unlabelled": [],
+      "screenshot": "live-approvals-1440.png"
+    },
+    {
+      "route": "/frameworks",
+      "width": 390,
+      "title": "Compliance assessments",
+      "headings": 1,
+      "overflow": false,
+      "unlabelled": [],
+      "screenshot": "live-frameworks-390.png"
+    },
+    {
+      "route": "/risks",
+      "width": 390,
+      "title": "Risk assessment",
+      "headings": 1,
+      "overflow": false,
+      "unlabelled": [],
+      "screenshot": "live-risks-390.png"
+    },
+    {
+      "route": "/policies",
+      "width": 390,
+      "title": "Policies",
+      "headings": 1,
+      "overflow": false,
+      "unlabelled": [],
+      "screenshot": "live-policies-390.png"
+    },
+    {
+      "route": "/evidence",
+      "width": 390,
+      "title": "Evidence",
+      "headings": 1,
+      "overflow": false,
+      "unlabelled": [],
+      "screenshot": "live-evidence-390.png"
+    },
+    {
+      "route": "/approvals",
+      "width": 390,
+      "title": "Approvals",
+      "headings": 1,
+      "overflow": false,
+      "unlabelled": [],
+      "screenshot": "live-approvals-390.png"
+    }
+  ],
+  "checks": [
+    {
+      "width": 1440,
+      "check": "Compliance phase selection survives reload",
+      "phase": "scope"
+    },
+    {
+      "width": 1440,
+      "check": "Compliance phase selection survives reload",
+      "phase": "risk"
+    },
+    {
+      "width": 1440,
+      "check": "Compliance phase selection survives reload",
+      "phase": "requirements"
+    },
+    {
+      "width": 1440,
+      "check": "Compliance phase selection survives reload",
+      "phase": "evidence"
+    },
+    {
+      "width": 1440,
+      "check": "Compliance phase selection survives reload",
+      "phase": "review"
+    },
+    {
+      "width": 1440,
+      "check": "Live scope preview and saved scope remain separate"
+    },
+    {
+      "width": 1440,
+      "check": "Secure session survives repeated navigation and reload"
+    },
+    {
+      "width": 1440,
+      "check": "Reference design navigation is available"
+    },
+    {
+      "width": 390,
+      "check": "Compliance phase selection survives reload",
+      "phase": "scope"
+    },
+    {
+      "width": 390,
+      "check": "Compliance phase selection survives reload",
+      "phase": "risk"
+    },
+    {
+      "width": 390,
+      "check": "Compliance phase selection survives reload",
+      "phase": "requirements"
+    },
+    {
+      "width": 390,
+      "check": "Compliance phase selection survives reload",
+      "phase": "evidence"
+    },
+    {
+      "width": 390,
+      "check": "Compliance phase selection survives reload",
+      "phase": "review"
+    },
+    {
+      "width": 390,
+      "check": "Live scope preview and saved scope remain separate"
+    },
+    {
+      "width": 390,
+      "check": "Secure session survives repeated navigation and reload"
+    },
+    {
+      "width": 390,
+      "check": "Reference design navigation is available"
+    }
+  ],
+  "errors": [],
+  "serverErrors": [],
+  "blockedWrites": [],
+  "authTrace": [
+    {
+      "width": 1440,
+      "route": "/login",
+      "path": "/api/auth/refresh",
+      "status": 401,
+      "at": "2026-10-31T08:06:29.474Z",
+      "code": "UNAUTHORIZED"
+    },
+    {
+      "width": 1440,
+      "route": "/login",
+      "path": "/api/auth/login",
+      "status": 200,
+      "at": "2026-10-31T08:06:31.122Z"
+    },
+    {
+      "width": 1440,
+      "route": "/frameworks",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:06:34.433Z"
+    },
+    {
+      "width": 1440,
+      "route": "/frameworks",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:06:34.822Z"
+    },
+    {
+      "width": 1440,
+      "route": "/risks",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:06:38.304Z"
+    },
+    {
+      "width": 1440,
+      "route": "/risks",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:06:38.639Z"
+    },
+    {
+      "width": 1440,
+      "route": "/policies",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:06:42.790Z"
+    },
+    {
+      "width": 1440,
+      "route": "/policies",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:06:43.251Z"
+    },
+    {
+      "width": 1440,
+      "route": "/evidence",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:06:47.067Z"
+    },
+    {
+      "width": 1440,
+      "route": "/evidence",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:06:47.663Z"
+    },
+    {
+      "width": 1440,
+      "route": "/approvals",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:06:51.119Z"
+    },
+    {
+      "width": 1440,
+      "route": "/approvals",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:06:51.502Z"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:06:56.286Z"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:06:56.621Z"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:06:59.955Z"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:00.406Z"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:02.962Z"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:03.503Z"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:06.205Z"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:06.601Z"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:09.942Z"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:10.467Z"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:13.334Z"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:13.775Z"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:15.801Z"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:16.268Z"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:19.653Z"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:20.067Z"
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "path": "/api/auth/refresh",
+      "status": 401,
+      "at": "2026-10-31T08:07:24.669Z",
+      "code": "UNAUTHORIZED"
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "path": "/api/auth/login",
+      "status": 200,
+      "at": "2026-10-31T08:07:25.850Z"
+    },
+    {
+      "width": 390,
+      "route": "/frameworks",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:28.514Z"
+    },
+    {
+      "width": 390,
+      "route": "/frameworks",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:29.009Z"
+    },
+    {
+      "width": 390,
+      "route": "/risks",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:31.930Z"
+    },
+    {
+      "width": 390,
+      "route": "/risks",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:32.476Z"
+    },
+    {
+      "width": 390,
+      "route": "/policies",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:35.573Z"
+    },
+    {
+      "width": 390,
+      "route": "/policies",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:36.008Z"
+    },
+    {
+      "width": 390,
+      "route": "/evidence",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:38.764Z"
+    },
+    {
+      "width": 390,
+      "route": "/evidence",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:39.184Z"
+    },
+    {
+      "width": 390,
+      "route": "/approvals",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:42.124Z"
+    },
+    {
+      "width": 390,
+      "route": "/approvals",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:42.467Z"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:45.275Z"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:45.723Z"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:48.477Z"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:48.867Z"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:51.770Z"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:52.298Z"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:07:56.020Z"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:07:56.446Z"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:08:01.138Z"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:08:01.539Z"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:08:08.857Z"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:08:09.259Z"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:08:24.505Z"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:08:27.336Z"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "path": "/api/auth/refresh",
+      "status": 200,
+      "at": "2026-10-31T08:08:44.104Z"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "path": "/api/auth/me",
+      "status": 200,
+      "at": "2026-10-31T08:08:44.821Z"
+    }
+  ],
+  "failedRequests": [
+    {
+      "width": 1440,
+      "route": "/frameworks",
+      "path": "/api/frameworks/implementation-members",
+      "error": "net::ERR_ABORTED",
+      "at": "2026-10-31T08:06:33.227Z"
+    },
+    {
+      "width": 1440,
+      "route": "/frameworks",
+      "path": "/api/frameworks/records/summary",
+      "error": "net::ERR_ABORTED",
+      "at": "2026-10-31T08:06:33.227Z"
+    },
+    {
+      "width": 1440,
+      "route": "/frameworks",
+      "path": "/api/organizations/scoping",
+      "error": "net::ERR_ABORTED",
+      "at": "2026-10-31T08:06:33.228Z"
+    },
+    {
+      "width": 1440,
+      "route": "/frameworks",
+      "path": "/api/frameworks/implementation-overview",
+      "error": "net::ERR_ABORTED",
+      "at": "2026-10-31T08:06:33.229Z"
+    }
+  ],
+  "cookieBlocks": [
+    {
+      "width": 1440,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/frameworks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/frameworks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/frameworks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/frameworks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/frameworks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/frameworks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 1440,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/frameworks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/frameworks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/frameworks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/frameworks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/frameworks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/frameworks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/risks",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/policies",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/evidence",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "/approvals",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "journey phases",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    },
+    {
+      "width": 390,
+      "route": "scope preview",
+      "name": "cc_refresh_token",
+      "reasons": [
+        "NotOnPath"
+      ],
+      "source": "request"
+    }
+  ],
+  "managedDemoOnly": true,
+  "customerRecordWrites": false
+}

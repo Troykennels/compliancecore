@@ -1,4 +1,4 @@
-﻿ComplianceCore reference design release - 31 October 2026
+ComplianceCore reference design release - 31 October 2026
 
 LIVE
 https://compliancecore-sand.vercel.app
@@ -34,7 +34,9 @@ VERIFICATION
   These fixtures were not written to the local or production database.
 - Canonical deployment identity checked after promotion.
 - Live managed-demo checks passed for integration setup, AI interface and six
-  session reloads. External connector test messages were not sent.
+  session reloads. Ten live assessment/related page layouts and 16 additional
+  interactions passed, including scope preview, phase reloads and navigation.
+  External connector test messages were not sent.
 
 Evidence and review gallery:
 verification/reference-20261031/gallery.html
