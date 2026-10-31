@@ -1,0 +1,69 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "width": 1440,
+      "check": "Only Jira, Drive and Okta remain planned"
+    },
+    {
+      "width": 1440,
+      "check": "slack configure, save, clear secrets, test, enable, pause and disconnect"
+    },
+    {
+      "width": 1440,
+      "check": "teams configure, save, clear secrets, test, enable, pause and disconnect"
+    },
+    {
+      "width": 1440,
+      "check": "email configure, save, clear secrets, test, enable, pause and disconnect"
+    },
+    {
+      "width": 1440,
+      "check": "Invalid settings show an inline error"
+    },
+    {
+      "width": 1440,
+      "check": "Contract summary accepts pasted text and renders a result"
+    },
+    {
+      "width": 1440,
+      "check": "Document Q&A accepts pasted text and renders its answer"
+    },
+    {
+      "width": 390,
+      "check": "Only Jira, Drive and Okta remain planned"
+    },
+    {
+      "width": 390,
+      "check": "slack configure, save, clear secrets, test, enable, pause and disconnect"
+    },
+    {
+      "width": 390,
+      "check": "teams configure, save, clear secrets, test, enable, pause and disconnect"
+    },
+    {
+      "width": 390,
+      "check": "email configure, save, clear secrets, test, enable, pause and disconnect"
+    },
+    {
+      "width": 390,
+      "check": "Invalid settings show an inline error"
+    },
+    {
+      "width": 390,
+      "check": "Contract summary accepts pasted text and renders a result"
+    },
+    {
+      "width": 390,
+      "check": "Document Q&A accepts pasted text and renders its answer"
+    },
+    {
+      "check": "DNS failure offers session restoration retry"
+    },
+    {
+      "check": "Authentication rejection still requires sign-in"
+    }
+  ],
+  "errors": [],
+  "providerTraffic": "All connector and auth requests were isolated fixture responses; no messages sent"
+}

@@ -17,6 +17,7 @@ import { startTenantPurgeWorker, scheduleTenantPurgeJob } from './jobs/tenant-pu
 import { initBillingTables } from './modules/billing/billing.repository';
 import { emailTransportStatus } from './lib/email';
 import { startPushDelivery } from './modules/notifications/push.service';
+import { startIntegrationDelivery } from './modules/integrations/integrations.service';
 
 async function bootstrap(): Promise<void> {
   // Verify database and Redis connectivity before accepting traffic
@@ -31,6 +32,7 @@ async function bootstrap(): Promise<void> {
   // restricted normal-query identity. Legacy configurations remain compatible.
   if(!env.PROVISIONING_DATABASE_URL)await initBillingTables();
   const stopPushDelivery = startPushDelivery();
+  const stopIntegrationDelivery = startIntegrationDelivery();
 
   // Say out loud how mail will be sent. Every email in this app is
   // fire-and-forget and swallows its own errors — correct, because a failed
@@ -119,6 +121,7 @@ async function bootstrap(): Promise<void> {
       await Promise.allSettled(workers.map((w) => w.close()));
       logger.info('Workers drained');
       stopPushDelivery();
+      stopIntegrationDelivery();
       await prisma.$disconnect();
       await redis.quit();
       if (env.ENABLE_REDIS) await redisForQueues.quit();

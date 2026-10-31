@@ -1,5 +1,7 @@
 export interface SummarizeContractDto {
-  evidenceId: string;
+  evidenceId?: string;
+  documentText?: string;
+  documentTitle?: string;
   focusAreas?: string[];
 }
 
@@ -66,7 +68,9 @@ export interface GenerateChecklistResult {
 }
 
 export interface DocumentQaDto {
-  evidenceId: string;
+  evidenceId?: string;
+  documentText?: string;
+  documentTitle?: string;
   question: string;
 }
 

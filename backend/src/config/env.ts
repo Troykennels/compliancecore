@@ -77,6 +77,7 @@ const schema = z.object({
 
   // Groq (free-tier AI)
   GROQ_API_KEY: z.string().min(1),
+  GROQ_MODEL: z.string().min(1).default('openai/gpt-oss-20b'),
 
   // ─── Paystack ───────────────────────────────────────────────────────────
   // Optional: a deployment with no payment provider still runs fully, it just

@@ -1,0 +1,72 @@
+ComplianceCore — AI repair and notification connections
+
+Scope
+The user prioritised Slack, Microsoft Teams and email. Jira, Google Drive and
+Okta remain explicitly planned. No account connection is presented as active
+without saved credentials, a successful provider test and explicit enablement.
+
+AI
+The production Groq account returned model_not_found for the old hard-coded
+llama-3.3-70b-versatile model. A harmless direct request confirmed that
+openai/gpt-oss-20b is available. GROQ_MODEL now configures the model, defaulting
+to that verified replacement. The existing provider key is preserved.
+JSON mode, response validation, bounded timeouts and useful errors replace
+silent fallback scores and empty checklists. Risk scores are calculated from
+validated ratings. Document quotations must occur in the supplied text, and
+search links must belong to retrieved evidence. Drafts require human review;
+no AI result approves or updates compliance records.
+Contract review and document Q&A also accept pasted authorised text, avoiding
+an OCR dependency for that path. Uploaded documents still require completed
+text extraction. Confidential evidence is excluded from external AI calls and
+search context. Pasted text is processed for the request, not saved as evidence.
+
+Notification connections
+Organisation administrators configure Slack incoming webhooks, Teams Workflow
+webhooks with Adaptive Cards, or SMTP/Brevo HTTP email. The guided setup provides
+event selection, optional detail sharing, save feedback, test-before-enable,
+pause/disconnect and 90-day delivery history. Passwords, API keys and webhook
+URLs are encrypted with the existing AES-256-GCM application key and are never
+returned by the API. Blank secret inputs preserve previously saved values.
+
+The worker sends durable, newly created notifications after activation. Claims
+are unique per connection and notification, preventing concurrent duplicate
+delivery. Uncertain delivery is recorded and not automatically retried. Email
+respects recipient preferences; configured event delivery replaces the platform
+email. No historical flood or client approval occurs through a channel.
+
+Networking
+Provider webhook domains are restricted, HTTPS redirects are refused, DNS
+answers must be public, and connections use the validated address. SMTP requires
+TLS, valid certificates and port 465 or 587. SMTP hosts that are private or
+reserved are rejected. Brevo HTTP provides an alternative where outbound SMTP
+is blocked. Provider acceptance does not guarantee final inbox/channel receipt.
+
+Deployment
+Apply additive global migration 016_notification_integrations.sql before the
+new backend. The normal runtime role requires SELECT/INSERT/UPDATE/DELETE on
+global.notification_integrations and global.integration_deliveries. No tenant
+schema migration, credential rotation or customer record conversion is needed.
+The explicit-target release script archives the committed source, preserves
+existing identities and subscription terms, and deploys to the existing
+Railway API and Vercel frontend. Provider activation remains an administrator
+setup task; automated verification sends no Slack, Teams or email messages.
+
+Session restoration
+A traced browser check identified net::ERR_NAME_NOT_RESOLVED during refresh.
+Transient connection/server failures now show a retry screen and retain the
+session; only an authentication rejection clears it. The prior full browser
+sweep was interrupted and is not claimed as passed. Earlier local design
+verification and the eight-reload live session check are documented separately.
+
+Validation receipts are stored in verification/ai-connectors-20261031.
+Credentials, full provider output and release archives remain outside Git.
+
+LOCAL ACCEPTANCE
+239 distinct backend checks passed across the initial run and targeted reruns:
+194 existing checks, 14 AI checks, 21 connector-network checks and 10 connector
+database checks. Four older groups initially rejected the new disposable
+database name; the harness was corrected and all 29 of those checks passed.
+The final connector rerun also covers Brevo payloads and exact SMTP passwords.
+Both production builds and frontend lint passed. Sixteen browser checks passed
+at desktop/phone widths, including all three connector lifecycles, pasted text
+in both document tools, DNS interruption and genuine authentication rejection.

@@ -86,7 +86,7 @@ function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
 function EvidenceDocumentSelect({value,onChange}:{value:string;onChange:(id:string)=>void}) {
   const [query,setQuery]=useState(''),[selectedTitle,setSelectedTitle]=useState('');
   const {data,isLoading,isError,refetch}=useEvidence({q:query||undefined,status:'active',limit:100});
-  const documents=(data?.evidence??[]).filter(e=>Boolean(e.currentVersionId));
+  const documents=(data?.evidence??[]).filter(e=>Boolean(e.currentVersionId)&&!e.isConfidential);
   return <div className="space-y-2">
     <input aria-label="Find an uploaded document" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search documents by title" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"/>
     <select aria-label="Uploaded document to analyse" required value={value} disabled={isLoading||isError} onChange={e=>{setSelectedTitle(documents.find(d=>d.id===e.target.value)?.title??'');onChange(e.target.value);}} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
@@ -96,7 +96,13 @@ function EvidenceDocumentSelect({value,onChange}:{value:string;onChange:(id:stri
     </select>
     {isError&&<p role="alert" className="text-xs text-red-700">Documents could not be loaded. <button type="button" className="underline" onClick={()=>void refetch()}>Try again</button></p>}
     {!isLoading&&!isError&&!documents.length&&<p className="text-xs text-slate-500">No matching documents. Upload the file in Evidence first, then return here.</p>}
+    <p className="text-xs text-slate-500">Confidential evidence is excluded from external AI. Uploaded documents need completed text extraction; otherwise use Paste text.</p>
   </div>;
+}
+
+function DocumentSource({value,onChange,text,onTextChange}:{value:string;onChange:(v:string)=>void;text:string;onTextChange:(v:string)=>void}) {
+  const [mode,setMode]=useState<'uploaded'|'paste'>('uploaded');
+  return <div className="space-y-3"><div role="group" aria-label="Document source" className="flex flex-wrap gap-2">{(['uploaded','paste'] as const).map(m=><button key={m} type="button" aria-pressed={mode===m} onClick={()=>{setMode(m);if(m==='paste')onChange('');else onTextChange('');}} className={'rounded-lg border px-3 py-2 text-sm '+(mode===m?'border-teal-600 bg-teal-50 text-teal-800':'border-slate-300 text-slate-600')}>{m==='uploaded'?'Uploaded document':'Paste text'}</button>)}</div>{mode==='uploaded'?<EvidenceDocumentSelect value={value} onChange={onChange}/>:<label className="block text-sm font-medium text-slate-700">Document text (required)<textarea required minLength={50} maxLength={20000} rows={8} value={text} onChange={e=>onTextChange(e.target.value)} className="mt-2 w-full rounded-lg border border-slate-300 p-3 text-sm" placeholder="Paste the authorised document text here…"/><span className="mt-1 block text-xs font-normal text-slate-500">50–20,000 characters. Use an authorised, non-confidential copy. Pasted text is sent to Groq for this request and is not saved as evidence.</span></label>}</div>;
 }
 
 function RunButton({ loading, children }: { loading: boolean; children: React.ReactNode }) {
@@ -137,13 +143,15 @@ function riskScoreColor(score: number) {
 
 function ContractSummarizer() {
   const [evidenceId, setEvidenceId] = useState('');
+  const [documentText,setDocumentText]=useState('');
   const [focusAreas, setFocusAreas] = useState('');
   const { mutate, isPending, data } = useSummarizeContract();
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     mutate({
-      evidenceId: evidenceId.trim(),
+      evidenceId: evidenceId.trim()||undefined,
+      documentText: documentText||undefined,
       focusAreas: focusAreas ? focusAreas.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
     });
   };
@@ -151,10 +159,9 @@ function ContractSummarizer() {
   return (
     <div className="space-y-5">
       <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
-        <AccessibleField label={<>Uploaded contract</>} >
+        <AccessibleField label={<>Contract to review (required)</>} >
 
-          <EvidenceDocumentSelect value={evidenceId} onChange={setEvidenceId}/>
-          <p className="mt-1 text-[11px] text-slate-400">Choose the contract by its title. Upload it in Evidence first if it is missing.</p>
+          <DocumentSource value={evidenceId} onChange={setEvidenceId} text={documentText} onTextChange={setDocumentText}/>
         </AccessibleField>
         <AccessibleField label={<>Focus Areas (optional, comma-separated)</>} >
 
@@ -586,6 +593,7 @@ const CONFIDENCE_LABELS = {
 
 function DocumentQa() {
   const [evidenceId, setEvidenceId] = useState('');
+  const [documentText,setDocumentText]=useState('');
   const [question, setQuestion]     = useState('');
   const { mutate, isPending, data } = useDocumentQa();
 
@@ -599,15 +607,15 @@ function DocumentQa() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutate({ evidenceId: evidenceId.trim(), question: question.trim() });
+    mutate({ evidenceId: evidenceId.trim()||undefined, documentText:documentText||undefined, question: question.trim() });
   };
 
   return (
     <div className="space-y-5">
       <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
-        <AccessibleField label={<>Uploaded document</>} >
+        <AccessibleField label={<>Document to review (required)</>} >
 
-          <EvidenceDocumentSelect value={evidenceId} onChange={setEvidenceId}/>
+          <DocumentSource value={evidenceId} onChange={setEvidenceId} text={documentText} onTextChange={setDocumentText}/>
         </AccessibleField>
         <AccessibleField label={<>Your Question *</>} >
 
@@ -811,6 +819,7 @@ export function AiToolsPage() {
     <div className="mx-auto max-w-7xl p-4 sm:p-6">
       <div className="mb-6"><PageHeader eyebrow="Tools" title="AI tools" description="Assisted drafting and analysis for contracts, policies, risks and compliance documents. Every result is a suggestion for a person to review." /></div>
 
+      <div className="mb-5 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-slate-700"><strong>Draft assistance &middot; Human review required</strong><p className="mt-1">Your submitted text or selected document is processed by our AI provider, Groq. Use information you are authorised to share. Results do not approve documents, confirm compliance or change your records.</p></div>
       {/* Tab navigation */}
       <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 mb-6">
         {TABS.map(({ id, label, icon: Icon }) => (

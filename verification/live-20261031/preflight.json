@@ -1,0 +1,153 @@
+{
+  "passed": true,
+  "commit": "807a4491d8a266ced80b56a5d4a05ec9bd7ef760",
+  "previousBackend": "efa978d8-7bbc-438d-a751-a865e0bcf7bb",
+  "previousFrontend": "dpl_Q5WMkaq1NjSAtAAifJwnt4k8VNvi",
+  "activeTenants": 11,
+  "tenantState": [
+    {
+      "missing": [
+        "privacy_processing_activities",
+        "privacy_requests",
+        "privacy_impact_assessments",
+        "audit_participants",
+        "audit_requests",
+        "audit_request_evidence",
+        "audit_request_comments",
+        "assessment_outcomes"
+      ],
+      "newControlDefault": false
+    },
+    {
+      "missing": [
+        "privacy_processing_activities",
+        "privacy_requests",
+        "privacy_impact_assessments",
+        "audit_participants",
+        "audit_requests",
+        "audit_request_evidence",
+        "audit_request_comments",
+        "assessment_outcomes"
+      ],
+      "newControlDefault": false
+    },
+    {
+      "missing": [
+        "privacy_processing_activities",
+        "privacy_requests",
+        "privacy_impact_assessments",
+        "audit_participants",
+        "audit_requests",
+        "audit_request_evidence",
+        "audit_request_comments",
+        "assessment_outcomes"
+      ],
+      "newControlDefault": false
+    },
+    {
+      "missing": [
+        "privacy_processing_activities",
+        "privacy_requests",
+        "privacy_impact_assessments",
+        "audit_participants",
+        "audit_requests",
+        "audit_request_evidence",
+        "audit_request_comments",
+        "assessment_outcomes"
+      ],
+      "newControlDefault": false
+    },
+    {
+      "missing": [
+        "privacy_processing_activities",
+        "privacy_requests",
+        "privacy_impact_assessments",
+        "audit_participants",
+        "audit_requests",
+        "audit_request_evidence",
+        "audit_request_comments",
+        "assessment_outcomes"
+      ],
+      "newControlDefault": false
+    },
+    {
+      "missing": [
+        "privacy_processing_activities",
+        "privacy_requests",
+        "privacy_impact_assessments",
+        "audit_participants",
+        "audit_requests",
+        "audit_request_evidence",
+        "audit_request_comments",
+        "assessment_outcomes"
+      ],
+      "newControlDefault": false
+    },
+    {
+      "missing": [
+        "privacy_processing_activities",
+        "privacy_requests",
+        "privacy_impact_assessments",
+        "audit_participants",
+        "audit_requests",
+        "audit_request_evidence",
+        "audit_request_comments",
+        "assessment_outcomes"
+      ],
+      "newControlDefault": false
+    },
+    {
+      "missing": [
+        "privacy_processing_activities",
+        "privacy_requests",
+        "privacy_impact_assessments",
+        "audit_participants",
+        "audit_requests",
+        "audit_request_evidence",
+        "audit_request_comments",
+        "assessment_outcomes"
+      ],
+      "newControlDefault": false
+    },
+    {
+      "missing": [
+        "privacy_processing_activities",
+        "privacy_requests",
+        "privacy_impact_assessments",
+        "audit_participants",
+        "audit_requests",
+        "audit_request_evidence",
+        "audit_request_comments",
+        "assessment_outcomes"
+      ],
+      "newControlDefault": false
+    },
+    {
+      "missing": [
+        "privacy_processing_activities",
+        "privacy_requests",
+        "privacy_impact_assessments",
+        "audit_participants",
+        "audit_requests",
+        "audit_request_evidence",
+        "audit_request_comments",
+        "assessment_outcomes"
+      ],
+      "newControlDefault": false
+    },
+    {
+      "missing": [
+        "privacy_processing_activities",
+        "privacy_requests",
+        "privacy_impact_assessments",
+        "audit_participants",
+        "audit_requests",
+        "audit_request_evidence",
+        "audit_request_comments",
+        "assessment_outcomes"
+      ],
+      "newControlDefault": false
+    }
+  ],
+  "productionWrites": false
+}

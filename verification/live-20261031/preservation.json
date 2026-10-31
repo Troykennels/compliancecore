@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "counts": {
+    "accounts": 20,
+    "memberships": 14,
+    "organisations": 11,
+    "subscriptions": 11,
+    "plans": 5
+  },
+  "passwordsAndMembershipsPreserved": true,
+  "subscriptionTermsPreserved": true,
+  "providerIdentityKeysPreserved": true,
+  "sourceBackupSha256": "723801753f5f6d15b610b5d1d807cfed1b50cc161041f83dace9b5a482757b68"
+}

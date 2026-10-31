@@ -32,6 +32,7 @@ import { signaturesRouter } from './modules/signatures/signatures.router';
 import { tasksRouter } from './modules/tasks/tasks.router';
 import { escalationsRouter } from './modules/escalations/escalations.router';
 import { aiRouter } from './modules/ai/ai.router';
+import integrationsRouter from './modules/integrations/integrations.router';
 import { reportsRouter } from './modules/reports/reports.router';
 import { billingRouter } from './modules/billing/billing.router';
 import { paymentsRouter, paymentsPublicRouter } from './modules/payments/payments.router';
@@ -129,6 +130,7 @@ export function createApp(): Express {
   app.use('/api/tasks',          tasksRouter);
   app.use('/api/escalations',    escalationsRouter);
   app.use('/api/ai',             aiRouter);
+  app.use('/api/integrations', integrationsRouter);
   app.use('/api/reports',        reportsRouter);
   app.use('/api/billing',        billingRouter);
   // Public router first: it only serves /config, so authenticated payment

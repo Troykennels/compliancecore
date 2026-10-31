@@ -1,0 +1,83 @@
+ComplianceCore live release - 31 October 2026
+
+Historical design release record. The subsequent AI and notification connector
+release is recorded in AI_CONNECTORS_20261031.txt and its verification folder.
+The interrupted browser sweep is retained as diagnostic evidence, not a pass.
+
+LIVE APPLICATION
+https://compliancecore-sand.vercel.app
+API: https://compliancecore-api-production.up.railway.app
+
+APPLICATION REVISION
+807a4491d8a266ced80b56a5d4a05ec9bd7ef760
+Reviewed branch: ux-fixes-20261029
+The release used a clean Git archive of that exact revision. Provider
+credentials, local preview builds, .env files and uncommitted operator tools
+were not included in the application source archive.
+
+DEPLOYMENTS
+Railway: 98542b81-0031-4487-b5b8-3b6b48c652a0
+Vercel: dpl_sTJ4eis5sxqaqyjErqRL1Ke6dPX4
+Vercel production candidate was built without assigning the live domain.
+The API reached SUCCESS and passed live HTTP acceptance before the candidate
+was promoted to the canonical address at 2026-10-31T05:21:19.992Z.
+No paid plan upgrade or new hosting service was created.
+
+DATABASE UPGRADE
+A consistent PostgreSQL 18 custom-format backup was taken before any writes.
+All 601 application tables / 4,170 rows matched an isolated local restore.
+The original full backup retains all extensions. The local Windows restore
+omitted the unused vector extension after verifying zero application vector
+columns. This validates application records, not an identical full-server
+recovery, production collation performance or external object-store recovery.
+Backups and credentials remain private outside the repository.
+
+All tenant templates validated against the restored copy and rolled back.
+The four new templates then applied atomically to 11 active tenant schemas:
+017 privacy registers; 018 untouched-control assessment status;
+019 audit rooms; 020 independently reviewed assessment outcomes.
+579 existing non-control/non-ledger tables had identical record fingerprints
+within the migration transaction. Existing controls retained their non-status
+fields; 779 untouched controls changed from not_implemented to not_assessed
+under the explicit migration eligibility rules. Audit-ledger entries from
+those status corrections are expected. New-table runtime permissions passed.
+
+ACCOUNT AND BILLING PRESERVATION
+Compared with the restored pre-release backup: 20 account credentials,
+14 memberships, 11 organisations, 11 subscriptions and five plan definitions
+matched the selected protected fields / complete subscription and plan terms.
+JWT keys, encryption key, cookie/signature secrets, database connections and
+frontend origin were unchanged. Existing demo credentials still sign in.
+No real payment, external test message, customer-record edit, owner reset or
+demonstration reseeding was performed by the release acceptance checks.
+
+ACCEPTANCE EVIDENCE
+verification/live-20261031/deployment.json
+verification/live-20261031/cloud-backup-restore.json
+verification/live-20261031/restore-migration-validation.json
+verification/live-20261031/migrations.json
+verification/live-20261031/preservation.json
+verification/live-20261031/live-http-checks.json (29 checks passed)
+Live desktop/phone results and screenshots are recorded in that directory.
+The browser runner blocks non-authentication API write requests and uses only
+the managed demonstration organisation. Authentication/session writes are normal.
+Earlier local acceptance: 88 page layouts, 48 interaction checks, seven role
+dashboards, frontend builds/type checking, and 194 backend tests including the
+isolated database suite. Those historical results are separate from live checks.
+
+OPERATING RECORD
+Railway CLI refreshed its existing authentication. Vercel CLI refreshed its
+expired cached access token. Old direct-provider endpoint/token attempts were
+read-only and failed before database changes; the final provider checks passed.
+The current public Railway API endpoint is backboard.railway.com/graphql/v2;
+the release uses CLI authentication instead of the obsolete saved API session.
+The release archive, command output and rollback target IDs are retained in
+the existing private operator directory under concept-release-20261031.
+Previous application targets: Railway efa978d8-7bbc-438d-a751-a865e0bcf7bb;
+Vercel dpl_Q5WMkaq1NjSAtAAifJwnt4k8VNvi. No destructive schema rollback or
+production backup restore was performed. Additive tables remain in place.
+
+The existing source push and local-only delivery notes describe earlier states.
+This record supersedes their statement that the application was not deployed.
+Origin/main was not advanced; production runs the exact reviewed branch revision
+above, deployed through the existing explicit Railway/Vercel release process.

@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "tenantSchemasValidated": 11,
+  "allTenantTemplatesValidated": true,
+  "rolledBack": true,
+  "productionWrites": false,
+  "backupSha256": "723801753f5f6d15b610b5d1d807cfed1b50cc161041f83dace9b5a482757b68"
+}

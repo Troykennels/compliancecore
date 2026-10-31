@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "scope": "Combined initial run and targeted reruns after correcting the disposable database name",
+  "uniqueBackendChecks": 239,
+  "coverage": {"existing": 194, "ai": 14, "connectorNetwork": 21, "connectorDatabase": 10},
+  "initialRun": {"passed": 203, "safetyGuardRejectedGroups": 4, "skippedByThoseGuards": 29},
+  "targetedRerun": {"filesPassed": 6, "checksPassed": 53},
+  "connectorSecurityRerun": {"filesPassed": 2, "checksPassed": 31},
+  "finalCredentialRerun": {"filesPassed": 1, "checksPassed": 10},
+  "backendBuild": "passed",
+  "frontendBuild": "passed",
+  "frontendLint": "passed",
+  "browserChecks": 16,
+  "externalConnectorMessagesSent": false,
+  "realCustomerBusinessRecordWrites": false,
+  "testDatabase": "Dedicated loopback PostgreSQL 18 database; production restore database untouched"
+}

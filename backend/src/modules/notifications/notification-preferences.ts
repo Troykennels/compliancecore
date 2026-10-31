@@ -50,6 +50,16 @@ export async function emailAllowedInTransaction(
   userId: string,
   type: string,
 ) {
+  // An enabled organisation transport owns these events. Avoid sending a
+  // second copy through the platform transport; the connector worker applies
+  // the same recipient preference before delivery.
+  const own = await tx.$queryRawUnsafe<Array<{ enabled: boolean }>>(
+    `SELECT i.enabled FROM global.notification_integrations i
+     JOIN global.tenants t ON t.id=i.tenant_id
+     WHERE t.schema_name=current_schema() AND i.provider='email' AND i.enabled
+       AND i.verified_at IS NOT NULL AND i.config->'events' ? $1`, type,
+  );
+  if(own.length)return false;
   const rows = await tx.$queryRawUnsafe<Array<{ email: boolean }>>(
     'SELECT email FROM notification_preferences WHERE user_id=$1::uuid AND notification_type=$2',
     userId,

@@ -4,9 +4,11 @@ import * as service from './ai.service';
 import { validate } from '../../lib/validate';
 
 const summarizeSchema = z.object({
-  evidenceId:  z.string().uuid(),
+  evidenceId:  z.string().uuid().optional(),
+  documentText: z.string().min(50).max(20000).optional(),
+  documentTitle: z.string().max(200).optional(),
   focusAreas:  z.array(z.string().max(100)).max(5).optional(),
-});
+}).refine(v=>Boolean(v.evidenceId)!==Boolean(v.documentText),{message:'Choose one uploaded document or paste document text.'});
 
 const policySchema = z.object({
   policyType:          z.string().min(1).max(200),
@@ -31,9 +33,11 @@ const checklistSchema = z.object({
 });
 
 const docQaSchema = z.object({
-  evidenceId: z.string().uuid(),
+  evidenceId: z.string().uuid().optional(),
+  documentText: z.string().min(50).max(20000).optional(),
+  documentTitle: z.string().max(200).optional(),
   question:   z.string().min(5).max(1000),
-});
+}).refine(v=>Boolean(v.evidenceId)!==Boolean(v.documentText),{message:'Choose one uploaded document or paste document text.'});
 
 const searchSchema = z.object({
   query: z.string().min(2).max(500),

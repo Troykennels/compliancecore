@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "appliedAtomically": true,
+  "templates": [
+    "017_privacy_registers.sql",
+    "018_control_not_assessed.sql",
+    "019_audit_room.sql",
+    "020_assessment_outcomes.sql"
+  ],
+  "tenants": 11,
+  "existingStableTablesUnchanged": 579,
+  "accountsAndBillingPreserved": true,
+  "untouchedControlsReclassified": 779,
+  "runtimeAccessVerified": true,
+  "backupSha256": "723801753f5f6d15b610b5d1d807cfed1b50cc161041f83dace9b5a482757b68"
+}

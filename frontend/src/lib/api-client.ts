@@ -100,6 +100,9 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         if(getAuthRevision()!==revision)return Promise.reject(refreshError);
+        // A DNS failure or provider outage is not an expired login. Retain
+        // the session and let the calling view offer a retry.
+        if(!axios.isAxiosError(refreshError)||![401,403].includes(refreshError.response?.status??0))return Promise.reject(refreshError);
         clearAccessToken();
         // Redirect to login — import is dynamic to avoid circular deps
         window.location.href = '/login';

@@ -1,4 +1,5 @@
-import { useEffect, lazy, Suspense } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
+import { isAxiosError } from 'axios';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
@@ -78,6 +79,7 @@ const BillingAdminPage = lazyPage(() => import('./features/billing/pages/billing
 // If the httpOnly refresh cookie is present and valid, restores auth state.
 function AuthInitialiser({ children }: { children: React.ReactNode }): JSX.Element {
   const { setAuth, clearAuth } = useAuthStore();
+  const [connectionError,setConnectionError]=useState(false);
 
   useEffect(() => {
     const initialRevision=getAuthRevision();
@@ -113,7 +115,11 @@ function AuthInitialiser({ children }: { children: React.ReactNode }): JSX.Eleme
           u.tenants,
         );
       })
-      .catch(() => {
+      .catch((error:unknown) => {
+        if(!isAxiosError(error)||![401,403].includes(error.response?.status??0)){
+          if(!useAuthStore.getState().isAuthenticated)setConnectionError(true);
+          return;
+        }
         // A slow startup refresh must not undo a newer explicit sign-in.
         if(!useAuthStore.getState().isAuthenticated&&(getAuthRevision()===initialRevision||(refreshToken!==null&&getAccessToken()===refreshToken)))clearAuth();
       }).finally(()=>useAuthStore.getState().setInitialised());
@@ -121,6 +127,7 @@ function AuthInitialiser({ children }: { children: React.ReactNode }): JSX.Eleme
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  if(connectionError)return <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6"><div role="alert" className="max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><h1 className="text-xl font-semibold text-slate-900">Connection interrupted</h1><p className="mt-3 text-sm leading-6 text-slate-600">We could not restore your session because the server could not be reached. Check your connection and try again.</p><button onClick={()=>window.location.reload()} className="mt-5 rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white">Try again</button></div></main>;
   return <>{children}</>;
 }
 
