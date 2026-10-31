@@ -1,0 +1,48 @@
+﻿ComplianceCore reference design release - 31 October 2026
+
+LIVE
+https://compliancecore-sand.vercel.app
+Application source: 51771ea0fc318f35e39b4bd1fe1d00dc9dad097a
+Branch: ux-fixes-20261029
+Vercel deployment: dpl_GfwHCcYxdpksmggd41J6G1iPtHth
+Existing production API and database retained; this release changes the frontend.
+
+DESIGN
+Applied reference-board proportions across shared headers, bordered cards,
+filters, form controls, tables and navigation. This remains a compliance app.
+The assessment desk has phase-grouped step navigation, individual labelled
+fields, required/optional indicators, contextual explanations, and a separate
+live scope preview. Collapsed phases remain accessible.
+
+Risk worksheets focus the visible columns and highlight the selected row.
+The context rail shows that record's saved asset, scenario, consequence,
+assessment basis, owner, proposed treatment and justified remaining risk.
+Existing row editing and validation remain available. Examples and suggestions
+remain draft material; saved decisions are not inferred from the design PNGs.
+
+The existing authenticator setup already supplies a QR code and manual key.
+Sign-in verification now prevents duplicate six-digit submissions synchronously
+and displays checking feedback. The backend authentication rules are unchanged.
+
+VERIFICATION
+- Production TypeScript/Vite build and ESLint passed.
+- 44 routes at desktop/phone widths: 88 layouts passed, with zero page errors,
+  API server errors, page overflow, duplicate headings or unlabelled fields.
+- 48 interaction checks passed, including scope preview, step reloads, forms,
+  role access and navigation.
+- Two explicit browser-only synthetic risk rows tested selected-row context.
+  These fixtures were not written to the local or production database.
+- Canonical deployment identity checked after promotion.
+- Live managed-demo checks passed for integration setup, AI interface and six
+  session reloads. External connector test messages were not sent.
+
+Evidence and review gallery:
+verification/reference-20261031/gallery.html
+verification/reference-20261031/page-coverage.csv
+verification/reference-20261031/browser-checks.json
+verification/reference-20261031/interaction-checks.json
+verification/reference-20261031/deployment.json
+
+No backend deployment, database migration, account reset or customer business
+record update was required for this frontend release. The prior AI/connector
+backend release remains active.

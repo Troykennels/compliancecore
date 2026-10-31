@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "rows": 2,
+  "selectedRiskDetails": true,
+  "scope": "Two explicit browser-only synthetic rows; no database writes"
+}

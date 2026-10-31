@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "width": 1440,
+      "check": "Slack setup loads with no stored credentials and no message sent"
+    },
+    {
+      "width": 1440,
+      "check": "Microsoft Teams setup loads with no stored credentials and no message sent"
+    },
+    {
+      "width": 1440,
+      "check": "Email / SMTP setup loads with no stored credentials and no message sent"
+    },
+    {
+      "width": 1440,
+      "check": "Live AI tools expose pasted-text mode and human review guidance"
+    },
+    {
+      "width": 1440,
+      "check": "Session retained across three full page reloads"
+    },
+    {
+      "width": 390,
+      "check": "Slack setup loads with no stored credentials and no message sent"
+    },
+    {
+      "width": 390,
+      "check": "Microsoft Teams setup loads with no stored credentials and no message sent"
+    },
+    {
+      "width": 390,
+      "check": "Email / SMTP setup loads with no stored credentials and no message sent"
+    },
+    {
+      "width": 390,
+      "check": "Live AI tools expose pasted-text mode and human review guidance"
+    },
+    {
+      "width": 390,
+      "check": "Session retained across three full page reloads"
+    }
+  ],
+  "errors": [],
+  "blockedWrites": [],
+  "managedDemoOnly": true,
+  "externalConnectorMessagesSent": false,
+  "customerBusinessRecordWrites": false
+}

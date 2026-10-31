@@ -1,0 +1,9 @@
+{
+  "commit": "51771ea0fc318f35e39b4bd1fe1d00dc9dad097a",
+  "frontendDeployment": "dpl_GfwHCcYxdpksmggd41J6G1iPtHth",
+  "previousFrontend": "dpl_BxvpV7M1UnQSRH4TuuJ6exQ5WL8j",
+  "promoted": true,
+  "url": "https://compliancecore-sand.vercel.app",
+  "backendUnchanged": true,
+  "at": "2026-10-31T08:02:28.169Z"
+}
