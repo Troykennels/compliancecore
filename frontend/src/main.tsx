@@ -4,6 +4,7 @@ import App from './App';
 import './styles/globals.css';
 import './styles/workspace.css';
 import './styles/compliance-concept.css';
+import './styles/reference-workspaces.css';
 
 /**
  * Recover from stale lazy-loaded chunks after a deploy.

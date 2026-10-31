@@ -18,6 +18,7 @@ export function MfaChallenge({ mfaChallengeToken, email }: MfaChallengeProps): J
   const [useBackupCode, setUseBackupCode] = useState(false);
   const [backupCode, setBackupCode] = useState('');
   const inputs = useRef<Array<HTMLInputElement | null>>([]);
+  const submitting = useRef(false);
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
 
@@ -30,6 +31,7 @@ export function MfaChallenge({ mfaChallengeToken, email }: MfaChallengeProps): J
     mutationFn: (code: string) =>
       authApi.completeMfaChallenge({ mfaChallengeToken, code }).then((r) => r.data.data),
     onSuccess: handleSuccess,
+    onSettled: () => { submitting.current = false; },
     onError: () => {
       toast.error('Invalid code. Please try again.');
       setDigits(Array(6).fill(''));
@@ -47,7 +49,8 @@ export function MfaChallenge({ mfaChallengeToken, email }: MfaChallengeProps): J
   const isLoading = totpMutation.isPending || backupMutation.isPending;
 
   const submitCode = (code: string) => {
-    if (code.length === 6 && /^\d+$/.test(code)) {
+    if (!submitting.current && code.length === 6 && /^\d+$/.test(code)) {
+      submitting.current = true;
       totpMutation.mutate(code);
     }
   };
@@ -163,8 +166,9 @@ export function MfaChallenge({ mfaChallengeToken, email }: MfaChallengeProps): J
       </div>
 
       {isLoading && (
-        <div className="flex justify-center">
+        <div className="flex items-center justify-center gap-2 text-sm text-slate-600" role="status">
           <Loader2 className="h-5 w-5 animate-spin text-indigo-600" />
+          Checking your code…
         </div>
       )}
 

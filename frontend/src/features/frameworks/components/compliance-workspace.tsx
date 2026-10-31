@@ -35,6 +35,7 @@ import { AssessmentHeader, CountChips, PhaseTabs, StatusBadge } from './assessme
 import { PHASES, phaseOf } from '../assessment-phases';
 import { useOrgFormat } from '@/lib/org-format';
 import { SuggestSelect } from './suggest-select';
+import type { WorksheetRisk } from '../assessment';
 import {
   MANAGEMENT_REVIEW_SUGGESTIONS,
   MONITORING_SUGGESTIONS,
@@ -108,6 +109,7 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
   const [justification, setJustification] = useState('');
   const [evidenceId, setEvidenceId] = useState('');
   const [filter, setFilter] = useState('');
+  const [selectedRisk, setSelectedRisk] = useState<WorksheetRisk | null>(null);
   const { data: files } = useQuery({
     queryKey: ['applicability-evidence'],
     queryFn: () => evidenceApi.list({ limit: 100, status: 'active' }).then((r) => r.data.data),
@@ -209,6 +211,7 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
       />
       <section
         aria-label="Assessment progress"
+        data-assessment-progress
         className="space-y-3 rounded-xl border border-slate-200 bg-white p-5"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -310,10 +313,10 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
             that they are approved.
           </p>
           {phases.map((p) => (
-            <div key={p.key} className="mt-4">
-              <p className="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <details key={p.key} open={phaseOf(keys, step) === p.key} className="cc-step-group mt-3">
+              <summary className="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 {p.label}
-              </p>
+              </summary>
               <ol className="mt-1 space-y-0.5">
                 {steps
                   .map((g, i) => ({ g, i }))
@@ -352,10 +355,10 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                     </li>
                   ))}
               </ol>
-            </div>
+            </details>
           ))}
         </nav>
-        <section className="min-w-0 space-y-5 rounded-xl border bg-white p-4 sm:p-6">
+        <section className="cc-assessment-editor min-w-0 space-y-5 rounded-xl border bg-white p-4 sm:p-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Step {steps.findIndex((x) => x.key === selected.key) + 1} of {steps.length}
@@ -372,7 +375,7 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                   action.mutate({ method: 'put', data: { scope, objective, ownerId, targetDate } });
                 }}
               >
-                <Field label="Scope: services, records, systems, locations and boundaries">
+                <Field label="Scope: services, records, systems, locations and boundaries" help="Describe what is included and where the boundaries sit. Keep excluded activities explicit so every reviewer assesses the same coverage." required>
                   <SuggestSelect
                     label="Choose a suggested scope"
                     options={scopeSuggestions(s.framework.code)}
@@ -392,7 +395,7 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                     disabled={!manager}
                   />
                 </Field>
-                <Field label="What should the assessment establish?">
+                <Field label="What should the assessment establish?" help="State the outcome you need from this assessment. Tailor any suggestion to the actual organisation and framework." required>
                   <SuggestSelect
                     label="Choose a suggested objective"
                     options={objectiveSuggestions(s.framework.code)}
@@ -413,7 +416,7 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                   />
                 </Field>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Field label="Accountable assessment owner">
+                  <Field label="Accountable assessment owner" help="Select the person responsible for coordinating this assessment." required>
                     <select
                       required
                       aria-label="Assessment owner"
@@ -606,10 +609,10 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                   </button>
                 )}
               </form>
-              <RiskAssessmentSheet id={id} />
+              <RiskAssessmentSheet id={id} onSelect={setSelectedRisk} />
             </>
           )}
-          {step === 'risk_treatment' && <RiskAssessmentSheet id={id} treatment />}
+          {step === 'risk_treatment' && <RiskAssessmentSheet id={id} treatment onSelect={setSelectedRisk} />}
           {step === 'policies' && (
             <>
               <div className="flex flex-wrap gap-2">
@@ -961,6 +964,22 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
           </div>
         </section>
         <aside className="cc-assessment-context" aria-label="Assessment context and guidance">
+          {['risk_assessment', 'risk_treatment'].includes(step) && selectedRisk && (
+            <section className="cc-context-card" aria-label="Selected risk details">
+              <h2>Risk details</h2>
+              <p className="mb-3 text-slate-500">Selected saved record. Use Edit row to update its assessment and treatment.</p>
+              <div className="cc-live-preview">
+                <h3>Asset or activity</h3><p>{selectedRisk.asset_name}</p>
+                <h3>Risk scenario</h3><p>{selectedRisk.title}</p>
+                <h3>Consequence</h3><p>{selectedRisk.consequence || 'Not recorded'}</p>
+                <h3>Likelihood × impact</h3><p>{selectedRisk.inherent_likelihood} × {selectedRisk.inherent_impact} = {selectedRisk.inherent_score}</p>
+                <h3>Assessment basis</h3><p>{selectedRisk.assessment_basis || 'Not recorded'}</p>
+                <h3>Treatment owner</h3><p>{selectedRisk.owner_name || 'Not assigned'}</p>
+                <h3>Proposed treatment</h3><p>{selectedRisk.mitigation_plan || 'Not recorded'}</p>
+                <h3>Remaining risk</h3><p>{selectedRisk.residual_basis ? `${selectedRisk.residual_score} · ${selectedRisk.residual_basis}` : 'Needs a justified residual assessment'}</p>
+              </div>
+            </section>
+          )}
           <section className="cc-context-card">
             <h2>{step === 'scope' ? 'Scope preview' : 'Selected assessment step'}</h2>
             {step === 'scope' ? (

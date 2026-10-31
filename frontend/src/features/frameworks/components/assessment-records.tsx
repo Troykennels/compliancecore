@@ -1,7 +1,7 @@
 import { useOrgFormat } from '@/lib/org-format';
 import { humanize } from '@/lib/labels';
 import { ModalSurface } from '@/components/modal-surface';
-import { useState } from 'react';
+import { Children, isValidElement, useEffect, useState } from 'react';
 import { Download, Plus, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
 import { useImplementationMembers } from '../implementation';
@@ -25,10 +25,12 @@ function useManager() {
     useAuthStore((s) => s.activeTenant?.role) ?? '',
   );
 }
-export function AssessmentField({ label, children }: { label: string; children: React.ReactNode }) {
+export function AssessmentField({ label, children, help, required }: { label: string; children: React.ReactNode; help?: string; required?: boolean }) {
+  const isRequired = required ?? Children.toArray(children).some(child => isValidElement<{ required?: boolean }>(child) && child.props.required);
   return (
-    <label className="block min-w-0 space-y-1 text-sm font-medium text-slate-700">
-      <span>{label}</span>
+    <label className="cc-assessment-field block min-w-0 space-y-1 text-sm font-medium text-slate-700">
+      <span className="cc-field-heading">{label}<small className={isRequired ? 'cc-required' : 'cc-optional'}>{isRequired ? 'Required' : 'Optional'}</small></span>
+      {help && <span className="cc-field-help">{help}</span>}
       {children}
     </label>
   );
@@ -304,9 +306,11 @@ function draftRisk(r: WorksheetRisk): RiskDraft {
 export function RiskAssessmentSheet({
   id,
   treatment = false,
+  onSelect,
 }: {
   id: string;
   treatment?: boolean;
+  onSelect?: (risk: WorksheetRisk | null) => void;
 }) {
   const { data, isLoading, isError } = useAssessment(id);
   const save = useAssessmentSave(id);
@@ -314,6 +318,9 @@ export function RiskAssessmentSheet({
   const { data: members = [] } = useImplementationMembers();
   const [draft, setDraft] = useState<RiskDraft | null>(null);
   const [filter, setFilter] = useState('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = data?.risks.find(risk => risk.id === selectedId) ?? data?.risks[0] ?? null;
+  useEffect(() => { onSelect?.(selected); }, [selected, onSelect]);
   if (isLoading) return <p>Loading risk worksheet…</p>;
   if (isError || !data)
     return <p role="alert">The risk worksheet could not be loaded. Refresh to retry.</p>;
@@ -379,7 +386,7 @@ export function RiskAssessmentSheet({
         </div>
       </details>
       <div
-        className="overflow-auto rounded-lg border"
+        className="cc-risk-sheet overflow-auto rounded-lg border"
         tabIndex={0}
         aria-label="Risk assessment spreadsheet"
       >
@@ -411,7 +418,7 @@ export function RiskAssessmentSheet({
                 (r.asset_name + ' ' + r.title).toLowerCase().includes(filter.toLowerCase()),
               )
               .map((r) => (
-                <tr key={r.id} className="border-t align-top">
+                <tr key={r.id} className="border-t align-top" aria-selected={selected?.id === r.id} onClick={() => setSelectedId(r.id)} onFocus={() => setSelectedId(r.id)}>
                   <td className="max-w-[180px] p-3 font-medium">{r.asset_name}</td>
                   <td className="max-w-[250px] p-3">{r.title}</td>
                   <td className="p-3">{r.inherent_likelihood}</td>
