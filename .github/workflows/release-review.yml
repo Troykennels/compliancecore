@@ -1,0 +1,37 @@
+name: Prepare reviewed release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-review-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+
+  package:
+    name: Package the verified revision for deployment review
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package tracked source and record its revision
+        shell: bash
+        run: |
+          mkdir -p release
+          git archive --format=zip --output=release/ComplianceCore-source.zip HEAD
+          git rev-parse HEAD > release/REVISION.txt
+          sha256sum release/ComplianceCore-source.zip > release/SHA256.txt
+          cp DEPLOYMENT.md release/
+          cp PRODUCTION_CHECKLIST.md release/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ComplianceCore-reviewed-${{ github.sha }}
+          path: release/
+          if-no-files-found: error
+          retention-days: 30

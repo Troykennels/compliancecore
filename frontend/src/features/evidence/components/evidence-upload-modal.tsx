@@ -46,7 +46,7 @@ export function EvidenceUploadModal({ open, onClose, onSuccess }: EvidenceUpload
 
   const {
     register, control, handleSubmit, formState: { errors }, reset: resetForm,
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({ resolver: zodResolver(schema) });
 
   useEffect(() => {
     if (!open) {

@@ -46,7 +46,7 @@ export function ApprovalRequestModal({ open, onClose, entityType, entityId, enti
   const create = useCreateApprovalRequest();
   const { data: workflows = [] } = useWorkflows();
 
-  const { register, control, watch, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, control, watch, handleSubmit, reset, formState: { errors } } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
       entityType: entityType ?? 'general',

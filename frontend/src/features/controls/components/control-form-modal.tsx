@@ -68,7 +68,7 @@ export function ControlFormModal({ open, onClose, control }: Props): JSX.Element
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormValues>({
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: DEFAULTS,
   });

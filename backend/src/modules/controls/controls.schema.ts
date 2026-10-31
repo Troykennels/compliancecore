@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 
 const uuidSchema = z.string().uuid();
@@ -20,7 +21,7 @@ export const createControlSchema = z.object({
   reviewFrequencyDays:  z.number().int().min(1).max(3650).optional().default(365),
 });
 
-export const updateControlSchema = createControlSchema.partial().extend({
+export const updateControlSchema = patchObject(createControlSchema).extend({
   lastReviewedAt: z.coerce.date().optional().nullable(),
 });
 

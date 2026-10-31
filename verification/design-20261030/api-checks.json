@@ -1,0 +1,417 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "role": "owner",
+      "method": "POST",
+      "route": "/auth/login",
+      "status": 200
+    },
+    {
+      "role": "owner",
+      "method": "GET",
+      "route": "/auth/me",
+      "status": 200
+    },
+    {
+      "role": "admin",
+      "method": "POST",
+      "route": "/auth/login",
+      "status": 200
+    },
+    {
+      "role": "compliance_manager",
+      "method": "POST",
+      "route": "/auth/login",
+      "status": 200
+    },
+    {
+      "role": "control_owner",
+      "method": "POST",
+      "route": "/auth/login",
+      "status": 200
+    },
+    {
+      "role": "auditor",
+      "method": "POST",
+      "route": "/auth/login",
+      "status": 200
+    },
+    {
+      "role": "viewer",
+      "method": "POST",
+      "route": "/auth/login",
+      "status": 200
+    },
+    {
+      "role": "msp_admin",
+      "method": "POST",
+      "route": "/auth/login",
+      "status": 200
+    },
+    {
+      "role": "msp_analyst",
+      "method": "POST",
+      "route": "/auth/login",
+      "status": 200
+    },
+    {
+      "role": "owner",
+      "method": "GET",
+      "route": "/analytics/overview",
+      "status": 200
+    },
+    {
+      "role": "admin",
+      "method": "GET",
+      "route": "/analytics/overview",
+      "status": 200
+    },
+    {
+      "role": "compliance_manager",
+      "method": "GET",
+      "route": "/analytics/overview",
+      "status": 200
+    },
+    {
+      "role": "control_owner",
+      "method": "GET",
+      "route": "/analytics/overview",
+      "status": 200
+    },
+    {
+      "role": "auditor",
+      "method": "GET",
+      "route": "/analytics/overview",
+      "status": 200
+    },
+    {
+      "role": "viewer",
+      "method": "GET",
+      "route": "/analytics/overview",
+      "status": 200
+    },
+    {
+      "role": "msp_admin",
+      "method": "GET",
+      "route": "/analytics/overview",
+      "status": 200
+    },
+    {
+      "role": "msp_analyst",
+      "method": "GET",
+      "route": "/analytics/overview",
+      "status": 200
+    },
+    {
+      "role": "auditor",
+      "method": "GET",
+      "route": "/training",
+      "status": 200
+    },
+    {
+      "role": "auditor",
+      "method": "GET",
+      "route": "/vendors",
+      "status": 200
+    },
+    {
+      "role": "auditor",
+      "method": "POST",
+      "route": "/training",
+      "status": 403
+    },
+    {
+      "role": "viewer",
+      "method": "POST",
+      "route": "/audits",
+      "status": 403
+    },
+    {
+      "role": "owner",
+      "method": "POST",
+      "route": "/audits",
+      "status": 201
+    },
+    {
+      "role": "owner",
+      "method": "PATCH",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4",
+      "status": 200
+    },
+    {
+      "role": "owner",
+      "method": "PATCH",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4",
+      "status": 200
+    },
+    {
+      "role": "owner",
+      "method": "POST",
+      "route": "/training",
+      "status": 201
+    },
+    {
+      "role": "owner",
+      "method": "PATCH",
+      "route": "/training/96e46473-b777-4502-ab30-486313d3fae8",
+      "status": 200
+    },
+    {
+      "role": "owner",
+      "method": "GET",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room",
+      "status": 200
+    },
+    {
+      "role": "viewer",
+      "method": "GET",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room",
+      "status": 403
+    },
+    {
+      "role": "auditor",
+      "method": "GET",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room",
+      "status": 403
+    },
+    {
+      "role": "owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/participants",
+      "status": 204
+    },
+    {
+      "role": "auditor",
+      "method": "GET",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room",
+      "status": 403
+    },
+    {
+      "role": "owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/participants",
+      "status": 204
+    },
+    {
+      "role": "auditor",
+      "method": "GET",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room",
+      "status": 200
+    },
+    {
+      "role": "auditor",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests",
+      "status": 403
+    },
+    {
+      "role": "owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests",
+      "status": 422
+    },
+    {
+      "role": "owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests",
+      "status": 201
+    },
+    {
+      "role": "owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests",
+      "status": 201
+    },
+    {
+      "role": "control_owner",
+      "method": "GET",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room",
+      "status": 200
+    },
+    {
+      "role": "control_owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/75d7db82-9eba-45a7-881a-773807ea4379/decision",
+      "status": 409
+    },
+    {
+      "role": "control_owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/75d7db82-9eba-45a7-881a-773807ea4379/evidence",
+      "status": 422
+    },
+    {
+      "role": "control_owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/75d7db82-9eba-45a7-881a-773807ea4379/evidence",
+      "status": 204
+    },
+    {
+      "role": "control_owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/75d7db82-9eba-45a7-881a-773807ea4379/evidence/remove",
+      "status": 204
+    },
+    {
+      "role": "control_owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/75d7db82-9eba-45a7-881a-773807ea4379/decision",
+      "status": 409
+    },
+    {
+      "role": "control_owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/75d7db82-9eba-45a7-881a-773807ea4379/evidence",
+      "status": 204
+    },
+    {
+      "role": "control_owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/75d7db82-9eba-45a7-881a-773807ea4379/comments",
+      "status": 204
+    },
+    {
+      "role": "control_owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/75d7db82-9eba-45a7-881a-773807ea4379/decision",
+      "status": 204
+    },
+    {
+      "role": "control_owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/75d7db82-9eba-45a7-881a-773807ea4379/decision",
+      "status": 403
+    },
+    {
+      "role": "auditor",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/75d7db82-9eba-45a7-881a-773807ea4379/decision",
+      "status": 204
+    },
+    {
+      "role": "owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/75d7db82-9eba-45a7-881a-773807ea4379/update",
+      "status": 204
+    },
+    {
+      "role": "control_owner",
+      "method": "GET",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room",
+      "status": 403
+    },
+    {
+      "role": "admin",
+      "method": "GET",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room",
+      "status": 200
+    },
+    {
+      "role": "owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/6c8055c1-a1f1-4bbe-8868-b2234b6ca3a2/archive",
+      "status": 204
+    },
+    {
+      "role": "owner",
+      "method": "GET",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room",
+      "status": 200
+    },
+    {
+      "role": "owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/requests/75d7db82-9eba-45a7-881a-773807ea4379/update",
+      "status": 204
+    },
+    {
+      "role": "owner",
+      "method": "GET",
+      "route": "/evidence/f5e38617-c7f2-4ade-89aa-d018e528d57b/coverage",
+      "status": 200
+    },
+    {
+      "role": "owner",
+      "method": "DELETE",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/participants/2ba1a491-8e12-4886-9e6e-ecc7f09ba457",
+      "status": 204
+    },
+    {
+      "role": "auditor",
+      "method": "GET",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room",
+      "status": 403
+    },
+    {
+      "role": "owner",
+      "method": "GET",
+      "route": "/notifications/preferences",
+      "status": 200
+    },
+    {
+      "role": "viewer",
+      "method": "GET",
+      "route": "/notifications/preferences",
+      "status": 200
+    },
+    {
+      "role": "viewer",
+      "method": "PUT",
+      "route": "/notifications/preferences",
+      "status": 204
+    },
+    {
+      "role": "viewer",
+      "method": "GET",
+      "route": "/notifications/preferences",
+      "status": 200
+    },
+    {
+      "role": "owner",
+      "method": "GET",
+      "route": "/notifications/preferences",
+      "status": 200
+    },
+    {
+      "role": "viewer",
+      "method": "GET",
+      "route": "/notifications?priority=low&notificationType=task_comment",
+      "status": 200
+    },
+    {
+      "role": "viewer",
+      "method": "GET",
+      "route": "/notifications",
+      "status": 200
+    },
+    {
+      "role": "viewer",
+      "method": "GET",
+      "route": "/notifications?priority=invalid",
+      "status": 422
+    },
+    {
+      "role": "owner",
+      "method": "POST",
+      "route": "/audits/5a5d8b6f-8efb-4d48-b883-722d053ba9c4/room/participants",
+      "status": 204
+    }
+  ],
+  "assertions": [
+    "assigned request isolation",
+    "version ownership",
+    "independent review",
+    "access revocation",
+    "own preference isolation",
+    "priority/type filtering",
+    "partial updates retain state",
+    "request owner eligibility",
+    "attachment removal requires new proof",
+    "reassignment revokes old access",
+    "request changes invalidate report review",
+    "one reminder follows the new owner",
+    "archival removes active requests"
+  ],
+  "productionWrites": false
+}

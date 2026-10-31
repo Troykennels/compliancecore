@@ -6,7 +6,7 @@ import { ComplianceOperationsPanel, ComplianceSearch } from '@/features/framewor
 import { CiDemoGuide } from './ci-demo-guide';
 import { PageHelpButton } from './compliance-page-help';
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, ShieldCheck, FileText, AlertTriangle,
   Settings, LogOut,
@@ -40,11 +40,12 @@ interface NavGroup {
 // Each group keeps to six links or fewer. Names match each page's own heading.
 const NAV_GROUPS: NavGroup[] = [
   { items: [
+    { label: 'Compliance journey', to: '/journey', icon: <ListChecks className="h-4 w-4" /> },
     { label: 'Dashboard', to: PATHS.DASHBOARD, icon: <LayoutDashboard className="h-4 w-4" /> },
     { label: 'My guide', to: PATHS.GUIDE, icon: <BookOpen className="h-4 w-4" /> },
   ] },
   { heading: 'Scope', items: [
-    { label: 'Scoping questions', to: PATHS.SETTINGS_ORG, icon: <Target className="h-4 w-4" /> },
+    { label: 'Organisation', to: PATHS.SETTINGS_ORG, icon: <Target className="h-4 w-4" /> },
     { label: 'Departments', to: PATHS.DEPARTMENTS, icon: <Building2 className="h-4 w-4" /> },
     { label: 'Branches', to: PATHS.BRANCHES, icon: <GitBranch className="h-4 w-4" /> },
   ] },
@@ -81,6 +82,7 @@ const NAV_GROUPS: NavGroup[] = [
     { label: 'Expiry tracker', to: PATHS.EXPIRY, icon: <Clock className="h-4 w-4" /> },
   ] },
   { heading: 'Tools', items: [
+    { label: 'Client portfolio', to: PATHS.MSP_PORTFOLIO, icon: <Building2 className="h-4 w-4" /> },
     { label: 'AI tools', to: PATHS.AI_TOOLS, icon: <Sparkles className="h-4 w-4" /> },
     { label: 'Integrations', to: PATHS.INTEGRATIONS, icon: <Plug className="h-4 w-4" /> },
   ] },
@@ -220,13 +222,13 @@ export function AppShell() {
   // Append the owner group only for a platform superadmin, so customers never
   // see a link into cross-tenant billing.
   const routeScope:Record<string,string>={
-    '/frameworks':'controls:read','/controls':'controls:read','/risks':'risks:read','/policies':'policies:read','/policy-templates':'policies:read','/evidence':'evidence:read','/training':'training:read','/audits':'audits:read','/incidents':'incidents:read','/vendors':'vendors:read','/tasks':'tasks:read','/approvals':'approvals:read','/signatures':'signatures:read','/escalations':'escalations:read','/calendar':'calendar:read','/expiry':'expiry:read','/reports':'reports:read','/analytics':'reports:read','/compliance-score':'reports:read','/branches':'org:read','/departments':'org:read','/ai-tools':'ai:use','/integrations':'integrations:read','/billing':'billing:read','/billing/plans':'billing:read','/billing/invoices':'billing:read','/settings':'settings:read','/privacy':'privacy:read','/settings/security':'notifications:read','/settings/notifications':'settings:read'
+    '/msp':'msp:read','/frameworks':'controls:read','/controls':'controls:read','/risks':'risks:read','/policies':'policies:read','/policy-templates':'policies:read','/evidence':'evidence:read','/training':'training:read','/audits':'audits:read','/incidents':'incidents:read','/vendors':'vendors:read','/tasks':'tasks:read','/approvals':'approvals:read','/signatures':'signatures:read','/escalations':'escalations:read','/calendar':'calendar:read','/expiry':'expiry:read','/reports':'reports:read','/analytics':'reports:read','/compliance-score':'reports:read','/branches':'org:read','/departments':'org:read','/ai-tools':'ai:use','/integrations':'integrations:read','/billing':'billing:read','/billing/plans':'billing:read','/billing/invoices':'billing:read','/settings':'settings:read','/privacy':'privacy:read','/settings/security':'notifications:read','/settings/notifications':'notifications:read'
   };
   // Menu links and page access use the same rule: an exact path entry, otherwise the first path segment.
   const scopeFor=(path:string)=>routeScope[path]??routeScope['/'+path.split('/')[1]];
   const navGroups = (user?.isSuperadmin ? [...NAV_GROUPS, OWNER_NAV_GROUP] : NAV_GROUPS).map(group=>({...group,items:group.items.filter(item=>!scopeFor(item.to)||hasPermission(activeTenant?.role,scopeFor(item.to)))})).filter(group=>group.items.length);
   const requiredScope=scopeFor(location.pathname);
-  const permitted=!requiredScope||hasPermission(activeTenant?.role,requiredScope);
+  const permitted=!requiredScope||hasPermission(activeTenant?.role,requiredScope)||(activeTenant?.role==='control_owner'&&/^\/audits\/[^/]+$/.test(location.pathname));
 
   async function handleLogout() {
     try { await authApi.logout(); } catch { /* ignore */ }
@@ -235,6 +237,9 @@ export function AppShell() {
   }
 
   const displayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.email || 'User';
+  const currentGroup = navGroups.find(group => group.items.some(item => location.pathname === item.to || location.pathname.startsWith(item.to + '/') || item.also?.includes(location.pathname)));
+  const currentItem = currentGroup?.items.find(item => location.pathname === item.to || location.pathname.startsWith(item.to + '/') || item.also?.includes(location.pathname));
+  const pageLabel = currentItem?.label ?? (location.pathname.startsWith('/settings') ? 'Settings' : location.pathname.startsWith('/notifications') ? 'Notifications' : 'Compliance workspace');
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
@@ -250,7 +255,7 @@ export function AppShell() {
   const sidebarBody = (
     <>
       {/* Brand */}
-      <div className="flex h-14 shrink-0 items-center gap-2 border-b border-teal-100 bg-gradient-to-r from-[#e2f4ef] to-white px-3">
+      <div className="cc-brand flex h-14 shrink-0 items-center gap-2 border-b border-teal-100 bg-gradient-to-r from-[#e2f4ef] to-white px-3">
         <div
           className={cn(
             'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#086963] shadow-xs',
@@ -265,7 +270,7 @@ export function AppShell() {
             collapsed && 'lg:hidden',
           )}
         >
-          <span className="block">ComplianceCore<span className="block text-[9px] font-semibold tracking-wider text-slate-500">BY ORION SOFT LIMITED</span></span>
+          <span className="block">Compliance<span className="cc-brand-accent">Core</span><span className="block text-[9px] font-semibold tracking-wider text-slate-500">BY ORION SOFT LIMITED</span></span>
         </span>
 
         {/* Collapse toggle — desktop only; the drawer has its own close button. */}
@@ -294,7 +299,7 @@ export function AppShell() {
 
       {/* Organisation switcher */}
       {activeTenant && (
-        <div ref={orgMenuRef} className={cn('relative border-b border-slate-200 p-2', collapsed && 'lg:hidden')}>
+        <div ref={orgMenuRef} className={cn('cc-organisation relative border-b border-slate-200 p-2', collapsed && 'lg:hidden')}>
           <button
             type="button"
             onClick={() => canSwitch && setOrgMenuOpen((o) => !o)}
@@ -414,7 +419,7 @@ export function AppShell() {
       </nav>
 
       {/* Settings, sign out, identity */}
-      <div className="shrink-0 space-y-0.5 border-t border-slate-200 p-2">
+      <div className="cc-sidebar-footer shrink-0 space-y-0.5 border-t border-slate-200 p-2">
         <NavLink
           to={hasPermission(activeTenant?.role, 'settings:read') ? PATHS.SETTINGS : PATHS.SETTINGS_SECURITY}
           title={collapsed ? (hasPermission(activeTenant?.role, 'settings:read') ? 'Settings' : 'Account security') : undefined}
@@ -449,7 +454,7 @@ export function AppShell() {
   );
 
   return (
-    <div className="relative flex h-screen overflow-hidden bg-slate-50">
+    <div className="cc-app relative flex h-screen overflow-hidden bg-slate-50">
       {/* Lets a keyboard user reach the page without tabbing the whole rail —
           around 40 stops on this navigation. */}
       <a
@@ -462,9 +467,9 @@ export function AppShell() {
       {/* Desktop rail */}
       <aside
         className={cn(
-          'hidden shrink-0 flex-col border-r border-slate-200 bg-white lg:flex',
+          'cc-sidebar hidden shrink-0 flex-col border-r border-slate-200 bg-white lg:flex',
           'transition-[width] duration-200 ease-out',
-          collapsed ? 'w-[3.75rem]' : 'w-60',
+          collapsed ? 'w-[3.75rem]' : 'w-[13.5rem]',
         )}
       >
         {sidebarBody}
@@ -495,7 +500,7 @@ export function AppShell() {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation"
-            className="relative flex h-full w-[17rem] max-w-[85vw] animate-slide-in-left flex-col border-r border-slate-200 bg-white shadow-2xl"
+            className="cc-sidebar relative flex h-full w-[17rem] max-w-[85vw] animate-slide-in-left flex-col border-r border-slate-200 bg-white shadow-2xl"
           >
             {sidebarBody}
           </aside>
@@ -504,7 +509,7 @@ export function AppShell() {
 
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 sm:px-5">
+        <header className="cc-topbar flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 sm:px-5">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -522,7 +527,8 @@ export function AppShell() {
             {activeTenant?.name ?? 'ComplianceCore'}
           </span>
 
-          <ComplianceSearch /><div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <nav aria-label="Breadcrumb" className="cc-breadcrumb"><Link to="/journey">Compliance</Link><span aria-hidden="true">›</span>{currentGroup?.heading && <><span>{currentGroup.heading}</span><span aria-hidden="true">›</span></>}<span aria-current="page">{pageLabel}</span></nav>
+          <div className="cc-header-search"><ComplianceSearch /></div><div className="ml-auto flex items-center gap-1 sm:gap-2">
             {isDemo && demoHidden && <button type="button" onClick={() => setDemoHidden(false)} className="hidden rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-900 sm:inline-flex">Demo workspace</button>}
             <PageHelpButton />
             <NotificationBell />
@@ -553,7 +559,7 @@ export function AppShell() {
             scroll still scroll. The inner Suspense keeps the sidebar/topbar
             mounted while a lazy page chunk loads (no full-screen white flash —
             only the content area shows the spinner). */}
-        <main id="main-content" className="flex-1 overflow-y-auto">
+        <main id="main-content" data-workspace className="min-w-0 flex-1 overflow-y-auto">
           <Suspense
             fallback={
               <div className="flex h-full items-center justify-center" role="status">

@@ -6,9 +6,11 @@ import { NotificationPanel } from '../components/notification-panel';
 export function NotificationsPage() {
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [page, setPage]             = useState(1);
+  const [priority, setPriority] = useState('');
+  const [notificationType, setNotificationType] = useState('');
   const LIMIT = 25;
 
-  const { data, isLoading, isError, refetch } = useNotifications({ unreadOnly, page, limit: LIMIT });
+  const { data, isLoading, isError, refetch } = useNotifications({ unreadOnly, page, limit: LIMIT, priority: priority || undefined, notificationType: notificationType || undefined });
   const markAll = useMarkAllRead();
 
   const notifications = data?.notifications ?? [];
@@ -17,7 +19,7 @@ export function NotificationsPage() {
   const totalPages    = Math.ceil(total / LIMIT);
 
   return (
-    <div className="flex flex-col h-full px-6 py-6 gap-5">
+    <div className="mx-auto flex min-h-full max-w-7xl flex-col gap-5 p-4 sm:p-6">
       <div className="mb-6"><PageHeader eyebrow="Account" title="Notifications" description={<>{unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}</>} actions={<><div className="flex items-center gap-3">
           <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none">
             <input
@@ -29,6 +31,11 @@ export function NotificationsPage() {
             Unread only
           </label></div></>} /></div>
 
+      <div className="workspace-toolbar">
+        <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">Priority<select value={priority} onChange={e => { setPriority(e.target.value); setPage(1); }} className="rounded-md border bg-white px-3 py-2 text-sm"><option value="">All priorities</option>{['critical','high','medium','low'].map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase()+p.slice(1)}</option>)}</select></label>
+        <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">Event type<select value={notificationType} onChange={e => { setNotificationType(e.target.value); setPage(1); }} className="rounded-md border bg-white px-3 py-2 text-sm"><option value="">All event types</option>{['expiry_warning','calendar_reminder','task_assigned','task_comment','approval_requested','approval_decided','approval_deadline_warning','escalation','system'].map(t => <option key={t} value={t}>{t.replace(/_/g,' ').replace(/^./, c => c.toUpperCase())}</option>)}</select></label>
+        <a href="/settings/notifications" className="ml-auto text-sm font-semibold text-brand-700 underline">Manage my preferences</a>
+      </div>
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center text-slate-400 text-sm">Loading…</div>
       ) : isError ? (

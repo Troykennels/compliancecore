@@ -64,6 +64,7 @@ router.post(
 
 // ── All routes below require auth + tenant ────────────────────────────────────
 router.use(authenticate(), resolveTenant, enforceEntitlement());
+router.get('/:id/coverage', requirePermission('evidence:read'), asyncHandler(ctrl.evidenceCoverage));
 
 // ── Categories ────────────────────────────────────────────────────────────────
 router.get('/categories',        asyncHandler(ctrl.listCategories));

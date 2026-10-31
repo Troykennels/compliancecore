@@ -3,8 +3,8 @@ import { toast } from 'sonner';
 import { frameworksApi } from '../api/frameworks.api';
 
 export const frameworkKeys = {
-  all:    ['frameworks'] as const,
-  list:   () => [...frameworkKeys.all, 'list'] as const,
+  all: ['frameworks'] as const,
+  list: () => [...frameworkKeys.all, 'list'] as const,
   detail: (id: string) => [...frameworkKeys.all, id] as const,
 };
 
@@ -16,15 +16,15 @@ function errorMessage(fallback: string) {
 export function useFrameworks() {
   return useQuery({
     queryKey: frameworkKeys.list(),
-    queryFn:  () => frameworksApi.list().then((r) => r.data.data ?? []),
+    queryFn: () => frameworksApi.list().then((r) => r.data.data ?? []),
   });
 }
 
 export function useFramework(id: string) {
   return useQuery({
     queryKey: frameworkKeys.detail(id),
-    queryFn:  () => frameworksApi.get(id).then((r) => r.data.data),
-    enabled:  Boolean(id),
+    queryFn: () => frameworksApi.get(id).then((r) => r.data.data),
+    enabled: Boolean(id),
   });
 }
 
@@ -79,8 +79,8 @@ export function useUnadoptFramework() {
 export function useUnadoptImpact(id: string | null) {
   return useQuery({
     queryKey: [...frameworkKeys.all, id, 'unadopt-impact'],
-    queryFn:  () => frameworksApi.unadoptImpact(id!).then((r) => r.data.data),
-    enabled:  Boolean(id),
+    queryFn: () => frameworksApi.unadoptImpact(id!).then((r) => r.data.data),
+    enabled: Boolean(id),
     staleTime: 0,
   });
 }

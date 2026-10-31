@@ -1,0 +1,91 @@
+ComplianceCore - concept design adaptation
+30 October 2026
+
+ACTIVE CHECKOUT
+C:\Users\user\Desktop\ComplianceCore-fixes
+Branch: ux-fixes-20261029
+Continues the existing isolated ComplianceCore worktree and its prior fixes.
+The original ComplianceCore checkout and other applications were preserved.
+
+DESIGN BRIEF
+Adapt the four supplied concept boards and the CIASecured visual direction to
+ComplianceCore: navy navigation, teal actions, visible borderlines, organised
+panels, simple forms and easy access. This remains a compliance application.
+No implementation delivery terminology or consultancy workflow was added.
+
+CHANGES
+1. Shared navigation
+The main sidebar now uses navy, a teal active item, compact grouped links and
+the existing ComplianceCore branding. Organisation switching, role filtering,
+settings, sign-out and the mobile drawer are retained. The desktop header has
+a compliance breadcrumb, search, notifications and account access. The phone
+header retains the organisation context and working search/navigation.
+
+2. Shared page design
+Page headers, actions, cards, filters, forms, dialogs and tables use a consistent
+border, spacing and corner system. Bordered table headers and separated rows
+make records easier to scan. Responsive table scrolling remains available.
+Teal actions remain distinct from green success and amber/red attention states.
+The theme lives in frontend/src/styles/compliance-concept.css and is loaded
+after the existing shared styles. Tailwind's brand ramp matches the new theme.
+
+3. Compliance journey
+The existing recorded steps are grouped into Scope, Risk assessment,
+Requirements and controls, Evidence and checks, and Review and reporting.
+Each phase opens its steps; the selected phase and assessment persist in the
+URL. The next required action remains directly accessible. A compact side
+panel shows actual saved counts and assessment status. All steps remain
+available through a full sequence list. People, training, suppliers, privacy,
+incidents, assurance and monitoring stay linked in bordered workstream cards.
+Phase completion counts come from the same saved readiness data as before.
+
+4. Assessment workspace
+Desktop: step rail on the left, the working record in the centre, and a separate
+context/guidance panel on the right. On smaller screens these panels stack.
+The scope preview reflects current form inputs and explicitly distinguishes
+them from the saved assessment. Saved owner, review date and evidence counts
+are shown separately. Guidance examples remain examples. Existing forms,
+validation, saving and independent-review gates remain in place.
+
+PRESERVATION
+This change is confined to frontend presentation and assessment navigation.
+No backend services, database schema, permission rules, approval requirements
+or record formats were changed for this design adaptation. Existing worktree
+changes were preserved. Document approval, evidence, control effectiveness
+and final outcomes retain their separate meanings.
+
+VERIFICATION
+Passed: 88 page layouts (44 routes at 1440px and 390px), 48 interaction checks,
+and the additional seven role dashboards and role-access/action checks.
+The gallery contains 127 screenshots. Zero page exceptions, API server errors,
+page overflow, duplicate main headings or unlabelled page fields were observed.
+Current evidence is in verification/concept-20261030, separate from the earlier
+verification/design-20261030 checkpoint. See verification-summary.json for the
+final counts, page-coverage.csv for every reviewed route and width, and the
+browser/interaction JSON files for results. The gallery includes desktop,
+phone, role, form and assessment screenshots.
+Frontend type checking, ESLint and the production build passed. The preview
+build explicitly targets the isolated local API, not the live API. No package
+dependencies were added or changed. Backend tests were not rerun for this
+frontend-only adaptation; prior backend results are documented in the earlier
+checkpoint and are not presented as fresh test runs.
+
+LOCAL REVIEW
+Existing local preview: http://127.0.0.1:5178/journey
+Existing isolated API: http://127.0.0.1:3008
+These services were already running and were reused. No new preview service
+was started by this design task. The local presentation database and private
+fixture credentials were reused without exposing credentials in this package.
+No customer records or production resources were modified.
+
+DELIVERY
+Local changes only. No commit, push, migration or production deployment.
+The gallery is verification/concept-20261030/gallery.html.
+The existing COMPLIANCE-REDESIGN-CHECKPOINT.txt records the earlier functional
+work; this file records the subsequent visual adaptation to the supplied PNGs.
+
+SOURCE PUSH - 31 October 2026
+The user subsequently authorised committing and pushing the reviewed work to
+origin/ux-fixes-20261029. This source push does not merge into main or deploy
+the production application. The original local-only statement above records
+the state at the design handover.

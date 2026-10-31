@@ -85,7 +85,7 @@ export function PoliciesPage(): JSX.Element {
 
         <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3 text-sm text-indigo-950">Draft → independent approval → publication → scheduled review. A changed approved policy returns to draft. <Link className="font-semibold underline" to={routeParams.get('frameworkId')?`/frameworks?framework=${routeParams.get('frameworkId')}`:'/frameworks'}>Return to compliance assessment</Link></div>
         {/* Filters */}
-        <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="workspace-toolbar mb-4 flex flex-wrap items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -188,14 +188,14 @@ export function PoliciesPage(): JSX.Element {
                               >
                                 <Pencil className="h-4 w-4" /> {canWrite?'Edit':'View'}
                               </button></PermissionAction>
-                              {canWrite&&policy.status==='in_review'&&policy.ownerId!==user?.id&&policy.createdBy!==user?.id&&policy.updatedBy!==user?.id&&<button className="flex w-full items-center gap-2 px-3 py-2 text-sm text-indigo-700 hover:bg-slate-50" onClick={()=>{approvePolicy(policy.id);setMenuOpenId(null);}}>Approve policy</button>}
+                              {canWrite&&policy.status==='in_review'&&policy.ownerId!==user?.id&&policy.createdBy!==user?.id&&policy.updatedBy!==user?.id&&<PermissionAction scope="policies:write"><button className="flex w-full items-center gap-2 px-3 py-2 text-sm text-indigo-700 hover:bg-slate-50" onClick={()=>{approvePolicy(policy.id);setMenuOpenId(null);}}>Approve policy</button></PermissionAction>}
                               {canWrite&&policy.status === 'approved' && (
-                                <button
+                                <PermissionAction scope="policies:write"><button
                                   onClick={() => { publishPolicy(policy.id); setMenuOpenId(null); }}
                                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                                 >
                                   <Send className="h-4 w-4" /> Publish
-                                </button>
+                                </button></PermissionAction>
                               )}
                               <PermissionAction scope="policies:delete"><button
                                 onClick={() => { setConfirmDeleteId(policy.id); setMenuOpenId(null); }}
@@ -311,12 +311,12 @@ function EmptyState({ onAdd }: { onAdd: () => void }): JSX.Element {
       <p className="mt-1 text-sm text-slate-500">
         Create your first policy to start documenting how your organization stays compliant.
       </p>
-      <button
+      <PermissionAction scope="policies:write"><button
         onClick={onAdd}
         className="mt-4 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
       >
         <Plus className="h-4 w-4" /> New Policy
-      </button>
+      </button></PermissionAction>
     </div>
   );
 }

@@ -69,6 +69,7 @@ export interface CreateTaskDto {
 export type UpdateTaskDto = Partial<CreateTaskDto>;
 
 export interface TaskFilters {
+  myTasks?: boolean;
   status?:     TaskStatus;
   priority?:   TaskPriority;
   assignedTo?: string;

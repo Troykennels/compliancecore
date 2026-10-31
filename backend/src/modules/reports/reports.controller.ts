@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import * as service from './reports.service';
@@ -27,7 +28,7 @@ const createSchema = z.object({
   format:      z.enum(['pdf', 'excel', 'both']).optional(),
 });
 
-const updateSchema = createSchema.partial().extend({
+const updateSchema = patchObject(createSchema).extend({
   isActive: z.boolean().optional(),
 });
 

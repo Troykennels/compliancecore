@@ -29,7 +29,7 @@ export function AuditsPage(): JSX.Element {
   const completeAudit = useUpdateAudit();
   const {data:frameworks=[]}=useFrameworks();
   const [search, setSearch] = useState(routeParams.get('q')??'');
-  const [statusFilter, setStatusFilter] = useState<AuditStatus | ''>('');
+  const [statusFilter, setStatusFilter] = useState<AuditStatus | ''>(() => { const value = routeParams.get('status'); return value && value in AUDIT_STATUS_CONFIG ? value as AuditStatus : ''; });
   const [typeFilter, setTypeFilter] = useState<AuditType | ''>('');
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
@@ -84,7 +84,7 @@ export function AuditsPage(): JSX.Element {
           </button></PermissionAction></>} /></div>
 
         {/* Filters */}
-        <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="workspace-toolbar mb-4 flex flex-wrap items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -148,7 +148,7 @@ export function AuditsPage(): JSX.Element {
                   return (
                     <tr key={audit.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4">
-                        <div className="font-medium text-slate-900">{audit.title}</div>
+                        <div className="font-medium text-slate-900"><Link to={`/audits/${audit.id}`} className="text-brand-700 hover:underline">{audit.title}</Link></div>
                         {audit.ownerName && (
                           <div className="text-xs text-slate-400">{audit.ownerName}</div>
                         )}
@@ -313,12 +313,12 @@ function EmptyState({ onAdd }: { onAdd: () => void }): JSX.Element {
       <p className="mt-1 text-sm text-slate-500">
         Create your first audit engagement to start tracking findings.
       </p>
-      <button
+      <PermissionAction scope="audits:write"><button
         onClick={onAdd}
         className="mt-4 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
       >
         <Plus className="h-4 w-4" /> New Audit
-      </button>
+      </button></PermissionAction>
     </div>
   );
 }

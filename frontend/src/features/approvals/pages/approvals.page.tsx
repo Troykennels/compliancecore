@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { ModalSurface } from '@/components/modal-surface';
 import { PageHeader } from '@/components/page-header';
 import React, { useState } from 'react';
@@ -75,20 +76,20 @@ export function ApprovalsPage() {
   ];
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="mx-auto max-w-7xl p-4 sm:p-6">
       <div className="mb-6"><PageHeader eyebrow="Review" title="Approvals" description={"Manage multi-step approval requests and workflow templates"} actions={<><div className="flex items-center gap-2">
-          <button
+          <PermissionAction scope="approvals:manage"><button
             onClick={() => setShowWorkflowBuilder(true)}
             className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
           >
             <GitBranch className="h-4 w-4" /> New Workflow
-          </button>
-          <button
+          </button></PermissionAction>
+          <PermissionAction scope="approvals:write"><button
             onClick={() => setShowRequestModal(true)}
             className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" /> New Request
-          </button></div></>} /></div>
+          </button></PermissionAction></div></>} /></div>
 
       {/* Tabs */}
       <div className="flex gap-1 rounded-lg bg-slate-100 p-1 w-fit mb-5">
@@ -138,7 +139,7 @@ export function ApprovalsPage() {
       {/* All Requests */}
       {tab === 'all' && (
         <div>
-          <div className="mb-4 flex items-center gap-3">
+          <div className="workspace-toolbar mb-4 flex items-center gap-3">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -182,9 +183,9 @@ export function ApprovalsPage() {
             <div className="rounded-xl border border-dashed border-slate-300 py-16 text-center">
               <GitBranch className="h-10 w-10 text-slate-300 mx-auto mb-2" />
               <p className="text-sm text-slate-500">No workflow templates yet</p>
-              <button onClick={() => setShowWorkflowBuilder(true)} className="mt-3 text-sm text-blue-600 hover:underline">
+              <PermissionAction scope="approvals:manage"><button onClick={() => setShowWorkflowBuilder(true)} className="mt-3 text-sm text-blue-600 hover:underline">
                 Create your first workflow
-              </button>
+              </button></PermissionAction>
             </div>
           ) : (
             <div className="overflow-hidden rounded-xl border border-slate-200">
@@ -214,7 +215,7 @@ export function ApprovalsPage() {
                         {wf.createdAt ? fmt.formatDateMedium(wf.createdAt) : '—'}
                       </td>
                       <td className="px-4 py-3">
-                        <button
+                        <PermissionAction scope="approvals:manage"><button
                           onClick={() => {
                             if (confirm(`Delete workflow "${wf.name}"? This cannot be undone.`)) {
                               deleteWorkflow.mutate(wf.id);
@@ -224,7 +225,7 @@ export function ApprovalsPage() {
                           title="Delete workflow"
                         >
                           <Trash2 className="h-4 w-4" />
-                        </button>
+                        </button></PermissionAction>
                       </td>
                     </tr>
                   ))}
@@ -243,9 +244,9 @@ export function ApprovalsPage() {
             <p className="text-xs text-slate-600 mb-4">This action cannot be undone. The request will be marked as cancelled.</p>
             <div className="flex gap-2 justify-end">
               <button onClick={() => setCancelId(null)} className="rounded-md px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">Keep</button>
-              <button onClick={confirmCancel} disabled={cancelMutation.isPending} className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">
+              <PermissionAction scope="approvals:write"><button onClick={confirmCancel} disabled={cancelMutation.isPending} className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">
                 {cancelMutation.isPending ? 'Cancelling…' : 'Cancel Request'}
-              </button>
+              </button></PermissionAction>
             </div>
           </div>
         </ModalSurface>
@@ -326,13 +327,13 @@ function RequestCard({ req, onCancel }: { req: any; onCancel: (id: string) => vo
             <Eye className="h-4 w-4" />
           </Link>
           {canCancel && (
-            <button
+            <PermissionAction scope="approvals:write"><button
               onClick={() => onCancel(req.id)}
               className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
               title="Cancel request"
             >
               <XCircle className="h-4 w-4" />
-            </button>
+            </button></PermissionAction>
           )}
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 import { refineDateRange } from '../../lib/date-range';
 
@@ -22,7 +23,7 @@ const calendarFields = z.object({
 });
 
 export const createCalendarEventSchema = calendarFields.superRefine(refineDateRange);
-export const updateCalendarEventSchema = calendarFields.partial().extend({
+export const updateCalendarEventSchema = patchObject(calendarFields).extend({
   status: z.enum(['upcoming','in_progress','completed','cancelled','overdue']).optional(),
 }).superRefine(refineDateRange);
 

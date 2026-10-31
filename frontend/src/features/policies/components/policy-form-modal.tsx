@@ -1,3 +1,4 @@
+import { useOrgFormat } from '@/lib/org-format';
 import { ModalSurface } from '@/components/modal-surface';
 import { AccessibleField } from '@/components/accessible-field';
 import { useEffect } from 'react';
@@ -52,6 +53,7 @@ const DEFAULTS: FormValues = {
 };
 
 export function PolicyFormModal({ open, onClose, policy, initialFrameworkId, initialTemplate }: Props): JSX.Element | null {
+  const fmt = useOrgFormat();
   const {data:templates=[]}=usePolicyTemplates();
   const role=useAuthStore(s=>s.activeTenant?.role);
   const canWrite=['owner','admin','compliance_manager','msp_admin'].includes(role??'');
@@ -69,7 +71,7 @@ export function PolicyFormModal({ open, onClose, policy, initialFrameworkId, ini
     reset,
     setValue,
     formState: { errors },
-  } = useForm<FormValues>({
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: DEFAULTS,
   });
@@ -186,7 +188,7 @@ export function PolicyFormModal({ open, onClose, policy, initialFrameworkId, ini
               <FormField label="Content" error={errors.content?.message} className="col-span-2">
                 <textarea {...register('content')} rows={6} className={cn(inputClass(false), 'resize-none')} />
               </FormField>
-              {policy&&<details className="col-span-2 rounded-lg border border-slate-200 p-3"><summary className="cursor-pointer text-sm font-semibold">Saved policy versions ({versions.length})</summary>{versions.map(v=><details key={v.version_number} className="mt-2 border-t pt-2"><summary className="cursor-pointer text-xs">Version {v.version_number} · {new Date(v.created_at).toLocaleDateString()} · {v.change_note}</summary><pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-words text-xs">{v.content||'No content recorded.'}</pre></details>)}</details>}
+              {policy&&<details className="col-span-2 rounded-lg border border-slate-200 p-3"><summary className="cursor-pointer text-sm font-semibold">Saved policy versions ({versions.length})</summary>{versions.map(v=><details key={v.version_number} className="mt-2 border-t pt-2"><summary className="cursor-pointer text-xs">Version {v.version_number} · {fmt.formatDateMedium(v.created_at)} · {v.change_note}</summary><pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-words text-xs">{v.content||'No content recorded.'}</pre></details>)}</details>}
             </div>
           </div>
 

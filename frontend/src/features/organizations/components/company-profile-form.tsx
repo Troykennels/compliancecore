@@ -41,7 +41,7 @@ export function CompanyProfileForm({ organization }: Props): JSX.Element {
     handleSubmit,
     reset,
     formState: { errors, isDirty },
-  } = useForm<FormValues>({
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
       name:       organization.name,

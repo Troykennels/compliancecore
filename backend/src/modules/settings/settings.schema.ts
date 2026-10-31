@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 
 const MEMBER_ROLES = [
@@ -47,11 +48,11 @@ const ASSIGNABLE_ROLES = ['owner', ...MEMBER_ROLES] as const;
 
 export const inviteMemberSchema = z.object({
   email: z.string().email('Must be a valid email address').max(255),
-  role: z.enum(MEMBER_ROLES, { errorMap: () => ({ message: 'Invalid role' }) }),
+  role: z.enum(MEMBER_ROLES, { error: 'Invalid role' }),
 });
 
 export const updateMemberRoleSchema = z.object({
-  role: z.enum(ASSIGNABLE_ROLES, { errorMap: () => ({ message: 'Invalid role' }) }),
+  role: z.enum(ASSIGNABLE_ROLES, { error: 'Invalid role' }),
 });
 
 export const acceptInvitationSchema = z.object({
@@ -82,7 +83,7 @@ export const createWebhookSchema = z.object({
     .max(WEBHOOK_EVENTS.length),
 });
 
-export const updateWebhookSchema = createWebhookSchema.partial().extend({
+export const updateWebhookSchema = patchObject(createWebhookSchema).extend({
   isActive: z.boolean().optional(),
 });
 

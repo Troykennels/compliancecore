@@ -1,5 +1,6 @@
 import * as repo from './approvals.repository';
 import { notificationService } from '../notifications/notification.service';
+import { emailAllowed } from '../notifications/notification-preferences';
 import { sendEmail, emailTemplates } from '../../lib/email.service';
 import type {
   CreateWorkflowDto, CreateApprovalRequestDto,
@@ -213,7 +214,7 @@ async function _notifyRequester(
     actionUrl:        `/approvals/${request.id}`,
   });
 
-  if (request.requesterEmail) {
+  if (request.requesterEmail && await emailAllowed(schemaName, request.requestedBy, 'approval_decided')) {
     const tmpl = emailTemplates.approvalDecided({
       recipientName: request.requesterName ?? request.requesterEmail,
       requestTitle:  request.title,

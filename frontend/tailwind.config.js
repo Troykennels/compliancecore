@@ -15,21 +15,11 @@ import tailwindcssAnimate from 'tailwindcss-animate';
  * `red`/`rose` for destructive and `green`/`emerald` for success.
  */
 
-// Brand — a deep cobalt. Reads as instrumentation rather than startup indigo,
-// and 600 clears 4.5:1 against white (6.6:1) so it is safe for text, not just
-// for buttons.
+// Teal actions sit against the navy navigation; darker tones keep labels readable.
 const brand = {
-  50: '#ECF4FF',
-  100: '#D6E7FF',
-  200: '#B0D0FF',
-  300: '#7FB2FF',
-  400: '#4A8FFA',
-  500: '#2470E8',
-  600: '#0F56C9',
-  700: '#0C45A3',
-  800: '#0E3B85',
-  900: '#11336E',
-  950: '#0A1F45',
+  50: '#EFFAFA', 100: '#DDF4F5', 200: '#ADE0E3', 300: '#71CDD1',
+  400: '#35B4BA', 500: '#009A9F', 600: '#007F86', 700: '#00656E',
+  800: '#07515C', 900: '#0A414E', 950: '#052B37',
 };
 
 // Neutrals carry a faint blue cast so they read as related to the brand rather

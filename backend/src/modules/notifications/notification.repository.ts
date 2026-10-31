@@ -45,11 +45,13 @@ export const notificationRepository = {
   async findForUser(
     tx: Tx,
     userId: string,
-    opts: { page?: number; limit?: number; unreadOnly?: boolean },
+    opts: { page?: number; limit?: number; unreadOnly?: boolean; priority?: string; notificationType?: string },
   ): Promise<NotificationListResult> {
     const { page = 1, limit = 30, unreadOnly = false } = opts;
     const offset = (page - 1) * limit;
-    const unreadFilter = unreadOnly ? 'AND n.read_at IS NULL' : '';
+    const unreadFilter = (unreadOnly ? 'AND n.read_at IS NULL ' : '') +
+      'AND NOT EXISTS(SELECT 1 FROM notification_preferences p WHERE p.user_id=n.user_id AND p.notification_type=n.notification_type AND p.in_app=FALSE) ' +
+      'AND ($2::text IS NULL OR n.priority=$2) AND ($3::text IS NULL OR n.notification_type=$3)';
 
     const [rows, countRows, unreadRows] = await Promise.all([
       tx.$queryRawUnsafe<Record<string, unknown>[]>(`
@@ -63,13 +65,13 @@ export const notificationRepository = {
         WHERE n.user_id = $1::uuid AND n.dismissed_at IS NULL ${unreadFilter}
         ORDER BY n.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
-      `, userId),
+      `, userId, opts.priority ?? null, opts.notificationType ?? null),
       tx.$queryRawUnsafe<[{ count: bigint }]>(
         `SELECT COUNT(*) FROM notifications n WHERE n.user_id = $1::uuid AND n.dismissed_at IS NULL ${unreadFilter}`,
-        userId,
+        userId, opts.priority ?? null, opts.notificationType ?? null,
       ),
       tx.$queryRawUnsafe<[{ count: bigint }]>(
-        `SELECT COUNT(*) FROM notifications WHERE user_id = $1::uuid AND read_at IS NULL AND dismissed_at IS NULL`,
+        `SELECT COUNT(*) FROM notifications n WHERE user_id = $1::uuid AND read_at IS NULL AND dismissed_at IS NULL AND NOT EXISTS(SELECT 1 FROM notification_preferences p WHERE p.user_id=n.user_id AND p.notification_type=n.notification_type AND p.in_app=FALSE)`,
         userId,
       ),
     ]);
@@ -83,8 +85,8 @@ export const notificationRepository = {
 
   async countUnread(tx: Tx, userId: string): Promise<number> {
     const rows = await tx.$queryRaw<[{ count: bigint }]>`
-      SELECT COUNT(*) FROM notifications
-      WHERE user_id = ${userId}::uuid AND read_at IS NULL AND dismissed_at IS NULL
+      SELECT COUNT(*) FROM notifications n
+      WHERE user_id = ${userId}::uuid AND read_at IS NULL AND dismissed_at IS NULL AND NOT EXISTS(SELECT 1 FROM notification_preferences p WHERE p.user_id=n.user_id AND p.notification_type=n.notification_type AND p.in_app=FALSE)
     `;
     return Number(rows[0].count);
   },

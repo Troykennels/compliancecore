@@ -136,6 +136,8 @@ export const rolePermissions:Record<UserRole,string[]>={
     "tasks:write"
   ],
   "auditor": [
+    "training:read",
+    "vendors:read",
     "ai:use",
     "approvals:decide",
     "approvals:read",

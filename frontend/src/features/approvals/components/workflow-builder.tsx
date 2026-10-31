@@ -46,7 +46,7 @@ interface WorkflowBuilderProps {
 export function WorkflowBuilder({ open, onClose }: WorkflowBuilderProps) {
   const create = useCreateWorkflow();
 
-  const { register, control, watch, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, control, watch, handleSubmit, reset, formState: { errors } } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
       entityType: 'general',

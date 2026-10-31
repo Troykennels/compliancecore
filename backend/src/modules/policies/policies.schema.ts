@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 
 const uuidSchema = z.string().uuid();
@@ -18,7 +19,7 @@ export const createPolicySchema = z.object({
   tags:                z.array(z.string().max(100)).optional().default([]),
 });
 
-export const updatePolicySchema = createPolicySchema.partial();
+export const updatePolicySchema = patchObject(createPolicySchema);
 
 export const listPoliciesSchema = z.object({
   frameworkId: uuidSchema.optional(),

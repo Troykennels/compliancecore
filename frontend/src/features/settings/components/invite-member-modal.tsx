@@ -20,7 +20,7 @@ const INVITABLE_ROLES = [
 
 const schema = z.object({
   email: z.string().email('Must be a valid email address'),
-  role: z.enum(INVITABLE_ROLES, { errorMap: () => ({ message: 'Please select a role' }) }),
+  role: z.enum(INVITABLE_ROLES, { error: 'Please select a role' }),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -39,7 +39,7 @@ export function InviteMemberModal({ open, onClose }: Props): JSX.Element | null 
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormValues>({
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: { role: 'viewer' },
   });

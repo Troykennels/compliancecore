@@ -42,7 +42,7 @@ export function BranchFormModal({ open, onClose, branch }: Props): JSX.Element |
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormValues>({
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: branch
       ? {

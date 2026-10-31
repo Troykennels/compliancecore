@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { AccessibleField } from '@/components/accessible-field';
 import { PageHeader } from '@/components/page-header';
 import { ReportTabs } from '../components/report-tabs';
@@ -403,19 +404,19 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
                     )}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <button
+                    <PermissionAction scope="reports:write"><button
                       onClick={() => update.mutate({ id: r.id, dto: { isActive: !r.isActive } })}
                       className="rounded-lg p-1.5 text-slate-400 hover:bg-white hover:text-blue-600"
                       title={r.isActive ? 'Pause' : 'Activate'}
                     >
                       {r.isActive ? <ToggleRight className="h-4 w-4 text-green-600" /> : <ToggleLeft className="h-4 w-4" />}
-                    </button>
-                    <button
+                    </button></PermissionAction>
+                    <PermissionAction scope="reports:write"><button
                       onClick={() => del.mutate(r.id)}
                       className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
                      aria-label="Delete record">
                       <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    </button></PermissionAction>
                   </div>
                 </div>
               ))}
@@ -525,10 +526,10 @@ function ScheduleModal({ onClose }: { onClose: () => void }) {
 
         {!showForm && (
           <div className="border-t border-slate-100 px-6 py-3 shrink-0">
-            <button onClick={() => setShowForm(true)}
+            <PermissionAction scope="reports:write"><button onClick={() => setShowForm(true)}
               className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700">
               <Plus className="h-3.5 w-3.5" /> New Schedule
-            </button>
+            </button></PermissionAction>
           </div>
         )}
       </div>

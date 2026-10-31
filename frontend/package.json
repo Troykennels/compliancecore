@@ -8,11 +8,13 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "format:compliance": "prettier --write src/features/frameworks src/features/privacy src/features/journey src/features/msp src/features/policies/pages/policy-templates.page.tsx",
+    "format:compliance:check": "prettier --check src/features/frameworks src/features/privacy src/features/journey src/features/msp src/features/policies/pages/policy-templates.page.tsx"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
-    "@hookform/resolvers": "^3.6.0",
+    "@hookform/resolvers": "6.0.2",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-checkbox": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.1",
@@ -39,16 +41,15 @@
     "recharts": "^2.12.7",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.3.0",
-    "zod": "^3.23.8",
+    "zod": "4.6.7",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "tailwindcss-animate": "^1.0.7",
     "@eslint/js": "^9.39.4",
     "@types/node": "^20.14.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
+    "@vitejs/plugin-react": "6.1.2",
     "autoprefixer": "^10.4.19",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -57,9 +58,14 @@
     "globals": "^15.15.0",
     "playwright": "^1.61.1",
     "postcss": "^8.4.38",
+    "prettier": "3.6.2",
     "tailwindcss": "^3.4.4",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.4.5",
     "typescript-eslint": "^8.62.1",
-    "vite": "^5.3.1"
+    "vite": "8.3.5"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

@@ -3,6 +3,7 @@ import { redisForQueues } from '../config/redis';
 import { prisma } from '../lib/prisma';
 import * as escalRepo from '../modules/escalations/escalations.repository';
 import { notificationService } from '../modules/notifications/notification.service';
+import { emailAllowed } from '../modules/notifications/notification-preferences';
 import { sendEmail, emailTemplates } from '../lib/email.service';
 import { withTenantSchema } from '../lib/tenant';
 import type { EscalationChainStep } from '../modules/escalations/escalations.types';
@@ -376,7 +377,7 @@ async function _sendEscalationEmail(schemaName: string, userId: string, entityTi
     const [user] = await withTenantSchema(schemaName, (p) =>
       p.$queryRawUnsafe<any[]>(`SELECT email, first_name, last_name FROM global.users WHERE id=$1::uuid`, userId),
     );
-    if (!user?.email) return;
+    if (!user?.email || !await emailAllowed(schemaName, userId, 'escalation')) return;
     const tmpl = emailTemplates.escalationAlert({
       recipientName: `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() || user.email,
       entityTitle,

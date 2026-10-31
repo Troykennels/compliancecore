@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import * as service from './escalations.service';
@@ -44,7 +45,7 @@ export async function createRule(req: Request, res: Response) {
 }
 
 export async function updateRule(req: Request, res: Response) {
-  const dto = validate(createRuleSchema.partial(), req.body);
+  const dto = validate(patchObject(createRuleSchema), req.body);
   const rule = await service.updateRule(req.tenant!.schemaName, req.params.id, dto as any);
   res.json({ success: true, data: rule });
 }

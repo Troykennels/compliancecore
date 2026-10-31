@@ -1,7 +1,11 @@
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api';
 import type {
-  AdoptResult, Framework, FrameworkDetail, UnadoptImpact, UnadoptResult,
+  AdoptResult,
+  Framework,
+  FrameworkDetail,
+  UnadoptImpact,
+  UnadoptResult,
 } from '../types/frameworks.types';
 
 export const frameworksApi = {

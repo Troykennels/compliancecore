@@ -55,7 +55,7 @@ export function VendorFormModal({ open, onClose, vendor }: Props): JSX.Element |
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormValues>({
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: DEFAULTS,
   });

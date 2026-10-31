@@ -413,6 +413,27 @@ export const evidenceService = {
 
   // ── Links ──────────────────────────────────────────────────────────────────
 
+  async coverage(schemaName: string, evidenceId: string, permissions: string[]) {
+    return withTenantSchema(schemaName, async tx => {
+      if (!await evidenceRepository.findById(tx, evidenceId)) throw new NotFoundError('Evidence not found.');
+      const targets = [
+        ['control', 'controls', 'controls:read'], ['risk', 'risks', 'risks:read'],
+        ['policy', 'policies', 'policies:read'], ['audit', 'audits', 'audits:read'], ['vendor', 'vendors', 'vendors:read'],
+      ];
+      const result: Array<{ id: string; type: string; title: string; reference: string | null; framework: string | null }> = [];
+      for (const [type, table, permission] of targets) {
+        if (!permissions.includes('*') && !permissions.includes(permission)) continue;
+        const rows = await tx.$queryRawUnsafe<Array<{ id: string; title: string; reference: string | null; framework: string | null }>>(
+          `SELECT DISTINCT t.id,${type === 'vendor' ? 't.name' : 't.title'} AS title,
+           ${type === 'control' ? 't.control_ref' : 'NULL::text'} AS reference,${type === 'control' ? 'f.name' : 'NULL::text'} AS framework
+           FROM evidence_links l JOIN ${table} t ON t.id=l.linked_id ${type === 'control' ? 'LEFT JOIN framework_data.frameworks f ON f.id=t.framework_id' : ''}
+           WHERE l.evidence_id=$1::uuid AND l.linked_type=$2 AND t.deleted_at IS NULL`, evidenceId, type);
+        result.push(...rows.map(row => ({ ...row, type })));
+      }
+      return result;
+    });
+  },
+
   async addLink(schemaName: string, evidenceId: string, input: AddLinkInput, actor: Actor) {
     return withTenantSchema(schemaName, async (tx) => {
       const tables:Record<string,string>={control:'controls',risk:'risks',policy:'policies',audit:'audits',vendor:'vendors'};

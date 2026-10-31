@@ -9,6 +9,8 @@ import { notificationService } from './notification.service';
 // surfaced as a 500), `?page=0` produced a negative OFFSET, and `?limit=1000000`
 // read a million rows. Every sibling list caps and coerces the same way.
 const listQuerySchema = z.object({
+  priority: z.enum(['critical','high','medium','low']).optional(),
+  notificationType: z.string().max(100).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(30),
   unreadOnly: z
@@ -18,11 +20,11 @@ const listQuerySchema = z.object({
 });
 
 export async function listNotifications(req: Request, res: Response) {
-  const { page, limit, unreadOnly } = listQuerySchema.parse(req.query);
+  const { page, limit, unreadOnly, priority, notificationType } = listQuerySchema.parse(req.query);
   const data = await notificationService.list(req.tenant!.schemaName, req.user!.id, {
     page,
     limit,
-    unreadOnly,
+    unreadOnly, priority, notificationType,
   });
   ok(res, req, data);
 }

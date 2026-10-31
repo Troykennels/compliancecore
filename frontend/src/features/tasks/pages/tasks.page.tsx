@@ -1,10 +1,12 @@
 import { ModalSurface } from '@/components/modal-surface';
 import { PageHeader } from '@/components/page-header';
 import { PermissionAction } from '@/components/permission-action';
+import { hasPermission } from '@/config/role-permissions';
+import { useAuthStore } from '@/stores/auth.store';
 import { useState } from 'react';
 import { parseISO, isPast } from 'date-fns';
 import { Plus, LayoutGrid, List, AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { PATHS } from '@/routes/paths';
 import { useTasks, useTaskStats, useDeleteTask } from '../hooks/use-tasks';
 import { TaskBoard } from '../components/task-board';
@@ -16,8 +18,11 @@ import { useOrgFormat } from '@/lib/org-format';
 type View = 'board' | 'list';
 
 export function TasksPage() {
+  const canWrite = hasPermission(useAuthStore(s => s.activeTenant?.role), 'tasks:write');
 
   const fmt = useOrgFormat();
+  const [params] = useSearchParams();
+  const [myTasks, setMyTasks] = useState(params.get('myTasks') === 'true');
   const [view, setView] = useState<View>('board');
   const [statusFilter, setStatusFilter] = useState<TaskStatus | ''>('');
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | ''>('');
@@ -32,6 +37,7 @@ export function TasksPage() {
   const { data: taskData, isLoading, isError, refetch } = useTasks({
     ...(statusFilter && { status: statusFilter }),
     ...(priorityFilter && { priority: priorityFilter }),
+    myTasks,
     limit: 100,
   });
   const deleteTask = useDeleteTask();
@@ -44,7 +50,7 @@ export function TasksPage() {
   };
 
   return (
-    <div className="p-6 max-w-full">
+    <div className="mx-auto max-w-7xl p-4 sm:p-6">
       {/* Header */}
       <div className="mb-6"><PageHeader eyebrow="Respond" title="Tasks" description={"Track and manage compliance tasks across your organization"} actions={<><PermissionAction scope="tasks:write"><button
           onClick={() => openCreate()}
@@ -64,7 +70,7 @@ export function TasksPage() {
       )}
 
       {/* Controls */}
-      <div className="flex items-center gap-3 mb-4 flex-wrap">
+      <div className="workspace-toolbar flex items-center gap-3 mb-4 flex-wrap"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={myTasks} onChange={e => setMyTasks(e.target.checked)} />Assigned to me</label>
         <div className="flex gap-1 rounded-lg bg-slate-100 p-1">
           <button onClick={() => setView('board')} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium ${view === 'board' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-600'}`}>
             <LayoutGrid className="h-3.5 w-3.5" /> Board
@@ -105,9 +111,9 @@ export function TasksPage() {
       ) : view === 'board' ? (
         <TaskBoard
           tasks={tasks}
-          onTaskClick={(t) => setEditTask(t)}
+          onTaskClick={(t) => canWrite ? setEditTask(t) : navigate(PATHS.TASK_DETAIL(t.id))}
           onViewTask={(t) => navigate(PATHS.TASK_DETAIL(t.id))}
-          onCreateTask={(status) => openCreate(status)}
+          onCreateTask={canWrite ? (status) => openCreate(status) : undefined}
         />
       ) : (
         <div className="overflow-hidden rounded-xl border border-slate-200">

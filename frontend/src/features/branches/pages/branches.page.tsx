@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { ModalSurface } from '@/components/modal-surface';
 import { PageHeader } from '@/components/page-header';
 import { useState } from 'react';
@@ -36,13 +37,13 @@ export function BranchesPage(): JSX.Element {
     <div className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-7xl p-4 sm:p-6">
         {/* Page Header */}
-        <div className="mb-6"><PageHeader eyebrow="Scope" title="Branches" description={"Manage your organisation's physical locations and offices."} actions={<><button
+        <div className="mb-6"><PageHeader eyebrow="Scope" title="Branches" description={"Manage your organisation's physical locations and offices."} actions={<><PermissionAction scope="org:write"><button
             onClick={openCreate}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
             Add Branch
-          </button></>} /></div>
+          </button></PermissionAction></>} /></div>
 
         {/* Search */}
         <div className="mb-4 relative">
@@ -140,18 +141,18 @@ export function BranchesPage(): JSX.Element {
 
                         {menuOpenId === branch.id && (
                           <div className="absolute right-0 top-full z-10 mt-1 w-36 rounded-lg border border-slate-200 bg-white shadow-lg py-1">
-                            <button
+                            <PermissionAction scope="org:write"><button
                               onClick={() => { openEdit(branch); setMenuOpenId(null); }}
                               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                             >
                               <Pencil className="h-4 w-4" /> Edit
-                            </button>
-                            <button
+                            </button></PermissionAction>
+                            <PermissionAction scope="org:write"><button
                               onClick={() => { setConfirmDeleteId(branch.id); setMenuOpenId(null); }}
                               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"
                             >
                               <Trash2 className="h-4 w-4" /> Delete
-                            </button>
+                            </button></PermissionAction>
                           </div>
                         )}
                       </div>
@@ -194,13 +195,13 @@ export function BranchesPage(): JSX.Element {
               >
                 Cancel
               </button>
-              <button
+              <PermissionAction scope="org:write"><button
                 onClick={() => handleDelete(confirmDeleteId)}
                 disabled={isDeleting}
                 className="rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting…' : 'Delete'}
-              </button>
+              </button></PermissionAction>
             </div>
           </div>
         </ModalSurface>
@@ -239,12 +240,12 @@ function EmptyState({ onAdd }: { onAdd: () => void }): JSX.Element {
       <p className="mt-1 text-sm text-slate-500">
         Add your first office or location to get started.
       </p>
-      <button
+      <PermissionAction scope="org:write"><button
         onClick={onAdd}
         className="mt-4 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
       >
         <Plus className="h-4 w-4" /> Add Branch
-      </button>
+      </button></PermissionAction>
     </div>
   );
 }

@@ -1,15 +1,15 @@
 export interface Framework {
-  id:                  string;
-  code:                string;
-  name:                string;
-  shortName:           string | null;
-  version:             string | null;
-  jurisdiction:        string | null;
-  issuingBody:         string | null;
-  description:         string | null;
-  isActive:            boolean;
-  effectiveDate:       string | null;
-  categoryCount:       number;
+  id: string;
+  code: string;
+  name: string;
+  shortName: string | null;
+  version: string | null;
+  jurisdiction: string | null;
+  issuingBody: string | null;
+  description: string | null;
+  isActive: boolean;
+  effectiveDate: string | null;
+  categoryCount: number;
   adoptedControlCount: number;
   /** Controls published in the shared library. 0 means the framework is listed
    *  in the catalogue but not yet modelled, so adopting it yields little. */
@@ -17,27 +17,27 @@ export interface Framework {
 }
 
 export interface FrameworkLibraryControl {
-  controlRef:   string;
-  title:        string;
-  description:  string | null;
-  guidance:     string | null;
-  sortOrder:    number;
+  controlRef: string;
+  title: string;
+  description: string | null;
+  guidance: string | null;
+  sortOrder: number;
   categoryCode: string | null;
   categoryName: string | null;
 }
 
 export interface FrameworkCategory {
-  id:          string;
+  id: string;
   frameworkId: string;
-  code:        string;
-  name:        string;
+  code: string;
+  name: string;
   description: string | null;
-  sortOrder:   number;
+  sortOrder: number;
 }
 
 export interface FrameworkDetail extends Framework {
   categories: FrameworkCategory[];
-  controls:   FrameworkLibraryControl[];
+  controls: FrameworkLibraryControl[];
 }
 
 export interface AdoptResult {
@@ -56,17 +56,17 @@ export interface AdoptResult {
  * and that should cost one click and no lecture.
  */
 export interface UnadoptImpact {
-  frameworkId:   string;
+  frameworkId: string;
   frameworkName: string;
-  controls:      number;
-  touched:       number;
-  implemented:   number;
-  withOwner:     number;
-  withNotes:     number;
-  withEvidence:  number;
+  controls: number;
+  touched: number;
+  implemented: number;
+  withOwner: number;
+  withNotes: number;
+  withEvidence: number;
 }
 
 export interface UnadoptResult {
-  removed:       number;
+  removed: number;
   frameworkName: string;
 }

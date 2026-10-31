@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { PageHeader } from '@/components/page-header';
 import { AccessibleField } from '@/components/accessible-field';
 import React, { useState } from 'react';
@@ -137,14 +138,14 @@ export function EvidencePage() {
       <div className="px-4 pt-4 sm:px-6 sm:pt-6">
         <PageHeader eyebrow="Prove" title="Evidence"
           description={`Records that support a compliance claim, such as an approved policy, a completed review or a test result. ${total.toLocaleString()} item${total !== 1 ? 's' : ''}.`}
-          actions={<button
+          actions={<PermissionAction scope="evidence:write"><button
             type="button"
             onClick={() => setUploadOpen(true)}
             className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
             <Upload className="h-4 w-4" />
             Upload Evidence
-          </button>} />
+          </button></PermissionAction>} />
       </div>
 
       {/* Search bar */}
@@ -236,13 +237,13 @@ export function EvidencePage() {
             <div className="flex h-64 flex-col items-center justify-center gap-3 text-slate-400">
               <AlertCircle className="h-10 w-10" />
               <p className="text-sm">No evidence found.</p>
-              <button
+              <PermissionAction scope="evidence:write"><button
                 type="button"
                 onClick={() => setUploadOpen(true)}
                 className="text-sm text-blue-600 hover:underline"
               >
                 Upload your first evidence item
-              </button>
+              </button></PermissionAction>
             </div>
           )}
 

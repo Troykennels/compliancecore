@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 
 const priority = z.enum(['critical','high','medium','low']).default('medium');
@@ -23,7 +24,7 @@ export const createTaskSchema = z.object({
   recurrenceRule: z.string().max(200).optional(),
 });
 
-export const updateTaskSchema = createTaskSchema.partial().extend({
+export const updateTaskSchema = patchObject(createTaskSchema).extend({
   status:      status.optional(),
   actualHours: z.number().positive().optional(),
 });

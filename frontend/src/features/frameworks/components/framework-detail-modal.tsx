@@ -11,10 +11,14 @@ interface Props {
 
 export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Element {
   const { data: framework, isLoading, isError } = useFramework(frameworkId);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   return (
-    <ModalSurface label=" " onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <ModalSurface
+      label=" "
+      onClose={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+    >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
 
@@ -58,7 +62,9 @@ export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Eleme
                 <AlertTriangle className="h-7 w-7 text-rose-400" />
               </div>
               <h3 className="text-base font-semibold text-slate-900">Couldn't load framework</h3>
-              <p className="mt-1 text-sm text-slate-500">Something went wrong while fetching this framework.</p>
+              <p className="mt-1 text-sm text-slate-500">
+                Something went wrong while fetching this framework.
+              </p>
             </div>
           ) : (
             <>
@@ -71,7 +77,10 @@ export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Eleme
                 <Meta label="Version" value={framework.version} />
                 <Meta label="Jurisdiction" value={framework.jurisdiction} />
                 <Meta label="Categories" value={String(framework.categoryCount)} />
-                <Meta label="Organisation control records" value={String(framework.adoptedControlCount)} />
+                <Meta
+                  label="Organisation control records"
+                  value={String(framework.adoptedControlCount)}
+                />
               </dl>
 
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
@@ -86,7 +95,9 @@ export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Eleme
                   {framework.categories.map((cat) => (
                     <li key={cat.id} className="px-4 py-3">
                       <div className="flex items-baseline gap-2">
-                        <span className="font-mono text-xs font-semibold text-indigo-600">{cat.code}</span>
+                        <span className="font-mono text-xs font-semibold text-indigo-600">
+                          {cat.code}
+                        </span>
                         <span className="text-sm font-medium text-slate-900">{cat.name}</span>
                       </div>
                       {cat.description && (
@@ -112,7 +123,10 @@ export function FrameworkDetailModal({ frameworkId, onClose }: Props): JSX.Eleme
           <button
             type="button"
             disabled={isLoading || isError || !framework}
-            onClick={() => {navigate('/frameworks?framework='+frameworkId);onClose();}}
+            onClick={() => {
+              navigate('/frameworks?framework=' + frameworkId);
+              onClose();
+            }}
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
           >
             <Download className="h-4 w-4" />
@@ -128,7 +142,9 @@ function Meta({ label, value }: { label: string; value: string | null }): JSX.El
   return (
     <div>
       <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</dt>
-      <dd className="mt-0.5 text-slate-700">{value ?? <span className="text-slate-400">—</span>}</dd>
+      <dd className="mt-0.5 text-slate-700">
+        {value ?? <span className="text-slate-400">—</span>}
+      </dd>
     </div>
   );
 }

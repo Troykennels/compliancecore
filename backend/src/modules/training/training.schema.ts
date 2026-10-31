@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 
 const uuidSchema = z.string().uuid();
@@ -14,7 +15,7 @@ export const createTrainingSchema = z.object({
   ownerId:         uuidSchema.optional().nullable(),
 });
 
-export const updateTrainingSchema = createTrainingSchema.partial();
+export const updateTrainingSchema = patchObject(createTrainingSchema);
 
 export const listTrainingsSchema = z.object({
   page:        z.coerce.number().int().min(1).optional().default(1),

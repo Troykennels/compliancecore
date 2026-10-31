@@ -1,3 +1,4 @@
+import { emailAllowed } from '../notifications/notification-preferences';
 import * as repo from './tasks.repository';
 import { notificationService } from '../notifications/notification.service';
 import { sendEmail, emailTemplates } from '../../lib/email.service';
@@ -182,7 +183,7 @@ async function _sendTaskAssignedEmail(
     return row;
   });
 
-  if (!user?.email) return;
+  if (!user?.email || !await emailAllowed(schemaName, assignedTo, 'task_assigned')) return;
   const tmpl = emailTemplates.taskAssigned({
     recipientName: `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() || user.email,
     taskTitle,

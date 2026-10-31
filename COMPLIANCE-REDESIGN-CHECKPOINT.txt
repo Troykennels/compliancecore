@@ -1,0 +1,107 @@
+ComplianceCore - design and compliance workflow checkpoint
+30 October 2026
+
+Location: C:\Users\user\Desktop\ComplianceCore-fixes
+Branch: ux-fixes-20261029 (continued Claude's existing isolated worktree).
+Reference: Downloads\Workings.docx and Claude's 29-item fix tracker.
+Original ComplianceCore checkout and its shared dependencies were preserved.
+
+DELIVERED
+A shared teal and neutral design with consistent bordered page headers, grouped
+filters, tables, forms, responsive task boards, readable dates and phone layouts.
+The assessment and privacy components are formatted for maintenance.
+
+Compliance journey: /journey
+The saved assessment pathway covers scope, obligations, applicability, risks,
+controls, policy/evidence implementation, tests, corrective work, management
+review, independent sign-off and the final external outcome. The first unfinished
+step is linked. The selected step survives reload. Supporting workstreams link
+people, training, suppliers, privacy, incidents, audits, approvals and monitoring.
+The existing readiness gates remain server-enforced. Progress represents saved
+records; a link alone is not evidence that a requirement has been satisfied.
+
+Final outcomes: actual issued reports/certificates/filing acknowledgments and
+pinned proof, or an explicit optional-certification rationale. Independent review
+is required. Assessment changes invalidate the prior outcome. Approved review
+or expiry dates create an owned calendar follow-up.
+
+Audit room: dated auditor access, assigned requests, linked controls, due dates,
+pinned evidence versions, comments, submission, independent acceptance/revision,
+correction, reassignment, attachment removal and soft archival. Corrections clear
+report review and reopen completed audits. Completion checks active requests and
+the validity of retained evidence. Control owners see only their assigned room
+requests. Room access windows do not restrict the organisation's other auditor
+read permissions. Eligible request owners are checked on the server and in forms.
+
+Evidence coverage: links name the supported requirement/control and source record,
+filtered by the caller's read permissions. Versions stay pinned for audit review.
+
+Notifications: each member controls their own preferences, including read-only
+roles. In-app visibility is applied by the API. Email switches are exposed only
+for implemented delivery paths. The bell leads with messages. The inbox supports
+type/priority filters and source links. Reminder timing is explained. Workflow
+emails use the existing shared Brevo/SMTP configuration and escape HTML content.
+
+Roles: analytics uses an existing report permission, auditors can read suppliers
+and training, prohibited write actions are hidden, role dashboards query real work,
+and MSP portfolio navigation uses authenticated organisation memberships.
+
+Dependencies: patched frontend and backend packages, compatible form validators,
+explicit environment boolean defaults and safe partial-update parsing. Both npm
+audit reports show zero known vulnerabilities at the time of this checkpoint.
+
+Release review: reusable CI plus a manual workflow that runs checks and packages
+source with revision/checksum information. This has not been run on GitHub.
+
+CLAUDE TRACKER RECONCILIATION
+NAV-01 through NAV-05: carried forward and checked in the page review.
+COMP-01 through COMP-05: carried forward; journey and outcome flow extended.
+AUD-01: audit room implemented. AUD-02: evidence coverage added.
+AUD-03: auditor supplier/training read permissions corrected.
+VIS-01: common brand and neutral tiles. VIS-02: organisation date formatter.
+VIS-03: consistent action labels. VIS-04: responsive task board.
+NOT-01: actual per-user email controls. NOT-02: message-first bell.
+NOT-03: source, priority and filters. NOT-04: reminder timing explained.
+ENG-01: release review workflow prepared. ENG-02: long single-line components formatted.
+ENG-03: personal preferences use one active UI/API; legacy organisation endpoint
+remains for compatibility and is not used by the preferences screen.
+ROLE-01: analytics permission fixed. ROLE-02: action permission visibility corrected.
+ROLE-03: own preferences for all roles. ROLE-04: role-specific live workload panels.
+ROLE-05: authenticated MSP portfolio screen implemented.
+
+VERIFICATION
+Final results are recorded in verification/design-20261030, including a screenshot
+gallery, API checks, outcome checks, dependency audits and automated test logs.
+Completed: 25 backend test files, 194 tests passed including the database integration suite.
+66 API request checks across eight roles; eight outcome persistence/review checks.
+34 browser interaction checks at desktop and phone widths, including eight module
+forms, step reload persistence, date validation and public authentication pages.
+The calendar colour field label was corrected after the form check identified it.
+Frontend type checking, ESLint, the scoped formatting check and production builds
+passed. Backend production TypeScript compilation passed. git diff --check passed.
+Initial harness/preview failures were corrected (preview API environment, hidden
+outcome details and browser load waits); final logs supersede those earlier runs.
+
+LOCAL REVIEW
+Frontend preview: http://127.0.0.1:5178
+Open /journey after sign-in for the complete assessment pathway.
+API: http://127.0.0.1:3008
+Database: isolated local presentation/test databases on 127.0.0.1:55443.
+Private fixture credentials stay in the user's temporary directory, outside source.
+
+FINAL PAGE REVIEW
+88 populated page layouts passed at 1440px and 390px, plus seven additional role
+dashboards and the role access/action checks. Zero page errors, API server errors,
+page overflow, duplicate main headings or unlabelled page fields were observed.
+Gallery: verification/design-20261030/gallery.html (123 screenshots).
+Aggregate result: verification/design-20261030/verification-summary.json.
+
+DELIVERY BOUNDARIES
+These are local source changes; no production deployment, push or commit was made.
+Migrations 019 and 020 were applied to local presentation tenant schemas only.
+A deployed upgrade must include the normal tenant migration step before use.
+External email, payments and object storage were disabled in local verification;
+real provider delivery has not been claimed. GitHub CI/release execution remains
+unverified remotely. Fixture outcomes test persistence/review rules; they are not
+certifications. Actual compliance depends on applicable obligations, current
+records, competent review and the external authority's decisions.

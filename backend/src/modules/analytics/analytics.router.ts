@@ -9,6 +9,6 @@ import { getAnalyticsOverview } from './analytics.controller';
 const router = Router();
 router.use(authenticate(), resolveTenant, enforceEntitlement());
 
-router.get('/overview', requirePermission('dashboard:read'), asyncHandler(getAnalyticsOverview));
+router.get('/overview', requirePermission('reports:read'), asyncHandler(getAnalyticsOverview));
 
 export default router;

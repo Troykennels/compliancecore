@@ -39,6 +39,7 @@ export function ControlsPage(): JSX.Element {
 
   const { data, isLoading, isError, refetch } = useControls({
     frameworkId: routeParams.get('frameworkId')||undefined,
+    ownerId: routeParams.get('ownerId')||undefined,
     q: search || undefined,
     status: statusFilter || undefined,
     criticality: criticalityFilter || undefined,
@@ -129,7 +130,7 @@ export function ControlsPage(): JSX.Element {
       <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-3 text-sm text-indigo-950">Work from the agreed scope and SoA, assign responsibility, record how the safeguard operates, attach evidence and review the result. <Link className="font-semibold underline" to={routeParams.get('frameworkId')?`/frameworks?framework=${routeParams.get('frameworkId')}`:'/frameworks'}>Return to compliance assessment</Link></div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="workspace-toolbar flex flex-wrap items-center gap-2">
         <div className="relative min-w-0 flex-1 sm:max-w-xs">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"

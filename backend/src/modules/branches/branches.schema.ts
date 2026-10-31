@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 
 export const createBranchSchema = z.object({
@@ -23,7 +24,7 @@ export const createBranchSchema = z.object({
   email: z.string().email('Invalid email').max(255).optional().nullable(),
 });
 
-export const updateBranchSchema = createBranchSchema.partial().extend({
+export const updateBranchSchema = patchObject(createBranchSchema).extend({
   isActive: z.boolean().optional(),
 });
 

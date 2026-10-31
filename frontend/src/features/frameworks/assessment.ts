@@ -2,11 +2,129 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api';
-export interface ComplianceProfile {family:'security'|'privacy'|'financial'|'continuity';applicabilityLabel:string;outcome:string;outcomeTitle:string;outcomeDetail:string;internalAudit:boolean;managementReview:boolean;focus:string;source:string;editionNote?:string}
-export interface Engagement {id:string;stakeholder:string;department:string;consulted_on:string;status:'draft'|'confirmed';answers:Record<string,string>}
-export interface WorksheetRisk {id:string;asset_name:string;asset_type:string;title:string;threat:string;vulnerability:string;consequence:string;assessment_basis:string;owner_id:string|null;owner_name:string|null;rating_confirmed:boolean;inherent_likelihood:number;inherent_impact:number;inherent_score:number;treatment:'mitigate'|'accept'|'transfer'|'avoid';mitigation_plan:string;control_ids:string[];treatment_due_date:string|null;acceptance_note:string;residual_likelihood:number;residual_impact:number;residual_score:number;residual_basis:string;status:'open'|'in_treatment'|'mitigated'|'accepted'|'closed'}
-export interface RiskSuggestion {assetName:string;assetType:string;title:string;threat:string;vulnerability:string;consequence:string;likelihood:number;impact:number;basis:string;context:string;controls:Array<{id:string;control_ref:string;title:string}>}
-export interface Assessment {framework:{id:string;code:string;name:string};profile:ComplianceProfile;engagements:Engagement[];controls:Array<{id:string;control_ref:string;title:string;implementation_status:string}>;risks:WorksheetRisk[];questions:Array<{key:string;label:string;example:string}>;ratingGuide:{likelihood:string[];impact:string[];method:string};suggestions:RiskSuggestion[]}
-export function useAssessment(id:string){return useQuery({queryKey:['assessment',id],queryFn:()=>apiClient.get<ApiResponse<Assessment>>(`/frameworks/${id}/assessment`).then(r=>r.data.data),enabled:Boolean(id)});}
-export function useAssessmentSave(id:string){const qc=useQueryClient();return useMutation({mutationFn:({path,data,method='put'}:{path:string;data?:unknown;method?:'put'|'delete'})=>method==='delete'?apiClient.delete(`/frameworks/${id}/assessment${path}`):apiClient.put(`/frameworks/${id}/assessment${path}`,data),onSuccess:()=>{for(const key of ['assessment','implementation','risks','tasks'])void qc.invalidateQueries({queryKey:[key]});toast.success('Assessment record saved.');},onError:(e:{response?:{data?:{error?:{message?:string}}}})=>toast.error(e.response?.data?.error?.message??'Could not save. Check the required fields and try again.')});}
-export async function downloadAssessment(id:string){try{const r=await apiClient.get(`/frameworks/${id}/assessment/workbook`,{responseType:'blob'});const url=URL.createObjectURL(r.data);const a=document.createElement('a');a.href=url;a.download='Compliance-assessment.xlsx';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch{toast.error('The workbook could not be downloaded. Please retry.');}}
+export interface ComplianceProfile {
+  family: 'security' | 'privacy' | 'financial' | 'continuity';
+  applicabilityLabel: string;
+  outcome: string;
+  outcomeTitle: string;
+  outcomeDetail: string;
+  internalAudit: boolean;
+  managementReview: boolean;
+  focus: string;
+  source: string;
+  editionNote?: string;
+}
+export interface Engagement {
+  id: string;
+  stakeholder: string;
+  department: string;
+  consulted_on: string;
+  status: 'draft' | 'confirmed';
+  answers: Record<string, string>;
+}
+export interface WorksheetRisk {
+  id: string;
+  asset_name: string;
+  asset_type: string;
+  title: string;
+  threat: string;
+  vulnerability: string;
+  consequence: string;
+  assessment_basis: string;
+  owner_id: string | null;
+  owner_name: string | null;
+  rating_confirmed: boolean;
+  inherent_likelihood: number;
+  inherent_impact: number;
+  inherent_score: number;
+  treatment: 'mitigate' | 'accept' | 'transfer' | 'avoid';
+  mitigation_plan: string;
+  control_ids: string[];
+  treatment_due_date: string | null;
+  acceptance_note: string;
+  residual_likelihood: number;
+  residual_impact: number;
+  residual_score: number;
+  residual_basis: string;
+  status: 'open' | 'in_treatment' | 'mitigated' | 'accepted' | 'closed';
+}
+export interface RiskSuggestion {
+  assetName: string;
+  assetType: string;
+  title: string;
+  threat: string;
+  vulnerability: string;
+  consequence: string;
+  likelihood: number;
+  impact: number;
+  basis: string;
+  context: string;
+  controls: Array<{ id: string; control_ref: string; title: string }>;
+}
+export interface Assessment {
+  framework: { id: string; code: string; name: string };
+  profile: ComplianceProfile;
+  engagements: Engagement[];
+  controls: Array<{
+    id: string;
+    control_ref: string;
+    title: string;
+    implementation_status: string;
+  }>;
+  risks: WorksheetRisk[];
+  questions: Array<{ key: string; label: string; example: string }>;
+  ratingGuide: { likelihood: string[]; impact: string[]; method: string };
+  suggestions: RiskSuggestion[];
+}
+export function useAssessment(id: string) {
+  return useQuery({
+    queryKey: ['assessment', id],
+    queryFn: () =>
+      apiClient
+        .get<ApiResponse<Assessment>>(`/frameworks/${id}/assessment`)
+        .then((r) => r.data.data),
+    enabled: Boolean(id),
+  });
+}
+export function useAssessmentSave(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      path,
+      data,
+      method = 'put',
+    }: {
+      path: string;
+      data?: unknown;
+      method?: 'put' | 'delete';
+    }) =>
+      method === 'delete'
+        ? apiClient.delete(`/frameworks/${id}/assessment${path}`)
+        : apiClient.put(`/frameworks/${id}/assessment${path}`, data),
+    onSuccess: () => {
+      for (const key of ['assessment', 'implementation', 'risks', 'tasks'])
+        void qc.invalidateQueries({ queryKey: [key] });
+      toast.success('Assessment record saved.');
+    },
+    onError: (e: { response?: { data?: { error?: { message?: string } } } }) =>
+      toast.error(
+        e.response?.data?.error?.message ??
+          'Could not save. Check the required fields and try again.',
+      ),
+  });
+}
+export async function downloadAssessment(id: string) {
+  try {
+    const r = await apiClient.get(`/frameworks/${id}/assessment/workbook`, {
+      responseType: 'blob',
+    });
+    const url = URL.createObjectURL(r.data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Compliance-assessment.xlsx';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch {
+    toast.error('The workbook could not be downloaded. Please retry.');
+  }
+}

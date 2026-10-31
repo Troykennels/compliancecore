@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { ModalSurface } from '@/components/modal-surface';
 import { PageHeader } from '@/components/page-header';
 import React, { useState } from 'react';
@@ -65,13 +66,13 @@ export function EscalationsPage() {
   const activeEventCount = events.filter((e) => e.status === 'active').length;
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-6"><PageHeader eyebrow="Respond" title="Escalations" description={"Automated escalation chains evaluated hourly by the BullMQ scheduler"} actions={<><button
+    <div className="mx-auto max-w-7xl p-4 sm:p-6">
+      <div className="mb-6"><PageHeader eyebrow="Respond" title="Escalations" description={"Automated escalation chains evaluated hourly by the BullMQ scheduler"} actions={<><PermissionAction scope="escalations:manage"><button
           onClick={() => setShowForm(true)}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" /> New Rule
-        </button></>} /></div>
+        </button></PermissionAction></>} /></div>
 
       {/* Tabs */}
       <div className="flex gap-1 rounded-lg bg-slate-100 p-1 w-fit mb-5">
@@ -97,7 +98,7 @@ export function EscalationsPage() {
             <div className="rounded-xl border border-dashed border-slate-300 py-16 text-center">
               <AlertTriangle className="h-10 w-10 text-slate-300 mx-auto mb-2" />
               <p className="text-sm text-slate-500">No escalation rules defined</p>
-              <button onClick={() => setShowForm(true)} className="mt-3 text-sm text-blue-600 hover:underline">Create your first rule</button>
+              <PermissionAction scope="escalations:manage"><button onClick={() => setShowForm(true)} className="mt-3 text-sm text-blue-600 hover:underline">Create your first rule</button></PermissionAction>
             </div>
           ) : (
             <div className="space-y-3">
@@ -116,15 +117,15 @@ export function EscalationsPage() {
                             {rule.description && <p className="text-xs text-slate-500 mt-0.5">{rule.description}</p>}
                           </div>
                           <div className="flex items-center gap-1.5 shrink-0">
-                            <button
+                            <PermissionAction scope="escalations:manage"><button
                               onClick={() => toggleRule.mutate({ id: rule.id, isActive: !rule.isActive })}
                               disabled={toggleRule.isPending}
                               className={`rounded-lg p-1.5 ${rule.isActive ? 'text-green-600 hover:bg-green-50' : 'text-slate-400 hover:bg-slate-100'}`}
                               title={rule.isActive ? 'Deactivate' : 'Activate'}
                             >
                               <Power className="h-4 w-4" />
-                            </button>
-                            <button
+                            </button></PermissionAction>
+                            <PermissionAction scope="escalations:manage"><button
                               onClick={() => {
                                 if (confirm(`Delete "${rule.name}"? This cannot be undone.`)) {
                                   deleteRule.mutate(rule.id);
@@ -134,7 +135,7 @@ export function EscalationsPage() {
                               title="Delete rule"
                             >
                               <Trash2 className="h-4 w-4" />
-                            </button>
+                            </button></PermissionAction>
                           </div>
                         </div>
 
@@ -187,7 +188,7 @@ export function EscalationsPage() {
       {/* Events tab */}
       {tab === 'events' && (
         <div>
-          <div className="flex items-center gap-3 mb-4">
+          <div className="workspace-toolbar flex items-center gap-3 mb-4">
             <select
               value={eventStatusFilter}
               onChange={(e) => setEventStatusFilter(e.target.value as any)}
@@ -246,12 +247,12 @@ export function EscalationsPage() {
                       </td>
                       <td className="px-4 py-3">
                         {ev.status === 'active' && (
-                          <button
+                          <PermissionAction scope="escalations:manage"><button
                             onClick={() => setResolveTarget(ev.id)}
                             className="text-xs text-green-600 hover:underline font-medium"
                           >
                             Resolve
-                          </button>
+                          </button></PermissionAction>
                         )}
                       </td>
                     </tr>
@@ -278,7 +279,7 @@ export function EscalationsPage() {
              aria-label="e.g. Issue addressed, task reassigned to team lead" />
             <div className="flex gap-2 justify-end">
               <button onClick={() => { setResolveTarget(null); setResolveNote(''); }} className="rounded-md px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">Cancel</button>
-              <button
+              <PermissionAction scope="escalations:manage"><button
                 onClick={async () => {
                   await resolveEvent.mutateAsync({ id: resolveTarget, resolutionNote: resolveNote || undefined });
                   setResolveTarget(null);
@@ -288,7 +289,7 @@ export function EscalationsPage() {
                 className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
               >
                 {resolveEvent.isPending ? 'Resolving…' : 'Resolve'}
-              </button>
+              </button></PermissionAction>
             </div>
           </div>
         </ModalSurface>

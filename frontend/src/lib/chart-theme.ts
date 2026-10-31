@@ -9,9 +9,9 @@
  */
 
 export const CHART = {
-  brand: '#0F56C9',
-  brandSoft: '#7FB2FF',
-  brandWash: '#ECF4FF',
+  brand: '#107568',
+  brandSoft: '#7CCABC',
+  brandWash: '#EFF9F7',
 
   success: '#0A7D58',
   successSoft: '#5FCDA4',

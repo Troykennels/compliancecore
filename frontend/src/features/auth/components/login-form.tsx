@@ -27,7 +27,7 @@ export function LoginForm({ onSuccess, isLoading, onSubmit }: LoginFormProps): J
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({ resolver: zodResolver(schema) });
 
   const submit = async (values: FormValues) => {
     const result = await onSubmit(values);

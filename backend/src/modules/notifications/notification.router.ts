@@ -6,9 +6,14 @@ import { asyncHandler } from '../../lib/asyncHandler';
 import * as ctrl from './notification.controller';
 import { pushKeys, subscribeDevice, unsubscribeDevice, testPush } from './push.service';
 import { validSubscription } from './push-core';
+import { notificationPreferences, preferencesSchema } from './notification-preferences';
+import { validate } from '../../middleware/validate.middleware';
+import { ok, noContent } from '../../lib/response';
 
 const router = Router();
 router.use(authenticate(), resolveTenant, enforceEntitlement());
+router.get('/preferences', asyncHandler(async (req, res) => ok(res, req, await notificationPreferences.get(req.tenant!.schemaName, req.user!.id))));
+router.put('/preferences', validate(preferencesSchema), asyncHandler(async (req, res) => { await notificationPreferences.save(req.tenant!.schemaName, req.user!.id, req.body); noContent(res); }));
 
 router.get('/push', asyncHandler(async(req,res)=>{
   res.setHeader('Cache-Control','no-store');

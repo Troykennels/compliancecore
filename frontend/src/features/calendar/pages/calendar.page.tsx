@@ -1,6 +1,7 @@
+import { PermissionAction } from '@/components/permission-action';
 import { useState } from 'react';
 import { PageHeader } from '@/components/page-header';
-import { format, parseISO, isValid } from 'date-fns';
+import { useOrgFormat } from '@/lib/org-format';
 import { Plus, Calendar, List, AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useCalendarEvents, useDeleteCalendarEvent } from '../hooks/use-calendar';
 import { CalendarGrid } from '../components/calendar-grid';
@@ -21,13 +22,9 @@ const STATUS_BADGE: Record<CalendarEventStatus, string> = {
 const DEFAULT_BADGE = 'bg-slate-100 text-slate-500';
 const DEFAULT_EVENT_COLOR = '#64748B';
 
-function safeFormat(dateStr: string | null | undefined, fmt: string): string | null {
-  if (!dateStr) return null;
-  const parsed = parseISO(dateStr);
-  return isValid(parsed) ? format(parsed, fmt) : null;
-}
 
 export function CalendarPage() {
+  const fmt = useOrgFormat();
   const [view, setView]             = useState<ViewMode>('month');
   const [modalOpen, setModalOpen]   = useState(false);
   const [selected, setSelected]     = useState<CalendarEvent | null>(null);
@@ -86,16 +83,16 @@ export function CalendarPage() {
               <List className="h-4 w-4" /> List
             </button>
           </div>
-          <button
+          <PermissionAction scope="calendar:write"><button
             onClick={() => openCreate()}
             className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" /> New Event
-          </button>
+          </button></PermissionAction>
         </div></>} /></div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="workspace-toolbar flex items-center gap-3 shrink-0">
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value as CalendarEventType | '')}
@@ -156,8 +153,8 @@ export function CalendarPage() {
           ) : (
             <div className="space-y-2">
               {events.map((ev) => {
-                const startLabel = safeFormat(ev.startDate, 'MMM d, yyyy h:mm a');
-                const endLabel = safeFormat(ev.endDate, 'MMM d, yyyy h:mm a');
+                const startLabel = fmt.formatDateTimeMedium(ev.startDate);
+                const endLabel = ev.endDate ? fmt.formatDateTimeMedium(ev.endDate) : null;
                 return (
                 <div
                   key={ev.id}
@@ -186,18 +183,18 @@ export function CalendarPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <button
+                    <PermissionAction scope="calendar:write"><button
                       onClick={() => openEdit(ev)}
                       className="rounded-md px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-100"
                     >
                       Edit
-                    </button>
-                    <button
+                    </button></PermissionAction>
+                    <PermissionAction scope="calendar:write"><button
                       onClick={() => handleDelete(ev.id)}
                       className="rounded-md px-2.5 py-1 text-xs text-red-600 hover:bg-red-50"
                     >
                       Delete
-                    </button>
+                    </button></PermissionAction>
                   </div>
                 </div>
                 );

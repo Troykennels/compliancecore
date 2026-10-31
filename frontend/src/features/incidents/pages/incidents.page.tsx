@@ -408,7 +408,7 @@ function IncidentDetailModal({ incident, onClose, onChanged }: {
   return (
     <Modal title={`${incident.reference} — ${incident.title}`} onClose={onClose} wide>
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="workspace-toolbar flex flex-wrap items-center gap-2">
           <select aria-label="Incident status" value={incident.status} className={field}
             onChange={(e) => patch.mutate({ status: e.target.value as IncidentStatus })}>
             {STATUSES.map((s) => <option key={s} value={s}>{titleCase(s)}</option>)}

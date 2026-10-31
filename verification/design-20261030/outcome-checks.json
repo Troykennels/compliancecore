@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "checks": [
+    "Outcome SQL insert with pinned evidence version",
+    "Self review refused",
+    "Changed assessment refused",
+    "Independent review stored",
+    "One owned calendar follow-up created",
+    "Updating outcome invalidates review",
+    "Review retry keeps one follow-up",
+    "Real assessment remains incomplete outside isolated readiness fixture"
+  ],
+  "readinessFixture": true,
+  "realAssessmentCompleted": false,
+  "productionWrites": false
+}

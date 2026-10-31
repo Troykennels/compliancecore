@@ -1,0 +1,209 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "width": 1440,
+      "check": "Compliance phase opens its recorded steps and survives reload",
+      "phase": "scope"
+    },
+    {
+      "width": 1440,
+      "check": "Compliance phase opens its recorded steps and survives reload",
+      "phase": "risk"
+    },
+    {
+      "width": 1440,
+      "check": "Compliance phase opens its recorded steps and survives reload",
+      "phase": "requirements"
+    },
+    {
+      "width": 1440,
+      "check": "Compliance phase opens its recorded steps and survives reload",
+      "phase": "evidence"
+    },
+    {
+      "width": 1440,
+      "check": "Compliance phase opens its recorded steps and survives reload",
+      "phase": "review"
+    },
+    {
+      "width": 1440,
+      "check": "Navy navigation and responsive access remain usable"
+    },
+    {
+      "width": 1440,
+      "check": "Scope preview reflects current inputs without changing the saved record"
+    },
+    {
+      "width": 1440,
+      "check": "Assessment step survives reload"
+    },
+    {
+      "width": 1440,
+      "check": "Incomplete assessment cannot record its final outcome"
+    },
+    {
+      "width": 1440,
+      "check": "Direct record link opens the saved source"
+    },
+    {
+      "width": 1440,
+      "check": "/controls form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 1440,
+      "check": "/policies form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 1440,
+      "check": "/audits form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 1440,
+      "check": "/training form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 1440,
+      "check": "/vendors form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 1440,
+      "check": "/calendar form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 1440,
+      "check": "/expiry form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 1440,
+      "check": "/tasks form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 1440,
+      "check": "Audit form refuses reversed dates before sending a request"
+    },
+    {
+      "width": 1440,
+      "check": "Training form saves with its optional frequency left blank"
+    },
+    {
+      "width": 1440,
+      "check": "Evidence title and document actions remain usable"
+    },
+    {
+      "width": 1440,
+      "check": "/register public page fits"
+    },
+    {
+      "width": 1440,
+      "check": "/forgot-password public page fits"
+    },
+    {
+      "width": 1440,
+      "check": "/reset-password public page fits"
+    },
+    {
+      "width": 390,
+      "check": "Compliance phase opens its recorded steps and survives reload",
+      "phase": "scope"
+    },
+    {
+      "width": 390,
+      "check": "Compliance phase opens its recorded steps and survives reload",
+      "phase": "risk"
+    },
+    {
+      "width": 390,
+      "check": "Compliance phase opens its recorded steps and survives reload",
+      "phase": "requirements"
+    },
+    {
+      "width": 390,
+      "check": "Compliance phase opens its recorded steps and survives reload",
+      "phase": "evidence"
+    },
+    {
+      "width": 390,
+      "check": "Compliance phase opens its recorded steps and survives reload",
+      "phase": "review"
+    },
+    {
+      "width": 390,
+      "check": "Navy navigation and responsive access remain usable"
+    },
+    {
+      "width": 390,
+      "check": "Scope preview reflects current inputs without changing the saved record"
+    },
+    {
+      "width": 390,
+      "check": "Assessment step survives reload"
+    },
+    {
+      "width": 390,
+      "check": "Incomplete assessment cannot record its final outcome"
+    },
+    {
+      "width": 390,
+      "check": "Direct record link opens the saved source"
+    },
+    {
+      "width": 390,
+      "check": "/controls form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 390,
+      "check": "/policies form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 390,
+      "check": "/audits form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 390,
+      "check": "/training form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 390,
+      "check": "/vendors form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 390,
+      "check": "/calendar form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 390,
+      "check": "/expiry form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 390,
+      "check": "/tasks form fits, fields are labelled, Escape closes it"
+    },
+    {
+      "width": 390,
+      "check": "Audit form refuses reversed dates before sending a request"
+    },
+    {
+      "width": 390,
+      "check": "Training form saves with its optional frequency left blank"
+    },
+    {
+      "width": 390,
+      "check": "Evidence title and document actions remain usable"
+    },
+    {
+      "width": 390,
+      "check": "/register public page fits"
+    },
+    {
+      "width": 390,
+      "check": "/forgot-password public page fits"
+    },
+    {
+      "width": 390,
+      "check": "/reset-password public page fits"
+    }
+  ],
+  "errors": [],
+  "productionWrites": false
+}

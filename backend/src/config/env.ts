@@ -9,13 +9,13 @@ const schema = z.object({
   DATABASE_URL: z.string().url(),
   PROVISIONING_DATABASE_URL: z.string().url().optional(),
   RUNTIME_DATABASE_ROLE: z.string().regex(/^[a-z_][a-z0-9_]{0,62}$/).optional(),
-  ALLOW_EXTERNAL_DOCUMENT_PREVIEW: z.string().transform(v=>v==='true').default('false'),
+  ALLOW_EXTERNAL_DOCUMENT_PREVIEW: z.string().transform(v=>v==='true').prefault('false'),
   REDIS_URL: z.string().url(),
   // Set to 'false' ONLY for local development without a Redis server: rate
   // limiting falls back to an in-process store, the cache becomes an in-memory
   // stub, and BullMQ background workers are not started. Defaults to enabled;
   // production must keep Redis on (multi-instance limits, queues, revocation).
-  ENABLE_REDIS: z.string().transform((v) => v !== 'false').default('true'),
+  ENABLE_REDIS: z.string().transform((v) => v !== 'false').prefault('true'),
 
   JWT_PRIVATE_KEY_BASE64: z.string().min(1),
   JWT_PUBLIC_KEY_BASE64: z.string().min(1),
@@ -26,7 +26,7 @@ const schema = z.object({
 
   SMTP_HOST: z.string(),
   SMTP_PORT: z.coerce.number().default(587),
-  SMTP_SECURE: z.string().transform((v) => v === 'true').default('false'),
+  SMTP_SECURE: z.string().transform((v) => v === 'true').prefault('false'),
   SMTP_USER: z.string(),
   SMTP_PASS: z.string(),
   EMAIL_FROM: z.string().default('ComplianceCore <noreply@compliancecore.io>'),
@@ -69,7 +69,7 @@ const schema = z.object({
   // MinIO, Backblaze B2). Leave unset to use AWS S3. For R2: set this to
   // https://<accountid>.r2.cloudflarestorage.com, AWS_REGION=auto.
   AWS_S3_ENDPOINT:       z.string().url().optional(),
-  AWS_S3_FORCE_PATH_STYLE: z.string().transform((v) => v === 'true').default('false'),
+  AWS_S3_FORCE_PATH_STYLE: z.string().transform((v) => v === 'true').prefault('false'),
 
   // OCR — if OCR_PROVIDER=textract (default) uses AWS Textract,
   // if OCR_PROVIDER=none disables OCR entirely

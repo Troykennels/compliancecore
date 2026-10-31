@@ -1,0 +1,10 @@
+[
+  {
+    "name": "frontend-typecheck",
+    "exitCode": 0
+  },
+  {
+    "name": "frontend-lint",
+    "exitCode": 0
+  }
+]

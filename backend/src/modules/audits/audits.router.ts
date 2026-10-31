@@ -13,9 +13,11 @@ import {
   updateFindingSchema,
 } from './audits.schema';
 import * as ctrl from './audits.controller';
+import auditRoomRouter from './audit-room.router';
 
 const router = Router();
 router.use(authenticate(), resolveTenant, enforceEntitlement());
+router.use('/:id/room', auditRoomRouter);
 
 router.get('/',                  requirePermission('audits:read'),   validateQuery(listAuditsSchema), asyncHandler(ctrl.listAudits));
 router.get('/:id',               requirePermission('audits:read'),   asyncHandler(ctrl.getAudit));

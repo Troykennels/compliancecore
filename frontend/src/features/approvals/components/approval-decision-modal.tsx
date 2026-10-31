@@ -30,7 +30,7 @@ export function ApprovalDecisionModal({ open, onClose, requestId, step }: Approv
   const [signatureImage, setSignatureImage] = useState<string>();
   const [formError, setFormError] = useState('');
 
-  const { register, watch, handleSubmit, reset } = useForm<FormValues>({
+  const { register, watch, handleSubmit, reset } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
   });
 

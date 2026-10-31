@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 import { refineDateRange } from '../../lib/date-range';
 
@@ -17,7 +18,7 @@ const auditFields = z.object({
 });
 
 export const createAuditSchema = auditFields.superRefine(refineDateRange);
-export const updateAuditSchema = auditFields.partial().superRefine(refineDateRange);
+export const updateAuditSchema = patchObject(auditFields).superRefine(refineDateRange);
 
 export const listAuditsSchema = z.object({
   page:      z.coerce.number().int().min(1).optional().default(1),
@@ -42,7 +43,7 @@ export const createFindingSchema = z.object({
   dueDate:        z.coerce.date().optional().nullable(),
 });
 
-export const updateFindingSchema = createFindingSchema.partial();
+export const updateFindingSchema = patchObject(createFindingSchema);
 
 export type CreateAuditInput   = z.infer<typeof createAuditSchema>;
 export type UpdateAuditInput   = z.infer<typeof updateAuditSchema>;

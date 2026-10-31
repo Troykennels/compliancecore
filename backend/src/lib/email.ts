@@ -38,6 +38,7 @@ async function sendViaHttpApi(
   html: string,
   attachments?: Array<{ filename: string; content: Buffer; contentType: string }>,
   replyTo?: string,
+  text?: string,
 ): Promise<void> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20_000);
@@ -55,6 +56,7 @@ async function sendViaHttpApi(
         to: [{ email: to }],
         subject,
         htmlContent: html,
+        ...(text && { textContent: text }),
         ...(replyTo && { replyTo: { email: replyTo } }),
         // Brevo takes attachments base64-encoded rather than as raw bytes.
         ...(attachments?.length && {
@@ -273,6 +275,9 @@ export async function sendRawEmail(opts: {
   to: string;
   subject: string;
   html: string;
+  text?: string;
+  /** Workflow callers may opt in to retry/reporting instead of best effort. */
+  throwOnError?: boolean;
   attachments?: Array<{ filename: string; content: Buffer; contentType: string }>;
   /** Defaults to EMAIL_REPLY_TO. Pass explicitly to override per message. */
   replyTo?: string;
@@ -280,13 +285,14 @@ export async function sendRawEmail(opts: {
   const replyTo = opts.replyTo ?? env.EMAIL_REPLY_TO;
   try {
     if (useHttpApi) {
-      await sendViaHttpApi(opts.to, opts.subject, opts.html, opts.attachments, replyTo);
+      await sendViaHttpApi(opts.to, opts.subject, opts.html, opts.attachments, replyTo, opts.text);
     } else {
       await transporter.sendMail({
         from: env.EMAIL_FROM,
         to: opts.to,
         subject: opts.subject,
         html: opts.html,
+        ...(opts.text && { text: opts.text }),
         ...(replyTo && { replyTo }),
         attachments: opts.attachments?.map((a) => ({
           filename: a.filename,
@@ -297,6 +303,7 @@ export async function sendRawEmail(opts: {
     }
   } catch (err) {
     logger.error({ err, to: opts.to, subject: opts.subject }, 'Failed to send raw email');
+    if (opts.throwOnError) throw err;
   }
 }
 

@@ -68,6 +68,7 @@ export function NotificationPanel({ notifications, unreadCount, onMarkAllRead }:
                   {pc.label}
                 </span>
               </div>
+              {n.referenceType && <p className="mt-1 text-xs font-medium text-slate-500">{n.referenceType.replace(/_/g, ' ')}{n.referenceId ? ' ? ' + n.referenceId.slice(0, 8) : ''}</p>}
               {n.message && <p className="mt-1 text-xs text-slate-600 leading-relaxed">{n.message}</p>}
               <div className="mt-2 flex items-center gap-3">
                 <p className="text-[11px] text-slate-400">
@@ -96,6 +97,7 @@ export function NotificationPanel({ notifications, unreadCount, onMarkAllRead }:
               onClick={() => dismiss.mutate(n.id)}
               className="shrink-0 mt-0.5 rounded-lg p-1 text-slate-300 hover:bg-slate-100 hover:text-slate-500"
               title="Dismiss"
+              aria-label="Dismiss notification"
             >
               <X className="h-4 w-4" />
             </button>

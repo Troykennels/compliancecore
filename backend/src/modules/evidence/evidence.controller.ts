@@ -19,6 +19,11 @@ export async function listCategories(req: Request, res: Response) {
   ok(res, req, data);
 }
 
+export async function evidenceCoverage(req: Request, res: Response) {
+  z.string().uuid().parse(req.params.id);
+  ok(res, req, await evidenceService.coverage(req.tenant!.schemaName, req.params.id, req.user!.permissions));
+}
+
 export async function createCategory(req: Request, res: Response) {
   const data = await evidenceService.createCategory(req.tenant!.schemaName, req.body, actor(req));
   created(res, req, data);

@@ -7,6 +7,6 @@ export function ModalSurface({ children, className, label, onClose }: {
 }) {
   const previousFocus=useRef(document.activeElement);
   return <Dialog.Root open onOpenChange={open => { if (!open) onClose(); }}>
-    <Dialog.Portal><Dialog.Content aria-describedby={undefined} className={className} onCloseAutoFocus={event=>{event.preventDefault();if(previousFocus.current instanceof HTMLElement && previousFocus.current.isConnected)previousFocus.current.focus();}}><Dialog.Title className="sr-only">{label}</Dialog.Title>{children}</Dialog.Content></Dialog.Portal>
+    <Dialog.Portal><Dialog.Content data-workspace-dialog aria-describedby={undefined} className={className} onCloseAutoFocus={event=>{event.preventDefault();if(previousFocus.current instanceof HTMLElement && previousFocus.current.isConnected)previousFocus.current.focus();}}><Dialog.Title className="sr-only">{label}</Dialog.Title>{children}</Dialog.Content></Dialog.Portal>
   </Dialog.Root>;
 }

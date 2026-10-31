@@ -1,4 +1,7 @@
 import { ModalSurface } from '@/components/modal-surface';
+import { EvidenceCoverage } from '../components/evidence-coverage';
+import { useAuthStore } from '@/stores/auth.store';
+import { hasPermission } from '@/config/role-permissions';
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -25,6 +28,10 @@ const STATUS_OPTIONS: { value: EvidenceStatus; label: string; color: string }[] 
 type DetailTab = 'preview' | 'ocr' | 'versions' | 'audit';
 
 export function EvidenceDetailPage() {
+  const role = useAuthStore(s => s.activeTenant?.role);
+  const canWrite = hasPermission(role, 'evidence:write');
+  const canShare = hasPermission(role, 'evidence:share');
+  const canDelete = hasPermission(role, 'evidence:delete');
 
   const fmt = useOrgFormat();
   const { id } = useParams<{ id: string }>();
@@ -94,13 +101,14 @@ export function EvidenceDetailPage() {
   ];
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-5 p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 border-b border-slate-200 bg-white px-6 py-4 shrink-0">
+      <div className="flex shrink-0 flex-col items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:flex-row">
         <div className="flex items-start gap-3 min-w-0 flex-1">
           <button
             type="button"
             onClick={() => navigate(PATHS.EVIDENCE)}
+            aria-label="Back to evidence"
             className="mt-0.5 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 shrink-0"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -120,19 +128,19 @@ export function EvidenceDetailPage() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-slate-900 truncate">{evidence.title}</h1>
-                <button type="button" onClick={startEditTitle} className="shrink-0 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600" aria-label="Edit record">
+                <h1 className="break-words text-xl font-semibold text-slate-900">{evidence.title}</h1>
+                {canWrite && <button type="button" onClick={startEditTitle} className="shrink-0 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600" aria-label="Edit record">
                   <Pencil className="h-4 w-4" />
-                </button>
+                </button>}
               </div>
             )}
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
               {/* Status dropdown */}
               <div className="relative group">
-                <button className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${statusConf.color}`}>
+                <button disabled={!canWrite} className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${statusConf.color}`}>
                   {statusConf.label} <ChevronDown className="h-3 w-3" />
                 </button>
-                <div className="absolute top-full left-0 z-20 mt-1 hidden group-hover:block rounded-md border border-slate-200 bg-white shadow-lg p-1 min-w-[120px]">
+                {canWrite && <div className="absolute top-full left-0 z-20 mt-1 hidden group-hover:block rounded-md border border-slate-200 bg-white shadow-lg p-1 min-w-[120px]">
                   {STATUS_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
@@ -143,7 +151,7 @@ export function EvidenceDetailPage() {
                       {opt.label}
                     </button>
                   ))}
-                </div>
+                </div>}
               </div>
               {evidence.isConfidential && (
                 <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
@@ -164,31 +172,33 @@ export function EvidenceDetailPage() {
 
         {/* Actions */}
         <div className="flex items-center gap-2 shrink-0">
-          <button
+          {canShare && <button
             type="button"
             onClick={() => setShareOpen(true)}
             className="flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
           >
             <Share2 className="h-4 w-4" />
             Share
-          </button>
-          <button
+          </button>}
+          {canDelete && <button
             type="button"
             onClick={() => setDeleteConfirm(true)}
             className="rounded-md border border-red-200 p-2 text-red-500 hover:bg-red-50"
             title="Delete evidence"
           >
             <Trash2 className="h-4 w-4" />
-          </button>
+          </button>}
         </div>
       </div>
 
+      <div className="rounded-xl border border-slate-200 bg-white p-4 lg:hidden"><EvidenceCoverage evidenceId={id!} /></div>
+
       {/* Two-column layout */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col gap-5 lg:flex-row">
         {/* Left — Preview/tabs */}
-        <div className="flex w-2/3 flex-col overflow-hidden border-r border-slate-200">
+        <div className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white lg:w-2/3">
           {/* Tab bar */}
-          <div className="flex border-b border-slate-200 bg-white px-4 shrink-0">
+          <div className="flex overflow-x-auto border-b border-slate-200 bg-white px-4 shrink-0">
             {TABS.map((tab) => (
               <button
                 key={tab.key}
@@ -229,7 +239,8 @@ export function EvidenceDetailPage() {
         </div>
 
         {/* Right — Metadata panel */}
-        <aside className="w-1/3 overflow-y-auto bg-white p-6 space-y-6">
+        <aside className="min-w-0 space-y-6 rounded-xl border border-slate-200 bg-white p-5 lg:w-1/3">
+          <div className="hidden lg:block"><EvidenceCoverage evidenceId={id!} /></div>
           {/* Description */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -245,7 +256,7 @@ export function EvidenceDetailPage() {
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
               Tags
             </label>
-            <TagSelector
+            <fieldset disabled={!canWrite}><TagSelector
               selected={evidence.tags.map((t) => t.id)}
               onChange={async (newIds) => {
                 const existing = evidence.tags.map((t) => t.id);
@@ -256,7 +267,7 @@ export function EvidenceDetailPage() {
                   if (!newIds.includes(id)) await tagMutation.remove.mutateAsync(id);
                 }
               }}
-            />
+            /></fieldset>
           </div>
 
           {/* File metadata */}
@@ -326,6 +337,7 @@ export function EvidenceDetailPage() {
               <input
                 type="checkbox"
                 checked={evidence.isConfidential}
+                disabled={!canWrite}
                 onChange={(e) => updateEvidence.mutate({ isConfidential: e.target.checked })}
                 className="h-4 w-4 rounded border-slate-300 text-amber-600"
               />

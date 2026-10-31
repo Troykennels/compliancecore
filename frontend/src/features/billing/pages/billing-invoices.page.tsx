@@ -133,7 +133,7 @@ export function BillingInvoicesPage(): JSX.Element {
       )}
 
       {/* Filters */}
-      <div className="flex gap-3 flex-wrap">
+      <div className="workspace-toolbar flex gap-3 flex-wrap">
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input

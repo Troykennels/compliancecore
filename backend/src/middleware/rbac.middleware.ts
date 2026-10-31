@@ -80,6 +80,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     'ai:use',
   ],
   auditor: [
+    'training:read', 'vendors:read',
     'controls:read',
     'evidence:read',
     'policies:read',

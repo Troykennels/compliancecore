@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { ModalSurface } from '@/components/modal-surface';
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
@@ -60,7 +61,7 @@ export function ApprovalDetailPage() {
   const activeStep = request.steps?.find((s: ApprovalRequestStep) => s.status === 'active');
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="mx-auto max-w-7xl p-4 sm:p-6">
       {/* Header */}
       <div className="mb-6">
         <button onClick={() => navigate(PATHS.APPROVALS)} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-3">
@@ -79,20 +80,20 @@ export function ApprovalDetailPage() {
               {statusCfg.label}
             </span>
             {isPending && (
-              <button
+              <PermissionAction scope="approvals:write"><button
                 onClick={() => setCancelConfirm(true)}
                 className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
               >
                 Cancel
-              </button>
+              </button></PermissionAction>
             )}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left: timeline */}
-        <div className="col-span-2">
+        <div className="lg:col-span-2">
           <div className="rounded-xl border border-slate-200 bg-white p-5">
             <h2 className="text-sm font-semibold text-slate-800 mb-4">Approval Progress</h2>
             {(request.steps?.length ?? 0) > 0 ? (
@@ -103,13 +104,13 @@ export function ApprovalDetailPage() {
 
             {canIDecide && activeStep && (
               <div className="mt-4 pt-4 border-t border-slate-100">
-                <button
+                <PermissionAction scope="approvals:decide"><button
                   onClick={() => setDecideStep(activeStep)}
                   className="flex items-center gap-2 w-full justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
                 >
                   <FileSignature className="h-4 w-4" />
                   Record My Decision — {activeStep.name}
-                </button>
+                </button></PermissionAction>
               </div>
             )}
           </div>
@@ -176,7 +177,7 @@ export function ApprovalDetailPage() {
             <p className="text-xs text-slate-600 mb-4">All pending approvers will be notified. This cannot be undone.</p>
             <div className="flex gap-2 justify-end">
               <button onClick={() => setCancelConfirm(false)} className="rounded-md px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">Keep</button>
-              <button
+              <PermissionAction scope="approvals:write"><button
                 onClick={async () => {
                   await cancelMutation.mutateAsync({ id: request.id });
                   setCancelConfirm(false);
@@ -186,7 +187,7 @@ export function ApprovalDetailPage() {
                 className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
               >
                 {cancelMutation.isPending ? 'Cancelling…' : 'Cancel Request'}
-              </button>
+              </button></PermissionAction>
             </div>
           </div>
         </ModalSurface>

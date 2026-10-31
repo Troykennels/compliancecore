@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
 type Option = { id: string; title: string; type?: string };
 type Props = {
   name: string;
@@ -15,20 +15,19 @@ type Props = {
   onChange?: (value: string) => void;
 };
 export function ComplianceRecordPicker(p: Props) {
-  const [search, setSearch] = useState(""),
+  const [search, setSearch] = useState(''),
     [selected, setSelected] = useState<string[]>(
       Array.isArray(p.initial) ? p.initial : p.initial ? [p.initial] : [],
     ),
     [known, setKnown] = useState(p.options);
   const query = useQuery({
-    queryKey: ["compliance-picker", p.kind, p.source, search],
-    enabled: search.length >= 2 && p.source !== "sourceKinds",
+    queryKey: ['compliance-picker', p.kind, p.source, search],
+    enabled: search.length >= 2 && p.source !== 'sourceKinds',
     queryFn: async () =>
       (
-        await apiClient.get<{ data: Option[] }>(
-          `/frameworks/records/${p.kind}/options`,
-          { params: { source: p.source, q: search } },
-        )
+        await apiClient.get<{ data: Option[] }>(`/frameworks/records/${p.kind}/options`, {
+          params: { source: p.source, q: search },
+        })
       ).data.data,
   });
   const options = (search.length >= 2 ? (query.data ?? []) : p.options).filter(
@@ -36,15 +35,10 @@ export function ComplianceRecordPicker(p: Props) {
   );
   const choices = [
     ...options,
-    ...known.filter(
-      (o) => selected.includes(o.id) && !options.some((v) => v.id === o.id),
-    ),
+    ...known.filter((o) => selected.includes(o.id) && !options.some((v) => v.id === o.id)),
   ];
   function choose(id: string) {
-    setKnown((prev) => [
-      ...prev,
-      ...options.filter((o) => !prev.some((v) => v.id === o.id)),
-    ]);
+    setKnown((prev) => [...prev, ...options.filter((o) => !prev.some((v) => v.id === o.id))]);
     setSelected(
       p.multiple
         ? selected.includes(id)
@@ -56,13 +50,12 @@ export function ComplianceRecordPicker(p: Props) {
     );
     p.onChange?.(id);
   }
-  const style =
-    "w-full min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm";
+  const style = 'w-full min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm';
   return (
     <div className="min-w-0 space-y-2">
-      {p.source !== "sourceKinds" && (
+      {p.source !== 'sourceKinds' && (
         <input
-          aria-label={"Find matching " + p.source + " records"}
+          aria-label={'Find matching ' + p.source + ' records'}
           className={style}
           placeholder="Type at least 2 letters to search all records"
           value={search}
@@ -76,12 +69,8 @@ export function ComplianceRecordPicker(p: Props) {
       )}
       {query.isError && (
         <p role="alert" className="text-xs text-red-800">
-          Search unavailable.{" "}
-          <button
-            type="button"
-            className="underline"
-            onClick={() => void query.refetch()}
-          >
+          Search unavailable.{' '}
+          <button type="button" className="underline" onClick={() => void query.refetch()}>
             Retry
           </button>
         </p>
@@ -110,8 +99,8 @@ export function ComplianceRecordPicker(p: Props) {
             ))}
             {!choices.length && (
               <p className="text-xs text-slate-500">
-                No matching records. Prepare the source record or upload the
-                supporting document first.
+                No matching records. Prepare the source record or upload the supporting document
+                first.
               </p>
             )}
           </div>
@@ -128,13 +117,13 @@ export function ComplianceRecordPicker(p: Props) {
           className={style}
           name={p.name}
           required={p.required}
-          value={selected[0] ?? ""}
+          value={selected[0] ?? ''}
           onChange={(e) => choose(e.target.value)}
         >
           <option value="">Choose a named record</option>
           {choices.map((o) => (
             <option key={o.id} value={o.id}>
-              {o.type ? o.type.replace(/_/g, " ") + " — " : ""}
+              {o.type ? o.type.replace(/_/g, ' ') + ' — ' : ''}
               {o.title}
             </option>
           ))}

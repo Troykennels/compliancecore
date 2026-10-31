@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 
 const uuidSchema = z.string().uuid();
@@ -82,7 +83,7 @@ export const createCategorySchema = z.object({
   sortOrder:   z.number().int().min(0).optional().default(100),
 });
 
-export const updateCategorySchema = createCategorySchema.partial();
+export const updateCategorySchema = patchObject(createCategorySchema);
 
 // ── Links ─────────────────────────────────────────────────────────────────────
 

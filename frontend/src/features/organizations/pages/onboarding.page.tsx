@@ -44,7 +44,7 @@ export function OnboardingPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({ resolver: zodResolver(schema) });
 
   // Already onboarded — nothing to do here. Skipped once we are mid-flow,
   // because creating the organisation marks onboarding complete and would

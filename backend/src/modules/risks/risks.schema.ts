@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 
 const uuidSchema = z.string().uuid();
@@ -25,7 +26,7 @@ export const createRiskSchema = z.object({
   nextReviewDate:      z.coerce.date().optional().nullable(),
 });
 
-export const updateRiskSchema = createRiskSchema.partial();
+export const updateRiskSchema = patchObject(createRiskSchema);
 
 export const listRisksSchema = z.object({
   page:      z.coerce.number().int().min(1).optional().default(1),

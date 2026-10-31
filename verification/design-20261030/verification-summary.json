@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "date": "2026-10-30",
+  "productionWrites": false,
+  "backend": {
+    "files": 25,
+    "testsPassed": 194,
+    "build": "passed"
+  },
+  "frontend": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "format": "passed",
+    "productionBuild": "passed"
+  },
+  "browser": {
+    "pageChecks": 88,
+    "interactionChecks": 34,
+    "errors": 0,
+    "apiServerErrors": 0,
+    "overflow": 0,
+    "unlabelledPageFields": 0
+  },
+  "apiChecks": 66,
+  "outcomeChecks": {
+    "passed": true,
+    "checks": [
+      "Outcome SQL insert with pinned evidence version",
+      "Self review refused",
+      "Changed assessment refused",
+      "Independent review stored",
+      "One owned calendar follow-up created",
+      "Updating outcome invalidates review",
+      "Review retry keeps one follow-up",
+      "Real assessment remains incomplete outside isolated readiness fixture"
+    ],
+    "readinessFixture": true,
+    "realAssessmentCompleted": false,
+    "productionWrites": false
+  },
+  "knownDependencyVulnerabilities": 0,
+  "galleryImages": 123
+}

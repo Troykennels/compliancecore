@@ -48,7 +48,7 @@ export function TaskFormModal({ open, onClose, task, parentTaskId, entityType, e
   const create = useCreateTask();
   const update = useUpdateTask(task?.id ?? '');
 
-  const { register, watch, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, watch, handleSubmit, reset, formState: { errors } } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
       title:       '',

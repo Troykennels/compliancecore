@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { humanize } from '@/lib/labels';
 import { ModalSurface } from '@/components/modal-surface';
 import { PageHeader } from '@/components/page-header';
@@ -39,7 +40,7 @@ export function SignaturesPage() {
     <div className="mx-auto max-w-7xl p-4 sm:p-6">
       <div className="mb-6"><PageHeader eyebrow="Review" title="Signatures"
         description={<>Sign a reviewed document and keep a record of the signer, time and document snapshot.{' '}<Link to="/guide#signatures" className="font-medium text-brand-700 underline">How to add and verify a signature</Link></>}
-        actions={canSign ? <button onClick={()=>setShowSign(true)} className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">Sign a document</button> : undefined} /></div>
+        actions={canSign ? <PermissionAction scope="signatures:create"><button onClick={()=>setShowSign(true)} className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">Sign a document</button></PermissionAction> : undefined} /></div>
       {showSign && <SignDocumentDialog onClose={()=>setShowSign(false)} />}
 
       {/* Filters */}
@@ -77,7 +78,7 @@ export function SignaturesPage() {
         <div className="rounded-xl border border-dashed border-slate-300 py-16 text-center">
           <ShieldCheck className="h-10 w-10 text-slate-300 mx-auto mb-2" />
           <p className="text-sm text-slate-500">No signatures found</p>
-          {canSign && <button onClick={()=>setShowSign(true)} className="mt-3 text-sm font-medium text-indigo-700 underline">Sign your first document</button>}
+          {canSign && <PermissionAction scope="signatures:create"><button onClick={()=>setShowSign(true)} className="mt-3 text-sm font-medium text-indigo-700 underline">Sign your first document</button></PermissionAction>}
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-slate-200">
@@ -125,13 +126,13 @@ export function SignaturesPage() {
                   <td className="px-4 py-3">
                     <VerifyButton id={sig.id} />
                     {sig.isValid && canManage && (
-                      <button
+                      <PermissionAction scope="signatures:manage"><button
                         onClick={() => setRevokeTarget(sig.id)}
                         className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
                         title="Revoke signature"
                       >
                         <RotateCcw className="h-3.5 w-3.5" />
-                      </button>
+                      </button></PermissionAction>
                     )}
                     {!sig.isValid && sig.revocationReason && (
                       <span className="text-[10px] text-red-400 italic max-w-[100px] truncate block" title={sig.revocationReason}>

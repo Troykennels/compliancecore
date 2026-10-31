@@ -41,7 +41,7 @@ interface EscalationRuleFormProps {
 export function EscalationRuleForm({ open, onClose }: EscalationRuleFormProps) {
   const create = useCreateEscalationRule();
 
-  const { register, watch, control, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, watch, control, handleSubmit, reset, formState: { errors } } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
       triggerType: 'task_overdue',

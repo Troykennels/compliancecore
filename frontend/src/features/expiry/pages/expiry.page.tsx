@@ -1,6 +1,8 @@
+import { PermissionAction } from '@/components/permission-action';
 import React, { useState } from 'react';
+import { useOrgFormat } from '@/lib/org-format';
 import { PageHeader } from '@/components/page-header';
-import { format, parseISO, differenceInDays, isValid } from 'date-fns';
+import { parseISO, differenceInDays, isValid } from 'date-fns';
 import { Plus, AlertTriangle, ShieldCheck, Clock, XCircle, Search, RefreshCw } from 'lucide-react';
 import { useExpiryItems, useExpiryStats, useDeleteExpiryItem } from '../hooks/use-expiry';
 import { ExpiryFormModal } from '../components/expiry-form-modal';
@@ -36,6 +38,7 @@ function daysUntilLabel(dateStr: string): { text: string; color: string } {
 }
 
 export function ExpiryPage() {
+  const fmt = useOrgFormat();
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected]   = useState<ExpiryItem | null>(null);
   const [query, setQuery]         = useState('');
@@ -62,14 +65,14 @@ export function ExpiryPage() {
   }
 
   return (
-    <div className="flex flex-col h-full px-6 py-6 gap-5">
+    <div className="mx-auto flex min-h-full max-w-7xl flex-col gap-5 p-4 sm:p-6">
       {/* Header */}
-      <div className="mb-6"><PageHeader eyebrow="Report" title="Expiry tracker" description={"Certificates, policies, contracts and renewals"} actions={<><button
+      <div className="mb-6"><PageHeader eyebrow="Report" title="Expiry tracker" description={"Certificates, policies, contracts and renewals"} actions={<><PermissionAction scope="expiry:write"><button
           onClick={openCreate}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" /> Track Item
-        </button></>} /></div>
+        </button></PermissionAction></>} /></div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 shrink-0">
@@ -80,7 +83,7 @@ export function ExpiryPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="workspace-toolbar flex items-center gap-3 shrink-0">
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
           <input
@@ -156,7 +159,7 @@ export function ExpiryPage() {
                       {item.notes && <div className="text-xs text-slate-400 mt-0.5 line-clamp-1">{item.notes}</div>}
                     </td>
                     <td className="px-4 py-3 text-slate-600">{ENTITY_TYPE_LABELS[item.entityType]}</td>
-                    <td className="px-4 py-3 text-slate-600">{isValid(expiryParsed) ? format(expiryParsed, 'MMM d, yyyy') : '—'}</td>
+                    <td className="px-4 py-3 text-slate-600">{isValid(expiryParsed) ? fmt.formatDateMedium(item.expiryDate) : '—'}</td>
                     <td className={`px-4 py-3 font-medium ${remaining.color}`}>{remaining.text}</td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${cfg.className}`}>
@@ -164,8 +167,8 @@ export function ExpiryPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => openEdit(item)} className="text-xs text-slate-600 hover:text-slate-900 mr-3">Edit</button>
-                      <button onClick={() => handleDelete(item.id)} className="text-xs text-red-600 hover:text-red-800">Delete</button>
+                      <PermissionAction scope="expiry:write"><button onClick={() => openEdit(item)} className="text-xs text-slate-600 hover:text-slate-900 mr-3">Edit</button></PermissionAction>
+                      <PermissionAction scope="expiry:write"><button onClick={() => handleDelete(item.id)} className="text-xs text-red-600 hover:text-red-800">Delete</button></PermissionAction>
                     </td>
                   </tr>
                 );

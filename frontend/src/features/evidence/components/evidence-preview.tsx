@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, FileX, ExternalLink, Loader2 } from 'lucide-react';
+import { Download, FileX, FileText, ExternalLink, Loader2 } from 'lucide-react';
 import { useEvidencePreviewUrl } from '../hooks/use-evidence';
 
 interface EvidencePreviewProps {
@@ -43,11 +43,12 @@ export function EvidencePreview({ evidenceId, fileName }: EvidencePreviewProps) 
     <div className="space-y-3">
       {/* Preview area */}
       <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+        {previewType === 'pdf' && url && <div className="flex flex-col items-center gap-3 p-6 text-center sm:hidden"><FileText className="h-10 w-10 text-brand-600" /><p className="break-all text-sm font-semibold text-slate-800">{fileName}</p><p className="text-sm text-slate-500">Open the PDF in your device’s viewer to read the full document.</p><a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white">Open PDF<ExternalLink className="h-4 w-4" /></a></div>}
         {previewType === 'pdf' && url && (
           <iframe
             src={url}
             title={fileName}
-            className="h-[700px] w-full"
+            className="hidden h-[700px] w-full sm:block"
           />
         )}
 
@@ -83,8 +84,8 @@ export function EvidencePreview({ evidenceId, fileName }: EvidencePreviewProps) 
       </div>
 
       {/* Download bar */}
-      <div className="flex items-center justify-between rounded-lg bg-slate-100 px-4 py-2.5">
-        <span className="truncate text-sm text-slate-700 max-w-xs">{fileName}</span>
+      <div className="flex flex-col items-start justify-between gap-3 rounded-lg bg-slate-100 px-4 py-3 sm:flex-row sm:items-center">
+        <span className="break-all text-sm text-slate-700 sm:max-w-xs">{fileName}</span>
         <div className="flex items-center gap-2 shrink-0">
           {(previewType === 'pdf' || previewType === 'image') && url && (
             <a

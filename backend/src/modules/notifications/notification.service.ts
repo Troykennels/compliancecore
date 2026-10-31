@@ -3,7 +3,7 @@ import { notificationRepository } from './notification.repository';
 import type { CreateNotificationDto } from './notification.types';
 
 export const notificationService = {
-  async list(schemaName: string, userId: string, opts: { page?: number; limit?: number; unreadOnly?: boolean }) {
+  async list(schemaName: string, userId: string, opts: { page?: number; limit?: number; unreadOnly?: boolean; priority?: string; notificationType?: string }) {
     return withTenantSchema(schemaName, (tx) =>
       notificationRepository.findForUser(tx, userId, opts),
     );

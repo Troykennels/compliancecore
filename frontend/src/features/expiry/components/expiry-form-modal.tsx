@@ -37,7 +37,7 @@ export function ExpiryFormModal({ open, onClose, item }: ExpiryFormModalProps) {
   const create = useCreateExpiryItem();
   const update = useUpdateExpiryItem(item?.id ?? '');
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
   });
 

@@ -65,6 +65,11 @@ export const auditsService = {
         if(current.status==='cancelled')throw new AppError('Reopen this cancelled audit and obtain a fresh report review before completion.',409,'AUDIT_REVIEW_REQUIRED');
         const reviewed=await tx.$queryRawUnsafe<Array<{reviewed_by:string|null}>>("SELECT a.reviewed_by FROM audits a JOIN evidence e ON e.id=a.report_evidence_id JOIN evidence_versions v ON v.id=e.current_version_id WHERE a.id=$1::uuid AND a.reviewed_at IS NOT NULL AND a.scope IS NOT NULL AND a.summary IS NOT NULL AND a.end_date IS NOT NULL AND a.report_evidence_version_id=e.current_version_id AND e.deleted_at IS NULL AND e.status='active' AND v.upload_status='completed' AND (e.retention_date IS NULL OR e.retention_date>NOW()) FOR UPDATE OF a",id);
         if(!reviewed[0]?.reviewed_by)throw new AppError('Attach the final report and obtain an independent review before completing the audit.',409,'AUDIT_REVIEW_REQUIRED');
+        const pending = await tx.$queryRawUnsafe<unknown[]>(`SELECT 1 FROM audit_requests r WHERE r.audit_id=$1::uuid AND r.deleted_at IS NULL AND
+          (r.status<>'accepted' OR NOT EXISTS(SELECT 1 FROM audit_request_evidence l WHERE l.request_id=r.id)
+           OR EXISTS(SELECT 1 FROM audit_request_evidence l JOIN evidence e ON e.id=l.evidence_id JOIN evidence_versions v ON v.id=l.evidence_version_id
+             WHERE l.request_id=r.id AND (e.deleted_at IS NOT NULL OR e.status<>'active' OR v.upload_status<>'completed' OR e.retention_date<=NOW()))) LIMIT 1`,id);
+        if(pending.length)throw new AppError('Accept every active evidence request and retain its valid evidence before completing the audit.',409,'AUDIT_REQUESTS_PENDING');
         if(Object.keys(input).some(key=>key!=='status'))throw new AppError('Save report changes first, obtain a fresh review, then complete the audit.',409,'AUDIT_REVIEW_REQUIRED');
       }
       if(reportChanged||input.status==='cancelled')await tx.$executeRawUnsafe('UPDATE audits SET reviewed_by=NULL,reviewed_at=NULL WHERE id=$1::uuid',id);

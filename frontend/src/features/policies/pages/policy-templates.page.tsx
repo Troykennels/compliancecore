@@ -1,16 +1,137 @@
+import { PermissionAction } from '@/components/permission-action';
 import { ComplianceTemplateLibrary } from '@/features/frameworks/components/compliance-template-library';
 import { PageHeader } from '@/components/page-header';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Download, FileText } from 'lucide-react';
-import { usePolicyTemplates, downloadPolicyTemplate, type PolicyTemplate } from '../policy-templates';
+import {
+  usePolicyTemplates,
+  downloadPolicyTemplate,
+  type PolicyTemplate,
+} from '../policy-templates';
 import { PolicyFormModal } from '../components/policy-form-modal';
 import { useAuthStore } from '@/stores/auth.store';
-export function PolicyTemplatesPage(){
- const {data=[],isLoading,isError,refetch}=usePolicyTemplates();const [search,setSearch]=useState('');const [family,setFamily]=useState('');const [selected,setSelected]=useState<PolicyTemplate>();const [preview,setPreview]=useState<string|null>(null);const [params]=useSearchParams();const frameworkId=params.get('frameworkId')??undefined;
- const manager=['owner','admin','compliance_manager','msp_admin'].includes(useAuthStore(s=>s.activeTenant?.role)??'');
- return <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6"><PageHeader eyebrow="Prove" title="Policy templates" description={<>Choose a starting document, replace its placeholders with your organisation’s actual rules, assign an owner and request independent approval. Templates are drafting aids and do not prove compliance.</>}></PageHeader><div className="flex flex-wrap gap-3"><Link to={frameworkId?`/frameworks?framework=${frameworkId}`:'/frameworks'} className="text-sm font-semibold text-indigo-700 underline">Return to compliance assessment</Link><Link to={frameworkId?`/policies?frameworkId=${frameworkId}`:'/policies'} className="text-sm font-semibold text-indigo-700 underline">Open policy register</Link></div><div className="flex flex-wrap gap-3"><input aria-label="Find policy templates" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Find a policy" className="rounded-lg border px-3 py-2 text-sm"/><select aria-label="Policy template area" value={family} onChange={e=>setFamily(e.target.value)} className="rounded-lg border px-3 py-2 text-sm"><option value="">All compliance areas</option><option value="security">Information security</option><option value="privacy">Privacy</option><option value="financial">Financial assurance</option><option value="continuity">Business continuity</option></select></div>
- {isLoading?<p>Loading templates…</p>:isError?<button onClick={()=>void refetch()}>Retry templates</button>:<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{data.filter(t=>(t.title+' '+t.purpose).toLowerCase().includes(search.toLowerCase())&&(!family||t.families.includes(family))).map(t=><article key={t.id} className="flex flex-col space-y-3 rounded-xl border bg-white p-5"><FileText className="h-6 w-6 text-indigo-600"/><h2 className="font-semibold">{t.title}</h2><p className="flex-1 text-sm text-slate-600">{t.purpose}</p><button className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40" disabled={!manager} onClick={()=>setSelected(t)}>Create a draft from template</button><div className="flex flex-wrap justify-between gap-2"><button className="text-sm font-semibold text-indigo-700 underline" onClick={()=>setPreview(preview===t.id?null:t.id)}>Preview</button><button className="flex items-center gap-1 text-sm text-indigo-700" onClick={()=>void downloadPolicyTemplate(t.id)}><Download className="h-4 w-4"/>Word template</button></div>{preview===t.id&&<pre className="max-h-80 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-slate-50 p-3 text-xs leading-relaxed">{t.content}</pre>}</article>)}</div>}
- <ComplianceTemplateLibrary/>
- {selected&&<PolicyFormModal open initialFrameworkId={frameworkId} initialTemplate={selected} onClose={()=>setSelected(undefined)}/>}</div>;
+export function PolicyTemplatesPage() {
+  const { data = [], isLoading, isError, refetch } = usePolicyTemplates();
+  const [search, setSearch] = useState('');
+  const [family, setFamily] = useState('');
+  const [selected, setSelected] = useState<PolicyTemplate>();
+  const [preview, setPreview] = useState<string | null>(null);
+  const [params] = useSearchParams();
+  const frameworkId = params.get('frameworkId') ?? undefined;
+  const manager = ['owner', 'admin', 'compliance_manager', 'msp_admin'].includes(
+    useAuthStore((s) => s.activeTenant?.role) ?? '',
+  );
+  return (
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+      <PageHeader
+        eyebrow="Prove"
+        title="Policy templates"
+        description={
+          <>
+            Choose a starting document, replace its placeholders with your organisation’s actual
+            rules, assign an owner and request independent approval. Templates are drafting aids and
+            do not prove compliance.
+          </>
+        }
+      ></PageHeader>
+      <div className="flex flex-wrap gap-3">
+        <Link
+          to={frameworkId ? `/frameworks?framework=${frameworkId}` : '/frameworks'}
+          className="text-sm font-semibold text-indigo-700 underline"
+        >
+          Return to compliance assessment
+        </Link>
+        <Link
+          to={frameworkId ? `/policies?frameworkId=${frameworkId}` : '/policies'}
+          className="text-sm font-semibold text-indigo-700 underline"
+        >
+          Open policy register
+        </Link>
+      </div>
+      <div className="workspace-toolbar flex flex-wrap gap-3">
+        <input
+          aria-label="Find policy templates"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Find a policy"
+          className="rounded-lg border px-3 py-2 text-sm"
+        />
+        <select
+          aria-label="Policy template area"
+          value={family}
+          onChange={(e) => setFamily(e.target.value)}
+          className="rounded-lg border px-3 py-2 text-sm"
+        >
+          <option value="">All compliance areas</option>
+          <option value="security">Information security</option>
+          <option value="privacy">Privacy</option>
+          <option value="financial">Financial assurance</option>
+          <option value="continuity">Business continuity</option>
+        </select>
+      </div>
+      {isLoading ? (
+        <p>Loading templates…</p>
+      ) : isError ? (
+        <button onClick={() => void refetch()}>Retry templates</button>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {data
+            .filter(
+              (t) =>
+                (t.title + ' ' + t.purpose).toLowerCase().includes(search.toLowerCase()) &&
+                (!family || t.families.includes(family)),
+            )
+            .map((t) => (
+              <article
+                key={t.id}
+                className="flex flex-col space-y-3 rounded-xl border bg-white p-5"
+              >
+                <FileText className="h-6 w-6 text-indigo-600" />
+                <h2 className="font-semibold">{t.title}</h2>
+                <p className="flex-1 text-sm text-slate-600">{t.purpose}</p>
+                <PermissionAction scope="policies:write">
+                  <button
+                    className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+                    disabled={!manager}
+                    onClick={() => setSelected(t)}
+                  >
+                    Create a draft from template
+                  </button>
+                </PermissionAction>
+                <div className="flex flex-wrap justify-between gap-2">
+                  <button
+                    className="text-sm font-semibold text-indigo-700 underline"
+                    onClick={() => setPreview(preview === t.id ? null : t.id)}
+                  >
+                    Preview
+                  </button>
+                  <button
+                    className="flex items-center gap-1 text-sm text-indigo-700"
+                    onClick={() => void downloadPolicyTemplate(t.id)}
+                  >
+                    <Download className="h-4 w-4" />
+                    Word template
+                  </button>
+                </div>
+                {preview === t.id && (
+                  <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-slate-50 p-3 text-xs leading-relaxed">
+                    {t.content}
+                  </pre>
+                )}
+              </article>
+            ))}
+        </div>
+      )}
+      <ComplianceTemplateLibrary />
+      {selected && (
+        <PolicyFormModal
+          open
+          initialFrameworkId={frameworkId}
+          initialTemplate={selected}
+          onClose={() => setSelected(undefined)}
+        />
+      )}
+    </div>
+  );
 }

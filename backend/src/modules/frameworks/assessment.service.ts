@@ -11,7 +11,7 @@ type Actor={id:string;email:string;role:string|null;tenantId:string|null};
 const text=z.string().trim().max(5000);
 const day=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>!Number.isNaN(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v,'Enter a valid date.');
 const scale=z.number().int().min(1).max(5);
-export const engagementSchema=z.object({id:z.string().uuid().optional(),stakeholder:z.string().trim().min(2).max(200),department:z.string().trim().min(2).max(200),consultedOn:day,answers:z.record(text),status:z.enum(['draft','confirmed'])}).superRefine((v,ctx)=>{if(v.status==='confirmed')for(const q of scopeQuestions)if((v.answers[q.key]?.trim().length??0)<10)ctx.addIssue({code:'custom',path:['answers',q.key],message:'Record the stakeholder’s answer (at least 10 characters), or explain why it does not apply.'});});
+export const engagementSchema=z.object({id:z.string().uuid().optional(),stakeholder:z.string().trim().min(2).max(200),department:z.string().trim().min(2).max(200),consultedOn:day,answers:z.record(z.string(), text),status:z.enum(['draft','confirmed'])}).superRefine((v,ctx)=>{if(v.status==='confirmed')for(const q of scopeQuestions)if((v.answers[q.key]?.trim().length??0)<10)ctx.addIssue({code:'custom',path:['answers',q.key],message:'Record the stakeholder’s answer (at least 10 characters), or explain why it does not apply.'});});
 export const worksheetRiskSchema=z.object({
  id:z.string().uuid().optional(),assetName:z.string().trim().min(2).max(500),assetType:z.string().trim().min(2).max(200),title:z.string().trim().min(5).max(500),
  threat:text.min(5),vulnerability:text,consequence:text.min(10),assessmentBasis:text,ownerId:z.string().uuid().nullable(),ratingConfirmed:z.boolean(),

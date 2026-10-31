@@ -66,7 +66,7 @@ export function SettingsWebhooksPage(): JSX.Element {
     onError: () => toast.error('Failed to delete webhook.'),
   });
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: { events: [] },
   });

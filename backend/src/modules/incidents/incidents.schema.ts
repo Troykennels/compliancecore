@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 
 const uuidSchema = z.string().uuid();
@@ -28,7 +29,7 @@ export const createIncidentSchema = z.object({
   tags:             z.array(z.string().max(100)).max(50).optional().default([]),
 });
 
-export const updateIncidentSchema = createIncidentSchema.partial().extend({
+export const updateIncidentSchema = patchObject(createIncidentSchema).extend({
   containedAt:              z.coerce.date().optional().nullable(),
   resolvedAt:               z.coerce.date().optional().nullable(),
   regulatorNotifiedAt:      z.coerce.date().optional().nullable(),

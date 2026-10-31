@@ -27,7 +27,7 @@ export function ScorePage() {
   const frameworks = scoreData?.frameworks ?? [];
 
   return (
-    <div className="flex flex-col h-full px-6 py-6 gap-6 overflow-y-auto">
+    <div className="mx-auto flex min-h-full max-w-7xl flex-col gap-6 p-4 sm:p-6">
       {/* Header */}
       <div className="mb-6"><PageHeader eyebrow="Report" title="Compliance score" description={"Weighted score across all active frameworks"} actions={<><PermissionAction scope="controls:write"><button
           onClick={() => triggerSnapshot.mutate()}

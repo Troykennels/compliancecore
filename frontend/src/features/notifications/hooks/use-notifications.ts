@@ -8,7 +8,7 @@ export const notifKeys = {
   unreadCount: () => [...notifKeys.all, 'unread-count'] as const,
 };
 
-export function useNotifications(params: { unreadOnly?: boolean; page?: number; limit?: number } = {}) {
+export function useNotifications(params: { unreadOnly?: boolean; page?: number; limit?: number; priority?: string; notificationType?: string } = {}) {
   return useQuery({
     queryKey: notifKeys.list(params),
     queryFn: () => notificationsApi.list(params).then((r) => r.data.data!),

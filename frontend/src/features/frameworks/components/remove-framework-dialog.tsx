@@ -66,9 +66,14 @@ export function RemoveFrameworkDialog({
             question this dialog is asking — so it becomes the warning, and the
             user gets to decide. Anything else really is an error.
           */
-          const res = (err as {
-            response?: { status?: number; data?: { error?: { message?: string; details?: UnadoptImpact } } };
-          }).response;
+          const res = (
+            err as {
+              response?: {
+                status?: number;
+                data?: { error?: { message?: string; details?: UnadoptImpact } };
+              };
+            }
+          ).response;
 
           if (res?.status === 409 && res.data?.error?.details) {
             setServerWarning(res.data.error.details);
@@ -85,7 +90,11 @@ export function RemoveFrameworkDialog({
   }
 
   return (
-    <ModalSurface label="Remove ?" onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+    <ModalSurface
+      label="Remove ?"
+      onClose={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+    >
       <div className="w-full max-w-lg rounded-xl bg-white shadow-xl">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 border-b border-slate-200 p-5">
@@ -128,15 +137,15 @@ export function RemoveFrameworkDialog({
           ) : isError && !serverWarning ? (
             <p className="text-sm text-slate-600">
               We could not check what this would affect. You can still remove the framework, and
-              nothing is deleted permanently — but if you are unsure, close this and try again in
-              a moment.
+              nothing is deleted permanently — but if you are unsure, close this and try again in a
+              moment.
             </p>
           ) : (
             <>
               <p className="text-sm text-slate-600">
-                <span className="font-semibold text-slate-900">{shown?.controls ?? 0}</span>{' '}
-                control{(shown?.controls ?? 0) === 1 ? '' : 's'} will be removed from your scope.
-                Your compliance score and dashboard will recalculate without{' '}
+                <span className="font-semibold text-slate-900">{shown?.controls ?? 0}</span> control
+                {(shown?.controls ?? 0) === 1 ? '' : 's'} will be removed from your scope. Your
+                compliance score and dashboard will recalculate without{' '}
                 {(shown?.controls ?? 0) === 1 ? 'it' : 'them'}.
               </p>
 
@@ -157,14 +166,17 @@ export function RemoveFrameworkDialog({
                       )}
                       {shown.withEvidence > 0 && (
                         <li>
-                          · <span className="font-semibold">{shown.withEvidence} with evidence attached</span>
+                          ·{' '}
+                          <span className="font-semibold">
+                            {shown.withEvidence} with evidence attached
+                          </span>
                         </li>
                       )}
                     </ul>
                     <p className="mt-3 text-xs text-rose-700">
                       Nothing is erased — the controls are archived and can be restored by an
-                      administrator. But they will disappear from your controls list, your score
-                      and your reports until they are.
+                      administrator. But they will disappear from your controls list, your score and
+                      your reports until they are.
                     </p>
                   </div>
 
@@ -189,7 +201,9 @@ export function RemoveFrameworkDialog({
           )}
 
           {fallbackError && (
-            <p className="mt-4 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{fallbackError}</p>
+            <p className="mt-4 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">
+              {fallbackError}
+            </p>
           )}
         </div>
 
@@ -206,7 +220,11 @@ export function RemoveFrameworkDialog({
             disabled={isPending || !confirmed}
             className="inline-flex items-center gap-2 rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
           >
-            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            {isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
             {risky ? 'Remove anyway' : 'Remove framework'}
           </button>
         </div>

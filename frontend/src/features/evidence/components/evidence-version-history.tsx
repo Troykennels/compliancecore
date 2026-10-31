@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { useState } from 'react';
 import { Clock, Download, Upload } from 'lucide-react';
 import { useEvidenceVersions } from '../hooks/use-evidence';
@@ -56,14 +57,14 @@ export function EvidenceVersionHistory({ evidenceId, currentVersionId }: Evidenc
         <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-700">
           <Clock className="h-4 w-4" /> Version History
         </h3>
-        <button
+        <PermissionAction scope="evidence:write"><button
           type="button"
           onClick={() => setShowNewVersion(!showNewVersion)}
           className="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
         >
           <Upload className="h-3.5 w-3.5" />
           Upload New Version
-        </button>
+        </button></PermissionAction>
       </div>
 
       {/* New version upload panel */}
@@ -94,13 +95,13 @@ export function EvidenceVersionHistory({ evidenceId, currentVersionId }: Evidenc
             </div>
           )}
           <div className="flex items-center gap-2 justify-end">
-            <button
+            <PermissionAction scope="evidence:write"><button
               type="button"
               onClick={() => { setShowNewVersion(false); setNewFile(null); reset(); }}
               className="rounded px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-200"
             >
               Cancel
-            </button>
+            </button></PermissionAction>
             <button
               type="button"
               onClick={handleUpload}

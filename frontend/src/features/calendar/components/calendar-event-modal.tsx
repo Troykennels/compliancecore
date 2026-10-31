@@ -47,7 +47,7 @@ export function CalendarEventModal({ open, onClose, event, defaultDate }: Calend
   const create = useCreateCalendarEvent();
   const update = useUpdateCalendarEvent(event?.id ?? '');
 
-  const { register, control, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, control, handleSubmit, reset, formState: { errors } } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
   });
 
@@ -160,10 +160,10 @@ export function CalendarEventModal({ open, onClose, event, defaultDate }: Calend
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Color</label>
+                <label htmlFor="calendar-event-color" className="mb-1 block text-xs font-medium text-slate-700">Colour</label>
                 <div className="flex items-center gap-2">
                   <Controller name="color" control={control} render={({ field }) => (
-                    <input type="color" value={field.value} onChange={field.onChange} className="h-9 w-16 rounded border border-slate-300 p-0.5 cursor-pointer" />
+                    <input id="calendar-event-color" type="color" value={field.value} onChange={field.onChange} className="h-9 w-16 rounded border border-slate-300 p-0.5 cursor-pointer" />
                   )} />
                   <span className="text-xs text-slate-500">Event colour</span>
                 </div>

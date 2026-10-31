@@ -52,7 +52,7 @@ export function TrainingFormModal({ open, onClose, program }: Props): JSX.Elemen
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormValues>({
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: DEFAULTS,
   });

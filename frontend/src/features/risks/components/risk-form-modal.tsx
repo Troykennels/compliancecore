@@ -72,7 +72,7 @@ export function RiskFormModal({ open, onClose, risk }: Props): JSX.Element | nul
     reset,
     watch,
     formState: { errors },
-  } = useForm<FormValues>({
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: DEFAULTS,
   });
@@ -98,8 +98,8 @@ export function RiskFormModal({ open, onClose, risk }: Props): JSX.Element | nul
     }
   }, [open, risk, reset]);
 
-  const inherentPreview = watch('inherentLikelihood') * watch('inherentImpact');
-  const residualPreview = watch('residualLikelihood') * watch('residualImpact');
+  const inherentPreview = Number(watch('inherentLikelihood')) * Number(watch('inherentImpact'));
+  const residualPreview = Number(watch('residualLikelihood')) * Number(watch('residualImpact'));
 
   const onSubmit = (values: FormValues) => {
     const input = {

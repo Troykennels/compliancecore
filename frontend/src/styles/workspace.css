@@ -1,0 +1,186 @@
+/* Shared layout for every authenticated page and its dialogs. */
+[data-workspace] {
+  background: #f4f7f8;
+  color: #253640;
+  scrollbar-gutter: stable;
+}
+
+[data-workspace] > div {
+  min-width: 0;
+}
+
+.workspace-header {
+  box-shadow: 0 2px 4px rgb(26 52 48 / 3%);
+  border-color: #d9e3e4;
+  position: relative;
+}
+
+.workspace-header::before {
+  content: '';
+  position: absolute;
+  inset: 20px auto 20px -1px;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: #107568;
+}
+
+.workspace-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #d9e3e4;
+  border-radius: 0.875rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(26 52 48 / 2%);
+}
+
+.workspace-toolbar > * {
+  min-width: 0;
+}
+
+.auth-page {
+  background: radial-gradient(ellipse at top left, #e2f1ed 0, transparent 50%), #f4f7f8;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.auth-page > div > div:has(> h1),
+.auth-page > div > div:has(> form) {
+  border-color: #d2e0df;
+  box-shadow: 0 12px 40px rgb(16 63 59 / 6%);
+}
+
+.auth-page input:not([type='checkbox'], [type='radio']) {
+  min-height: 2.75rem;
+}
+
+:is([data-workspace], [data-workspace-dialog])
+  :is(input, select, textarea):not(
+    [type='checkbox'],
+    [type='radio'],
+    [type='range'],
+    [type='color'],
+    [type='file'],
+    [type='hidden']
+  ) {
+  border-color: #cbd8db;
+  border-radius: 0.5rem;
+  min-height: 2.5rem;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+:is([data-workspace], [data-workspace-dialog])
+  :is(input, select, textarea):not(:disabled):focus-visible {
+  border-color: #107568;
+  box-shadow: 0 0 0 3px rgb(16 117 104 / 10%);
+}
+
+:is([data-workspace], [data-workspace-dialog]) input:is([type='checkbox'], [type='radio']) {
+  accent-color: #107568;
+}
+
+[data-workspace] :is(section, article, .card-surface)[class~='border'] {
+  border-color: #d9e3e4;
+}
+
+/* Scroll the table, keeping the page frame and primary actions in place. */
+[data-workspace] div:has(> table) {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  background: #fff;
+}
+
+[data-workspace] table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+[data-workspace] table thead {
+  background: #f5f8f8;
+}
+
+[data-workspace] table th {
+  color: #536672;
+  font-size: 0.6875rem;
+  font-weight: 650;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid #d9e3e4;
+  padding-top: 0.875rem;
+  padding-bottom: 0.875rem;
+}
+
+[data-workspace] table td {
+  border-bottom: 1px solid #edf1f2;
+  vertical-align: middle;
+  line-height: 1.55;
+}
+
+[data-workspace] table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+[data-workspace] table tbody tr:hover {
+  background-color: #f5faf9;
+}
+
+[data-workspace] table :is(th, td):first-child {
+  padding-left: 1.25rem;
+}
+
+[data-workspace] table :is(th, td):last-child {
+  padding-right: 1.25rem;
+}
+
+[data-workspace] table td :is(button, a) {
+  text-underline-offset: 3px;
+}
+
+[data-workspace-dialog] > div:last-child {
+  border: 1px solid #d9e3e4;
+}
+
+[data-workspace-dialog] form > :is(div, section) + :is(div, section) {
+  margin-top: 1rem;
+}
+
+@media (max-width: 639px) {
+  .workspace-header {
+    padding: 1rem;
+  }
+  .workspace-header h1 {
+    font-size: 1.375rem;
+  }
+  .workspace-header-actions {
+    width: 100%;
+  }
+  .workspace-header-actions > :is(button, a) {
+    flex-grow: 1;
+    justify-content: center;
+  }
+  .workspace-toolbar {
+    padding: 0.875rem;
+    gap: 0.625rem;
+  }
+  .workspace-toolbar > select {
+    flex: 1;
+  }
+  [data-workspace] table {
+    min-width: 38rem;
+  }
+  [data-workspace] table :is(th, td) {
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+  }
+  [data-workspace-dialog] > div:last-child {
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+  }
+}

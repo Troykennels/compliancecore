@@ -21,6 +21,7 @@ const lazyPage = <T extends Record<string, React.ComponentType<unknown>>>(
 ) => lazy(() => loader().then((m) => ({ default: m[name] })));
 
 const GuidePage = lazyPage(() => import('./features/guide/guide.page'), 'GuidePage');
+const ComplianceJourneyPage = lazyPage(() => import('./features/journey/compliance-journey.page'), 'ComplianceJourneyPage');
 const LoginPage = lazyPage(() => import('./features/auth/pages/login.page'), 'LoginPage');
 const RegisterPage = lazyPage(() => import('./features/auth/pages/register.page'), 'RegisterPage');
 const ForgotPasswordPage = lazyPage(() => import('./features/auth/pages/forgot-password.page'), 'ForgotPasswordPage');
@@ -36,6 +37,8 @@ const VendorsPage = lazyPage(() => import('./features/vendors/pages/vendors.page
 const IncidentsPage = lazyPage(() => import('./features/incidents/pages/incidents.page'), 'IncidentsPage');
 const PrivacyPage = lazyPage(() => import('./features/privacy/privacy.page'), 'PrivacyPage');
 const AuditsPage = lazyPage(() => import('./features/audits/pages/audits.page'), 'AuditsPage');
+const MspPortfolioPage = lazyPage(() => import('./features/msp/portfolio.page'), 'MspPortfolioPage');
+const AuditRoomPage = lazyPage(() => import('./features/audits/pages/audit-room.page'), 'AuditRoomPage');
 const TrainingPage = lazyPage(() => import('./features/training/pages/training.page'), 'TrainingPage');
 const FrameworksPage = lazyPage(() => import('./features/frameworks/pages/frameworks.page'), 'FrameworksPage');
 const AnalyticsPage = lazyPage(() => import('./features/analytics/pages/analytics.page'), 'AnalyticsPage');
@@ -150,6 +153,8 @@ export default function App(): JSX.Element {
               {/* App shell wraps all authenticated pages (sidebar + topbar) */}
               <Route element={<AppShell />}>
                 <Route path={PATHS.DASHBOARD}    element={<DashboardPage />} />
+                <Route path="/journey" element={<ComplianceJourneyPage />} />
+                <Route path={PATHS.MSP_PORTFOLIO} element={<MspPortfolioPage />} />
                 <Route path={PATHS.GUIDE} element={<GuidePage />} />
                 <Route path={PATHS.CONTROLS}     element={<ControlsPage />} />
                 <Route path={PATHS.FRAMEWORKS}   element={<FrameworksPage />} />
@@ -160,6 +165,7 @@ export default function App(): JSX.Element {
                 <Route path={PATHS.RISKS}        element={<RisksPage />} />
                 <Route path={PATHS.VENDORS}      element={<VendorsPage />} />
                 <Route path={PATHS.AUDITS}       element={<AuditsPage />} />
+                <Route path="/audits/:id" element={<AuditRoomPage />} />
                 <Route path={PATHS.TRAINING}     element={<TrainingPage />} />
                 <Route path={PATHS.INCIDENTS}    element={<IncidentsPage />} />
                 <Route path={PATHS.PRIVACY_ROPA} element={<PrivacyPage />} />

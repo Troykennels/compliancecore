@@ -37,7 +37,7 @@ export function ResetPasswordPage(): JSX.Element {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({ resolver: zodResolver(schema) });
 
   const mutation = useMutation({
     mutationFn: (data: FormValues) =>
@@ -57,7 +57,7 @@ export function ResetPasswordPage(): JSX.Element {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4">
+    <div className="auth-page flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <div className="inline-flex items-center gap-2">

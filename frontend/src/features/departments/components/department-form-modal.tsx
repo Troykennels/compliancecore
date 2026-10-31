@@ -43,7 +43,7 @@ export function DepartmentFormModal({ open, onClose, department }: Props): JSX.E
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormValues>({
+  } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: department
       ? {

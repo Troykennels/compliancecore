@@ -5,39 +5,360 @@ import { useFrameworks } from '../hooks/use-frameworks';
 import { useImplementationOverview, implementationLabels } from '../implementation';
 import { ComplianceWorkspace } from '../components/compliance-workspace';
 import { AssessmentHeader, CountChips, StatusBadge } from '../components/assessment-layout';
-import { assessmentInput as input, assessmentButton as button, assessmentSecondary as secondary } from '../components/assessment-records';
+import {
+  assessmentInput as input,
+  assessmentButton as button,
+  assessmentSecondary as secondary,
+} from '../components/assessment-records';
 import { useOrgFormat } from '@/lib/org-format';
 import { useAuthStore } from '@/stores/auth.store';
 import { StartAssessmentWizard } from '../components/start-assessment-wizard';
-export function FrameworksPage():JSX.Element {
- const [params,setParams]=useSearchParams();const id=params.get('framework')??'';
- if(id)return <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6"><ComplianceWorkspace key={id} id={id} back={()=>setParams({})}/></div>;
- return <AssessmentList open={framework=>setParams({framework})}/>;
+export function FrameworksPage(): JSX.Element {
+  const [params, setParams] = useSearchParams();
+  const id = params.get('framework') ?? '';
+  if (id)
+    return (
+      <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6">
+        <ComplianceWorkspace key={id} id={id} back={() => setParams({})} />
+      </div>
+    );
+  return <AssessmentList open={(framework) => setParams({ framework })} />;
 }
 
-function AssessmentList({open}:{open:(id:string)=>void}):JSX.Element {
- const {data=[],isLoading,isError,refetch}=useFrameworks();const overview=useImplementationOverview();const {formatDate}=useOrgFormat();
- const [search,setSearch]=useState('');const [status,setStatus]=useState('');const [wizard,setWizard]=useState<string|null>(null);
- const manager=['owner','admin','compliance_manager','msp_admin'].includes(useAuthStore(x=>x.activeTenant?.role)??'');
- const active=[...(overview.data??[])].filter(x=>!status||x.status===status).sort((a,b)=>Number(b.status==='needs_attention')-Number(a.status==='needs_attention')||b.stats.overdue-a.stats.overdue);
- const started=new Set((overview.data??[]).map(x=>x.framework.id));const all=overview.data??[];
- const catalogue=data.filter(f=>(f.name+' '+f.code+' '+(f.shortName??'')).toLowerCase().includes(search.toLowerCase()));
- return <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6">
-  <AssessmentHeader eyebrow="Assess" title="Compliance assessments" description="Agree scope with stakeholders, assess risks, decide the response, review the applicable requirements and verify the supporting records. Each assessment shows its next unfinished step." actions={manager?<button className={button} onClick={()=>setWizard('')} disabled={isLoading}>Start an assessment</button>:<a className={secondary} href="#start-assessment">Browse frameworks</a>}/>
-  {wizard!==null&&<StartAssessmentWizard frameworks={data} started={started} initial={wizard||undefined} close={()=>setWizard(null)} opened={id=>{setWizard(null);open(id);}}/>}
-  <section aria-label="Assessments in progress" className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4"><div><h2 className="text-base font-semibold text-slate-900">Your assessments</h2><p className="mt-1 text-xs text-slate-500">Open an assessment to continue its next step. Internal review is separate from certification or external attestation.</p></div>
-    {all.length>0&&<CountChips items={[{label:'In scope',value:all.length},{label:'Reviewed',value:all.filter(x=>x.status==='implemented').length,tone:'good'},{label:'Awaiting sign-off',value:all.filter(x=>['in_review','ready_for_review'].includes(x.status)).length},{label:'Review needed',value:all.filter(x=>x.status==='needs_attention').length,tone:'warn'},{label:'Controls without evidence',value:all.reduce((n,x)=>n+Math.max(0,x.stats.applicable-x.stats.evidenced),0),tone:'warn'}]}/>}</div>
-   {all.length>0&&<div className="flex flex-wrap items-center gap-3 border-b border-slate-200 bg-slate-50 px-5 py-3"><label className="text-xs font-medium text-slate-600" htmlFor="assessment-status">Status</label><select id="assessment-status" className={input+' sm:max-w-xs'} value={status} onChange={e=>setStatus(e.target.value)}><option value="">Any status</option>{Object.entries(implementationLabels).map(([k,l])=><option key={k} value={k}>{l}</option>)}</select></div>}
-   {overview.isLoading?<p role="status" className="p-5 text-sm text-slate-500">Loading assessments…</p>:overview.isError?<p className="p-5 text-sm"><button className="text-red-700 underline" onClick={()=>void overview.refetch()}>Assessments could not be loaded. Retry</button></p>:!all.length?<p className="p-5 text-sm text-slate-600">No assessment started yet. Choose the framework or law you need below.</p>:!active.length?<p className="p-5 text-sm text-slate-600">No assessment has this status.</p>:<>
-    <div className="hidden overflow-x-auto md:block"><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-xs text-slate-500"><tr><th scope="col" className="px-5 py-3 font-semibold">Framework</th><th scope="col" className="px-3 py-3 font-semibold">Status</th><th scope="col" className="px-3 py-3 font-semibold">Progress</th><th scope="col" className="px-3 py-3 font-semibold">Next step</th><th scope="col" className="px-3 py-3 font-semibold">Target review</th><th scope="col" className="px-5 py-3 font-semibold"><span className="sr-only">Open</span></th></tr></thead>
-     <tbody>{active.map(x=>{const next=x.gates.find(g=>!g.done);const done=x.gates.filter(g=>g.done).length;return <tr key={x.framework.id} className="border-t border-slate-100 align-top hover:bg-slate-50/60"><td className="px-5 py-3"><Link className="font-semibold text-slate-900 hover:text-brand-700" to={`/frameworks?framework=${x.framework.id}`}>{x.framework.short_name||x.framework.name}</Link><p className="text-xs text-slate-500">{x.framework.name} · {x.framework.code}</p></td><td className="px-3 py-3"><StatusBadge status={x.status} label={implementationLabels[x.status]??x.status}/></td><td className="min-w-[150px] px-3 py-3"><div className="h-1.5 overflow-hidden rounded-full bg-slate-100"><div className={`h-full ${x.status==='implemented'?'bg-emerald-500':'bg-brand-600'}`} style={{width:`${x.gates.length?done/x.gates.length*100:0}%`}}/></div><p className="mt-1 text-xs text-slate-500">{done} of {x.gates.length} steps · {x.stats.evidenced}/{x.stats.applicable} evidenced</p></td><td className="px-3 py-3 text-slate-700">{x.status==='implemented'?'Monitor changes and the next review date':next?.title??'Independent reviewer sign-off'}{(x.stats.overdue>0||x.stats.unassigned>0)&&<p className="text-xs text-amber-800">{x.stats.overdue} overdue · {x.stats.unassigned} unassigned</p>}</td><td className="px-3 py-3 text-slate-700">{x.plan?.target_date?formatDate(x.plan.target_date):'—'}</td><td className="px-5 py-3 text-right"><Link className={secondary} to={`/frameworks?framework=${x.framework.id}`}>Open <ArrowRight className="h-4 w-4"/></Link></td></tr>;})}</tbody></table></div>
-    <ul className="divide-y divide-slate-100 md:hidden">{active.map(x=>{const next=x.gates.find(g=>!g.done);const done=x.gates.filter(g=>g.done).length;return <li key={x.framework.id}><Link className="block px-5 py-4" to={`/frameworks?framework=${x.framework.id}`}><div className="flex items-start justify-between gap-2"><span className="font-semibold text-slate-900">{x.framework.short_name||x.framework.name}</span><StatusBadge status={x.status} label={implementationLabels[x.status]??x.status}/></div><p className="mt-1 text-xs text-slate-500">{x.framework.code} · {done} of {x.gates.length} steps</p><p className="mt-1 text-sm text-slate-700">Next: {x.status==='implemented'?'monitor changes':next?.title??'independent reviewer sign-off'}</p></Link></li>;})}</ul>
-   </>}
-  </section>
-  <section id="start-assessment" aria-label="Start an assessment" className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4"><div><h2 className="text-base font-semibold text-slate-900">Start an assessment</h2><p className="mt-1 text-xs text-slate-500">Choose the requirements you need to assess. Confirm the full current requirements and their applicability before drawing a conclusion.</p></div><input aria-label="Search frameworks" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Find a framework or law" className={input+' sm:max-w-xs'}/></div>
-   <div className="p-5">{isLoading?<p role="status" className="text-sm text-slate-500">Loading requirements…</p>:isError?<button className={secondary} onClick={()=>void refetch()}>Retry catalogue</button>:!catalogue.length?<p className="text-sm text-slate-600">No framework matches “{search}”.</p>:<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{catalogue.map(f=><article key={f.id} className="flex flex-col rounded-xl border border-slate-200 p-5"><div className="flex items-start justify-between gap-2"><ShieldCheck className="mb-3 h-6 w-6 text-brand-600"/>{started.has(f.id)&&<span className="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-800">In progress</span>}</div><h3 className="font-semibold">{f.shortName||f.name}</h3><p className="mt-2 text-sm text-slate-500">{f.name} · Catalogue edition {f.version||'not stated'}</p><p className="my-4 text-xs text-slate-500">{f.libraryControlCount} published reference controls · {f.adoptedControlCount} existing organisation records</p><button className={(started.has(f.id)?secondary:button)+' mt-auto'} onClick={()=>started.has(f.id)||!manager?open(f.id):setWizard(f.id)}>{started.has(f.id)?'Continue assessment':manager?'Start this assessment':'View assessment'} <ArrowRight className="h-4 w-4"/></button></article>)}</div>}</div>
-  </section>
- </div>;
+function AssessmentList({ open }: { open: (id: string) => void }): JSX.Element {
+  const { data = [], isLoading, isError, refetch } = useFrameworks();
+  const overview = useImplementationOverview();
+  const { formatDate } = useOrgFormat();
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('');
+  const [wizard, setWizard] = useState<string | null>(null);
+  const manager = ['owner', 'admin', 'compliance_manager', 'msp_admin'].includes(
+    useAuthStore((x) => x.activeTenant?.role) ?? '',
+  );
+  const active = [...(overview.data ?? [])]
+    .filter((x) => !status || x.status === status)
+    .sort(
+      (a, b) =>
+        Number(b.status === 'needs_attention') - Number(a.status === 'needs_attention') ||
+        b.stats.overdue - a.stats.overdue,
+    );
+  const started = new Set((overview.data ?? []).map((x) => x.framework.id));
+  const all = overview.data ?? [];
+  const catalogue = data.filter((f) =>
+    (f.name + ' ' + f.code + ' ' + (f.shortName ?? ''))
+      .toLowerCase()
+      .includes(search.toLowerCase()),
+  );
+  return (
+    <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6">
+      <AssessmentHeader
+        eyebrow="Assess"
+        title="Compliance assessments"
+        description="Agree scope with stakeholders, assess risks, decide the response, review the applicable requirements and verify the supporting records. Each assessment shows its next unfinished step."
+        actions={
+          manager ? (
+            <button className={button} onClick={() => setWizard('')} disabled={isLoading}>
+              Start an assessment
+            </button>
+          ) : (
+            <a className={secondary} href="#start-assessment">
+              Browse frameworks
+            </a>
+          )
+        }
+      />
+      {wizard !== null && (
+        <StartAssessmentWizard
+          frameworks={data}
+          started={started}
+          initial={wizard || undefined}
+          close={() => setWizard(null)}
+          opened={(id) => {
+            setWizard(null);
+            open(id);
+          }}
+        />
+      )}
+      <section
+        aria-label="Assessments in progress"
+        className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">Your assessments</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Open an assessment to continue its next step. Internal review is separate from
+              certification or external attestation.
+            </p>
+          </div>
+          {all.length > 0 && (
+            <CountChips
+              items={[
+                { label: 'In scope', value: all.length },
+                {
+                  label: 'Reviewed',
+                  value: all.filter((x) => x.status === 'implemented').length,
+                  tone: 'good',
+                },
+                {
+                  label: 'Awaiting sign-off',
+                  value: all.filter((x) => ['in_review', 'ready_for_review'].includes(x.status))
+                    .length,
+                },
+                {
+                  label: 'Review needed',
+                  value: all.filter((x) => x.status === 'needs_attention').length,
+                  tone: 'warn',
+                },
+                {
+                  label: 'Controls without evidence',
+                  value: all.reduce(
+                    (n, x) => n + Math.max(0, x.stats.applicable - x.stats.evidenced),
+                    0,
+                  ),
+                  tone: 'warn',
+                },
+              ]}
+            />
+          )}
+        </div>
+        {all.length > 0 && (
+          <div className="workspace-toolbar flex flex-wrap items-center gap-3 border-b border-slate-200 bg-slate-50 px-5 py-3">
+            <label className="text-xs font-medium text-slate-600" htmlFor="assessment-status">
+              Status
+            </label>
+            <select
+              id="assessment-status"
+              className={input + ' sm:max-w-xs'}
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+            >
+              <option value="">Any status</option>
+              {Object.entries(implementationLabels).map(([k, l]) => (
+                <option key={k} value={k}>
+                  {l}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        {overview.isLoading ? (
+          <p role="status" className="p-5 text-sm text-slate-500">
+            Loading assessments…
+          </p>
+        ) : overview.isError ? (
+          <p className="p-5 text-sm">
+            <button className="text-red-700 underline" onClick={() => void overview.refetch()}>
+              Assessments could not be loaded. Retry
+            </button>
+          </p>
+        ) : !all.length ? (
+          <p className="p-5 text-sm text-slate-600">
+            No assessment started yet. Choose the framework or law you need below.
+          </p>
+        ) : !active.length ? (
+          <p className="p-5 text-sm text-slate-600">No assessment has this status.</p>
+        ) : (
+          <>
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 text-xs text-slate-500">
+                  <tr>
+                    <th scope="col" className="px-5 py-3 font-semibold">
+                      Framework
+                    </th>
+                    <th scope="col" className="px-3 py-3 font-semibold">
+                      Status
+                    </th>
+                    <th scope="col" className="px-3 py-3 font-semibold">
+                      Progress
+                    </th>
+                    <th scope="col" className="px-3 py-3 font-semibold">
+                      Next step
+                    </th>
+                    <th scope="col" className="px-3 py-3 font-semibold">
+                      Target review
+                    </th>
+                    <th scope="col" className="px-5 py-3 font-semibold">
+                      <span className="sr-only">Open</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {active.map((x) => {
+                    const next = x.gates.find((g) => !g.done);
+                    const done = x.gates.filter((g) => g.done).length;
+                    return (
+                      <tr
+                        key={x.framework.id}
+                        className="border-t border-slate-100 align-top hover:bg-slate-50/60"
+                      >
+                        <td className="px-5 py-3">
+                          <Link
+                            className="font-semibold text-slate-900 hover:text-brand-700"
+                            to={`/frameworks?framework=${x.framework.id}`}
+                          >
+                            {x.framework.short_name || x.framework.name}
+                          </Link>
+                          <p className="text-xs text-slate-500">
+                            {x.framework.name} · {x.framework.code}
+                          </p>
+                        </td>
+                        <td className="px-3 py-3">
+                          <StatusBadge
+                            status={x.status}
+                            label={implementationLabels[x.status] ?? x.status}
+                          />
+                        </td>
+                        <td className="min-w-[150px] px-3 py-3">
+                          <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+                            <div
+                              className={`h-full ${x.status === 'implemented' ? 'bg-emerald-500' : 'bg-brand-600'}`}
+                              style={{
+                                width: `${x.gates.length ? (done / x.gates.length) * 100 : 0}%`,
+                              }}
+                            />
+                          </div>
+                          <p className="mt-1 text-xs text-slate-500">
+                            {done} of {x.gates.length} steps · {x.stats.evidenced}/
+                            {x.stats.applicable} evidenced
+                          </p>
+                        </td>
+                        <td className="px-3 py-3 text-slate-700">
+                          {x.status === 'implemented'
+                            ? 'Monitor changes and the next review date'
+                            : (next?.title ?? 'Independent reviewer sign-off')}
+                          {(x.stats.overdue > 0 || x.stats.unassigned > 0) && (
+                            <p className="text-xs text-amber-800">
+                              {x.stats.overdue} overdue · {x.stats.unassigned} unassigned
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-3 py-3 text-slate-700">
+                          {x.plan?.target_date ? formatDate(x.plan.target_date) : '—'}
+                        </td>
+                        <td className="px-5 py-3 text-right">
+                          <Link
+                            className={secondary}
+                            to={`/frameworks?framework=${x.framework.id}`}
+                          >
+                            Open <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <ul className="divide-y divide-slate-100 md:hidden">
+              {active.map((x) => {
+                const next = x.gates.find((g) => !g.done);
+                const done = x.gates.filter((g) => g.done).length;
+                return (
+                  <li key={x.framework.id}>
+                    <Link
+                      className="block px-5 py-4"
+                      to={`/frameworks?framework=${x.framework.id}`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="font-semibold text-slate-900">
+                          {x.framework.short_name || x.framework.name}
+                        </span>
+                        <StatusBadge
+                          status={x.status}
+                          label={implementationLabels[x.status] ?? x.status}
+                        />
+                      </div>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {x.framework.code} · {done} of {x.gates.length} steps
+                      </p>
+                      <p className="mt-1 text-sm text-slate-700">
+                        Next:{' '}
+                        {x.status === 'implemented'
+                          ? 'monitor changes'
+                          : (next?.title ?? 'independent reviewer sign-off')}
+                      </p>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+      </section>
+      <section
+        id="start-assessment"
+        aria-label="Start an assessment"
+        className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">Start an assessment</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Choose the requirements you need to assess. Confirm the full current requirements and
+              their applicability before drawing a conclusion.
+            </p>
+          </div>
+          <input
+            aria-label="Search frameworks"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Find a framework or law"
+            className={input + ' sm:max-w-xs'}
+          />
+        </div>
+        <div className="p-5">
+          {isLoading ? (
+            <p role="status" className="text-sm text-slate-500">
+              Loading requirements…
+            </p>
+          ) : isError ? (
+            <button className={secondary} onClick={() => void refetch()}>
+              Retry catalogue
+            </button>
+          ) : !catalogue.length ? (
+            <p className="text-sm text-slate-600">No framework matches “{search}”.</p>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {catalogue.map((f) => (
+                <article
+                  key={f.id}
+                  className="flex flex-col rounded-xl border border-slate-200 p-5"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <ShieldCheck className="mb-3 h-6 w-6 text-brand-600" />
+                    {started.has(f.id) && (
+                      <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-800">
+                        In progress
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-semibold">{f.shortName || f.name}</h3>
+                  <p className="mt-2 text-sm text-slate-500">
+                    {f.name} · Catalogue edition {f.version || 'not stated'}
+                  </p>
+                  <p className="my-4 text-xs text-slate-500">
+                    {f.libraryControlCount} published reference controls · {f.adoptedControlCount}{' '}
+                    existing organisation records
+                  </p>
+                  <button
+                    className={(started.has(f.id) ? secondary : button) + ' mt-auto'}
+                    onClick={() => (started.has(f.id) || !manager ? open(f.id) : setWizard(f.id))}
+                  >
+                    {started.has(f.id)
+                      ? 'Continue assessment'
+                      : manager
+                        ? 'Start this assessment'
+                        : 'View assessment'}{' '}
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
 }

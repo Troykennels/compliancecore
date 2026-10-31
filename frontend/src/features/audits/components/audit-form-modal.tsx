@@ -33,7 +33,7 @@ export function AuditFormModal({ open, onClose, audit }: { open: boolean; onClos
   const { data: members = [], isLoading: membersLoading, isError: membersError, refetch: reloadMembers } = useImplementationMembers(open);
   const create = useCreateAudit(), update = useUpdateAudit();
   const pending = create.isPending || update.isPending;
-  const { register, reset, handleSubmit, watch, formState: { errors } } = useForm<Values>({ resolver: zodResolver(schema), defaultValues: initial });
+  const { register, reset, handleSubmit, watch, formState: { errors } } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({ resolver: zodResolver(schema), defaultValues: initial });
   useEffect(() => {
     if (open) reset(audit ? { title: audit.title, auditType: audit.auditType, frameworkRef: audit.frameworkRef ?? '', status: audit.status === 'completed' ? 'in_progress' : audit.status, auditorName: audit.auditorName ?? '', ownerId: audit.ownerId ?? userId ?? '', scope: audit.scope ?? '', summary: audit.summary ?? '', startDate: audit.startDate?.slice(0,10) ?? '', endDate: audit.endDate?.slice(0,10) ?? '' } : { ...initial, ownerId: userId ?? '' });
   }, [open, audit, reset, userId]);

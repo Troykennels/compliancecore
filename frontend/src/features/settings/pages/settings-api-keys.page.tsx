@@ -78,7 +78,7 @@ export function SettingsApiKeysPage(): JSX.Element {
     onError: () => toast.error('Failed to revoke API key.'),
   });
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: { permissions: [], name: '' },
   });

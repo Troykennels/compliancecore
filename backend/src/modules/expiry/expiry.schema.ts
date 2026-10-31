@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 
 const uuidSchema = z.string().uuid();
@@ -19,7 +20,7 @@ export const createExpiryItemSchema = z.object({
   notes:        z.string().max(5000).optional().nullable(),
 });
 
-export const updateExpiryItemSchema = createExpiryItemSchema.partial().extend({
+export const updateExpiryItemSchema = patchObject(createExpiryItemSchema).extend({
   status: z.enum(['active','expiring_soon','expired','renewed','cancelled']).optional(),
 });
 

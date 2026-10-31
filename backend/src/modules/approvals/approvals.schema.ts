@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 
 const approverType = z.enum(['user', 'role', 'manager', 'any_from_list']);
@@ -24,7 +25,7 @@ export const createWorkflowSchema = z.object({
   steps:       z.array(workflowStepSchema).min(1),
 });
 
-export const updateWorkflowSchema = createWorkflowSchema.partial();
+export const updateWorkflowSchema = patchObject(createWorkflowSchema);
 
 export const adHocStepSchema = z.object({
   stepOrder:        z.number().int().min(1),
@@ -45,7 +46,7 @@ export const createApprovalRequestSchema = z.object({
   entityId:    z.string().uuid().optional(),
   priority,
   deadline:    z.string().datetime().optional(),
-  metadata:    z.record(z.unknown()).optional(),
+  metadata:    z.record(z.string(), z.unknown()).optional(),
   steps:       z.array(adHocStepSchema).optional(),
 });
 

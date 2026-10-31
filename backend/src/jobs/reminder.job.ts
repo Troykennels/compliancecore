@@ -1,3 +1,4 @@
+import { emailAllowedInTransaction } from '../modules/notifications/notification-preferences';
 import { Queue, Worker, Job } from 'bullmq';
 import { redisForQueues } from '../config/redis';
 import { prisma } from '../config/database';
@@ -84,12 +85,12 @@ async function processExpiryReminders(schemaName: string, tenantId: string): Pro
           // "/" as a path relative to the CURRENT route, so an absolute URL
           // stored here resolved to nonsense like
           // "/dashboard/http:/host/expiry" and dumped the user on the catch-all.
-          actionUrl:        '/expiry',
+          actionUrl:        `/expiry?record=${item.id}`,
         });
 
         // Send email if owner email is available. Fire-and-forget; failures
         // must not block notification creation.
-        if (item.ownerEmail) {
+        if (item.ownerEmail && await emailAllowedInTransaction(tx, item.ownerId, 'expiry_warning')) {
           await emailClient.sendExpiryReminder({
             to:         item.ownerEmail,
             ownerName:  item.ownerName ?? '',
@@ -154,7 +155,7 @@ async function processCalendarReminders(schemaName: string): Promise<void> {
           priority:         event.priority,
           referenceType:    'calendar_event',
           referenceId:      event.id,
-          actionUrl:        '/calendar',
+          actionUrl:        `/calendar?record=${event.id}`,
         });
       }
 

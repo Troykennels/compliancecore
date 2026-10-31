@@ -10,7 +10,7 @@ const PAYMENT_METHOD_TYPES = ['card', 'bank_transfer', 'wire'] as const;
 
 export const createSubscriptionSchema = z.object({
   planId: z.string().uuid('planId must be a valid id'),
-  billingCycle: z.enum(BILLING_CYCLES, { errorMap: () => ({ message: 'Invalid billing cycle' }) }).optional(),
+  billingCycle: z.enum(BILLING_CYCLES, { error: 'Invalid billing cycle' }).optional(),
   couponCode: z.string().min(1).max(64).optional(),
   // trialDays is NOT accepted from clients. It used to be, which let a caller
   // POST {planId: <enterprise>, trialDays: 365} and self-grant a year of a paid
@@ -21,9 +21,9 @@ export const createSubscriptionSchema = z.object({
 export const updateSubscriptionSchema = z
   .object({
     planId: z.string().uuid('planId must be a valid id').optional(),
-    billingCycle: z.enum(BILLING_CYCLES, { errorMap: () => ({ message: 'Invalid billing cycle' }) }).optional(),
+    billingCycle: z.enum(BILLING_CYCLES, { error: 'Invalid billing cycle' }).optional(),
     cancelAtPeriodEnd: z.boolean().optional(),
-    status: z.enum(SUBSCRIPTION_STATUSES, { errorMap: () => ({ message: 'Invalid status' }) }).optional(),
+    status: z.enum(SUBSCRIPTION_STATUSES, { error: 'Invalid status' }).optional(),
   })
   .refine((v) => Object.keys(v).length > 0, { message: 'At least one field is required' });
 
@@ -32,7 +32,7 @@ export const applyCouponSchema = z.object({
 });
 
 export const addPaymentMethodSchema = z.object({
-  type: z.enum(PAYMENT_METHOD_TYPES, { errorMap: () => ({ message: 'Invalid payment method type' }) }),
+  type: z.enum(PAYMENT_METHOD_TYPES, { error: 'Invalid payment method type' }),
   label: z.string().min(1, 'Label is required').max(100),
   last4: z.string().regex(/^\d{4}$/, 'last4 must be 4 digits').optional(),
   brand: z.string().max(50).optional(),

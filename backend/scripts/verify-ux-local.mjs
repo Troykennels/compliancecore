@@ -1,0 +1,122 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+import pg from 'pg';
+import bcrypt from 'bcrypt';
+
+const database = new URL(process.env.DATABASE_URL ?? '');
+assert.equal(database.hostname, '127.0.0.1');
+assert.equal(database.port, '55443');
+assert.match(database.pathname, /^\/compliance_renewal_task_presentation_/);
+const api = 'http://127.0.0.1:3008/api';
+const directory = path.join(os.tmpdir(), 'compliance-presentation-20261023');
+const original = JSON.parse(await fs.readFile(path.join(directory, 'demo-access-local.json'), 'utf8'));
+const c = new pg.Client({ connectionString: database.href });
+const checks = [];
+const tokens = {};
+const roles = {};
+async function call(role, method, route, body, expected = 200) {
+  const response = await fetch(api + route, { method, headers: { 'Content-Type': 'application/json', ...(tokens[role] ? { Authorization: `Bearer ${tokens[role]}` } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const result = await response.json().catch(() => ({}));
+  assert.equal(response.status, expected, `${role} ${method} ${route}: ${response.status} ${JSON.stringify(result).slice(0, 250)}`);
+  checks.push({ role, method, route, status: response.status });
+  return result.data;
+}
+try {
+  await c.connect();
+  const ownerLogin = await call('owner', 'POST', '/auth/login', { email: original.email, password: original.password });
+  tokens.owner = ownerLogin.accessToken;
+  const me = await call('owner', 'GET', '/auth/me');
+  const tenantId = me.tenants[0].id;
+  const tenant = (await c.query('SELECT schema_name FROM global.tenants WHERE id=$1', [tenantId])).rows[0];
+  const schema = tenant.schema_name;
+  assert.match(schema, /^tenant_[a-f0-9]{32}$/);
+  roles.owner = { email: original.email, password: original.password, id: me.id, tenantId };
+  const password = crypto.randomBytes(24).toString('base64url') + '!Aa7';
+  const hash = await bcrypt.hash(password, 10);
+  for (const role of ['admin', 'compliance_manager', 'control_owner', 'auditor', 'viewer', 'msp_admin', 'msp_analyst']) {
+    const id = crypto.randomUUID(), email = `ux-${role}-${id.slice(0, 8)}@example.invalid`;
+    await c.query('INSERT INTO global.users(id,email,password_hash,first_name,last_name,email_verified_at,onboarding_completed_at,is_active,updated_at) VALUES($1,$2,$3,$4,$5,NOW(),NOW(),true,NOW())', [id, email, hash, 'UX check', role]);
+    await c.query('INSERT INTO global.tenant_memberships(id,tenant_id,user_id,role,is_active) VALUES($1,$2,$3,$4,true)', [crypto.randomUUID(), tenantId, id, role]);
+    roles[role] = { id, email, password, tenantId };
+    tokens[role] = (await call(role, 'POST', '/auth/login', { email, password })).accessToken;
+  }
+  await fs.writeFile(path.join(directory, 'ux-access.private.json'), JSON.stringify({ roles }), { mode: 0o600 });
+  for (const role of Object.keys(roles)) await call(role, 'GET', '/analytics/overview');
+  await call('auditor', 'GET', '/training');
+  await call('auditor', 'GET', '/vendors');
+  await call('auditor', 'POST', '/training', { title: 'Forbidden write' }, 403);
+  await call('viewer', 'POST', '/audits', { title: 'Forbidden write' }, 403);
+
+  const audit = await call('owner', 'POST', '/audits', { title: 'UX verification audit ' + crypto.randomUUID().slice(0, 8), auditType: 'internal', status: 'planned', scope: 'Isolated local verification', startDate: '2026-10-30', endDate: '2026-11-30' }, 201);
+  await call('owner', 'PATCH', `/audits/${audit.id}`, { status: 'in_progress' });
+  const renamedAudit = await call('owner', 'PATCH', `/audits/${audit.id}`, { title: audit.title + ' updated' });
+  assert.equal(renamedAudit.status, 'in_progress', 'Changing a title must not reset audit status');
+  const training = await call('owner', 'POST', '/training', { title: 'UX mandatory training ' + crypto.randomUUID().slice(0, 8), isMandatory: true, status: 'active' }, 201);
+  const updatedTraining = await call('owner', 'PATCH', `/training/${training.id}`, { description: 'Partial update safety check.' });
+  assert.equal(updatedTraining.isMandatory, true, 'Changing a description must not remove mandatory training');
+  const base = `/audits/${audit.id}/room`;
+  await call('owner', 'GET', base);
+  await call('viewer', 'GET', base, undefined, 403);
+  await call('auditor', 'GET', base, undefined, 403);
+  await call('owner', 'POST', base + '/participants', { userId: roles.auditor.id, accessFrom: '2020-01-01', accessUntil: '2020-01-02' }, 204);
+  await call('auditor', 'GET', base, undefined, 403);
+  const today = new Date().toISOString().slice(0, 10);
+  await call('owner', 'POST', base + '/participants', { userId: roles.auditor.id, accessFrom: today, accessUntil: '2030-01-01' }, 204);
+  await call('auditor', 'GET', base);
+  await call('auditor', 'POST', base + '/requests', { reference: 'FORBIDDEN', title: 'Forbidden' }, 403);
+  await call('owner','POST',base+'/requests',{reference:'BAD-OWNER',title:'Incapable owner',ownerId:roles.viewer.id},422);
+  const request = await call('owner', 'POST', base + '/requests', { reference: 'REQ-01', title: 'Sample evidence', requirement: 'A.5.1', ownerId: roles.control_owner.id, dueDate: '2026-11-15' }, 201);
+  const requestId = request[0].id;
+  const secondRequest = await call('owner', 'POST', base + '/requests', { reference: 'REQ-02', title: 'Other owner evidence', ownerId: me.id }, 201);
+  const ownRoom = await call('control_owner', 'GET', base);
+  assert.equal(ownRoom.requests.length, 1, 'Control owner can read only their request');
+  await call('control_owner', 'POST', `${base}/requests/${requestId}/decision`, { status: 'submitted', note: 'No evidence yet' }, 409);
+  const evidence = (await c.query(`SELECT e.id,e.current_version_id FROM "${schema}".evidence e JOIN "${schema}".evidence_versions v ON v.id=e.current_version_id WHERE e.deleted_at IS NULL AND e.status='active' AND v.upload_status='completed' LIMIT 1`)).rows[0];
+  assert.ok(evidence, 'Local demo must have completed evidence');
+  await call('control_owner', 'POST', `${base}/requests/${requestId}/evidence`, { evidenceId: evidence.id, evidenceVersionId: crypto.randomUUID() }, 422);
+  await call('control_owner', 'POST', `${base}/requests/${requestId}/evidence`, { evidenceId: evidence.id, evidenceVersionId: evidence.current_version_id }, 204);
+  await call('control_owner','POST',`${base}/requests/${requestId}/evidence/remove`,{evidenceId:evidence.id,evidenceVersionId:evidence.current_version_id},204);
+  await call('control_owner','POST',`${base}/requests/${requestId}/decision`,{status:'submitted',note:'Removed evidence cannot be submitted.'},409);
+  await call('control_owner','POST',`${base}/requests/${requestId}/evidence`,{evidenceId:evidence.id,evidenceVersionId:evidence.current_version_id},204);
+  await call('control_owner', 'POST', `${base}/requests/${requestId}/comments`, { body: 'Evidence prepared for independent review.' }, 204);
+  await call('control_owner', 'POST', `${base}/requests/${requestId}/decision`, { status: 'submitted', note: 'Ready for review.' }, 204);
+  await call('control_owner', 'POST', `${base}/requests/${requestId}/decision`, { status: 'accepted', note: 'Self review is forbidden.' }, 403);
+  await call('auditor', 'POST', `${base}/requests/${requestId}/decision`, { status: 'accepted', note: 'Independent sample review.' }, 204);
+  await c.query(`UPDATE "${schema}".audits SET status='completed',reviewed_by=$2,reviewed_at=NOW() WHERE id=$1`,[audit.id,roles.auditor.id]);
+  await call('owner','POST',`${base}/requests/${requestId}/update`,{reference:'REQ-01',title:'Reassigned evidence',ownerId:roles.admin.id,dueDate:'2026-11-16'},204);
+  await call('control_owner','GET',base,undefined,403);
+  const reopened=await call('admin','GET',base);
+  assert.equal(reopened.requests.find(r=>r.id===requestId).status,'requested');
+  const parent=(await c.query(`SELECT status,reviewed_by FROM "${schema}".audits WHERE id=$1`,[audit.id])).rows[0];
+  assert.equal(parent.status,'in_progress');assert.equal(parent.reviewed_by,null);
+  const followups=(await c.query(`SELECT assigned_to,status FROM "${schema}".compliance_calendar_events WHERE source_key=$1`,['compliance:audit_request:'+requestId])).rows;
+  assert.equal(followups.length,1);assert.equal(followups[0].assigned_to,roles.admin.id);assert.equal(followups[0].status,'upcoming');
+  await call('owner','POST',`${base}/requests/${secondRequest[0].id}/archive`,{},204);
+  assert.equal((await call('owner','GET',base)).requests.length,1);
+  // Return the fixture to the control owner for browser coverage.
+  await call('owner','POST',`${base}/requests/${requestId}/update`,{reference:'REQ-01',title:'Sample evidence',ownerId:roles.control_owner.id,dueDate:'2026-11-16'},204);
+  await call('owner', 'GET', `/evidence/${evidence.id}/coverage`);
+  await call('owner', 'DELETE', `${base}/participants/${roles.auditor.id}`, undefined, 204);
+  await call('auditor', 'GET', base, undefined, 403);
+
+  const before = await call('owner', 'GET', '/notifications/preferences');
+  const preferences = await call('viewer', 'GET', '/notifications/preferences');
+  const changed = preferences.map(({ notificationType, inApp, email }) => ({ notificationType, inApp: notificationType === 'system' ? false : inApp, email }));
+  await call('viewer', 'PUT', '/notifications/preferences', { preferences: changed }, 204);
+  assert.equal((await call('viewer', 'GET', '/notifications/preferences')).find(p => p.notificationType === 'system').inApp, false);
+  assert.deepEqual(await call('owner', 'GET', '/notifications/preferences'), before, 'Preferences cannot alter another member');
+  await c.query(`INSERT INTO "${schema}".notifications(user_id,title,notification_type,priority) VALUES($1,'Hidden preference probe','system','high'),($1,'Visible preference probe','task_comment','low')`, [roles.viewer.id]);
+  const filtered = await call('viewer', 'GET', '/notifications?priority=low&notificationType=task_comment');
+  assert.equal(filtered.total, 1);
+  assert.equal((await call('viewer', 'GET', '/notifications')).total, 1);
+  await call('viewer', 'GET', '/notifications?priority=invalid', undefined, 422);
+  // Restore the auditor's access so the browser can inspect the new room.
+  await call('owner', 'POST', base + '/participants', { userId: roles.auditor.id, accessFrom: today, accessUntil: '2030-01-01' }, 204);
+  await fs.writeFile(path.join(directory, 'ux-access.private.json'), JSON.stringify({ roles, auditId: audit.id, evidenceId: evidence.id }), { mode: 0o600 });
+  await fs.mkdir('../verification/design-20261030', { recursive: true });
+  await fs.writeFile('../verification/design-20261030/api-checks.json', JSON.stringify({ passed: true, checks, assertions: ['assigned request isolation', 'version ownership', 'independent review', 'access revocation', 'own preference isolation', 'priority/type filtering', 'partial updates retain state', 'request owner eligibility', 'attachment removal requires new proof', 'reassignment revokes old access', 'request changes invalidate report review', 'one reminder follows the new owner', 'archival removes active requests'], productionWrites: false }, null, 2));
+  console.log(JSON.stringify({ passed: true, checks: checks.length, roles: Object.keys(roles), productionWrites: false }));
+} finally { await c.end(); }

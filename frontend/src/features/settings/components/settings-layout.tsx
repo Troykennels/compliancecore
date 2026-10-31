@@ -34,7 +34,7 @@ export function SettingsLayout({ children }: Props): JSX.Element {
   const role = useUserRole();
 
   const visibleItems = NAV_ITEMS.filter(
-    (item) => (item.path===PATHS.SETTINGS_SECURITY || hasPermission(role??undefined,item.path===PATHS.SETTINGS_TEAM?'team:read':item.path===PATHS.SETTINGS_ORG?'org:read':'settings:read')) && (!item.requiresRole || Boolean(role && item.requiresRole.includes(role))),
+    (item) => (item.path===PATHS.SETTINGS_SECURITY || item.path===PATHS.SETTINGS_NOTIFICATIONS || hasPermission(role??undefined,item.path===PATHS.SETTINGS_TEAM?'team:read':item.path===PATHS.SETTINGS_ORG?'org:read':'settings:read')) && (!item.requiresRole || Boolean(role && item.requiresRole.includes(role))),
   );
 
   return (

@@ -31,7 +31,7 @@ export function TaskBoard({ tasks, onTaskClick, onViewTask, onCreateTask }: Task
   }, {} as Record<TaskStatus, Task[]>);
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4">
+    <div className="grid min-w-0 grid-cols-1 gap-4 pb-4 sm:grid-cols-2 xl:grid-cols-3">
       {BOARD_COLUMNS.map((col) => (
         <BoardColumn
           key={col.status}
@@ -62,7 +62,7 @@ function BoardColumn({
   const cfg = STATUS_CONFIG[col.status];
 
   return (
-    <div className={`flex w-72 shrink-0 flex-col rounded-xl border border-t-4 border-slate-200 bg-slate-50 ${col.headerColor}`}>
+    <div className={`flex min-w-0 flex-col rounded-xl border border-t-4 border-slate-200 bg-slate-50 ${col.headerColor}`}>
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-slate-800">{col.label}</span>

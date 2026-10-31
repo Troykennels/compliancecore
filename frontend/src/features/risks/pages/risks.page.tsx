@@ -76,7 +76,7 @@ function LegacyRisksPage(): JSX.Element {
           </button></PermissionAction></>} /></div>
 
         {/* Filters */}
-        <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="workspace-toolbar mb-4 flex flex-wrap items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -303,12 +303,12 @@ function EmptyState({ onAdd }: { onAdd: () => void }): JSX.Element {
       <p className="mt-1 text-sm text-slate-500">
         Add your first risk to start building your risk register.
       </p>
-      <button
+      <PermissionAction scope="risks:write"><button
         onClick={onAdd}
         className="mt-4 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
       >
         <Plus className="h-4 w-4" /> New Risk
-      </button>
+      </button></PermissionAction>
     </div>
   );
 }

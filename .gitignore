@@ -46,3 +46,4 @@ deploy-secrets.local.env
 
 # Vite writes these while resolving its config; they are per-run temp files.
 vite.config.ts.timestamp-*.mjs
+**/.codex-shared-node_modules/

@@ -1,4 +1,5 @@
 import { GettingStarted } from '../components/getting-started';
+import { RoleWork } from '../components/role-work';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, CheckCircle, ChevronDown, Circle, ShieldCheck, AlertTriangle, ListChecks } from 'lucide-react';
@@ -28,13 +29,13 @@ export function DashboardPage() {
   // One headline figure, the same rule as the status chart: operating controls out of all controls in scope.
   const progress = applicable > 0 ? Math.round(100 * controls.implemented / applicable) : null;
   const cards = [
-    { title: 'Total controls', status: '', value: controls.total, help: 'All recorded safeguards', icon: ListChecks, style: 'border-blue-200 bg-blue-50 text-blue-800' },
-    { title: 'Operating', status: 'implemented', value: controls.implemented, help: 'Recorded as in place', icon: CheckCircle, style: 'border-green-200 bg-green-50 text-green-800' },
-    { title: 'Partly operating', status: 'partially_implemented', value: controls.partiallyImplemented, help: 'Further work is needed', icon: Circle, style: 'border-amber-200 bg-amber-50 text-amber-800' },
-    { title: 'Not operating', status: 'not_implemented', value: controls.notImplemented, help: 'Recorded as not in place', icon: AlertTriangle, style: 'border-red-200 bg-red-50 text-red-800' },
+    { title: 'Total controls', status: '', value: controls.total, help: 'All recorded safeguards', icon: ListChecks, style: 'border-slate-200 bg-white text-slate-800' },
+    { title: 'Operating', status: 'implemented', value: controls.implemented, help: 'Recorded as in place', icon: CheckCircle, style: 'border-slate-200 bg-white text-slate-800' },
+    { title: 'Partly operating', status: 'partially_implemented', value: controls.partiallyImplemented, help: 'Further work is needed', icon: Circle, style: 'border-slate-200 bg-white text-slate-800' },
+    { title: 'Not operating', status: 'not_implemented', value: controls.notImplemented, help: 'Recorded as not in place', icon: AlertTriangle, style: 'border-slate-200 bg-white text-slate-800' },
     { title: 'Planned', status: 'planned', value: controls.planned, help: 'Agreed but not yet in place', icon: Circle, style: 'border-slate-200 bg-slate-50 text-slate-700' },
     { title: 'Not yet assessed', status: 'not_assessed', value: controls.notAssessed ?? 0, help: 'Waiting for an assessment', icon: Circle, style: 'border-slate-200 bg-slate-50 text-slate-700' },
-    { title: 'Not applicable', status: 'not_applicable', value: controls.notApplicable, help: 'Recorded as outside scope', icon: ShieldCheck, style: 'border-violet-200 bg-violet-50 text-violet-800' },
+    { title: 'Not applicable', status: 'not_applicable', value: controls.notApplicable, help: 'Recorded as outside scope', icon: ShieldCheck, style: 'border-slate-200 bg-white text-slate-800' },
   ];
   return <PageShell width="wide" className="!space-y-5 !py-5">
     <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#073f40] via-[#086963] to-[#14857a] p-5 text-white shadow-sm sm:p-6" aria-labelledby="overview-title">
@@ -46,6 +47,7 @@ export function DashboardPage() {
           <p className="mt-2 text-sm leading-relaxed text-white/90">{role ? ROLE_GUIDANCE[role].purpose : 'See where things stand, what needs attention and what to do next.'}</p>
           {role && <span className="mt-3 inline-block rounded-full border border-white/30 bg-white/10 px-2.5 py-1 text-[10px] font-semibold tracking-wide">{ROLE_GUIDANCE[role].label} view</span>}
           <div className="mt-4 flex flex-wrap gap-2">
+            <Link to="/journey" className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#07534f] hover:bg-green-50">Continue your compliance journey <ArrowRight className="h-3.5 w-3.5" /></Link>
             {can('controls:read') && <Link to="/frameworks" className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#07534f] hover:bg-green-50">Review assessments <ArrowRight className="h-3.5 w-3.5" /></Link>}
             {can('reports:read') && <Link to="/reports" className="rounded-lg border border-white/40 bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/20">Open management report</Link>}
           </div>
@@ -59,6 +61,7 @@ export function DashboardPage() {
       </div>
     </section>
     {['owner', 'admin', 'compliance_manager', 'msp_admin'].includes(role ?? '') && <GettingStarted />}
+    <RoleWork />
     <section aria-label="Control status totals" className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-7">
       {cards.map(({ title, status, value, help, icon: Icon, style }) => {
         const content = <><div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold">{title}</span><Icon className="h-4 w-4 shrink-0" aria-hidden="true" /></div><p className="mt-2 text-3xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs opacity-90">{help}</p></>;
@@ -68,7 +71,7 @@ export function DashboardPage() {
     </section>
     <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
       <ControlStatusChart controls={controls} />
-      {can('controls:read') ? <ImplementationOverview compact /> : <Card><CardHeader title="Your next step" description="Use the pages available to your role to keep your records current." /><Link to="/guide" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-700"><BookOpen className="h-4 w-4" /> Open your user guide</Link></Card>}
+      {can('controls:read') && !['control_owner', 'auditor'].includes(role ?? '') ? <ImplementationOverview compact /> : <Card><CardHeader title="Your next step" description="Use the pages available to your role to keep your records current." /><Link to="/guide" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-700"><BookOpen className="h-4 w-4" /> Open your user guide</Link></Card>}
     </div>
     {can('reports:read') && <ComplianceWorkSummary />}
     <section className="rounded-xl border border-slate-200 bg-white">

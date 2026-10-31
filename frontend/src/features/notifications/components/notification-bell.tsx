@@ -5,7 +5,6 @@ import { useUnreadCount, useNotifications, useMarkRead, useMarkAllRead, useDismi
 import type { Notification } from '../api/notifications.api';
 import { useNavigate } from 'react-router-dom';
 import { toAppPath } from '../lib/action-url';
-import DeviceAlerts from './device-alerts';
 import { useNotificationSound } from '../hooks/use-notification-sound';
 
 const PRIORITY_DOT: Record<string, string> = {
@@ -44,7 +43,7 @@ function NotificationRow({ n, onRead, onDismiss }: {
       <button
         onClick={(e) => { e.stopPropagation(); onDismiss(n.id); }}
         className="shrink-0 mt-1 rounded p-0.5 text-slate-300 hover:text-slate-500 hover:bg-slate-100"
-       aria-label="Close dialog">
+       aria-label="Dismiss notification">
         <X className="h-3.5 w-3.5" />
       </button>
     </div>
@@ -78,6 +77,8 @@ export function NotificationBell() {
         onClick={() => setOpen((o) => !o)}
         className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
         aria-label="Notifications"
+        aria-expanded={open}
+        aria-controls="notification-dropdown"
       >
         <Bell className="h-5 w-5" />
         {!!count && count > 0 && (
@@ -88,7 +89,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 z-50 w-80 max-w-[calc(100vw-24px)] rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
+        <div id="notification-dropdown" className="absolute right-0 top-11 z-50 w-80 max-w-[calc(100vw-24px)] rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
           {/* Dropdown header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <span className="text-sm font-semibold text-slate-900">Notifications</span>
@@ -103,7 +104,6 @@ export function NotificationBell() {
           </div>
 
           {/* List */}
-          <DeviceAlerts />
           <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-slate-400">

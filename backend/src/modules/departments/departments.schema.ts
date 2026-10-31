@@ -1,3 +1,4 @@
+import { patchObject } from '../../lib/patch-schema';
 import { z } from 'zod';
 
 const uuidSchema = z.string().uuid('Must be a valid UUID');
@@ -14,7 +15,7 @@ export const createDepartmentSchema = z.object({
   description: z.string().max(1000).optional().nullable(),
 });
 
-export const updateDepartmentSchema = createDepartmentSchema.partial().extend({
+export const updateDepartmentSchema = patchObject(createDepartmentSchema).extend({
   isActive: z.boolean().optional(),
 });
 

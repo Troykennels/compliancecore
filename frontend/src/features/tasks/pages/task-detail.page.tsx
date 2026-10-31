@@ -1,3 +1,4 @@
+import { PermissionAction } from '@/components/permission-action';
 import { ModalSurface } from '@/components/modal-surface';
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
@@ -67,7 +68,7 @@ export function TaskDetailPage() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="mx-auto max-w-7xl p-4 sm:p-6">
       {/* Breadcrumb */}
       <button onClick={() => navigate(PATHS.TASKS)} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-4">
         <ArrowLeft className="h-4 w-4" /> Back to Tasks
@@ -100,24 +101,24 @@ export function TaskDetailPage() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <button onClick={() => setShowEdit(true)} className="rounded-lg border border-slate-300 p-2 text-slate-500 hover:bg-slate-50" title="Edit">
+          <PermissionAction scope="tasks:write"><button onClick={() => setShowEdit(true)} className="rounded-lg border border-slate-300 p-2 text-slate-500 hover:bg-slate-50" title="Edit">
             <Edit2 className="h-4 w-4" />
-          </button>
-          <button onClick={() => setDeleteConfirm(true)} className="rounded-lg border border-red-200 p-2 text-red-500 hover:bg-red-50" title="Delete">
+          </button></PermissionAction>
+          <PermissionAction scope="tasks:write"><button onClick={() => setDeleteConfirm(true)} className="rounded-lg border border-red-200 p-2 text-red-500 hover:bg-red-50" title="Delete">
             <Trash2 className="h-4 w-4" />
-          </button>
+          </button></PermissionAction>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Main content */}
-        <div className="col-span-2 space-y-5">
+        <div className="lg:col-span-2 space-y-5">
           {/* Quick status */}
           <div className="rounded-xl border border-slate-200 bg-white p-4">
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Quick Status Update</h3>
             <div className="flex gap-2 flex-wrap">
               {Object.entries(STATUS_CONFIG).map(([status, cfg]) => (
-                <button
+                <PermissionAction scope="tasks:write" key={status}><button
                   key={status}
                   onClick={() => quickStatusChange(status as Task['status'])}
                   disabled={task.status === status || updateTask.isPending}
@@ -128,7 +129,7 @@ export function TaskDetailPage() {
                   }`}
                 >
                   {cfg.label}
-                </button>
+                </button></PermissionAction>
               ))}
             </div>
           </div>
@@ -139,12 +140,12 @@ export function TaskDetailPage() {
               <h3 className="text-sm font-semibold text-slate-800">
                 Subtasks <span className="text-slate-400 font-normal">({task.completedSubtasks}/{task.subtaskCount})</span>
               </h3>
-              <button
+              <PermissionAction scope="tasks:write"><button
                 onClick={() => setShowAddSubtask(true)}
                 className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
               >
                 <Plus className="h-3.5 w-3.5" /> Add Subtask
-              </button>
+              </button></PermissionAction>
             </div>
 
             {subtasks.length === 0 ? (
