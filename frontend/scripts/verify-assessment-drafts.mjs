@@ -118,5 +118,3 @@ try {
     console.log(JSON.stringify({ passed: true, results }));
   }
 } finally { await browser.close(); }
-
-
