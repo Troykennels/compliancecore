@@ -1,0 +1,66 @@
+ComplianceCore workflow and page audit - 4 November 2026
+
+Comparison with CIASecured
+Applied: preservation of unsaved answers; section navigation without resetting
+drafts; persistent server validation and permission/connection errors; retry using
+current inputs; actionable assessment-review blockers; people-list recovery.
+ComplianceCore retains organisational assessments, controls, evidence, treatment,
+independent assurance and monitoring. No consultancy implementation questionnaire,
+client scope approval, quotation or purchased delivery-phase flow was imported.
+
+Reproduced and fixed
+1. Saving a stakeholder interview invalidated the assessment query. The scope
+   editor's hydration effect replaced unsaved scope with the saved server value.
+2. The application shell keyed each page by its entire query string. Changing an
+   assessment step remounted its editor and discarded unfinished answers.
+3. Assessment write failures relied on transient toasts with generic validation
+   text. Consultation/risk forms now retain visible failures and offer Retry.
+   Field-specific errors can focus named fields, including inside collapsed panels.
+4. Independent-review prerequisites were static text. Each check now opens its
+   assessment step. Active-member load failures offer a retry; review requirements
+   and the team/roles recovery route are visible.
+
+Drafts stay only in component memory, scoped by user, organisation and framework.
+They survive step changes and background refreshes. Save before closing/reloading.
+A saved answer is confirmed by a successful server response, then checked by
+reopening. Independent approval still belongs to the saved assessment records;
+edits reopen readiness through the existing server rules.
+
+Verification receipts
+- Backend build, frontend production build and ESLint pass.
+- All 239 backend tests pass against a fresh disposable PostgreSQL cluster.
+- Separate assessment lifecycle integration: 26 checks pass through stakeholder
+  confirmation, obligations, risk/treatment, applicability, policy review, evidence,
+  independent control/risk review, assessment sign-off and post-review changes.
+- followup-lifecycle-checks.json: the changed risk is reassessed through real
+  services, all actual readiness gates pass again, the outcome receives separate
+  independent review, and repeated review creates exactly one owned calendar
+  follow-up. No readiness mocking or forced completion flags were used.
+- framework-entry-checks.json: all 18 seeded frameworks support scoped register
+  preparation, incomplete consultation saving/reopening and confirmed progression.
+  It verifies entry and progression for every framework, not a complete independent
+  certification or regulatory assessment for every framework.
+- draft-regression.json: browser reproduction and regression checks, successful
+  save/reopen, field links, injected 422/403/connection failures, Retry and access
+  through all 15 ISO assessment steps, including independent review and outcome.
+- browser-checks.json: 44 routes at 1440px and 390px (88 page layouts), plus eight
+  role dashboards. No browser exceptions, server errors, overflow, missing form
+  labels or incorrect main-heading counts. Screenshot gallery: gallery.html.
+- extra-page-checks.json: 20 additional desktop/mobile layouts covering public
+  access and invalid-link states, onboarding, task/approval details and platform
+  billing administration. MSP portfolio pages are also captured for MSP roles.
+- Visually inspected assessment catalogue, risk worksheet and mobile privacy page
+  against the supplied bordered-card design pattern. Current application uses
+  navy navigation, teal actions, grouped forms, table borders and responsive cards.
+
+Test environment
+The old local PostgreSQL cluster had missing relation files (58P01). Its data was
+not reset or repaired. A fresh loopback-only cluster on 55446 was created for this
+audit. Test credentials and database files remain outside the repository. SMTP,
+payments and external AI transports were disabled; no customer messages were sent.
+No production schema changes or customer-record mutations are needed for this fix.
+
+Limits
+Passing these checks does not establish legal compliance or exhaust every possible
+record combination. Actual certification, attestation, regulatory filings and
+authorised independent decisions remain separate tracked activities.

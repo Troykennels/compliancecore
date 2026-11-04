@@ -5,8 +5,8 @@ import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 
 const base = 'http://127.0.0.1:5178';
-const out = '../verification/reference-20261031';
-const access = JSON.parse(await fs.readFile(path.join(os.tmpdir(), 'compliance-presentation-20261023/ux-access.private.json'), 'utf8'));
+const out = process.env.CC_AUDIT_OUT ?? '../verification/reference-20261031';
+const access = JSON.parse(await fs.readFile(process.env.CC_AUDIT_ACCESS ?? path.join(os.tmpdir(), 'compliance-presentation-20261023/ux-access.private.json'), 'utf8'));
 const pages = ['/journey', '/dashboard', '/guide', '/frameworks', '/risks', '/controls', '/policies', '/policy-templates', '/evidence', '/audits', '/approvals', '/signatures', '/training', '/tasks', '/incidents', '/vendors', '/escalations', '/privacy/ropa', '/privacy/dsar', '/privacy/dpia', '/reports', '/compliance-score', '/analytics', '/calendar', '/expiry', '/departments', '/branches', '/ai-tools', '/integrations', '/notifications', '/settings/organization', '/settings/team', '/settings/security', '/settings/sso', '/settings/api-keys', '/settings/webhooks', '/settings/notifications', '/settings/billing', '/billing', '/billing/plans', '/billing/invoices', '/billing/payment-methods', `/audits/${access.auditId}`, `/evidence/${access.evidenceId}`];
 const results = [], errors = [], serverErrors = [];
 await fs.mkdir(out, { recursive: true });

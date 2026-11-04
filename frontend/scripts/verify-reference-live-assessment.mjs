@@ -6,7 +6,7 @@ const privateRoot=path.join(process.env.LOCALAPPDATA,'OrionSoft');
 const access=JSON.parse(await fs.readFile(path.join(privateRoot,'ComplianceCore-Demo-Access.private.json'),'utf8'));
 const contextData=JSON.parse(await fs.readFile(path.join(privateRoot,'ComplianceCore-private-20261023/concept-release-20261031/live-demo-context.private.json'),'utf8'));
 const base='https://compliancecore-sand.vercel.app',api='https://compliancecore-api-production.up.railway.app';
-const out=path.resolve('../verification/reference-20261031');await fs.mkdir(out,{recursive:true});
+const out=path.resolve(process.env.CC_AUDIT_OUT??'../verification/reference-20261031');await fs.mkdir(out,{recursive:true});
 const routes=['/frameworks','/risks','/policies','/evidence','/approvals'];
 const browser=await chromium.launch({channel:"msedge"});const checks=[],pages=[],errors=[],serverErrors=[],blockedWrites=[],authTrace=[],failedRequests=[],cookieBlocks=[];let current='',page;
 try{

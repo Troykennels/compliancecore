@@ -5,6 +5,7 @@ import { Children, isValidElement, useEffect, useState } from 'react';
 import { Download, Plus, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
 import { useImplementationMembers } from '../implementation';
+import { AssessmentSaveError } from './assessment-save-error';
 import {
   useAssessment,
   useAssessmentSave,
@@ -76,7 +77,7 @@ export function StakeholderQuestionnaire({ id, scopeSaved }: { id: string; scope
           <button
             className={assessmentButton}
             disabled={!scopeSaved}
-            onClick={() => setEditing(null)}
+            onClick={() => { save.reset(); setEditing(null); }}
           >
             <Plus className="h-4 w-4" />
             Add stakeholder interview
@@ -101,7 +102,7 @@ export function StakeholderQuestionnaire({ id, scopeSaved }: { id: string; scope
               {e.status === 'confirmed' ? 'Answers confirmed' : 'Draft — not yet confirmed'}
             </p>
           </div>
-          <button className={assessmentSecondary} onClick={() => setEditing(e)}>
+          <button className={assessmentSecondary} onClick={() => { save.reset(); setEditing(e); }}>
             {manager ? 'Review / edit answers' : 'Read answers'}
           </button>
         </article>
@@ -152,6 +153,7 @@ export function StakeholderQuestionnaire({ id, scopeSaved }: { id: string; scope
                 <X className="h-5 w-5" />
               </button>
             </div>
+            <AssessmentSaveError error={save.error} retry />
             <fieldset disabled={!manager || save.isPending} className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
                 <AssessmentField label="Stakeholder name or role">
@@ -352,7 +354,7 @@ export function RiskAssessmentSheet({
       <div className="flex flex-wrap gap-2">
         <WorkbookButton id={id} />
         {manager && (
-          <button className={assessmentButton} onClick={() => setDraft({ ...blankRisk })}>
+          <button className={assessmentButton} onClick={() => { save.reset(); setDraft({ ...blankRisk }); }}>
             <Plus className="h-4 w-4" />
             Add risk row
           </button>
@@ -444,7 +446,7 @@ export function RiskAssessmentSheet({
                     <p className="text-xs text-slate-500">{humanize(r.status)}</p>
                   </td>
                   <td className="p-3">
-                    <button className={assessmentSecondary} onClick={() => setDraft(draftRisk(r))}>
+                    <button className={assessmentSecondary} onClick={() => { save.reset(); setDraft(draftRisk(r)); }}>
                       {manager ? 'Edit row' : 'View row'}
                     </button>
                   </td>
@@ -483,7 +485,7 @@ export function RiskAssessmentSheet({
                   'No title match — select suitable requirements manually after preparing the register.'}
               </p>
               {manager && (
-                <button className={assessmentSecondary} onClick={() => chooseSuggestion(s)}>
+                <button className={assessmentSecondary} onClick={() => { save.reset(); chooseSuggestion(s); }}>
                   Review suggestion
                 </button>
               )}
@@ -517,6 +519,7 @@ export function RiskAssessmentSheet({
                 <X className="h-5 w-5" />
               </button>
             </div>
+            <AssessmentSaveError error={save.error} retry />
             <fieldset disabled={!manager || save.isPending} className="space-y-5">
               <div className="grid gap-3 sm:grid-cols-2">
                 {(
@@ -534,6 +537,7 @@ export function RiskAssessmentSheet({
                       maxLength={k === 'threat' ? 5000 : k === 'assetType' ? 200 : 500}
                       className={assessmentInput}
                       value={draft[k]}
+                      name={k}
                       onChange={(e) => update(k, e.target.value)}
                     />
                   </AssessmentField>
@@ -601,6 +605,7 @@ export function RiskAssessmentSheet({
                     rows={3}
                     className={assessmentInput}
                     value={draft.assessmentBasis}
+                    name="assessmentBasis"
                     onChange={(e) => update('assessmentBasis', e.target.value)}
                   />
                 </AssessmentField>
@@ -609,6 +614,7 @@ export function RiskAssessmentSheet({
                     required={draft.ratingConfirmed}
                     className={assessmentInput}
                     value={draft.ownerId ?? ''}
+                    name="ownerId"
                     onChange={(e) => update('ownerId', e.target.value || null)}
                   >
                     <option value="">Select an organisation member</option>
@@ -653,6 +659,7 @@ export function RiskAssessmentSheet({
                     size={5}
                     className={assessmentInput}
                     value={draft.controlIds}
+                    name="controlIds"
                     onChange={(e) =>
                       update(
                         'controlIds',
@@ -684,6 +691,7 @@ export function RiskAssessmentSheet({
                     rows={3}
                     className={assessmentInput}
                     value={draft.mitigationPlan}
+                    name="mitigationPlan"
                     onChange={(e) => update('mitigationPlan', e.target.value)}
                   />
                 </AssessmentField>
@@ -692,6 +700,7 @@ export function RiskAssessmentSheet({
                     type="date"
                     className={assessmentInput}
                     value={draft.treatmentDueDate ?? ''}
+                    name="treatmentDueDate"
                     onChange={(e) => update('treatmentDueDate', e.target.value || null)}
                   />
                 </AssessmentField>

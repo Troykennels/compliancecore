@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "realServices": true,
+  "mockedReadiness": false,
+  "checks": [
+    "Changed risk reassessed and independently reviewed",
+    "All actual readiness gates pass",
+    "Current assessment independently signed off",
+    "Outcome saved with pinned evidence",
+    "Outcome self-review refused",
+    "Outcome independently reviewed",
+    "Duplicate review creates exactly one owned calendar follow-up"
+  ]
+}

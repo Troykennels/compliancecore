@@ -1,0 +1,127 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "page": "login",
+      "width": 1440,
+      "title": "Sign in to your account",
+      "overflow": false
+    },
+    {
+      "page": "register",
+      "width": 1440,
+      "title": "Create your account",
+      "overflow": false
+    },
+    {
+      "page": "forgot-password",
+      "width": 1440,
+      "title": "Forgot your password?",
+      "overflow": false
+    },
+    {
+      "page": "reset-password",
+      "width": 1440,
+      "title": "Forgot your password?",
+      "overflow": false
+    },
+    {
+      "page": "verify-email",
+      "width": 1440,
+      "title": "Sign in to your account",
+      "overflow": false
+    },
+    {
+      "page": "shared-link-invalid",
+      "width": 1440,
+      "title": "Access Denied",
+      "overflow": false
+    },
+    {
+      "page": "task-detail",
+      "width": 1440,
+      "title": "Complete quarterly access review",
+      "overflow": false
+    },
+    {
+      "page": "approval-detail",
+      "width": 1440,
+      "title": "Review supplier due diligence standard",
+      "overflow": false
+    },
+    {
+      "page": "billing-admin",
+      "width": 1440,
+      "title": "Billing admin",
+      "overflow": false
+    },
+    {
+      "page": "onboarding",
+      "width": 1440,
+      "title": "Set up your organization",
+      "overflow": false
+    },
+    {
+      "page": "login",
+      "width": 390,
+      "title": "Sign in to your account",
+      "overflow": false
+    },
+    {
+      "page": "register",
+      "width": 390,
+      "title": "Create your account",
+      "overflow": false
+    },
+    {
+      "page": "forgot-password",
+      "width": 390,
+      "title": "Forgot your password?",
+      "overflow": false
+    },
+    {
+      "page": "reset-password",
+      "width": 390,
+      "title": "Forgot your password?",
+      "overflow": false
+    },
+    {
+      "page": "verify-email",
+      "width": 390,
+      "title": "Sign in to your account",
+      "overflow": false
+    },
+    {
+      "page": "shared-link-invalid",
+      "width": 390,
+      "title": "Access Denied",
+      "overflow": false
+    },
+    {
+      "page": "task-detail",
+      "width": 390,
+      "title": "Complete quarterly access review",
+      "overflow": false
+    },
+    {
+      "page": "approval-detail",
+      "width": 390,
+      "title": "Review supplier due diligence standard",
+      "overflow": false
+    },
+    {
+      "page": "billing-admin",
+      "width": 390,
+      "title": "Billing admin",
+      "overflow": false
+    },
+    {
+      "page": "onboarding",
+      "width": 390,
+      "title": "Set up your organization",
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "note": "Missing-token public pages are checked as actionable error states. Actual registration and checkout transactions are covered by backend integration tests."
+}

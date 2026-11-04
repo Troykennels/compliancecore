@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "reproducedBeforeFix": [
+    "Background refresh discarded unsaved scope",
+    "Step navigation remounted the page and discarded drafts"
+  ],
+  "results": [
+    {
+      "check": "Unsaved scope survives a changed background response",
+      "passed": true
+    },
+    {
+      "check": "Each assessment step retains its unsaved narrative when navigating",
+      "passed": true
+    },
+    {
+      "check": "Server validation explains failure and preserves current answers",
+      "passed": true
+    },
+    {
+      "check": "Successful save is confirmed by the server and survives reopening",
+      "passed": true
+    },
+    {
+      "check": "Permission and connection failures preserve interview answers; Retry saves current values",
+      "passed": true
+    },
+    {
+      "check": "Every assessment step remains accessible through review and final outcome",
+      "passed": true,
+      "visited": [
+        "scope",
+        "obligations",
+        "risk_assessment",
+        "risk_treatment",
+        "soa",
+        "controls",
+        "policies",
+        "evidence",
+        "testing",
+        "corrective_actions",
+        "internal_audit",
+        "management_review",
+        "monitoring",
+        "signoff",
+        "outcome"
+      ]
+    }
+  ]
+}

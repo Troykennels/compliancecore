@@ -1,0 +1,7 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+const folder = path.resolve('../verification/workflow-audit-20261104');
+const screenshots = (await fs.readdir(folder)).filter(file => file.endsWith('.png')).sort();
+const cards = screenshots.map(file => `<article><h2>${file.replace('.png', '').replaceAll('-', ' ')}</h2><a href="${file}"><img loading="lazy" src="${file}" alt="${file.replace('.png', '')}"></a></article>`).join('');
+await fs.writeFile(path.join(folder, 'gallery.html'), `<!doctype html><html lang="en"><meta charset="utf-8"><title>ComplianceCore workflow and page audit</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:14px system-ui;background:#eef4f8;color:#0b263e;margin:32px}h1{font-size:28px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px}article{background:white;border:1px solid #cddce8;border-radius:12px;padding:16px;box-shadow:0 2px 8px #0b263e08}img{max-width:100%;border:1px solid #dbe5ef;border-radius:6px}h2{font-size:16px;text-transform:capitalize}p{max-width:850px;line-height:1.6}</style><h1>ComplianceCore: workflow and page review</h1><p>4 November 2026. Local synthetic records, desktop and mobile layouts. Includes the main compliance pages, public access states, onboarding, record details, platform billing, role dashboards, assessment steps and save-error recovery. <a href="REVIEW.txt">Audit findings and coverage</a>.</p><div class="grid">${cards}</div></html>`);
+console.log(JSON.stringify({ screenshots: screenshots.length }));

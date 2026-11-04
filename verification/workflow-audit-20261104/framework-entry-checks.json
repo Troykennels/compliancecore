@@ -1,0 +1,150 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "framework": "CCPA",
+      "requirements": 16,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "regulatory"
+    },
+    {
+      "framework": "CIS_V8",
+      "requirements": 18,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "monitoring"
+    },
+    {
+      "framework": "DPDPA",
+      "requirements": 16,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "regulatory"
+    },
+    {
+      "framework": "GDPR",
+      "requirements": 26,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "regulatory"
+    },
+    {
+      "framework": "HIPAA",
+      "requirements": 25,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "regulatory"
+    },
+    {
+      "framework": "ISO22301",
+      "requirements": 24,
+      "steps": 15,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "certification"
+    },
+    {
+      "framework": "ISO27001",
+      "requirements": 93,
+      "steps": 15,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "certification"
+    },
+    {
+      "framework": "ISO27701",
+      "requirements": 15,
+      "steps": 15,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "certification"
+    },
+    {
+      "framework": "NDPR",
+      "requirements": 28,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "regulatory"
+    },
+    {
+      "framework": "NIST_800_53",
+      "requirements": 20,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "authorisation"
+    },
+    {
+      "framework": "NIST_CSF",
+      "requirements": 22,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "monitoring"
+    },
+    {
+      "framework": "PCIDSS",
+      "requirements": 63,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "validation"
+    },
+    {
+      "framework": "POPIA",
+      "requirements": 16,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "regulatory"
+    },
+    {
+      "framework": "SAMA_CSF",
+      "requirements": 32,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "regulatory"
+    },
+    {
+      "framework": "SOC2",
+      "requirements": 51,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "attestation"
+    },
+    {
+      "framework": "SOX",
+      "requirements": 32,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "regulatory"
+    },
+    {
+      "framework": "UAE_PDPL",
+      "requirements": 16,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "regulatory"
+    },
+    {
+      "framework": "UK_GDPR",
+      "requirements": 19,
+      "steps": 13,
+      "scopeProgresses": true,
+      "incompleteDraftReopened": true,
+      "outcome": "regulatory"
+    }
+  ],
+  "scope": "Entry, incomplete draft persistence, stakeholder confirmation and framework-specific progression. Final sign-off is covered by the separate lifecycle integration receipt."
+}

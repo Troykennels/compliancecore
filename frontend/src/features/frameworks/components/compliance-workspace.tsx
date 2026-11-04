@@ -2,7 +2,9 @@ import { AssessmentOutcome } from './assessment-outcome';
 import { humanize } from '@/lib/labels';
 import { ModalSurface } from '@/components/modal-surface';
 import { hasPermission } from '@/config/role-permissions';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useAssessmentDraft } from '../use-assessment-draft';
+import { AssessmentSaveError } from './assessment-save-error';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -79,7 +81,8 @@ const examples: Record<string, string> = {
 export function ComplianceWorkspace({ id, back }: { id: string; back: () => void }) {
   const { data: s, isLoading, isError, refetch } = useImplementation(id);
   const action = useImplementationAction(id);
-  const { data: members = [] } = useImplementationMembers();
+  const memberQuery = useImplementationMembers();
+  const members = memberQuery.data ?? [];
   const qc = useQueryClient();
   const { formatDate, formatDateTime } = useOrgFormat();
   const user = useAuthStore((x) => x.user);
@@ -88,18 +91,21 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
   const [params, setParams] = useSearchParams();
   const step = params.get('step') ?? 'scope';
   const setStep = (value: string) => {
+    action.reset();
     const next = new URLSearchParams(params);
     next.set('step', value);
     setParams(next, { replace: true });
   };
-  const [scope, setScope] = useState('');
-  const [objective, setObjective] = useState('');
-  const [ownerId, setOwnerId] = useState('');
-  const [targetDate, setTargetDate] = useState('');
-  const [narrative, setNarrative] = useState('');
-  const [riskMethod, setRiskMethod] = useState('');
-  const [period, setPeriod] = useState('');
-  const [auditId, setAuditId] = useState('');
+  const [scope, setScope, scopeDirty] = useAssessmentDraft(id + ':scope', s?.plan?.scope ?? '');
+  const [objective, setObjective, objectiveDirty] = useAssessmentDraft(id + ':objective', s?.plan?.objective ?? '');
+  const [ownerId, setOwnerId, ownerDirty] = useAssessmentDraft(id + ':owner', s?.plan?.owner_id ?? user?.id ?? '');
+  const [targetDate, setTargetDate, targetDirty] = useAssessmentDraft(id + ':target', s?.plan?.target_date?.slice(0, 10) ?? '');
+  const prep = s?.plan?.preparation;
+  const savedNarrative = step === 'obligations' ? prep?.obligations : step === 'monitoring' ? prep?.monitoring : step === 'management_review' ? prep?.managementReview : '';
+  const [narrative, setNarrative, narrativeDirty] = useAssessmentDraft(id + ':' + step, savedNarrative ?? '');
+  const [riskMethod, setRiskMethod, methodDirty] = useAssessmentDraft(id + ':method', prep?.riskMethod ?? '');
+  const [period, setPeriod, periodDirty] = useAssessmentDraft(id + ':period', prep?.assessmentPeriod ?? '');
+  const [auditId, setAuditId, auditDirty] = useAssessmentDraft(id + ':audit', prep?.internalAuditId ?? '');
   const [note, setNote] = useState('');
   const [editing, setEditing] = useState<Control>();
   const [policyOpen, setPolicyOpen] = useState(false);
@@ -115,28 +121,6 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
     queryFn: () => evidenceApi.list({ limit: 100, status: 'active' }).then((r) => r.data.data),
     enabled: Boolean(soaControl),
   });
-  useEffect(() => {
-    if (!s) return;
-    setScope(s.plan?.scope ?? '');
-    setObjective(s.plan?.objective ?? '');
-    setOwnerId(s.plan?.owner_id ?? user?.id ?? '');
-    setTargetDate(s.plan?.target_date?.slice(0, 10) ?? '');
-    setRiskMethod(s.plan?.preparation?.riskMethod ?? '');
-    setPeriod(s.plan?.preparation?.assessmentPeriod ?? '');
-    setAuditId(s.plan?.preparation?.internalAuditId ?? '');
-  }, [s, user?.id]);
-  useEffect(() => {
-    const prep = s?.plan?.preparation;
-    setNarrative(
-      step === 'obligations'
-        ? (prep?.obligations ?? '')
-        : step === 'monitoring'
-          ? (prep?.monitoring ?? '')
-          : step === 'management_review'
-            ? (prep?.managementReview ?? '')
-            : '',
-    );
-  }, [step, s]);
   if (isLoading) return <p>Loading compliance assessment…</p>;
   if (isError || !s)
     return (
@@ -359,6 +343,9 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
           ))}
         </nav>
         <section className="cc-assessment-editor min-w-0 space-y-5 rounded-xl border bg-white p-4 sm:p-6">
+          {(scopeDirty || objectiveDirty || narrativeDirty || ownerDirty || targetDirty || methodDirty || periodDirty || auditDirty) && <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">You have unsaved answers. They are retained while switching assessment steps in this workspace. Save before leaving or reloading the page.</p>}
+          {memberQuery.isError && <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm">Organisation members could not be loaded. Existing assignments are retained. <button type="button" className="font-semibold underline" onClick={() => void memberQuery.refetch()}>Retry loading people</button></div>}
+          <AssessmentSaveError error={action.error} />
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Step {steps.findIndex((x) => x.key === selected.key) + 1} of {steps.length}
@@ -385,6 +372,7 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                   />
                   <textarea
                     aria-label="Compliance scope"
+                      name="scope"
                     required
                     minLength={30}
                     maxLength={5000}
@@ -405,6 +393,7 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                   />
                   <textarea
                     aria-label="Assessment objective"
+                    name="objective"
                     required
                     minLength={20}
                     maxLength={3000}
@@ -420,6 +409,7 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                     <select
                       required
                       aria-label="Assessment owner"
+                      name="ownerId"
                       className={input}
                       value={ownerId}
                       onChange={(e) => setOwnerId(e.target.value)}
@@ -437,6 +427,7 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                     <input
                       required
                       type="date"
+                      name="targetDate"
                       className={input}
                       value={targetDate}
                       onChange={(e) => setTargetDate(e.target.value)}
@@ -517,6 +508,7 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                   disabled={!manager}
                 />
                 <textarea
+                  name={step === 'management_review' ? 'managementReview' : step}
                   aria-label={
                     step === 'obligations'
                       ? 'Applicable requirements, sources and deadlines'
@@ -828,10 +820,15 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
               <ul className="space-y-2 text-sm">
                 {s.gates.map((g) => (
                   <li key={g.key} className={g.done ? 'text-emerald-700' : 'text-amber-800'}>
-                    {g.done ? '✓' : '○'} {g.title}
+                    {g.done ? '✓' : '○'} <button type="button" onClick={() => setStep(g.key)} className="text-left underline">{g.title}</button>
                   </li>
                 ))}
               </ul>
+              <p className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+                {s.plan?.status === 'in_review' ? 'This saved assessment is awaiting independent review. An eligible reviewer can open this step to record their conclusion.' : 'Complete the linked checks above, then request independent review of the saved assessment.'}
+                {' '}The reviewer must be an active owner, administrator, compliance manager, auditor or MSP administrator other than the assessment owner and submitter.
+                {hasPermission(role, 'team:read') && <> <Link to="/settings/team" className="font-semibold underline">View team and roles</Link></>}
+              </p>
               <Field label="Review conclusion or requested corrections">
                 <SuggestSelect
                   label="Choose a suggested note"
