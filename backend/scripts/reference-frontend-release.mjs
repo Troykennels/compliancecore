@@ -23,8 +23,8 @@ if(action==='prepare'){
   const commit=(await command('git',['rev-parse','HEAD'])).trim();assert.match(commit,/^[a-f0-9]{40}$/);
   const source=path.join(folder,'source-'+commit.slice(0,12)),archive=source+'.tar';
   await command('git',['archive','--format=tar','--output='+archive,commit]);
-  await fs.mkdir(source);await command('tar.exe',['-xf',archive,'-C',source]);
-  await fs.mkdir(path.join(source,'frontend/.vercel'));await fs.writeFile(path.join(source,'frontend/.vercel/project.json'),JSON.stringify(target));
+  await fs.mkdir(source,{recursive:true});await command('tar.exe',['-xf',archive,'-C',source]);
+  await fs.mkdir(path.join(source,'frontend/.vercel'),{recursive:true});await fs.writeFile(path.join(source,'frontend/.vercel/project.json'),JSON.stringify(target));
   const alias=await api(`/v4/aliases/compliancecore-sand.vercel.app?teamId=${target.orgId}`);
   await fs.writeFile(record,JSON.stringify({commit,source,previousFrontend:alias.deployment.id}));console.log(JSON.stringify({prepared:true,commit,previousFrontend:alias.deployment.id}));
 }else{
