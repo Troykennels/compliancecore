@@ -60,6 +60,16 @@ audit. Test credentials and database files remain outside the repository. SMTP,
 payments and external AI transports were disabled; no customer messages were sent.
 No production schema changes or customer-record mutations are needed for this fix.
 
+Live release
+Promoted frontend source 0225477d730cc51ed12a9dde6a91adeb05252191 to
+https://compliancecore-sand.vercel.app on 4 November 2026.
+Deployment: dpl_7vUuDGH6cLPw4hMog4Vn4t27mudC.
+Backend deployment and database are unchanged. The production alias was verified.
+Live read-only acceptance: 10 desktop/mobile layouts and 16 interaction checks
+pass with zero browser/server errors. Managed demo only; customer record writes
+were blocked by the browser harness. See live/live-browser-checks.json and
+live/gallery.html. The complete local page gallery remains gallery.html.
+
 Limits
 Passing these checks does not establish legal compliance or exhaust every possible
 record combination. Actual certification, attestation, regulatory filings and
