@@ -32,6 +32,9 @@ export async function checkoutQuote(input: { tenantId: string; planId: string; c
   const base = input.billingCycle === 'yearly' ? price.priceYearly : price.priceMonthly;
   // An agreed discount belongs to the current plan, not an arbitrary upgrade.
   const subscriptionAmount = contracted ? sub.nextInvoiceAmount : sub?.planId === plan.id && sub.currency === currency ? applyDiscount(base,sub.discountPercent,sub.discountFixed) : base;
-  const onboardingFee = onboardingRequired ? price.onboardingFee : 0;
-  return { planId:plan.id,planName:plan.name,currency,billingCycle:input.billingCycle,subscriptionAmount,onboardingFee,total:Math.round((subscriptionAmount+onboardingFee)*100)/100,onboardingRequired,previewOnly };
+  // Plans marked waive_onboarding_yearly charge no onboarding to a customer who
+  // pays a year upfront (the payment then settles onboarding as covered).
+  const onboardingWaived = onboardingRequired && input.billingCycle === 'yearly' && plan.waiveOnboardingYearly === true && price.onboardingFee > 0;
+  const onboardingFee = onboardingRequired && !onboardingWaived ? price.onboardingFee : 0;
+  return { planId:plan.id,planName:plan.name,currency,billingCycle:input.billingCycle,subscriptionAmount,onboardingFee,total:Math.round((subscriptionAmount+onboardingFee)*100)/100,onboardingRequired,onboardingWaived,previewOnly };
 }

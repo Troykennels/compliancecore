@@ -1,6 +1,6 @@
 # ComplianceCore plan gating, catalogue 2026.2
 
-Implements `ComplianceCore_AI_Feature_Gating_Implementation_Prompt_2026.pdf` on branch `ux-fixes-20261029` (the live code, with Compliance journey, the privacy modules and Client portfolio). Prices are **draft** and editable in Billing Admin; every edit is recorded.
+Implements `ComplianceCore_AI_Feature_Gating_Implementation_Prompt_2026.pdf` on branch `ux-fixes-20261029` (the live code, with Compliance journey, the privacy modules and Client portfolio). Prices come from market research (section 2) and stay editable in Billing Admin; every edit is recorded.
 
 ## 1. Discovery summary
 
@@ -27,16 +27,26 @@ Implements `ComplianceCore_AI_Feature_Gating_Implementation_Prompt_2026.pdf` on 
 - **Placeholder found:** the old logo upload saved a temporary `blob:` URL and accepted SVG. It has been replaced (section 6).
 - **Partial:** Client portfolio has no API of its own. It lists the user's own memberships and switches between them, so its lock is a screen-level lock. Each organisation's own plan applies after switching.
 
-## 2. Plan-module matrix (draft, owner-editable)
+## 2. Plan-module matrix (owner-editable)
 
 | | Essential | Growth | Professional | Business | Enterprise |
 |---|---|---|---|---|---|
-| Price | N12,000/mo, N120,000/yr | N25,000 / N250,000 | N50,000 / N500,000 | N90,000 / N900,000 | quoted, from N1,800,000/yr |
+| Price | N35,000/mo, N350,000/yr | N75,000 / N750,000 | N150,000 / N1,500,000 | N300,000 / N3,000,000 | quoted, from N6,000,000/yr |
+| One-time onboarding | none | N100,000 | N250,000 | N500,000 | from N1,500,000 |
+| Onboarding waived when paying yearly | n/a | yes | yes | yes | no (quoted) |
 | Team members | 3 | 10 | 25 | 50 | unlimited |
-| Journey, dashboard, guide, scope, assessments, controls, policies, evidence, tasks, calendar, expiry tracker, basic reports, compliance score, **branding**, billing | yes | yes | yes | yes | yes |
-| Risk assessment, policy templates, audits, approvals, training, incidents, analytics (enhanced reporting) | - | yes | yes | yes | yes |
-| Signatures, vendors, escalations, records of processing, data subject requests, impact assessments | - | - | yes | yes | yes |
-| Client portfolio, scheduled (advanced) reports, integrations, AI tools (300 requests/month) | - | - | - | yes | yes |
+| Frameworks | 2 | 3 | 5 | unlimited | unlimited |
+| Evidence storage | 5 GB | 20 GB | 50 GB | 150 GB | unlimited |
+| Journey, dashboard, guide, scope, assessments, controls, policies, evidence, tasks, calendar, expiry tracker, basic reports, compliance score, branding, billing, **records of processing, data subject requests, incident register** | yes | yes | yes | yes | yes |
+| Risk assessment, policy templates, approvals, training, impact assessments, analytics (enhanced reporting) | - | yes | yes | yes | yes |
+| Audits and audit room, signatures, vendors, escalations, AI tools | - | - | yes (AI 100 requests/month) | yes (AI 500/month) | yes |
+| Client portfolio, scheduled (advanced) reports, integrations | - | - | - | yes | yes |
+
+**Why these prices (research, 12 November 2026).** Foreign compliance tools start at about $7,500-$15,000 a year for one framework (Vanta, Drata, Secureframe, Sprinto, Scrut); OneTrust's privacy suite is about $44,000 a year. In Nigeria, Asiri (NDPA only) lists N900,000-N6,000,000 a year, and outsourced DPO services start at about N600,000 a month. These plans sit below Asiri while covering far more, and below the October 2026 prices (Starter N40,000/mo plus N1,500,000 onboarding).
+
+**Why this placement.** Nigerian buyers come for the Nigeria Data Protection Act, so its basics (records of processing, data subject requests, an incident register for the 72-hour breach notice) are in every plan. Upgrades are driven by team size, frameworks, storage, impact assessments, audits, vendors, AI and multi-client work.
+
+**First-customer offer.** Use a Billing Admin coupon (for example 40% off, limited uses, an expiry date, the 2026 plan slugs). A coupon applies to the plan the organisation is on when it is applied; it never discounts onboarding.
 
 Earlier plans (Starter, Professional, Business, Enterprise, MSP) are **withdrawn from new sales only**. They stay active and have no module list, so every module stays open. Customers on them keep their contracted entitlements and prices (grandfathered).
 

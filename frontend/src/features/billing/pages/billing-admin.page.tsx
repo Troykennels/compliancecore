@@ -87,6 +87,8 @@ function PlanForm({ initial, onDone }: {
     everyModule: initial?.modules == null,
     modules: Object.fromEntries(PLAN_MODULE_INFO.map((m) => [m.key, initial?.modules?.[m.key] === true])) as Record<string, boolean>,
     maxAiRequestsMonthly: initial?.maxAiRequestsMonthly != null ? String(initial.maxAiRequestsMonthly) : '',
+    onboardingFee: String(initial?.onboardingFee ?? 0),
+    waiveOnboardingYearly: initial?.waiveOnboardingYearly ?? false,
   });
 
   function handleSubmit(e: React.FormEvent) {
@@ -105,6 +107,8 @@ function PlanForm({ initial, onDone }: {
       sortOrder: Number(form.sortOrder),
       modules: form.everyModule ? null : form.modules,
       maxAiRequestsMonthly: form.maxAiRequestsMonthly ? Number(form.maxAiRequestsMonthly) : null,
+      onboardingFee: Number(form.onboardingFee || 0),
+      waiveOnboardingYearly: form.waiveOnboardingYearly,
     };
 
     if (isEdit && initial?.id) {
@@ -131,6 +135,11 @@ function PlanForm({ initial, onDone }: {
         <F label="Max Users (blank = unlimited)"><input type="number" min="1" value={form.maxUsers} onChange={(e) => setForm({ ...form, maxUsers: e.target.value })} placeholder="Unlimited" className={inp}  aria-label="Unlimited" /></F>
         <F label="Max Frameworks"><input type="number" min="1" value={form.maxFrameworks} onChange={(e) => setForm({ ...form, maxFrameworks: e.target.value })} placeholder="Unlimited" className={inp}  aria-label="Unlimited" /></F>
         <F label="Max Evidence GB"><input type="number" step="0.1" min="0" value={form.maxEvidenceGb} onChange={(e) => setForm({ ...form, maxEvidenceGb: e.target.value })} placeholder="Unlimited" className={inp}  aria-label="Unlimited" /></F>
+        <F label={`One-time onboarding fee (${initial?.currency ?? 'NGN'}, 0 = none)`}><input type="number" step="0.01" min="0" value={form.onboardingFee} onChange={(e) => setForm({ ...form, onboardingFee: e.target.value })} className={inp} /></F>
+        <label className="flex items-center gap-2 self-end pb-2 text-sm">
+          <input type="checkbox" checked={form.waiveOnboardingYearly} onChange={(e) => setForm({ ...form, waiveOnboardingYearly: e.target.checked })} className="h-4 w-4 rounded text-indigo-600" />
+          <span className="text-slate-700">Waive onboarding when the customer pays yearly</span>
+        </label>
         <F label="Sort Order"><input type="number" min="0" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: e.target.value })} className={inp} /></F>
         <div className="sm:col-span-2">
           <F label="Description"><input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={inp} /></F>

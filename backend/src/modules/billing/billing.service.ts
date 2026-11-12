@@ -88,8 +88,20 @@ export async function adminUpdatePlan(id: string, dto: UpdatePlanDto, changedBy?
   if (dto.maxAiRequestsMonthly != null && (!Number.isInteger(dto.maxAiRequestsMonthly) || dto.maxAiRequestsMonthly < 0)) {
     throw new AppError('AI requests a month must be a whole number (or empty for no limit)', 400, 'VALIDATION_ERROR');
   }
+  if (dto.onboardingFee !== undefined && (typeof dto.onboardingFee !== 'number' || !Number.isFinite(dto.onboardingFee) || dto.onboardingFee < 0)) {
+    throw new AppError('Onboarding fee must be zero or more', 400, 'VALIDATION_ERROR');
+  }
+  if (dto.waiveOnboardingYearly !== undefined && typeof dto.waiveOnboardingYearly !== 'boolean') {
+    throw new AppError('Waive onboarding when paying yearly must be true or false', 400, 'VALIDATION_ERROR');
+  }
   const plan = await repo.updatePlan(id, dto, changedBy);
   if (!plan) throw new NotFoundError('Plan', id);
+
+  // Checkout charges onboarding from plan_prices too: keep the plan's own
+  // currency row in step (other currencies stay separate pricing decisions).
+  if (dto.onboardingFee !== undefined) {
+    await repo.setPlanPriceOnboarding(id, plan.currency, dto.onboardingFee);
+  }
 
   // Keep the per-currency price in step with the plan's own price.
   //

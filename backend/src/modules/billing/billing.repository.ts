@@ -512,6 +512,7 @@ function mapPlan(r: any): SubscriptionPlan {
     priceMonthly: Number(r.price_monthly),
     priceYearly: Number(r.price_yearly),
     onboardingFee: Number(r.onboarding_fee || 0),
+    waiveOnboardingYearly: r.waive_onboarding_yearly === true,
     currency: r.currency,
     maxUsers: r.max_users ?? null,
     maxFrameworks: r.max_frameworks ?? null,
@@ -738,6 +739,8 @@ export async function updatePlan(id: string, dto: UpdatePlanDto, changedBy?: str
   if (dto.features !== undefined) setClauses.push(`features = $${idx++}::jsonb`), values.push(JSON.stringify(dto.features));
   if ('modules' in dto) setClauses.push(`modules = $${idx++}::jsonb`), values.push(dto.modules ? JSON.stringify(dto.modules) : null);
   if ('maxAiRequestsMonthly' in dto) add('max_ai_requests_monthly', dto.maxAiRequestsMonthly ?? null);
+  if (dto.onboardingFee !== undefined) add('onboarding_fee', dto.onboardingFee);
+  if (dto.waiveOnboardingYearly !== undefined) add('waive_onboarding_yearly', dto.waiveOnboardingYearly);
   if (dto.isPublic !== undefined) add('is_public', dto.isPublic);
   if (dto.isActive !== undefined) add('is_active', dto.isActive);
   if (dto.sortOrder !== undefined) add('sort_order', dto.sortOrder);
@@ -1325,6 +1328,16 @@ export async function findAllTenantBilling(): Promise<TenantBillingRow[]> {
  * edits made to a plan in the owner console, which writes the legacy price
  * columns on subscription_plans.
  */
+/** Sets the one-time onboarding fee on the plan's price row for one currency. */
+export async function setPlanPriceOnboarding(planId: string, currency: string, onboardingFee: number): Promise<void> {
+  await prisma.$executeRawUnsafe(
+    `INSERT INTO global.plan_prices (plan_id, currency, price_monthly, price_yearly, onboarding_fee)
+     SELECT id, UPPER($2), price_monthly, price_yearly, $3 FROM global.subscription_plans WHERE id = $1::uuid
+     ON CONFLICT (plan_id, currency) DO UPDATE SET onboarding_fee = EXCLUDED.onboarding_fee, updated_at = NOW()`,
+    planId, currency, onboardingFee,
+  );
+}
+
 export async function upsertPlanPrice(
   planId: string,
   currency: string,

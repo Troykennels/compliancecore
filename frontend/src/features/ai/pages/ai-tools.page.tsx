@@ -13,7 +13,7 @@ import {
   useGenerateChecklist, useDocumentQa, useAiSearch,
 } from '../hooks/use-ai';
 import type { RiskLevel, ChecklistItem } from '../types/ai.types';
-import { Markdown } from '@/components/markdown';
+import { InlineMarkdown, Markdown } from '@/components/markdown';
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
@@ -191,7 +191,7 @@ function ContractSummarizer() {
             <Markdown content={data.summary} />
           </ResultCard>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <ResultCard title="Key Terms">
               <ul className="space-y-1.5">
                 {(data.keyTerms ?? []).map((t, i) => <BulletItem key={i}>{t}</BulletItem>)}
@@ -267,7 +267,7 @@ function PolicyGenerator() {
   return (
     <div className="space-y-5">
       <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="col-span-2">
             <Label>Policy Type</Label>
             <div className="flex items-center gap-2 mb-2">
@@ -373,7 +373,7 @@ function RiskAnalyzer() {
           <Textarea value={description} onChange={(e) => setDesc(e.target.value)} rows={4}
             placeholder="Describe the risk scenario, existing controls, and potential threat vectors…" required />
         </AccessibleField>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <AccessibleField label={<>Industry (optional)</>} >
 
             <Select value={industry} onChange={(e) => setIndustry(e.target.value)}>
@@ -424,7 +424,7 @@ function RiskAnalyzer() {
             <Markdown content={data.summary} />
           </ResultCard>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <ResultCard title="Mitigation Strategies">
               <ul className="space-y-1.5">
                 {data.mitigationStrategies.map((s, i) => <BulletItem key={i}>{s}</BulletItem>)}
@@ -438,7 +438,7 @@ function RiskAnalyzer() {
           </div>
 
           <ResultCard title="Residual Risk">
-            <p className="text-sm text-slate-700 leading-relaxed">{data.residualRisk}</p>
+            <Markdown content={data.residualRisk} />
           </ResultCard>
         </div>
       )}
@@ -495,7 +495,7 @@ function ChecklistGenerator() {
   return (
     <div className="space-y-5">
       <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <AccessibleField label={<>Framework *</>} className="col-span-2">
 
             <Select value={framework} onChange={(e) => setFramework(e.target.value)}>
@@ -564,7 +564,7 @@ function ChecklistGenerator() {
                         </span>
                       </div>
                       {item.notes && (
-                        <p className="mt-0.5 text-[11px] text-slate-400">{item.notes}</p>
+                        <p className="mt-0.5 text-[11px] text-slate-500"><InlineMarkdown text={item.notes} /></p>
                       )}
                     </div>
                   </li>
@@ -736,7 +736,7 @@ function AiSearchPanel() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-slate-800 truncate">{doc.title}</p>
-                        <p className="mt-1 text-xs text-slate-500 line-clamp-2">{doc.snippet}</p>
+                        <p className="mt-1 text-xs text-slate-500 line-clamp-2"><InlineMarkdown text={doc.snippet} /></p>
                       </div>
                       <div className="shrink-0 text-right">
                         <span className="text-xs font-semibold text-blue-700">
@@ -796,7 +796,7 @@ function BulletItem({ children, dot }: { children: React.ReactNode; dot?: 'red' 
   return (
     <li className="flex items-start gap-2 text-sm text-slate-600">
       <div className={`mt-2 h-1.5 w-1.5 rounded-full shrink-0 ${dotColor}`} />
-      {children}
+      <span className="min-w-0">{typeof children === 'string' ? <InlineMarkdown text={children} /> : children}</span>
     </li>
   );
 }

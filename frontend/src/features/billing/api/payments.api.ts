@@ -23,7 +23,7 @@ export interface CheckoutResult {
 }
 export interface CheckoutQuote {
   planId:string;planName:string;currency:string;billingCycle:'monthly'|'yearly';
-  subscriptionAmount:number;onboardingFee:number;total:number;onboardingRequired:boolean;previewOnly:boolean;
+  subscriptionAmount:number;onboardingFee:number;total:number;onboardingRequired:boolean;onboardingWaived?:boolean;previewOnly:boolean;
 }
 
 export interface ConfirmResult {

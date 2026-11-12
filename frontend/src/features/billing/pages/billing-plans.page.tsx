@@ -107,7 +107,7 @@ function PlanCard({
         <p className="mt-2 break-words text-[clamp(1.35rem,2vw,1.875rem)] font-extrabold leading-tight">
           {onboarding != null ? fmt(onboarding, displayCurrency) : 'By quotation'}
         </p>
-        <p className="mt-2 text-xs text-slate-200">{contactSales ? 'Starting fee; final scope by quotation' : 'Paid once to set up your organisation'}</p>
+        <p className="mt-2 text-xs text-slate-200">{contactSales ? 'Starting fee; final scope by quotation' : !onboarding ? 'No setup fee on this plan' : plan.waiveOnboardingYearly ? (cycle === 'yearly' ? 'Waived when you pay yearly' : 'Paid once; waived if you pay yearly') : 'Paid once to set up your organisation'}</p>
       </section>
 
       <section aria-label={`${plan.name} subscription`} className="mb-5 rounded-xl border border-slate-200 p-4">
@@ -515,7 +515,7 @@ export function BillingPlansPage(): JSX.Element {
         <h2 className="text-lg font-bold text-slate-900">Review {quote.planName} payment</h2>
         {quote.previewOnly && <p className="mt-2 text-sm text-indigo-800">Illustrative first-payment quote. This demonstration workspace cannot make payments.</p>}
         <dl className="mt-4 space-y-2 text-sm">
-          <div className="flex justify-between gap-4"><dt>One-time onboarding</dt><dd className="font-semibold">{quote.onboardingFee ? fmt(quote.onboardingFee,quote.currency) : 'Already covered / not due'}</dd></div>
+          <div className="flex justify-between gap-4"><dt>One-time onboarding</dt><dd className="font-semibold">{quote.onboardingFee ? fmt(quote.onboardingFee,quote.currency) : quote.onboardingWaived ? 'Waived (paying yearly)' : 'Already covered / not due'}</dd></div>
           <div className="flex justify-between gap-4"><dt>{quote.billingCycle === 'yearly' ? '12 months · price of 10' : 'First month / renewal'}</dt><dd className="font-semibold">{fmt(quote.subscriptionAmount,quote.currency)}</dd></div>
           <div className="flex justify-between gap-4 border-t border-indigo-200 pt-3 text-base font-bold"><dt>Total payable now</dt><dd>{fmt(quote.total,quote.currency)}</dd></div>
         </dl>

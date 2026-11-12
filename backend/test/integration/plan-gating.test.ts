@@ -100,15 +100,19 @@ describe.skipIf(!TEST_DB)('plan gating, catalogue 2026.2', () => {
   }
 
   // ── Catalogue ─────────────────────────────────────────────────────────────
-  it('adds the five 2026 plans with draft prices, user caps and growing module sets; earlier plans stay for their customers', async () => {
-    const rows = (await client.query(`SELECT slug, price_monthly, price_yearly, max_users, is_public, is_active, modules, catalog_version, max_ai_requests_monthly FROM global.subscription_plans`)).rows;
+  it('adds the five 2026 plans with prices, onboarding, caps and growing module sets; earlier plans stay for their customers', async () => {
+    const rows = (await client.query(`SELECT slug, price_monthly, price_yearly, max_users, max_frameworks, max_evidence_gb, onboarding_fee, waive_onboarding_yearly, is_public, is_active, modules, catalog_version, max_ai_requests_monthly FROM global.subscription_plans`)).rows;
     const by = Object.fromEntries(rows.map((r) => [r.slug, r]));
-    expect(Number(by.essential_2026.price_monthly)).toBe(12000);
-    expect(Number(by.essential_2026.price_yearly)).toBe(120000);
-    expect(Number(by.growth_2026.price_yearly)).toBe(250000);
-    expect(Number(by.professional_2026.price_monthly)).toBe(50000);
-    expect(Number(by.business_2026.price_yearly)).toBe(900000);
-    expect(Number(by.enterprise_2026.price_yearly)).toBe(1800000);
+    const slugs = ['essential_2026', 'growth_2026', 'professional_2026', 'business_2026', 'enterprise_2026'];
+    expect(slugs.map((s) => Number(by[s].price_monthly))).toEqual([35000, 75000, 150000, 300000, 600000]);
+    expect(slugs.map((s) => Number(by[s].price_yearly))).toEqual([350000, 750000, 1500000, 3000000, 6000000]);
+    expect(slugs.map((s) => Number(by[s].onboarding_fee))).toEqual([0, 100000, 250000, 500000, 1500000]);
+    expect(slugs.map((s) => by[s].waive_onboarding_yearly)).toEqual([false, true, true, true, false]);
+    expect(slugs.map((s) => by[s].max_frameworks)).toEqual([2, 3, 5, null, null]);
+    expect(slugs.map((s) => (by[s].max_evidence_gb == null ? null : Number(by[s].max_evidence_gb)))).toEqual([5, 20, 50, 150, null]);
+    // Checkout charges from plan_prices: the onboarding fee is there too.
+    const prices = (await client.query(`SELECT p.slug, pp.onboarding_fee FROM global.plan_prices pp JOIN global.subscription_plans p ON p.id = pp.plan_id WHERE pp.currency = 'NGN'`)).rows;
+    expect(Number(prices.find((r) => r.slug === 'professional_2026').onboarding_fee)).toBe(250000);
     expect([by.essential_2026, by.growth_2026, by.professional_2026, by.business_2026].map((p) => p.max_users)).toEqual([3, 10, 25, 50]);
     expect(by.enterprise_2026.max_users).toBeNull();
     expect(by.enterprise_2026.modules).toBeNull(); // every module
@@ -117,12 +121,18 @@ describe.skipIf(!TEST_DB)('plan gating, catalogue 2026.2', () => {
     // Each bigger plan keeps every module of the smaller one.
     const order = ['essential_2026', 'growth_2026', 'professional_2026', 'business_2026'].map((s) => by[s].modules);
     for (let i = 1; i < order.length; i++) for (const [k, v] of Object.entries(order[i - 1])) if (v) expect(order[i][k]).toBe(true);
+    // Nigeria Data Protection Act basics in every plan.
+    for (const k of ['privacy_ropa', 'privacy_dsar', 'incidents']) expect(order[0][k]).toBe(true);
     expect(order[0].risks).toBe(false);
+    expect(order[0].privacy_dpia).toBe(false);
     expect(order[1].risks).toBe(true);
-    expect(order[2].privacy_dsar).toBe(true);
-    expect(order[2].ai).toBe(false);
-    expect(order[3].ai).toBe(true);
-    expect(by.business_2026.max_ai_requests_monthly).toBe(300);
+    expect(order[1].privacy_dpia).toBe(true);
+    expect(order[1].audits).toBe(false);
+    expect(order[2].audits).toBe(true);
+    expect(order[2].ai).toBe(true);
+    expect(order[2].msp_portfolio).toBe(false);
+    expect(order[3].msp_portfolio).toBe(true);
+    expect([by.growth_2026, by.professional_2026, by.business_2026].map((p) => p.max_ai_requests_monthly)).toEqual([0, 100, 500]);
   });
 
   it('applies the catalogue once: an owner edit survives a restart', async () => {
@@ -130,7 +140,7 @@ describe.skipIf(!TEST_DB)('plan gating, catalogue 2026.2', () => {
     const { initPlanCatalog2026 } = await import('../../src/modules/billing/plan-catalog-2026');
     await initPlanCatalog2026();
     expect(Number((await client.query(`SELECT price_monthly FROM global.subscription_plans WHERE slug='essential_2026'`)).rows[0].price_monthly)).toBe(13000);
-    await client.query(`UPDATE global.subscription_plans SET price_monthly = 12000 WHERE slug = 'essential_2026'`);
+    await client.query(`UPDATE global.subscription_plans SET price_monthly = 35000 WHERE slug = 'essential_2026'`);
   });
 
   // ── Module locks (A plan, B role, C tenant) ───────────────────────────────
@@ -140,7 +150,9 @@ describe.skipIf(!TEST_DB)('plan gating, catalogue 2026.2', () => {
     expect(write).toMatchObject({ statusCode: 402, code: 'PLAN_UPGRADE_REQUIRED' });
     expect(write.message).toMatch(/Upgrade in Plans and upgrade/);
     expect(await gate('GET', '/api/risks?page=1')).toBeNull();          // reading stays possible
-    expect(await gate('PUT', '/api/privacy/requests/123')).toMatchObject({ code: 'PLAN_UPGRADE_REQUIRED' });
+    expect(await gate('PUT', '/api/privacy/assessments/123')).toMatchObject({ code: 'PLAN_UPGRADE_REQUIRED' });
+    // The data protection basics are open on Essential.
+    for (const url of ['/api/privacy/requests', '/api/privacy/activities', '/api/incidents']) expect(await gate('POST', url)).toBeNull();
     expect(await gate('POST', '/api/policies/templates/x')).toMatchObject({ code: 'PLAN_UPGRADE_REQUIRED' });
     expect(await gate('GET', '/api/ai/search')).toMatchObject({ code: 'PLAN_UPGRADE_REQUIRED' }); // AI: every request
     // Modules whose value is reading are refused for reads too (no records of the customer's to protect).
@@ -233,9 +245,45 @@ describe.skipIf(!TEST_DB)('plan gating, catalogue 2026.2', () => {
     await expect(checkoutQuote({ tenantId, planId: plan.starter, currency: 'NGN', billingCycle: 'monthly' })).rejects.toMatchObject({ code: 'PLAN_NOT_AVAILABLE' });
     await expect(checkoutQuote({ tenantId, planId: plan.enterprise_2026, currency: 'NGN', billingCycle: 'yearly' })).rejects.toMatchObject({ code: 'PLAN_NOT_AVAILABLE' });
     const q = await checkoutQuote({ tenantId, planId: plan.growth_2026, currency: 'NGN', billingCycle: 'yearly' });
-    expect(q.subscriptionAmount).toBe(250000);
+    expect(q.subscriptionAmount).toBe(750000);
     await subscribe('starter');
     await expect(checkoutQuote({ tenantId, planId: plan.starter, currency: 'NGN', billingCycle: 'monthly' })).resolves.toBeTruthy();
+  });
+
+  it('onboarding is charged once with a monthly first payment, waived for a yearly one, and never charged after a waived year', async () => {
+    const { checkoutQuote } = await import('../../src/modules/payments/checkout-quote');
+    const { settlePaidCheckout } = await import('../../src/modules/payments/settle-paid-checkout');
+    await client.query(`DELETE FROM global.tenant_onboarding WHERE tenant_id = ANY($1::uuid[])`, [[tenantId, otherTenantId]]);
+    await subscribe('professional_2026', { status: 'trial' });
+    const monthly = await checkoutQuote({ tenantId, planId: plan.professional_2026, currency: 'NGN', billingCycle: 'monthly' });
+    expect(monthly).toMatchObject({ subscriptionAmount: 150000, onboardingFee: 250000, total: 400000, onboardingWaived: false });
+    const yearly = await checkoutQuote({ tenantId, planId: plan.professional_2026, currency: 'NGN', billingCycle: 'yearly' });
+    expect(yearly).toMatchObject({ subscriptionAmount: 1500000, onboardingFee: 0, total: 1500000, onboardingWaived: true });
+    // Essential has no onboarding fee at all.
+    expect(await checkoutQuote({ tenantId, planId: plan.essential_2026, currency: 'NGN', billingCycle: 'monthly' })).toMatchObject({ onboardingFee: 0, onboardingWaived: false });
+    // Pay the waived year: onboarding is then covered for good.
+    const ref = 'gate-waive-' + Date.now();
+    await client.query(`INSERT INTO global.payment_transactions (reference, tenant_id, user_id, plan_id, billing_cycle, currency, amount, onboarding_fee, subscription_amount)
+      VALUES ($1, $2::uuid, $3::uuid, $4::uuid, 'yearly', 'NGN', 1500000, 0, 1500000)`, [ref, tenantId, ownerId, plan.professional_2026]);
+    await settlePaidCheckout(ref, null, new Date());
+    expect((await client.query(`SELECT status FROM global.tenant_onboarding WHERE tenant_id = $1::uuid`, [tenantId])).rows[0]).toMatchObject({ status: 'paid' });
+    expect(await checkoutQuote({ tenantId, planId: plan.business_2026, currency: 'NGN', billingCycle: 'monthly' })).toMatchObject({ onboardingFee: 0 });
+    // The other organisation still owes onboarding on a monthly start.
+    await subscribe('growth_2026', { tenant: otherTenantId, status: 'trial' });
+    expect(await checkoutQuote({ tenantId: otherTenantId, planId: plan.growth_2026, currency: 'NGN', billingCycle: 'monthly' })).toMatchObject({ onboardingFee: 100000 });
+  });
+
+  it('the owner can change the onboarding fee and the yearly waiver; checkout follows, and the edit is in the history', async () => {
+    const service = await import('../../src/modules/billing/billing.service');
+    const { checkoutQuote } = await import('../../src/modules/payments/checkout-quote');
+    await client.query(`DELETE FROM global.tenant_onboarding WHERE tenant_id = $1::uuid`, [tenantId]);
+    await subscribe('growth_2026', { status: 'trial' });
+    await expect(service.adminUpdatePlan(plan.growth_2026, { onboardingFee: -1 })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    await service.adminUpdatePlan(plan.growth_2026, { onboardingFee: 80000, waiveOnboardingYearly: false }, ownerId);
+    expect(await checkoutQuote({ tenantId, planId: plan.growth_2026, currency: 'NGN', billingCycle: 'yearly' })).toMatchObject({ onboardingFee: 80000, onboardingWaived: false });
+    const hist = (await client.query(`SELECT changes FROM global.subscription_plan_history WHERE plan_id = $1::uuid ORDER BY changed_at DESC LIMIT 1`, [plan.growth_2026])).rows[0];
+    expect(hist.changes).toMatchObject({ onboardingFee: 80000, waiveOnboardingYearly: false });
+    await service.adminUpdatePlan(plan.growth_2026, { onboardingFee: 100000, waiveOnboardingYearly: true });
   });
 
   it('a self-service switch onto an old cheaper plan (which opens every module) is refused', async () => {

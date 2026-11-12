@@ -43,7 +43,10 @@ export async function settlePaidCheckout(reference: string, providerRef: string 
         payment.tenant_id,payment.plan_id,payment.billing_cycle,start,end,subscriptionAmount,payment.currency);
       subscriptionId = created[0].id;
     }
-    if (onboardingFee > 0) await tx.$executeRawUnsafe(`INSERT INTO global.tenant_onboarding(tenant_id,status,amount,currency,payment_reference,settled_at)
+    // Onboarding waived for a yearly payment (waive_onboarding_yearly) counts as
+    // covered, so a later monthly renewal or plan change never charges it.
+    const waived = onboardingFee === 0 && payment.billing_cycle === 'yearly' && plan.waive_onboarding_yearly === true && Number(plan.onboarding_fee || 0) > 0;
+    if (onboardingFee > 0 || waived) await tx.$executeRawUnsafe(`INSERT INTO global.tenant_onboarding(tenant_id,status,amount,currency,payment_reference,settled_at)
       VALUES($1::uuid,'paid',$2,$3,$4,$5::timestamptz) ON CONFLICT(tenant_id) DO NOTHING`,payment.tenant_id,onboardingFee,payment.currency,reference,paidAt);
     const lineItems = [
       ...(onboardingFee>0 ? [{ description:'One-time implementation & onboarding — Orion Soft Limited',quantity:1,unitAmount:onboardingFee,amount:onboardingFee }] : []),

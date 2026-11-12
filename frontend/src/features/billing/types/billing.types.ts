@@ -15,6 +15,8 @@ export interface SubscriptionPlan {
   priceMonthly: number;
   priceYearly: number;
   onboardingFee?: number;
+  /** No onboarding fee when the customer pays a year upfront. */
+  waiveOnboardingYearly?: boolean;
   currency: string;
   maxUsers: number | null;
   maxFrameworks: number | null;
@@ -218,6 +220,8 @@ export interface CreatePlanDto {
   /** Catalogue 2026.2 module switches; null = every module. */
   modules?: Record<string, boolean> | null;
   maxAiRequestsMonthly?: number | null;
+  onboardingFee?: number;
+  waiveOnboardingYearly?: boolean;
   isPublic?: boolean;
   sortOrder?: number;
 }
