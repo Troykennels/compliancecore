@@ -297,7 +297,7 @@ async function main() {
 
   // ── Security guards ──────────────────────────────────────────────────────
   const badSwitch = await call('POST', '/api/auth/switch-tenant',
-    { tenantId: '00000000-0000-0000-0000-000000000009' });
+    { tenantId: '9b2f0c7e-4a1d-4c3b-8e5f-2a6d7c8b9e01' }); // well-formed, not this user's organisation
   assert('cross-tenant switch is refused', badSwitch.status === 403);
 
   // Must be an UPGRADE to be a meaningful test. Moving to a cheaper plan is

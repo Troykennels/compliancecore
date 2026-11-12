@@ -26,11 +26,30 @@ function useManager() {
     useAuthStore((s) => s.activeTenant?.role) ?? '',
   );
 }
-export function AssessmentField({ label, children, help, required }: { label: string; children: React.ReactNode; help?: string; required?: boolean }) {
-  const isRequired = required ?? Children.toArray(children).some(child => isValidElement<{ required?: boolean }>(child) && child.props.required);
+export function AssessmentField({
+  label,
+  children,
+  help,
+  required,
+}: {
+  label: string;
+  children: React.ReactNode;
+  help?: string;
+  required?: boolean;
+}) {
+  const isRequired =
+    required ??
+    Children.toArray(children).some(
+      (child) => isValidElement<{ required?: boolean }>(child) && child.props.required,
+    );
   return (
     <label className="cc-assessment-field block min-w-0 space-y-1 text-sm font-medium text-slate-700">
-      <span className="cc-field-heading">{label}<small className={isRequired ? 'cc-required' : 'cc-optional'}>{isRequired ? 'Required' : 'Optional'}</small></span>
+      <span className="cc-field-heading">
+        {label}
+        <small className={isRequired ? 'cc-required' : 'cc-optional'}>
+          {isRequired ? 'Required' : 'Optional'}
+        </small>
+      </span>
       {help && <span className="cc-field-help">{help}</span>}
       {children}
     </label>
@@ -77,7 +96,10 @@ export function StakeholderQuestionnaire({ id, scopeSaved }: { id: string; scope
           <button
             className={assessmentButton}
             disabled={!scopeSaved}
-            onClick={() => { save.reset(); setEditing(null); }}
+            onClick={() => {
+              save.reset();
+              setEditing(null);
+            }}
           >
             <Plus className="h-4 w-4" />
             Add stakeholder interview
@@ -102,7 +124,13 @@ export function StakeholderQuestionnaire({ id, scopeSaved }: { id: string; scope
               {e.status === 'confirmed' ? 'Answers confirmed' : 'Draft — not yet confirmed'}
             </p>
           </div>
-          <button className={assessmentSecondary} onClick={() => { save.reset(); setEditing(e); }}>
+          <button
+            className={assessmentSecondary}
+            onClick={() => {
+              save.reset();
+              setEditing(e);
+            }}
+          >
             {manager ? 'Review / edit answers' : 'Read answers'}
           </button>
         </article>
@@ -321,8 +349,10 @@ export function RiskAssessmentSheet({
   const [draft, setDraft] = useState<RiskDraft | null>(null);
   const [filter, setFilter] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selected = data?.risks.find(risk => risk.id === selectedId) ?? data?.risks[0] ?? null;
-  useEffect(() => { onSelect?.(selected); }, [selected, onSelect]);
+  const selected = data?.risks.find((risk) => risk.id === selectedId) ?? data?.risks[0] ?? null;
+  useEffect(() => {
+    onSelect?.(selected);
+  }, [selected, onSelect]);
   if (isLoading) return <p>Loading risk worksheet…</p>;
   if (isError || !data)
     return <p role="alert">The risk worksheet could not be loaded. Refresh to retry.</p>;
@@ -354,7 +384,13 @@ export function RiskAssessmentSheet({
       <div className="flex flex-wrap gap-2">
         <WorkbookButton id={id} />
         {manager && (
-          <button className={assessmentButton} onClick={() => { save.reset(); setDraft({ ...blankRisk }); }}>
+          <button
+            className={assessmentButton}
+            onClick={() => {
+              save.reset();
+              setDraft({ ...blankRisk });
+            }}
+          >
             <Plus className="h-4 w-4" />
             Add risk row
           </button>
@@ -420,7 +456,13 @@ export function RiskAssessmentSheet({
                 (r.asset_name + ' ' + r.title).toLowerCase().includes(filter.toLowerCase()),
               )
               .map((r) => (
-                <tr key={r.id} className="border-t align-top" aria-selected={selected?.id === r.id} onClick={() => setSelectedId(r.id)} onFocus={() => setSelectedId(r.id)}>
+                <tr
+                  key={r.id}
+                  className="border-t align-top"
+                  aria-selected={selected?.id === r.id}
+                  onClick={() => setSelectedId(r.id)}
+                  onFocus={() => setSelectedId(r.id)}
+                >
                   <td className="max-w-[180px] p-3 font-medium">{r.asset_name}</td>
                   <td className="max-w-[250px] p-3">{r.title}</td>
                   <td className="p-3">{r.inherent_likelihood}</td>
@@ -446,7 +488,13 @@ export function RiskAssessmentSheet({
                     <p className="text-xs text-slate-500">{humanize(r.status)}</p>
                   </td>
                   <td className="p-3">
-                    <button className={assessmentSecondary} onClick={() => { save.reset(); setDraft(draftRisk(r)); }}>
+                    <button
+                      className={assessmentSecondary}
+                      onClick={() => {
+                        save.reset();
+                        setDraft(draftRisk(r));
+                      }}
+                    >
                       {manager ? 'Edit row' : 'View row'}
                     </button>
                   </td>
@@ -485,7 +533,13 @@ export function RiskAssessmentSheet({
                   'No title match — select suitable requirements manually after preparing the register.'}
               </p>
               {manager && (
-                <button className={assessmentSecondary} onClick={() => { save.reset(); chooseSuggestion(s); }}>
+                <button
+                  className={assessmentSecondary}
+                  onClick={() => {
+                    save.reset();
+                    chooseSuggestion(s);
+                  }}
+                >
                   Review suggestion
                 </button>
               )}

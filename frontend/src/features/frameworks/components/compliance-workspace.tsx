@@ -97,15 +97,43 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
     setParams(next, { replace: true });
   };
   const [scope, setScope, scopeDirty] = useAssessmentDraft(id + ':scope', s?.plan?.scope ?? '');
-  const [objective, setObjective, objectiveDirty] = useAssessmentDraft(id + ':objective', s?.plan?.objective ?? '');
-  const [ownerId, setOwnerId, ownerDirty] = useAssessmentDraft(id + ':owner', s?.plan?.owner_id ?? user?.id ?? '');
-  const [targetDate, setTargetDate, targetDirty] = useAssessmentDraft(id + ':target', s?.plan?.target_date?.slice(0, 10) ?? '');
+  const [objective, setObjective, objectiveDirty] = useAssessmentDraft(
+    id + ':objective',
+    s?.plan?.objective ?? '',
+  );
+  const [ownerId, setOwnerId, ownerDirty] = useAssessmentDraft(
+    id + ':owner',
+    s?.plan?.owner_id ?? user?.id ?? '',
+  );
+  const [targetDate, setTargetDate, targetDirty] = useAssessmentDraft(
+    id + ':target',
+    s?.plan?.target_date?.slice(0, 10) ?? '',
+  );
   const prep = s?.plan?.preparation;
-  const savedNarrative = step === 'obligations' ? prep?.obligations : step === 'monitoring' ? prep?.monitoring : step === 'management_review' ? prep?.managementReview : '';
-  const [narrative, setNarrative, narrativeDirty] = useAssessmentDraft(id + ':' + step, savedNarrative ?? '');
-  const [riskMethod, setRiskMethod, methodDirty] = useAssessmentDraft(id + ':method', prep?.riskMethod ?? '');
-  const [period, setPeriod, periodDirty] = useAssessmentDraft(id + ':period', prep?.assessmentPeriod ?? '');
-  const [auditId, setAuditId, auditDirty] = useAssessmentDraft(id + ':audit', prep?.internalAuditId ?? '');
+  const savedNarrative =
+    step === 'obligations'
+      ? prep?.obligations
+      : step === 'monitoring'
+        ? prep?.monitoring
+        : step === 'management_review'
+          ? prep?.managementReview
+          : '';
+  const [narrative, setNarrative, narrativeDirty] = useAssessmentDraft(
+    id + ':' + step,
+    savedNarrative ?? '',
+  );
+  const [riskMethod, setRiskMethod, methodDirty] = useAssessmentDraft(
+    id + ':method',
+    prep?.riskMethod ?? '',
+  );
+  const [period, setPeriod, periodDirty] = useAssessmentDraft(
+    id + ':period',
+    prep?.assessmentPeriod ?? '',
+  );
+  const [auditId, setAuditId, auditDirty] = useAssessmentDraft(
+    id + ':audit',
+    prep?.internalAuditId ?? '',
+  );
   const [note, setNote] = useState('');
   const [editing, setEditing] = useState<Control>();
   const [policyOpen, setPolicyOpen] = useState(false);
@@ -297,7 +325,11 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
             that they are approved.
           </p>
           {phases.map((p) => (
-            <details key={p.key} open={phaseOf(keys, step) === p.key} className="cc-step-group mt-3">
+            <details
+              key={p.key}
+              open={phaseOf(keys, step) === p.key}
+              className="cc-step-group mt-3"
+            >
               <summary className="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 {p.label}
               </summary>
@@ -343,8 +375,37 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
           ))}
         </nav>
         <section className="cc-assessment-editor min-w-0 space-y-5 rounded-xl border bg-white p-4 sm:p-6">
-          {(scopeDirty || objectiveDirty || narrativeDirty || ownerDirty || targetDirty || methodDirty || periodDirty || auditDirty) && <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">You have unsaved answers. They are retained while switching assessment steps in this workspace. Save before leaving or reloading the page.</p>}
-          {memberQuery.isError && <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm">Organisation members could not be loaded. Existing assignments are retained. <button type="button" className="font-semibold underline" onClick={() => void memberQuery.refetch()}>Retry loading people</button></div>}
+          {(scopeDirty ||
+            objectiveDirty ||
+            narrativeDirty ||
+            ownerDirty ||
+            targetDirty ||
+            methodDirty ||
+            periodDirty ||
+            auditDirty) && (
+            <p
+              role="status"
+              className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"
+            >
+              You have unsaved answers. They are retained while switching assessment steps in this
+              workspace. Save before leaving or reloading the page.
+            </p>
+          )}
+          {memberQuery.isError && (
+            <div
+              role="alert"
+              className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm"
+            >
+              Organisation members could not be loaded. Existing assignments are retained.{' '}
+              <button
+                type="button"
+                className="font-semibold underline"
+                onClick={() => void memberQuery.refetch()}
+              >
+                Retry loading people
+              </button>
+            </div>
+          )}
           <AssessmentSaveError error={action.error} />
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -362,7 +423,11 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                   action.mutate({ method: 'put', data: { scope, objective, ownerId, targetDate } });
                 }}
               >
-                <Field label="Scope: services, records, systems, locations and boundaries" help="Describe what is included and where the boundaries sit. Keep excluded activities explicit so every reviewer assesses the same coverage." required>
+                <Field
+                  label="Scope: services, records, systems, locations and boundaries"
+                  help="Describe what is included and where the boundaries sit. Keep excluded activities explicit so every reviewer assesses the same coverage."
+                  required
+                >
                   <SuggestSelect
                     label="Choose a suggested scope"
                     options={scopeSuggestions(s.framework.code)}
@@ -372,7 +437,7 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                   />
                   <textarea
                     aria-label="Compliance scope"
-                      name="scope"
+                    name="scope"
                     required
                     minLength={30}
                     maxLength={5000}
@@ -383,7 +448,11 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                     disabled={!manager}
                   />
                 </Field>
-                <Field label="What should the assessment establish?" help="State the outcome you need from this assessment. Tailor any suggestion to the actual organisation and framework." required>
+                <Field
+                  label="What should the assessment establish?"
+                  help="State the outcome you need from this assessment. Tailor any suggestion to the actual organisation and framework."
+                  required
+                >
                   <SuggestSelect
                     label="Choose a suggested objective"
                     options={objectiveSuggestions(s.framework.code)}
@@ -405,7 +474,11 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
                   />
                 </Field>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Field label="Accountable assessment owner" help="Select the person responsible for coordinating this assessment." required>
+                  <Field
+                    label="Accountable assessment owner"
+                    help="Select the person responsible for coordinating this assessment."
+                    required
+                  >
                     <select
                       required
                       aria-label="Assessment owner"
@@ -604,7 +677,9 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
               <RiskAssessmentSheet id={id} onSelect={setSelectedRisk} />
             </>
           )}
-          {step === 'risk_treatment' && <RiskAssessmentSheet id={id} treatment onSelect={setSelectedRisk} />}
+          {step === 'risk_treatment' && (
+            <RiskAssessmentSheet id={id} treatment onSelect={setSelectedRisk} />
+          )}
           {step === 'policies' && (
             <>
               <div className="flex flex-wrap gap-2">
@@ -820,14 +895,31 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
               <ul className="space-y-2 text-sm">
                 {s.gates.map((g) => (
                   <li key={g.key} className={g.done ? 'text-emerald-700' : 'text-amber-800'}>
-                    {g.done ? '✓' : '○'} <button type="button" onClick={() => setStep(g.key)} className="text-left underline">{g.title}</button>
+                    {g.done ? '✓' : '○'}{' '}
+                    <button
+                      type="button"
+                      onClick={() => setStep(g.key)}
+                      className="text-left underline"
+                    >
+                      {g.title}
+                    </button>
                   </li>
                 ))}
               </ul>
               <p className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
-                {s.plan?.status === 'in_review' ? 'This saved assessment is awaiting independent review. An eligible reviewer can open this step to record their conclusion.' : 'Complete the linked checks above, then request independent review of the saved assessment.'}
-                {' '}The reviewer must be an active owner, administrator, compliance manager, auditor or MSP administrator other than the assessment owner and submitter.
-                {hasPermission(role, 'team:read') && <> <Link to="/settings/team" className="font-semibold underline">View team and roles</Link></>}
+                {s.plan?.status === 'in_review'
+                  ? 'This saved assessment is awaiting independent review. An eligible reviewer can open this step to record their conclusion.'
+                  : 'Complete the linked checks above, then request independent review of the saved assessment.'}{' '}
+                The reviewer must be an active owner, administrator, compliance manager, auditor or
+                MSP administrator other than the assessment owner and submitter.
+                {hasPermission(role, 'team:read') && (
+                  <>
+                    {' '}
+                    <Link to="/settings/team" className="font-semibold underline">
+                      View team and roles
+                    </Link>
+                  </>
+                )}
               </p>
               <Field label="Review conclusion or requested corrections">
                 <SuggestSelect
@@ -964,16 +1056,33 @@ export function ComplianceWorkspace({ id, back }: { id: string; back: () => void
           {['risk_assessment', 'risk_treatment'].includes(step) && selectedRisk && (
             <section className="cc-context-card" aria-label="Selected risk details">
               <h2>Risk details</h2>
-              <p className="mb-3 text-slate-500">Selected saved record. Use Edit row to update its assessment and treatment.</p>
+              <p className="mb-3 text-slate-500">
+                Selected saved record. Use Edit row to update its assessment and treatment.
+              </p>
               <div className="cc-live-preview">
-                <h3>Asset or activity</h3><p>{selectedRisk.asset_name}</p>
-                <h3>Risk scenario</h3><p>{selectedRisk.title}</p>
-                <h3>Consequence</h3><p>{selectedRisk.consequence || 'Not recorded'}</p>
-                <h3>Likelihood × impact</h3><p>{selectedRisk.inherent_likelihood} × {selectedRisk.inherent_impact} = {selectedRisk.inherent_score}</p>
-                <h3>Assessment basis</h3><p>{selectedRisk.assessment_basis || 'Not recorded'}</p>
-                <h3>Treatment owner</h3><p>{selectedRisk.owner_name || 'Not assigned'}</p>
-                <h3>Proposed treatment</h3><p>{selectedRisk.mitigation_plan || 'Not recorded'}</p>
-                <h3>Remaining risk</h3><p>{selectedRisk.residual_basis ? `${selectedRisk.residual_score} · ${selectedRisk.residual_basis}` : 'Needs a justified residual assessment'}</p>
+                <h3>Asset or activity</h3>
+                <p>{selectedRisk.asset_name}</p>
+                <h3>Risk scenario</h3>
+                <p>{selectedRisk.title}</p>
+                <h3>Consequence</h3>
+                <p>{selectedRisk.consequence || 'Not recorded'}</p>
+                <h3>Likelihood × impact</h3>
+                <p>
+                  {selectedRisk.inherent_likelihood} × {selectedRisk.inherent_impact} ={' '}
+                  {selectedRisk.inherent_score}
+                </p>
+                <h3>Assessment basis</h3>
+                <p>{selectedRisk.assessment_basis || 'Not recorded'}</p>
+                <h3>Treatment owner</h3>
+                <p>{selectedRisk.owner_name || 'Not assigned'}</p>
+                <h3>Proposed treatment</h3>
+                <p>{selectedRisk.mitigation_plan || 'Not recorded'}</p>
+                <h3>Remaining risk</h3>
+                <p>
+                  {selectedRisk.residual_basis
+                    ? `${selectedRisk.residual_score} · ${selectedRisk.residual_basis}`
+                    : 'Needs a justified residual assessment'}
+                </p>
               </div>
             </section>
           )}

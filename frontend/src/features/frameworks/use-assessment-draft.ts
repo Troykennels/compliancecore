@@ -10,11 +10,19 @@ export function useAssessmentDraft(key: string, saved: string) {
   if (!current || current.base !== saved) {
     setDrafts({
       ...drafts,
-      [key]: { base: saved, value: !current || current.value === current.base ? saved : current.value },
+      [key]: {
+        base: saved,
+        value: !current || current.value === current.base ? saved : current.value,
+      },
     });
   }
   const value = !current || current.value === current.base ? saved : current.value;
-  const setValue = (next: string) => setDrafts(previous => ({ ...previous, [key]: { base: saved, value: next } }));
-  const dirty = value !== saved || Object.entries(drafts).some(([section, draft]) => section !== key && draft.value !== draft.base);
+  const setValue = (next: string) =>
+    setDrafts((previous) => ({ ...previous, [key]: { base: saved, value: next } }));
+  const dirty =
+    value !== saved ||
+    Object.entries(drafts).some(
+      ([section, draft]) => section !== key && draft.value !== draft.base,
+    );
   return [value, setValue, dirty] as const;
 }
