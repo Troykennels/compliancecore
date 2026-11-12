@@ -1,4 +1,5 @@
-export type PlanSlug = 'starter' | 'professional' | 'business' | 'enterprise' | 'msp';
+export type PlanSlug = 'starter' | 'professional' | 'business' | 'enterprise' | 'msp'
+  | 'essential_2026' | 'growth_2026' | 'professional_2026' | 'business_2026' | 'enterprise_2026';
 export type BillingCycle = 'monthly' | 'yearly';
 export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled' | 'paused';
 export type InvoiceStatus = 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
@@ -21,6 +22,10 @@ export interface SubscriptionPlan {
   maxBranches: number | null;
   maxDepartments: number | null;
   features: string[];
+  /** Catalogue 2026.2 module switches (explicit false locks); null = every module. */
+  modules?: Record<string, boolean> | null;
+  catalogVersion?: string | null;
+  maxAiRequestsMonthly?: number | null;
   isActive: boolean;
   isPublic: boolean;
   sortOrder: number;
@@ -210,6 +215,9 @@ export interface CreatePlanDto {
   maxBranches?: number | null;
   maxDepartments?: number | null;
   features?: string[];
+  /** Catalogue 2026.2 module switches; null = every module. */
+  modules?: Record<string, boolean> | null;
+  maxAiRequestsMonthly?: number | null;
   isPublic?: boolean;
   sortOrder?: number;
 }

@@ -2,7 +2,7 @@ import { Loader2 } from 'lucide-react';
 import { SettingsLayout } from '../components/settings-layout';
 import { useOrganizationProfile } from '@/features/organizations/hooks/use-organization';
 import { CompanyProfileForm } from '@/features/organizations/components/company-profile-form';
-import { LogoUpload } from '@/features/organizations/components/logo-upload';
+import { BrandingSettings } from '@/features/organizations/components/branding-settings';
 import { ScopingQuestionnaire } from '@/features/organizations/components/scoping-questionnaire';
 import { DataExport } from '@/features/organizations/components/data-export';
 import { DeleteOrganization } from '@/features/organizations/components/delete-organization';
@@ -72,9 +72,9 @@ export function SettingsOrgPage(): JSX.Element {
                 {/* Logo */}
                 <div className="space-y-2">
                   <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">
-                    Logo
+                    Branding (every plan)
                   </h3>
-                  <LogoUpload currentLogoUrl={org.logoUrl} orgName={org.name} />
+                  <BrandingSettings canWrite={canWrite} />
                 </div>
 
                 <hr className="border-slate-200" />

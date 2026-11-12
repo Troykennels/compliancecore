@@ -4,6 +4,8 @@ import { withTenantSchema } from '../../lib/prisma';
 import { prisma } from '../../config/database';
 import { NotFoundError, AppError, ConflictError } from '../../lib/errors';
 import * as repo from './billing.repository';
+import { CONTACT_SALES_PLANS } from './billing.types';
+import { validateModules } from '../../lib/plan-modules';
 import type {
   SubscriptionPlan, Subscription, BillingOverview, UsageSummary,
   CreateSubscriptionDto, UpdateSubscriptionDto,
@@ -73,11 +75,20 @@ export async function getPlanById(id: string): Promise<SubscriptionPlan> {
 }
 
 export async function adminCreatePlan(dto: CreatePlanDto): Promise<SubscriptionPlan> {
+  if (dto.modules != null) {
+    try { dto = { ...dto, modules: validateModules(dto.modules) }; } catch (e) { throw new AppError((e as Error).message, 400, 'VALIDATION_ERROR'); }
+  }
   return repo.createPlan(dto);
 }
 
-export async function adminUpdatePlan(id: string, dto: UpdatePlanDto): Promise<SubscriptionPlan> {
-  const plan = await repo.updatePlan(id, dto);
+export async function adminUpdatePlan(id: string, dto: UpdatePlanDto, changedBy?: string | null): Promise<SubscriptionPlan> {
+  if (dto.modules != null) {
+    try { dto = { ...dto, modules: validateModules(dto.modules) }; } catch (e) { throw new AppError((e as Error).message, 400, 'VALIDATION_ERROR'); }
+  }
+  if (dto.maxAiRequestsMonthly != null && (!Number.isInteger(dto.maxAiRequestsMonthly) || dto.maxAiRequestsMonthly < 0)) {
+    throw new AppError('AI requests a month must be a whole number (or empty for no limit)', 400, 'VALIDATION_ERROR');
+  }
+  const plan = await repo.updatePlan(id, dto, changedBy);
   if (!plan) throw new NotFoundError('Plan', id);
 
   // Keep the per-currency price in step with the plan's own price.
@@ -262,6 +273,21 @@ export async function updateSubscription(
   const existing = await repo.findSubscriptionByTenant(tenantId);
   if (!existing) throw new NotFoundError('Subscription');
 
+  // Withdrawn plans (earlier catalogues, kept for the customers already on
+  // them) and quoted plans can never be switched TO. They carry no module list,
+  // so every module is open on them: a "downgrade" onto an old cheaper plan
+  // would otherwise unlock everything for less money.
+  if (dto.planId !== undefined && dto.planId !== existing.planId) {
+    const target = await repo.findPlanById(dto.planId);
+    if (!target || !target.isActive || !target.isPublic || (CONTACT_SALES_PLANS as readonly string[]).includes(target.slug)) {
+      throw new AppError(
+        target && (CONTACT_SALES_PLANS as readonly string[]).includes(target.slug)
+          ? `${target.name} is arranged with Orion Soft Limited. Contact us for a quotation.`
+          : 'That plan is not available. Choose one of the current plans.',
+        403, 'PLAN_NOT_AVAILABLE');
+    }
+  }
+
   // Refuse any self-service change that increases what is owed. Downgrades and
   // moves to a free plan stay allowed — a customer may always spend less.
   if (!opts?.paidUpgrade) {
@@ -433,7 +459,7 @@ export async function getInvoice(tenantId: string, id: string): Promise<Invoice>
 
 export async function downloadInvoicePdf(tenantId: string, id: string): Promise<Buffer> {
   const inv = await getInvoice(tenantId, id);
-  return generateInvoicePdf(inv);
+  return brandedInvoicePdf(inv);
 }
 
 // ── Usage ──────────────────────────────────────────────────────────────────────
@@ -566,3 +592,15 @@ export async function adminGetInvoices(filter: InvoiceListFilter = {}) {
 
 // ── Renewal helpers (used by BullMQ job) ──────────────────────────────────────
 export { advancePeriod, calcBasePrice, applyDiscount };
+
+
+export async function adminPlanHistory(id: string) {
+  return repo.listPlanHistory(id);
+}
+
+/** The invoice PDF with the customer's legal name and address in Bill to (branding, every plan). */
+export async function brandedInvoicePdf(inv: Invoice): Promise<Buffer> {
+  const { getBranding } = await import('../../lib/branding');
+  const brand = await getBranding(inv.tenantId).catch(() => null);
+  return generateInvoicePdf(inv, brand ? { legalName: brand.legalName, address: brand.address } : null);
+}

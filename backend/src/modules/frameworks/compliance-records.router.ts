@@ -64,7 +64,7 @@ router.get(
         `attachment; filename="${t.id}-template.csv"`,
       );
       res.send("\uFEFF" + t.fields.map(csvCell).join(",") + "\r\n");
-    } else downloadTextDocument(t, res);
+    } else downloadTextDocument(t, res, await (await import("../../lib/branding")).brandLine(req.tenant?.id ?? req.user?.tenantId));
   }),
 );
 router.param("recordId", (_req, _res, next, value) =>

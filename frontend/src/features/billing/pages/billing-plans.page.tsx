@@ -8,8 +8,9 @@ import { paymentsApi, type PlanPrice, type CheckoutQuote } from '../api/payments
 import { PATHS } from '@/routes/paths';
 import { SUPPORT_EMAIL, supportMailto } from '@/config/contact';
 import type { BillingCycle, SubscriptionPlan } from '../types/billing.types';
+import { PlanComparison } from '../components/plan-comparison';
 
-const PLAN_HIGHLIGHT: Record<string, boolean> = { professional: true };
+const PLAN_HIGHLIGHT: Record<string, boolean> = { professional: true, professional_2026: true };
 
 /**
  * Plans sold by conversation rather than self-service checkout.
@@ -18,7 +19,7 @@ const PLAN_HIGHLIGHT: Record<string, boolean> = { professional: true };
  * what stops anyone assigning themselves Enterprise for free — a zero-priced
  * plan is treated as free by the subscription guard.
  */
-const CONTACT_SALES_PLANS = new Set(['enterprise', 'msp']);
+const CONTACT_SALES_PLANS = new Set(['enterprise', 'msp', 'enterprise_2026']);
 
 const SALES_EMAIL = SUPPORT_EMAIL;
 
@@ -509,6 +510,7 @@ export function BillingPlansPage(): JSX.Element {
           />
         ))}
       </div>
+      <PlanComparison plans={plans} focus={searchParams.get('module')} />
       {quote && reviewPlan && <section id="payment-summary" tabIndex={-1} aria-label="Review payment" className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-5 outline-none focus:ring-2 focus:ring-indigo-500">
         <h2 className="text-lg font-bold text-slate-900">Review {quote.planName} payment</h2>
         {quote.previewOnly && <p className="mt-2 text-sm text-indigo-800">Illustrative first-payment quote. This demonstration workspace cannot make payments.</p>}

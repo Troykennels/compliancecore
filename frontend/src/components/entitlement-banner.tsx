@@ -6,10 +6,12 @@ import { useAuthStore } from '@/stores/auth.store';
 import { PATHS } from '@/routes/paths';
 
 export interface Entitlement {
-  state: 'trialing' | 'active' | 'grace' | 'read_only';
+  state: 'trialing' | 'active' | 'expiring' | 'grace' | 'read_only' | 'suspended' | 'cancelled';
   canWrite: boolean;
   expiresAt: string | null;
   daysRemaining: number | null;
+  /** From the server's clock; the browser only displays it. */
+  hoursRemaining?: number | null;
   planName: string | null;
   planSlug: string | null;
 }
@@ -45,6 +47,45 @@ export function EntitlementBanner(): JSX.Element | null {
   if (!ent || ent.state === 'active') return null;
 
   const days = ent.daysRemaining ?? 0;
+  const hours = ent.hoursRemaining ?? null;
+  // Days, or hours on the last day: the countdown the prompt asks for.
+  const countdown = hours !== null && hours < 24
+    ? (hours <= 0 ? 'today' : `in ${hours} hour${hours === 1 ? '' : 's'}`)
+    : (days <= 0 ? 'today' : `in ${days} day${days === 1 ? '' : 's'}`);
+  const dueDate = ent.expiresAt ? new Date(ent.expiresAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
+
+  if (ent.state === 'expiring') {
+    return (
+      <Bar tone="amber" icon={<Clock className="h-4 w-4 shrink-0" />}>
+        <span>
+          Your {ent.planName ?? 'subscription'} renews or ends {countdown}{dueDate ? ` (${dueDate})` : ''}.
+          Renew or upgrade to keep full access.
+        </span>
+      </Bar>
+    );
+  }
+
+  if (ent.state === 'suspended') {
+    return (
+      <Bar tone="red" icon={<Lock className="h-4 w-4 shrink-0" />}>
+        <span>
+          This organisation's subscription is <strong>suspended</strong>. Your records stay available to view and
+          export, but changes are paused. Contact Orion Soft Limited to restore it.
+        </span>
+      </Bar>
+    );
+  }
+
+  if (ent.state === 'cancelled') {
+    return (
+      <Bar tone="red" icon={<Lock className="h-4 w-4 shrink-0" />}>
+        <span>
+          Your subscription was cancelled, so this organisation is <strong>read-only</strong>. Your data is safe and
+          still exportable. Choose a plan to start making changes again.
+        </span>
+      </Bar>
+    );
+  }
 
   if (ent.state === 'trialing') {
     // Stay quiet early in the trial and speak up as it runs out.

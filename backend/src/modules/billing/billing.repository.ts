@@ -301,6 +301,8 @@ export async function initBillingTables(): Promise<void> {
   await initRecurringTables();
   await applyPricingCorrection();
   await (await import('./commercial-pricing')).initCommercialPricing();
+  // Catalogue 2026.2 (after commercial pricing, which adds the onboarding columns).
+  await (await import('./plan-catalog-2026')).initPlanCatalog2026();
   await (await import('../payments/invoice-checkout')).initInvoicePayments();
 
   _initialized = true;
@@ -517,6 +519,9 @@ function mapPlan(r: any): SubscriptionPlan {
     maxBranches: r.max_branches ?? null,
     maxDepartments: r.max_departments ?? null,
     features: typeof r.features === 'string' ? JSON.parse(r.features) : (r.features ?? []),
+    modules: r.modules == null ? null : (typeof r.modules === 'string' ? JSON.parse(r.modules) : r.modules),
+    catalogVersion: r.catalog_version ?? null,
+    maxAiRequestsMonthly: r.max_ai_requests_monthly ?? null,
     isActive: r.is_active,
     isPublic: r.is_public,
     sortOrder: Number(r.sort_order),
@@ -662,14 +667,15 @@ export async function createPlan(dto: CreatePlanDto): Promise<SubscriptionPlan> 
   const rows = await prisma.$queryRawUnsafe(`
     INSERT INTO global.subscription_plans
       (name, slug, description, price_monthly, price_yearly, currency, max_users, max_frameworks,
-       max_evidence_gb, max_branches, max_departments, features, is_public, sort_order)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14)
+       max_evidence_gb, max_branches, max_departments, features, is_public, sort_order, modules, max_ai_requests_monthly)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14,$15::jsonb,$16)
     RETURNING *
   `,
     dto.name, dto.slug, dto.description ?? null, dto.priceMonthly, dto.priceYearly,
     dto.currency ?? 'USD', dto.maxUsers ?? null, dto.maxFrameworks ?? null,
     dto.maxEvidenceGb ?? null, dto.maxBranches ?? null, dto.maxDepartments ?? null,
     JSON.stringify(dto.features ?? []), dto.isPublic ?? true, dto.sortOrder ?? 0,
+    dto.modules ? JSON.stringify(dto.modules) : null, dto.maxAiRequestsMonthly ?? null,
   ) as unknown[];
   return mapPlan((rows as unknown[])[0]);
 }
@@ -706,7 +712,13 @@ function assign(col: string, idx: number): string {
   return `${col} = $${idx}${BILLING_COLUMN_CASTS[col] ?? ''}`;
 }
 
-export async function updatePlan(id: string, dto: UpdatePlanDto): Promise<SubscriptionPlan | null> {
+export async function updatePlan(id: string, dto: UpdatePlanDto, changedBy?: string | null): Promise<SubscriptionPlan | null> {
+  // Approval log (prompt section 13): the plan as it was, the fields sent, who and when.
+  await prisma.$executeRawUnsafe(
+    `INSERT INTO global.subscription_plan_history (plan_id, snapshot, changes, changed_by)
+     SELECT id, to_jsonb(p.*), $2::jsonb, $3::uuid FROM global.subscription_plans p WHERE id = $1::uuid`,
+    id, JSON.stringify(dto), changedBy ?? null,
+  );
   const setClauses: string[] = ['updated_at = NOW()'];
   const values: unknown[] = [];
   let idx = 1;
@@ -724,6 +736,8 @@ export async function updatePlan(id: string, dto: UpdatePlanDto): Promise<Subscr
   if ('maxBranches' in dto) add('max_branches', dto.maxBranches ?? null);
   if ('maxDepartments' in dto) add('max_departments', dto.maxDepartments ?? null);
   if (dto.features !== undefined) setClauses.push(`features = $${idx++}::jsonb`), values.push(JSON.stringify(dto.features));
+  if ('modules' in dto) setClauses.push(`modules = $${idx++}::jsonb`), values.push(dto.modules ? JSON.stringify(dto.modules) : null);
+  if ('maxAiRequestsMonthly' in dto) add('max_ai_requests_monthly', dto.maxAiRequestsMonthly ?? null);
   if (dto.isPublic !== undefined) add('is_public', dto.isPublic);
   if (dto.isActive !== undefined) add('is_active', dto.isActive);
   if (dto.sortOrder !== undefined) add('sort_order', dto.sortOrder);
@@ -1072,7 +1086,8 @@ export async function findExpiringSubscriptions(withinDays: number): Promise<Arr
        AND t.deleted_at IS NULL
        AND (CASE WHEN s.status = 'trial' AND s.trial_ends_at IS NOT NULL
                  THEN s.trial_ends_at ELSE s.current_period_end END)
-             BETWEEN NOW() AND NOW() + ($1 || ' days')::interval
+             -- From a day back: the due-date reminder is still sent the day it ends.
+             BETWEEN NOW() - INTERVAL '1 day' AND NOW() + ($1 || ' days')::interval
   `, String(withinDays));
 }
 
@@ -1367,4 +1382,15 @@ export async function findPlanPricesByPlan(planId: string): Promise<
     priceMonthly: Number(r.price_monthly),
     priceYearly: Number(r.price_yearly),
   }));
+}
+
+export async function listPlanHistory(planId: string): Promise<Array<{ snapshot: unknown; changes: unknown; changedBy: string | null; changedByName: string | null; changedAt: string }>> {
+  const rows = await prisma.$queryRawUnsafe(
+    `SELECT h.snapshot, h.changes, h.changed_by, h.changed_at,
+            COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) AS changed_by_name
+       FROM global.subscription_plan_history h LEFT JOIN global.users u ON u.id = h.changed_by
+      WHERE h.plan_id = $1::uuid ORDER BY h.changed_at DESC LIMIT 100`,
+    planId,
+  ) as any[];
+  return rows.map((r) => ({ snapshot: r.snapshot, changes: r.changes, changedBy: r.changed_by ?? null, changedByName: r.changed_by_name ?? null, changedAt: String(r.changed_at) }));
 }

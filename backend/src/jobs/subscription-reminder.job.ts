@@ -15,7 +15,8 @@ import * as billingRepo from '../modules/billing/billing.repository';
  * product going read-only, which is both a bad experience and the most
  * expensive possible moment to try to save the subscription.
  *
- * Three warnings, once each, at 7 / 3 / 1 days. The dedupe is a unique
+ * Five warnings, once each, at 14 / 7 / 3 / 1 days and on the due date
+ * (catalogue 2026.2, prompt section 8; it was 7 / 3 / 1). The dedupe is a unique
  * constraint keyed on (subscription, period end, threshold), so re-running the
  * job — or two workers racing — cannot send twice, and a renewal that moves the
  * period end naturally starts a fresh set for the new period.
@@ -28,7 +29,9 @@ const QUEUE_NAME = 'subscription-reminder';
 // Every customer would have received exactly one email, labelled "7 days",
 // however close they actually were, and the 3-day and 1-day warnings would
 // never have fired at all.
-const THRESHOLDS = [1, 3, 7] as const;
+const THRESHOLDS = [1, 3, 7, 14] as const;
+/** The due-date reminder: the day the period ends, in Lagos. */
+const DUE_DATE = 0;
 const MAX_THRESHOLD = THRESHOLDS[THRESHOLDS.length - 1];
 
 export const subscriptionReminderQueue = new Queue(QUEUE_NAME, {
@@ -60,8 +63,12 @@ const DAY_MS = 86_400_000;
  * customer two days out is told "in 2 days" rather than being rounded up to
  * whatever bucket happened to catch them.
  */
-function bandFor(expiresAt: Date, now: Date): { threshold: number; days: number } | null {
+const lagosDay = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Lagos' }).format(d);
+
+export function bandFor(expiresAt: Date, now: Date): { threshold: number; days: number } | null {
   const raw = (expiresAt.getTime() - now.getTime()) / DAY_MS;
+  // Due date: the period ends today (Lagos calendar), even if earlier today.
+  if (lagosDay(expiresAt) === lagosDay(now)) return { threshold: DUE_DATE, days: 0 };
   if (raw < 0) return null;
 
   // Two different roundings, on purpose.

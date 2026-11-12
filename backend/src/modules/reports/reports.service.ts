@@ -2,6 +2,7 @@ import PDFDocument from 'pdfkit';
 import ExcelJS from 'exceljs';
 import type { ReportFilter, ExecutiveDashboard, ScheduledReport, CreateScheduledReportDto, UpdateScheduledReportDto } from './reports.types';
 import * as repo from './reports.repository';
+import { imageBytes, type Branding } from '../../lib/branding';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -53,6 +54,7 @@ export async function getExecutiveDashboard(
 export async function generateExecutivePdf(
   schemaName: string,
   filter: ReportFilter,
+  brand?: Branding | null,
 ): Promise<Buffer> {
   const data = await getExecutiveDashboard(schemaName, filter);
 
@@ -64,7 +66,10 @@ export async function generateExecutivePdf(
     doc.on('error', reject);
 
     const W = 595.28 - 100; // usable width
-    const BLUE  = '#2563EB';
+    // The organisation's own colour when it set one (every plan), else ComplianceCore blue.
+    const BLUE  = brand?.color ?? '#2563EB';
+    const orgName = brand ? (brand.legalName || brand.name) : null;
+    const contact = brand ? [brand.address, brand.phone, brand.website].filter(Boolean).join('  |  ') : '';
     const SLATE = '#1e293b';
     const MUTED = '#64748b';
     const LIGHT = '#f8fafc';
@@ -98,12 +103,27 @@ export async function generateExecutivePdf(
 
     // ── Cover ────────────────────────────────────────────────────────────────
     doc.rect(0, 0, 595.28, 841.89).fill('#f1f5f9');
-    doc.rect(0, 0, 595.28, 200).fill(BLUE);
-    doc.fillColor('white').fontSize(26).font('Helvetica-Bold').text('ComplianceCore', 50, 60);
-    doc.fontSize(14).font('Helvetica').text('Executive Compliance Report', 50, 94);
-    doc.fontSize(10).text(`Generated: ${new Date().toUTCString()}`, 50, 116);
+    const letterhead = imageBytes(brand?.letterhead ?? null);
+    const logo = imageBytes(brand?.logo ?? null);
     const { from, to } = resolveDateRange(filter);
-    doc.text(`Period: ${from.toDateString()} — ${to.toDateString()}`, 50, 130);
+    if (letterhead) {
+      // The organisation's own letterhead replaces the coloured band.
+      doc.rect(0, 0, 595.28, 200).fill('white');
+      try { doc.image(letterhead, 50, 20, { fit: [W, 110], align: 'center' }); } catch { /* unreadable image: keep the band empty */ }
+      doc.fillColor(SLATE).fontSize(14).font('Helvetica-Bold').text('Executive Compliance Report', 50, 140);
+      doc.fontSize(9).font('Helvetica').fillColor(MUTED)
+        .text(`Generated: ${new Date().toUTCString()}   Period: ${from.toDateString()} - ${to.toDateString()}`, 50, 162, { width: W });
+    } else {
+      doc.rect(0, 0, 595.28, 200).fill(BLUE);
+      let x = 50;
+      if (logo) { try { doc.image(logo, 50, 48, { fit: [70, 70] }); x = 132; } catch { x = 50; } }
+      doc.fillColor('white').fontSize(orgName && orgName.length > 30 ? 18 : 26).font('Helvetica-Bold')
+        .text(orgName || 'ComplianceCore', x, 56, { width: 545 - x });
+      doc.fontSize(14).font('Helvetica').text('Executive Compliance Report', x, 94, { width: 545 - x });
+      doc.fontSize(10).text(`Generated: ${new Date().toUTCString()}`, x, 116, { width: 545 - x });
+      doc.text(`Period: ${from.toDateString()} — ${to.toDateString()}`, x, 130, { width: 545 - x });
+      if (contact) doc.fontSize(8).text(contact, x, 150, { width: 545 - x });
+    }
 
     /*
       KPI strip on cover.
@@ -207,8 +227,10 @@ export async function generateExecutivePdf(
     }
 
     // ── Footer ────────────────────────────────────────────────────────────────
+    // The organisation's footer line (every plan); ComplianceCore attribution stays.
+    if (brand?.footer) doc.fillColor(MUTED).fontSize(8).text(brand.footer, 50, 788, { width: W, align: 'center' });
     doc.fillColor(MUTED).fontSize(8)
-      .text('ComplianceCore by ORION SOFT LIMITED — Confidential', 50, 800, { width: W, align: 'center' });
+      .text(`ComplianceCore by ORION SOFT LIMITED — Confidential${orgName ? ` — prepared for ${orgName}` : ''}`, 50, 800, { width: W, align: 'center' });
 
     doc.end();
   });

@@ -3,7 +3,8 @@ import { SUPPORT_EMAIL } from '../../config/contact';
 import type { Invoice } from './billing.types';
 
 /** Flow-based invoice: measured text, continuation rows and repeatable page furniture. */
-export function generateInvoicePdf(invoice: Invoice): Promise<Buffer> {
+/** billTo: the customer's legal name and address (branding, every plan); ORION SOFT stays the issuer. */
+export function generateInvoicePdf(invoice: Invoice, billTo?: { legalName?: string | null; address?: string | null } | null): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margin: 42, bufferPages: true,
       info: { Title: `Invoice ${invoice.number}`, Author: 'Orion Soft Limited' } });
@@ -57,14 +58,15 @@ export function generateInvoicePdf(invoice: Invoice): Promise<Buffer> {
     text(demo ? 'DEMONSTRATION' : status, right - 160, 82, 160, 10, true, '#C7D2FE', 'right');
 
     const recipientHeight = text('BILL TO', left, 164, 260, 8, true, muted);
-    const nameHeight = text((invoice.tenantName || 'Account holder').replace(/[\u2013\u2014]/g, '-'), left, 164 + recipientHeight + 9, 254, 15, true);
-    text(demo ? 'Presentation workspace - fictional examples' : 'ComplianceCore subscription account', left, 164 + recipientHeight + nameHeight + 18, 254, 9, false, muted);
+    const nameHeight = text((billTo?.legalName || invoice.tenantName || 'Account holder').replace(/[\u2013\u2014]/g, '-'), left, 164 + recipientHeight + 9, 254, 15, true);
+    const addressHeight = !demo && billTo?.address ? text(billTo.address.replace(/[\u2013\u2014]/g, '-'), left, 164 + recipientHeight + nameHeight + 14, 254, 9, false, ink) + 4 : 0;
+    text(demo ? 'Presentation workspace - fictional examples' : 'ComplianceCore subscription account', left, 164 + recipientHeight + nameHeight + addressHeight + 18, 254, 9, false, muted);
     let metaY = 164;
     for (const [label, value] of [['INVOICE NUMBER', invoice.number], ['ISSUED', date(invoice.createdAt)], ['DUE DATE', date(invoice.dueDate)]]) {
       text(label, right - 218, metaY, 84, 8, true, muted);
       metaY += Math.max(19, text(value, right - 129, metaY - 1, 129, 9, true, ink, 'right') + 7);
     }
-    y = Math.max(metaY + 14, 164 + recipientHeight + nameHeight + 49);
+    y = Math.max(metaY + 14, 164 + recipientHeight + nameHeight + addressHeight + 49);
     rule(y); y += 16;
     y += text(`SERVICE PERIOD  ${date(invoice.billingPeriodStart)} - ${date(invoice.billingPeriodEnd)}`, left, y, width, 9, false, muted) + 10;
     if (demo) {

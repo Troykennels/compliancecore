@@ -43,7 +43,9 @@ export async function getExecutiveDashboard(req: Request, res: Response) {
 
 export async function exportPdf(req: Request, res: Response) {
   const filter = filterSchema.parse(req.query);
-  const buffer = await service.generateExecutivePdf(schema(req), filter);
+  const { getBranding } = await import('../../lib/branding');
+  const tenantId = req.tenant?.id ?? req.user?.tenantId;
+  const buffer = await service.generateExecutivePdf(schema(req), filter, tenantId ? await getBranding(tenantId) : null);
   const filename = `compliance-report-${new Date().toISOString().slice(0, 10)}.pdf`;
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);

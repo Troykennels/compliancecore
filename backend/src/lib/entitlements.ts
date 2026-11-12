@@ -1,6 +1,7 @@
 import { prisma } from './prisma';
 import * as billingRepo from '../modules/billing/billing.repository';
 import type { SubscriptionPlan } from '../modules/billing/billing.types';
+import { lockedModulesFrom } from './plan-modules';
 
 // ─── Entitlement model ───────────────────────────────────────────────────────
 //
@@ -15,6 +16,11 @@ import type { SubscriptionPlan } from '../modules/billing/billing.types';
 //   grace      just lapsed, within GRACE_DAYS — full access, prompt to pay
 //   read_only  past grace                   — reads allowed, writes blocked
 //
+// Added with catalogue 2026.2 (prompt section 8), without changing the above:
+//   expiring   paid, 14 days or less left   — full access, renewal prompted
+//   suspended  paused by Orion Soft         — reads allowed, writes blocked
+//   cancelled  cancelled and past grace     — as read_only (reads allowed)
+//
 // Reads are never blocked. This is a compliance product: an organisation's
 // audit evidence may be legally required at short notice, and locking a
 // customer out of their own records over a failed card is the kind of harm that
@@ -23,8 +29,19 @@ import type { SubscriptionPlan } from '../modules/billing/billing.types';
 export const TRIAL_DAYS = 14;
 export const GRACE_DAYS = 7;
 export const TRIAL_PLAN_SLUG = 'professional';
+/** Trials start on the current Professional plan; the earlier one if it is missing. */
+export const TRIAL_PLAN_SLUGS = ['professional_2026', TRIAL_PLAN_SLUG] as const;
+export const EXPIRING_DAYS = 14;
 
-export type EntitlementState = 'trialing' | 'active' | 'grace' | 'read_only';
+export async function findTrialPlan(): Promise<SubscriptionPlan | null> {
+  for (const slug of TRIAL_PLAN_SLUGS) {
+    const plan = await billingRepo.findPlanBySlug(slug).catch(() => null);
+    if (plan?.isActive) return plan;
+  }
+  return null;
+}
+
+export type EntitlementState = 'trialing' | 'active' | 'expiring' | 'grace' | 'read_only' | 'suspended' | 'cancelled';
 
 export interface Entitlement {
   state: EntitlementState;
@@ -36,6 +53,13 @@ export interface Entitlement {
   daysRemaining: number | null;
   planName: string | null;
   planSlug: string | null;
+  /** Hours until expiry (the countdown); negative once lapsed. */
+  hoursRemaining: number | null;
+  /** Modules the plan switches off (explicit false only); [] = every module. */
+  lockedModules: string[];
+  catalogVersion: string | null;
+  /** AI requests a month on this plan; null = no plan limit. */
+  aiRequestsMonthly: number | null;
   /** Limits that apply right now; null for a given metric means unlimited. */
   limits: {
     users: number | null;
@@ -81,10 +105,10 @@ export async function getEntitlement(tenantId: string): Promise<Entitlement> {
       where: { id: tenantId },
       select: { createdAt: true },
     });
-    const trialPlan = await billingRepo.findPlanBySlug(TRIAL_PLAN_SLUG).catch(() => null);
+    const trialPlan = await findTrialPlan();
     const anchor = tenant?.createdAt ?? now;
     const expiresAt = new Date(anchor.getTime() + TRIAL_DAYS * DAY_MS);
-    return buildFromExpiry(expiresAt, now, trialPlan, trialPlan?.name ?? 'Trial', trialPlan?.slug ?? null);
+    return withPlan(buildFromExpiry(expiresAt, now, trialPlan, trialPlan?.name ?? 'Trial', trialPlan?.slug ?? null), trialPlan);
   }
 
   const plan = await billingRepo.findPlanById(sub.planId);
@@ -100,7 +124,25 @@ export async function getEntitlement(tenantId: string): Promise<Entitlement> {
   const expiresAt =
     trialEndsAt && trialEndsAt.getTime() > now.getTime() ? trialEndsAt : periodEnd;
 
-  return buildFromExpiry(expiresAt, now, plan, plan?.name ?? null, plan?.slug ?? null, trialEndsAt);
+  const ent = withPlan(buildFromExpiry(expiresAt, now, plan, plan?.name ?? null, plan?.slug ?? null, trialEndsAt), plan);
+  // Suspended by Orion Soft (status paused): records stay viewable, no changes.
+  if (sub.status === 'paused') return { ...ent, state: 'suspended', canWrite: false };
+  if (ent.state === 'read_only' && sub.status === 'cancelled') return { ...ent, state: 'cancelled' };
+  return ent;
+}
+
+/** Adds the plan's module locks and AI allowance, and the expiring state. */
+function withPlan(ent: Entitlement, plan: SubscriptionPlan | null): Entitlement {
+  const out: Entitlement = {
+    ...ent,
+    // PLAN_MODULE_LOCKS=off turns module locks off without a code change (staged
+    // rollout or an instant rollback, prompt section 14). Limits and states are unaffected.
+    lockedModules: process.env.PLAN_MODULE_LOCKS === 'off' ? [] : lockedModulesFrom(plan?.modules),
+    catalogVersion: plan?.catalogVersion ?? null,
+    aiRequestsMonthly: plan?.maxAiRequestsMonthly ?? null,
+  };
+  if (out.state === 'active' && out.daysRemaining !== null && out.daysRemaining <= EXPIRING_DAYS) out.state = 'expiring';
+  return out;
 }
 
 function toDate(v: string | Date | null | undefined): Date | null {
@@ -117,38 +159,35 @@ function buildFromExpiry(
   planSlug: string | null,
   trialEndsAt?: Date | null,
 ): Entitlement {
-  const limits = limitsFrom(plan);
+  const base = {
+    planName, planSlug, limits: limitsFrom(plan),
+    lockedModules: [] as string[], catalogVersion: null, aiRequestsMonthly: null,
+  };
 
   if (!expiresAt) {
     // No date to reason about — fail open rather than locking someone out on
     // incomplete data. A missing period is a bug on our side, not the
     // customer's problem.
-    return { state: 'active', canWrite: true, expiresAt: null, daysRemaining: null, planName, planSlug, limits };
+    return { ...base, state: 'active', canWrite: true, expiresAt: null, daysRemaining: null, hoursRemaining: null };
   }
 
   const daysRemaining = daysBetween(now, expiresAt);
+  // The server's clock decides; the browser only displays this countdown.
+  const hoursRemaining = Math.floor((expiresAt.getTime() - now.getTime()) / 3_600_000);
   const inTrial = Boolean(trialEndsAt && trialEndsAt.getTime() > now.getTime());
+  const dates = { expiresAt, daysRemaining, hoursRemaining };
 
   if (now.getTime() < expiresAt.getTime()) {
-    return {
-      state: inTrial ? 'trialing' : 'active',
-      canWrite: true,
-      expiresAt,
-      daysRemaining,
-      planName,
-      planSlug,
-      limits,
-    };
+    return { ...base, ...dates, state: inTrial ? 'trialing' : 'active', canWrite: true };
   }
 
   const graceEnds = new Date(expiresAt.getTime() + GRACE_DAYS * DAY_MS);
   if (now.getTime() < graceEnds.getTime()) {
-    return { state: 'grace', canWrite: true, expiresAt, daysRemaining, planName, planSlug, limits };
+    return { ...base, ...dates, state: 'grace', canWrite: true };
   }
 
-  return { state: 'read_only', canWrite: false, expiresAt, daysRemaining, planName, planSlug, limits };
+  return { ...base, ...dates, state: 'read_only', canWrite: false };
 }
-
 // ─── Plan limits ─────────────────────────────────────────────────────────────
 
 export type LimitMetric = keyof Entitlement['limits'];
@@ -174,4 +213,18 @@ export function exceedsLimit(
   const limit = ent.limits[metric];
   if (limit === null) return false;
   return currentCount + increment > limit;
+}
+
+/**
+ * Background jobs run only for modules the organisation's plan includes
+ * (prompt section 4: every background task follows the plan too). Fails
+ * SAFELY: a lookup problem skips this run of a paid module's job (the next
+ * run picks it up) rather than running it unpaid (prompt section 6).
+ */
+export async function moduleAllowed(tenantId: string, module: string): Promise<boolean> {
+  try {
+    return !(await getEntitlement(tenantId)).lockedModules.includes(module);
+  } catch {
+    return false;
+  }
 }

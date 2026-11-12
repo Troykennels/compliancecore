@@ -17,4 +17,4 @@ function body(t:PolicyTemplate){return `Policy control information\n\nOrganisati
 export const policyTemplates=definitions.map(t=>({...t,content:body(t),documentType:'policy' as const}));
 const placeholders=new Set(policyTemplates.flatMap(t=>t.content.match(/\[[^\]\n]{2,180}\]/g)??[]));
 export const hasTemplatePlaceholders=(content:string)=>(content.match(/\[[^\]\n]{2,180}\]/g)??[]).some(value=>placeholders.has(value));
-export function downloadPolicyTemplate(id:string,res:Response):boolean {const t=policyTemplates.find(t=>t.id===id);return t?downloadTextDocument(t,res):false;}
+export function downloadPolicyTemplate(id:string,res:Response,brand?:{name?:string|null;footer?:string|null}|null):boolean {const t=policyTemplates.find(t=>t.id===id);return t?downloadTextDocument(t,res,brand):false;}

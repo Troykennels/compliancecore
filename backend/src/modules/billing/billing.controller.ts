@@ -39,7 +39,11 @@ export async function getEntitlement(req: Request, res: Response) {
     res.json({ success: true, data: null });
     return;
   }
-  res.json({ success: true, data: await resolveEntitlement(tenantId) });
+  const ent = await resolveEntitlement(tenantId);
+  // The AI allowance used this month (shown next to the AI tools; the server enforces it).
+  const { aiUsageThisMonth } = await import('../../lib/ai-usage');
+  const aiRequestsUsed = await aiUsageThisMonth(tenantId).catch(() => null);
+  res.json({ success: true, data: { ...ent, aiRequestsUsed } });
 }
 
 // ── Tenant Billing ─────────────────────────────────────────────────────────────
@@ -112,7 +116,7 @@ export async function getInvoice(req: Request, res: Response) {
 export async function downloadInvoicePdf(req: Request, res: Response) {
   const { id } = req.params;
   const inv = await service.getInvoice(tid(req), id);
-  const buffer = await service.generateInvoicePdf(inv);
+  const buffer = await service.brandedInvoicePdf(inv);
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="invoice-${inv.number}.pdf"`);
   res.setHeader('Content-Length', buffer.length);
@@ -136,7 +140,7 @@ export async function adminCreatePlan(req: Request, res: Response) {
 }
 
 export async function adminUpdatePlan(req: Request, res: Response) {
-  const data = await service.adminUpdatePlan(req.params.id, req.body);
+  const data = await service.adminUpdatePlan(req.params.id, req.body, req.user?.id ?? null);
   res.json({ success: true, data });
 }
 
@@ -247,7 +251,7 @@ export async function adminDownloadInvoicePdf(req: Request, res: Response) {
   const { findInvoiceById } = await import('./billing.repository');
   const inv = await findInvoiceById(id);
   if (!inv) throw new (await import('../../lib/errors')).NotFoundError('Invoice', id);
-  const buffer = await service.generateInvoicePdf(inv);
+  const buffer = await service.brandedInvoicePdf(inv);
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="invoice-${inv.number}.pdf"`);
   res.setHeader('Content-Length', buffer.length);
@@ -288,5 +292,11 @@ export async function adminUpdateSubscription(req: Request, res: Response) {
 
 export async function adminUpdateInvoice(req: Request, res: Response) {
   const data = await service.adminUpdateInvoice(req.params.id, req.body);
+  res.json({ success: true, data });
+}
+
+
+export async function adminPlanHistory(req: Request, res: Response) {
+  const data = await service.adminPlanHistory(req.params.id);
   res.json({ success: true, data });
 }

@@ -6,6 +6,7 @@ import { validate } from '../../middleware/validate.middleware';
 import { validateUuidParam } from '../../middleware/validate-params.middleware';
 import { asyncHandler } from '../../lib/asyncHandler';
 import * as ctrl from './billing.controller';
+import { requestUpgrade } from './upgrade-request';
 import {
   createSubscriptionSchema,
   updateSubscriptionSchema,
@@ -25,6 +26,8 @@ router.use(authenticate());
 // No billing permission required: every member needs to know their
 // organisation is in read-only, not just whoever manages the invoices.
 router.get('/entitlement', asyncHandler(ctrl.getEntitlement));
+// Users without billing authority ask their administrators instead of paying.
+router.post('/upgrade-request', asyncHandler(requestUpgrade));
 router.get('/overview', requirePermission('billing:read'), asyncHandler(ctrl.getBillingOverview));
 router.get('/subscription', requirePermission('billing:read'), asyncHandler(ctrl.getSubscription));
 router.post('/subscription', requirePermission('billing:write'), validate(createSubscriptionSchema), asyncHandler(ctrl.createSubscription));
@@ -47,6 +50,11 @@ router.get('/usage', requirePermission('billing:read'), asyncHandler(ctrl.getUsa
 router.get('/admin/plans', requireSuperadmin, asyncHandler(ctrl.adminGetPlans));
 router.post('/admin/plans', requireSuperadmin, asyncHandler(ctrl.adminCreatePlan));
 router.patch('/admin/plans/:id', requireSuperadmin, validateUuidParam('id'), asyncHandler(ctrl.adminUpdatePlan));
+// Every edit's snapshot (who, when, what was sent): the approval log for plans.
+router.get('/admin/plans/:id/history', requireSuperadmin, validateUuidParam('id'), asyncHandler(ctrl.adminPlanHistory));
+// Refunds, chargebacks and rejected webhooks for review (reconciliation).
+router.get('/admin/payment-issues', requireSuperadmin, asyncHandler(async (_req, res) => { res.json({ success: true, data: await (await import('../payments/payment-issues')).listPaymentIssues() }); }));
+router.post('/admin/payment-issues/:id/resolve', requireSuperadmin, validateUuidParam('id'), asyncHandler(async (req, res) => { res.json({ success: true, data: { resolved: await (await import('../payments/payment-issues')).resolvePaymentIssue(req.params.id) } }); }));
 
 // Per-currency pricing. The plan record holds only one currency, so NGN prices
 // are edited here rather than through the plan itself.

@@ -2,11 +2,24 @@ import { prisma } from '../../config/database';
 import * as billingRepo from '../billing/billing.repository';
 import * as repo from './payments.repository';
 import { applyDiscount } from '../billing/billing.service';
-import { NotFoundError, ValidationError } from '../../lib/errors';
+import { AppError, NotFoundError, ValidationError } from '../../lib/errors';
+import { CONTACT_SALES_PLANS } from '../billing/billing.types';
 
 export async function checkoutQuote(input: { tenantId: string; planId: string; currency: string; billingCycle: 'monthly' | 'yearly' }) {
   const plan = await billingRepo.findPlanById(input.planId);
   if (!plan || !plan.isActive) throw new NotFoundError('Active plan');
+  // Withdrawn plans (not on sale) and quoted plans (Enterprise, MSP) can only be
+  // paid for by an organisation already on them: a grandfathered customer
+  // renews its contracted plan, but nobody can buy an old cheaper plan or a
+  // quoted one by sending its id.
+  const current = await billingRepo.findSubscriptionByTenant(input.tenantId);
+  if (current?.planId !== plan.id && (!plan.isPublic || (CONTACT_SALES_PLANS as readonly string[]).includes(plan.slug))) {
+    throw new AppError(
+      (CONTACT_SALES_PLANS as readonly string[]).includes(plan.slug)
+        ? `${plan.name} is arranged with Orion Soft Limited. Contact us for a quotation.`
+        : `${plan.name} is no longer offered to new subscriptions. Choose one of the current plans.`,
+      403, 'PLAN_NOT_AVAILABLE');
+  }
   const currency = input.currency.toUpperCase();
   const price = await repo.findPlanPrice(plan.id, currency);
   if (!price) throw new ValidationError(`No price is configured in ${currency}. Contact Orion Soft Limited.`);

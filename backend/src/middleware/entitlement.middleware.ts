@@ -2,6 +2,8 @@ import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import { getEntitlement, LIMIT_LABELS, exceedsLimit, type LimitMetric } from '../lib/entitlements';
 import { AppError } from '../lib/errors';
 import { logger } from '../lib/logger';
+import { moduleForPath, LOCK_ALL_METHODS, MODULE_LABEL } from '../lib/plan-modules';
+import { hasPermission } from './rbac.middleware';
 
 // Methods that create or change data. GET/HEAD/OPTIONS are always allowed —
 // see the reasoning in lib/entitlements.ts about not locking customers out of
@@ -53,6 +55,22 @@ export function enforceEntitlement(): RequestHandler {
       // operates — including while investigating a customer's problem.
       if (req.user?.isSuperadmin) return next();
 
+      // Plan module locks (catalogue 2026.2). A locked module's records stay
+      // viewable and exportable; only creating or changing is refused. AI tools
+      // refuse every request (each one is a paid generation).
+      const module = moduleForPath(req.originalUrl);
+      if (module && ent.lockedModules.includes(module)
+        && (WRITE_METHODS.has(req.method) || LOCK_ALL_METHODS.has(module))) {
+        const label = MODULE_LABEL[module] ?? module;
+        const canBuy = hasPermission(req.user?.permissions ?? [], 'billing:write');
+        return next(new AppError(
+          canBuy
+            ? `${label} is not included in your ${ent.planName ?? 'current'} plan. Upgrade in Plans and upgrade to use it; your existing records stay as they are.`
+            : `${label} is not included in your organisation's plan. You can ask your administrator to upgrade from Plans and upgrade.`,
+          402, 'PLAN_UPGRADE_REQUIRED', { module, label },
+        ));
+      }
+
       if (!WRITE_METHODS.has(req.method)) return next();
       if (ALWAYS_ALLOWED.some((p) => req.originalUrl.startsWith(p))) return next();
       if (ent.canWrite) return next();
@@ -68,6 +86,13 @@ export function enforceEntitlement(): RequestHandler {
       // Never let an entitlement lookup failure take the API down. Failing open
       // risks a little unpaid usage; failing closed would block paying
       // customers because of our own outage.
+      // Plan modules fail SAFELY (prompt section 6: never unlock a paid module by
+      // accident); core work keeps failing open so our outage never locks a
+      // customer out of their own records.
+      if (moduleForPath(req.originalUrl) && !req.user?.isSuperadmin) {
+        logger.error({ err, tenantId }, 'Entitlement check failed on a plan module — refusing for now');
+        return next(new AppError('This feature is temporarily unavailable. Please try again in a moment.', 503, 'ENTITLEMENT_UNAVAILABLE'));
+      }
       logger.error({ err, tenantId }, 'Entitlement check failed — allowing request');
       return next();
     }

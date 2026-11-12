@@ -289,6 +289,7 @@ function assertAmountMatches(
  */
 export async function handleWebhook(rawBody: Buffer, signature: string | undefined): Promise<void> {
   if (!verifyWebhookSignature(rawBody, signature)) {
+    await (await import('./payment-issues')).recordRejectedWebhook(rawBody);
     throw new AppError('Invalid webhook signature.', 401, 'INVALID_SIGNATURE');
   }
 
@@ -297,6 +298,14 @@ export async function handleWebhook(rawBody: Buffer, signature: string | undefin
     event = JSON.parse(rawBody.toString('utf8'));
   } catch {
     throw new ValidationError('Malformed webhook payload.');
+  }
+
+  // Refunds and chargebacks: recorded for review (their reference is in a
+  // different field, so they must be handled before the reference check).
+  const issues = await import('./payment-issues');
+  if (issues.isIssueEvent(event.event)) {
+    await issues.recordPaymentIssue(event as never);
+    return;
   }
 
   const reference = event.data?.reference;

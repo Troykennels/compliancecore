@@ -8,7 +8,7 @@ import { setAuditSessionVars } from '../../middleware/audit.middleware';
 import { prisma, tenantSchemaName } from '../../lib/prisma';
 import { provisionTenantSchema, dropTenantSchema } from '../../lib/provisioning';
 import { logger } from '../../lib/logger';
-import { TRIAL_DAYS, TRIAL_PLAN_SLUG } from '../../lib/entitlements';
+import { TRIAL_DAYS, findTrialPlan } from '../../lib/entitlements';
 import * as billingRepo from '../billing/billing.repository';
 import * as billingService from '../billing/billing.service';
 import {
@@ -110,7 +110,7 @@ export const organizationService = {
       // tenant's createdAt, so an organisation whose subscription row failed to
       // write still gets its full trial rather than being locked out.
       try {
-        const plan = await billingRepo.findPlanBySlug(TRIAL_PLAN_SLUG);
+        const plan = await findTrialPlan();
         if (plan) {
           await billingService.createSubscription(
             id,

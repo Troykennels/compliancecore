@@ -1,3 +1,4 @@
+import { useEntitlement } from '@/features/billing/plan-modules';
 import { useEvidence } from '@/features/evidence/hooks/use-evidence';
 import { PageHeader } from '@/components/page-header';
 import { AccessibleField } from '@/components/accessible-field';
@@ -819,7 +820,7 @@ export function AiToolsPage() {
     <div className="mx-auto max-w-7xl p-4 sm:p-6">
       <div className="mb-6"><PageHeader eyebrow="Tools" title="AI tools" description="Assisted drafting and analysis for contracts, policies, risks and compliance documents. Every result is a suggestion for a person to review." /></div>
 
-      <div className="mb-5 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-slate-700"><strong>Draft assistance &middot; Human review required</strong><p className="mt-1">Your submitted text or selected document is processed by our AI provider, Groq. Use information you are authorised to share. Results do not approve documents, confirm compliance or change your records.</p></div>
+      <div className="mb-5 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-slate-700"><strong>Draft assistance &middot; Human review required</strong><p className="mt-1">Your submitted text or selected document is processed by our AI provider, Groq. Use information you are authorised to share. Results do not approve documents, confirm compliance or change your records. AI output is not legal advice and is not a certification; a qualified person must check it before you rely on it.</p><AiAllowance /></div>
       {/* Tab navigation */}
       <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 mb-6">
         {TABS.map(({ id, label, icon: Icon }) => (
@@ -841,5 +842,18 @@ export function AiToolsPage() {
       {/* Active panel */}
       <Panel />
     </div>
+  );
+}
+
+/** This month's AI allowance on the plan (the server enforces it; this only shows it). */
+function AiAllowance(): JSX.Element | null {
+  const { data: ent } = useEntitlement();
+  if (!ent || ent.aiRequestsMonthly == null) return null;
+  const used = ent.aiRequestsUsed ?? 0;
+  const left = Math.max(0, ent.aiRequestsMonthly - used);
+  return (
+    <p className="mt-2 text-xs text-slate-600" role="status">
+      AI requests this month: <strong>{used}</strong> of {ent.aiRequestsMonthly} used ({left} left). The allowance renews on the 1st.
+    </p>
   );
 }

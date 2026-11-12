@@ -1,3 +1,4 @@
+import { moduleAllowed } from '../lib/entitlements';
 import { Queue, Worker, type Job } from 'bullmq';
 import { redisForQueues } from '../config/redis';
 import { prisma } from '../lib/prisma';
@@ -394,7 +395,7 @@ async function processJob(_job: Job) {
   const tenants = await getActiveTenants();
   for (const tenant of tenants) {
     try {
-      await evaluateTenantEscalations(tenant.schema_name);
+      if (await moduleAllowed(tenant.id, 'escalations')) await evaluateTenantEscalations(tenant.schema_name);
     } catch (err) {
       console.error(`[escalation.job] Tenant ${tenant.schema_name} failed:`, err);
     }

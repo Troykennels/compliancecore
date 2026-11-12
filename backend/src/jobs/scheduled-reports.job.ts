@@ -1,3 +1,5 @@
+import { moduleAllowed } from '../lib/entitlements';
+import { getBranding } from '../lib/branding';
 import { Queue, Worker, type Job } from 'bullmq';
 import { redisForQueues } from '../config/redis';
 import { prisma } from '../config/database';
@@ -102,7 +104,7 @@ async function processTenantReports(tenant: TenantRow): Promise<void> {
       const attachments: Array<{ filename: string; content: Buffer; contentType: string }> = [];
 
       if (report.format === 'pdf' || report.format === 'both') {
-        const buf = await generateExecutivePdf(tenant.schema_name, {});
+        const buf = await generateExecutivePdf(tenant.schema_name, {}, await getBranding(tenant.id));
         attachments.push({ filename: `${tenant.name}-compliance-report.pdf`, content: buf, contentType: 'application/pdf' });
       }
       if (report.format === 'excel' || report.format === 'both') {
@@ -148,7 +150,7 @@ async function runCheck(): Promise<void> {
   logger.info({ count: tenants.length }, 'Checking scheduled reports for all tenants');
   for (const tenant of tenants) {
     try {
-      await processTenantReports(tenant);
+      if (await moduleAllowed(tenant.id, 'scheduled_reports')) await processTenantReports(tenant);
     } catch (err) {
       logger.error({ err, tenantId: tenant.id }, 'Scheduled report check failed for tenant');
     }

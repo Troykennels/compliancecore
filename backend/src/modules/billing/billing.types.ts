@@ -1,5 +1,7 @@
 // ── Primitives ─────────────────────────────────────────────────────────────────
-export type PlanSlug = 'starter' | 'professional' | 'business' | 'enterprise' | 'msp';
+export type PlanSlug = 'starter' | 'professional' | 'business' | 'enterprise' | 'msp'
+  // Catalogue 2026.2 (plan-catalog-2026.ts)
+  | 'essential_2026' | 'growth_2026' | 'professional_2026' | 'business_2026' | 'enterprise_2026';
 
 /**
  * Plans sold by conversation rather than checkout.
@@ -8,7 +10,7 @@ export type PlanSlug = 'starter' | 'professional' | 'business' | 'enterprise' | 
  * createSubscription/updateSubscription keeps blocking self-assignment. The UI
  * shows "Contact Sales" instead of a figure and a Subscribe button.
  */
-export const CONTACT_SALES_PLANS: readonly PlanSlug[] = ['enterprise', 'msp'];
+export const CONTACT_SALES_PLANS: readonly PlanSlug[] = ['enterprise', 'msp', 'enterprise_2026'];
 export type BillingCycle = 'monthly' | 'yearly';
 export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled' | 'paused';
 export type InvoiceStatus = 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
@@ -32,6 +34,11 @@ export interface SubscriptionPlan {
   maxBranches: number | null;
   maxDepartments: number | null;
   features: string[];
+  /** Module switches (catalogue 2026.2): explicit false locks; null = every module. */
+  modules: Record<string, boolean> | null;
+  catalogVersion: string | null;
+  /** AI requests a month; null = no plan limit (the module itself may be locked). */
+  maxAiRequestsMonthly: number | null;
   isActive: boolean;
   isPublic: boolean;
   sortOrder: number;
@@ -52,6 +59,8 @@ export interface CreatePlanDto {
   maxBranches?: number | null;
   maxDepartments?: number | null;
   features?: string[];
+  modules?: Record<string, boolean> | null;
+  maxAiRequestsMonthly?: number | null;
   isPublic?: boolean;
   sortOrder?: number;
 }

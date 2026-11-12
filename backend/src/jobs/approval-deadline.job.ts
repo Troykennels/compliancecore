@@ -1,3 +1,4 @@
+import { moduleAllowed } from '../lib/entitlements';
 import { Queue, Worker, type Job } from 'bullmq';
 import { redisForQueues } from '../config/redis';
 import { prisma } from '../lib/prisma';
@@ -26,7 +27,7 @@ async function processJob(_job: Job) {
 
   for (const tenant of tenants) {
     try {
-      await checkTenantDeadlines(tenant.schema_name);
+      if (await moduleAllowed(tenant.id, 'approvals')) await checkTenantDeadlines(tenant.schema_name);
     } catch (err) {
       console.error(`[approval-deadline.job] Tenant ${tenant.schema_name} failed:`, err);
     }

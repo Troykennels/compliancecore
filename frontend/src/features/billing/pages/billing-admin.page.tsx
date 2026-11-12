@@ -19,9 +19,11 @@ import type {
 } from '../types/billing.types';
 import { useOrgFormat } from '@/lib/org-format';
 import { apiClient } from '@/lib/api-client';
+import { PLAN_MODULE_INFO } from '../plan-modules';
+import { useQuery } from '@tanstack/react-query';
 
 // ── Tab definitions ────────────────────────────────────────────────────────────
-type Tab = 'signups' | 'plans' | 'pricing' | 'coupons' | 'tenants' | 'invoices';
+type Tab = 'signups' | 'plans' | 'pricing' | 'coupons' | 'tenants' | 'invoices' | 'issues';
 const TABS: Array<{ id: Tab; label: string; icon: JSX.Element }> = [
   { id: 'signups', label: 'Signups & trials', icon: <Building2 className="h-4 w-4" /> },
   { id: 'plans',   label: 'Plans',    icon: <ShieldAlert className="h-4 w-4" /> },
@@ -29,6 +31,7 @@ const TABS: Array<{ id: Tab; label: string; icon: JSX.Element }> = [
   { id: 'coupons', label: 'Coupons',  icon: <Tag className="h-4 w-4" /> },
   { id: 'tenants', label: 'Tenants',  icon: <Building2 className="h-4 w-4" /> },
   { id: 'invoices',label: 'Invoices', icon: <FileText className="h-4 w-4" /> },
+  { id: 'issues',  label: 'Payment issues', icon: <AlertTriangle className="h-4 w-4" /> },
 ];
 
 // ── Query error state ────────────────────────────────────────────────────────────
@@ -61,7 +64,7 @@ function F({ label, children }: { label: string; children: React.ReactNode }) {
 
 // ── Plans tab ──────────────────────────────────────────────────────────────────
 function PlanForm({ initial, onDone }: {
-  initial?: Partial<CreatePlanDto & { id: string; isActive: boolean }>;
+  initial?: Partial<CreatePlanDto & { id: string; isActive: boolean; currency: string }>;
   onDone: () => void;
 }) {
   const createPlan = useAdminCreatePlan();
@@ -80,6 +83,10 @@ function PlanForm({ initial, onDone }: {
     featuresRaw: (initial?.features ?? []).join('\n'),
     isPublic: initial?.isPublic ?? true,
     sortOrder: String(initial?.sortOrder ?? 0),
+    // null = every module (earlier plans and Enterprise); otherwise explicit switches.
+    everyModule: initial?.modules == null,
+    modules: Object.fromEntries(PLAN_MODULE_INFO.map((m) => [m.key, initial?.modules?.[m.key] === true])) as Record<string, boolean>,
+    maxAiRequestsMonthly: initial?.maxAiRequestsMonthly != null ? String(initial.maxAiRequestsMonthly) : '',
   });
 
   function handleSubmit(e: React.FormEvent) {
@@ -96,6 +103,8 @@ function PlanForm({ initial, onDone }: {
       features: form.featuresRaw.split('\n').map((s) => s.trim()).filter(Boolean),
       isPublic: form.isPublic,
       sortOrder: Number(form.sortOrder),
+      modules: form.everyModule ? null : form.modules,
+      maxAiRequestsMonthly: form.maxAiRequestsMonthly ? Number(form.maxAiRequestsMonthly) : null,
     };
 
     if (isEdit && initial?.id) {
@@ -114,11 +123,11 @@ function PlanForm({ initial, onDone }: {
         <F label="Name *"><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className={inp} /></F>
         <F label="Slug *">
           <select value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value as PlanSlug })} className={inp}>
-            {['starter','professional','enterprise','msp'].map((s) => <option key={s} value={s}>{s}</option>)}
+            {Array.from(new Set([form.slug, 'essential_2026', 'growth_2026', 'professional_2026', 'business_2026', 'enterprise_2026', 'starter', 'professional', 'business', 'enterprise', 'msp'])).map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </F>
-        <F label="Monthly Price (USD)"><input type="number" step="0.01" min="0" value={form.priceMonthly} onChange={(e) => setForm({ ...form, priceMonthly: e.target.value })} required className={inp} /></F>
-        <F label="Yearly Price (USD)"><input type="number" step="0.01" min="0" value={form.priceYearly} onChange={(e) => setForm({ ...form, priceYearly: e.target.value })} required className={inp} /></F>
+        <F label={`Monthly price (${initial?.currency ?? 'NGN'})`}><input type="number" step="0.01" min="0" value={form.priceMonthly} onChange={(e) => setForm({ ...form, priceMonthly: e.target.value })} required className={inp} /></F>
+        <F label={`Yearly price (${initial?.currency ?? 'NGN'})`}><input type="number" step="0.01" min="0" value={form.priceYearly} onChange={(e) => setForm({ ...form, priceYearly: e.target.value })} required className={inp} /></F>
         <F label="Max Users (blank = unlimited)"><input type="number" min="1" value={form.maxUsers} onChange={(e) => setForm({ ...form, maxUsers: e.target.value })} placeholder="Unlimited" className={inp}  aria-label="Unlimited" /></F>
         <F label="Max Frameworks"><input type="number" min="1" value={form.maxFrameworks} onChange={(e) => setForm({ ...form, maxFrameworks: e.target.value })} placeholder="Unlimited" className={inp}  aria-label="Unlimited" /></F>
         <F label="Max Evidence GB"><input type="number" step="0.1" min="0" value={form.maxEvidenceGb} onChange={(e) => setForm({ ...form, maxEvidenceGb: e.target.value })} placeholder="Unlimited" className={inp}  aria-label="Unlimited" /></F>
@@ -137,6 +146,25 @@ function PlanForm({ initial, onDone }: {
           </F>
         </div>
       </div>
+      <fieldset className="rounded-lg border border-slate-200 bg-white p-3">
+        <legend className="px-1 text-sm font-semibold text-slate-700">Modules in this plan</legend>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={form.everyModule} onChange={(e) => setForm({ ...form, everyModule: e.target.checked })} className="h-4 w-4 rounded text-indigo-600" />
+          <span>Every module (no list; earlier plans and Enterprise)</span>
+        </label>
+        {!form.everyModule && (
+          <div className="mt-2 grid gap-1 sm:grid-cols-2">
+            {PLAN_MODULE_INFO.map((m) => (
+              <label key={m.key} className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={form.modules[m.key]} onChange={(e) => setForm({ ...form, modules: { ...form.modules, [m.key]: e.target.checked } })} className="h-4 w-4 rounded text-indigo-600" />
+                <span>{m.label}</span>
+              </label>
+            ))}
+          </div>
+        )}
+        <p className="mt-2 text-xs text-slate-500">Core work, basic reports, branding and billing are in every plan and cannot be switched off. Every change is kept in the plan history.</p>
+        <div className="mt-2 max-w-xs"><F label="AI requests a month (blank = no limit)"><input type="number" min="0" value={form.maxAiRequestsMonthly} onChange={(e) => setForm({ ...form, maxAiRequestsMonthly: e.target.value })} placeholder="No limit" className={inp} /></F></div>
+      </fieldset>
       <label className="flex items-center gap-2 cursor-pointer text-sm">
         <input type="checkbox" checked={form.isPublic} onChange={(e) => setForm({ ...form, isPublic: e.target.checked })} className="h-4 w-4 rounded text-indigo-600" />
         <span className="text-slate-700">Show on public plans page</span>
@@ -156,6 +184,7 @@ function PlansTab() {
   const updatePlan = useAdminUpdatePlan();
   const [editId, setEditId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [historyId, setHistoryId] = useState<string | null>(null);
 
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-indigo-500" /></div>;
   if (isError) return <QueryError onRetry={() => refetch()} message="Failed to load plans." />;
@@ -183,12 +212,14 @@ function PlansTab() {
                     {!plan.isPublic && <span className="rounded-full bg-amber-100 text-amber-700 text-xs px-2 py-0.5 font-semibold">Hidden</span>}
                   </div>
                   <div className="flex gap-4 mt-1 text-xs text-slate-500">
-                    <span>${plan.priceMonthly}/mo · ${plan.priceYearly}/yr</span>
+                    <span>{plan.currency} {plan.priceMonthly.toLocaleString()}/mo · {plan.priceYearly.toLocaleString()}/yr</span>
+                    <span>{plan.modules == null ? 'Every module' : `${Object.values(plan.modules).filter(Boolean).length} of ${PLAN_MODULE_INFO.length} modules`}</span>
                     <span>Users: {plan.maxUsers ?? '∞'}</span>
                     <span>Frameworks: {plan.maxFrameworks ?? '∞'}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
+                  <button onClick={() => setHistoryId(historyId === plan.id ? null : plan.id)} className="rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100">History</button>
                   <button onClick={() => setEditId(plan.id)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
                     <Edit2 className="h-4 w-4" />
                   </button>
@@ -203,9 +234,63 @@ function PlansTab() {
                 </div>
               </div>
             )}
+            {historyId === plan.id && <PlanHistory planId={plan.id} />}
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/** Every owner edit of a plan: what it was before, what was sent, who and when (approval log). */
+function PlanHistory({ planId }: { planId: string }) {
+  const { data = [], isLoading } = useQuery<Array<{ changes: Record<string, unknown>; changedByName: string | null; changedAt: string }>>({
+    queryKey: ['billing', 'admin', 'plan-history', planId],
+    queryFn: async () => (await apiClient.get(`/billing/admin/plans/${planId}/history`)).data.data,
+  });
+  if (isLoading) return <p className="px-4 py-2 text-xs text-slate-500">Loading history...</p>;
+  if (!data.length) return <p className="px-4 py-2 text-xs text-slate-500">No edits recorded yet.</p>;
+  return (
+    <ul className="mt-1 space-y-1 rounded-lg border border-slate-100 bg-slate-50 p-3 text-xs text-slate-600">
+      {data.map((h, i) => (
+        <li key={i}><strong>{new Date(h.changedAt).toLocaleString()}</strong>{h.changedByName ? ` by ${h.changedByName}` : ''}: {Object.keys(h.changes).join(', ') || 'no fields'}</li>
+      ))}
+    </ul>
+  );
+}
+
+/** Refunds, chargebacks and rejected webhooks recorded for review (nothing changes access automatically). */
+function PaymentIssuesTab() {
+  const { data = [], isLoading, isError, refetch } = useQuery<Array<{ id: string; kind: string; event: string | null; status: string | null; reference: string | null; amount: string | null; currency: string | null; tenant_name: string | null; resolved_at: string | null; created_at: string }>>({
+    queryKey: ['billing', 'admin', 'payment-issues'],
+    queryFn: async () => (await apiClient.get('/billing/admin/payment-issues')).data.data,
+  });
+  if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-indigo-500" /></div>;
+  if (isError) return <QueryError onRetry={() => refetch()} message="Failed to load payment issues." />;
+  async function resolve(id: string) {
+    try { await apiClient.post(`/billing/admin/payment-issues/${id}/resolve`); toast.success('Marked as reviewed'); refetch(); }
+    catch { toast.error('Could not update the issue'); }
+  }
+  if (!data.length) return <p className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-500">No refunds, disputes or rejected webhooks recorded.</p>;
+  return (
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <p className="px-4 pt-3 text-xs text-slate-500">A refund or dispute never changes a customer's access by itself. Review it here and correct the subscription in Tenants if that was agreed.</p>
+      <table className="mt-2 w-full min-w-[720px] text-sm">
+        <thead><tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500"><th className="px-4 py-2">When</th><th className="px-4 py-2">Kind</th><th className="px-4 py-2">Status</th><th className="px-4 py-2">Organisation</th><th className="px-4 py-2">Reference</th><th className="px-4 py-2 text-right">Amount</th><th className="px-4 py-2"></th></tr></thead>
+        <tbody>
+          {data.map((r) => (
+            <tr key={r.id} className={`border-b border-slate-100 ${r.resolved_at ? 'opacity-60' : ''}`}>
+              <td className="px-4 py-2">{new Date(r.created_at).toLocaleString()}</td>
+              <td className="px-4 py-2 capitalize">{r.kind.replace('_', ' ')}</td>
+              <td className="px-4 py-2">{r.status ?? r.event ?? '-'}</td>
+              <td className="px-4 py-2">{r.tenant_name ?? '-'}</td>
+              <td className="px-4 py-2 font-mono text-xs">{r.reference ?? '-'}</td>
+              <td className="px-4 py-2 text-right">{r.amount != null ? `${r.currency ?? ''} ${Number(r.amount).toLocaleString()}` : '-'}</td>
+              <td className="px-4 py-2 text-right">{r.resolved_at ? 'Reviewed' : <button onClick={() => resolve(r.id)} className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-semibold hover:bg-slate-50">Mark reviewed</button>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -705,6 +790,7 @@ export function BillingAdminPage(): JSX.Element {
       {tab === 'coupons'  && <CouponsTab />}
       {tab === 'tenants'  && <TenantsTab />}
       {tab === 'invoices' && <AdminInvoicesTab />}
+          {tab === 'issues' && <PaymentIssuesTab />}
     </div>
   );
 }

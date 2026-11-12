@@ -15,7 +15,7 @@ import { NotFoundError } from '../../lib/errors';
 const router = Router();
 router.use(authenticate(), resolveTenant, enforceEntitlement());
 router.get('/templates',requirePermission('policies:read'),asyncHandler(async(req,res)=>ok(res,req,policyTemplates)));
-router.get('/templates/:key/download',requirePermission('policies:read'),asyncHandler(async(req,res)=>{if(!downloadPolicyTemplate(req.params.key,res))throw new NotFoundError('Policy template not found.');}));
+router.get('/templates/:key/download',requirePermission('policies:read'),asyncHandler(async(req,res)=>{const {brandLine}=await import('../../lib/branding');if(!downloadPolicyTemplate(req.params.key,res,await brandLine(req.tenant?.id??req.user?.tenantId)))throw new NotFoundError('Policy template not found.');}));
 
 router.get('/',            requirePermission('policies:read'),  validateQuery(listPoliciesSchema), asyncHandler(ctrl.listPolicies));
 router.get('/:id',         requirePermission('policies:read'),  asyncHandler(ctrl.getPolicy));

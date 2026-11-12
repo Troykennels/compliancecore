@@ -18,6 +18,8 @@ import {
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth.store';
 import { EntitlementBanner } from '@/components/entitlement-banner';
+import { LockedModulePage } from '@/components/locked-module';
+import { usePlanLocks, moduleForPath, MODULE_INFO } from '@/features/billing/plan-modules';
 import { authApi } from '@/features/auth/api/auth.api';
 import { PATHS } from '@/routes/paths';
 import { NotificationBell } from '@/features/notifications/components/notification-bell';
@@ -229,6 +231,11 @@ export function AppShell() {
   const navGroups = (user?.isSuperadmin ? [...NAV_GROUPS, OWNER_NAV_GROUP] : NAV_GROUPS).map(group=>({...group,items:group.items.filter(item=>!scopeFor(item.to)||hasPermission(activeTenant?.role,scopeFor(item.to)))})).filter(group=>group.items.length);
   const requiredScope=scopeFor(location.pathname);
   const permitted=!requiredScope||hasPermission(activeTenant?.role,requiredScope)||(activeTenant?.role==='control_owner'&&/^\/audits\/[^/]+$/.test(location.pathname));
+  // Plan locks (catalogue 2026.2): the menu shows a lock and the page explains
+  // the upgrade. The API enforces the lock either way.
+  const planLocks = usePlanLocks();
+  const isLocked = (path: string) => { const m = moduleForPath(path); return !!m && planLocks.has(m); };
+  const lockedModule = (() => { const m = moduleForPath(location.pathname); return m && planLocks.has(m) ? m : null; })();
 
   async function handleLogout() {
     try { await authApi.logout(); } catch { /* ignore */ }
@@ -387,7 +394,8 @@ export function AppShell() {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  title={collapsed ? item.label : undefined}
+                  title={collapsed ? `${item.label}${isLocked(item.to) ? ' (not in your plan)' : ''}` : (isLocked(item.to) ? `Not in your plan: ${MODULE_INFO[moduleForPath(item.to)!]?.benefit ?? ''}` : undefined)}
+                  aria-label={isLocked(item.to) ? `${item.label} (locked, not in your plan)` : undefined}
                   // Closing on a pathname change is not enough: tapping the
                   // entry for the page you are already on changes nothing, so
                   // the drawer would sit there over the content you asked for.
@@ -408,7 +416,8 @@ export function AppShell() {
                       <span className={cn('shrink-0', isActive ? 'text-brand-600' : 'text-slate-400 group-hover:text-slate-600')}>
                         {item.icon}
                       </span>
-                      <span className={cn('truncate', collapsed && 'lg:hidden')}>{item.label}</span>
+                      <span className={cn('truncate', collapsed && 'lg:hidden', isLocked(item.to) && 'opacity-70')}>{item.label}</span>
+                      {isLocked(item.to) && <Lock className={cn('ml-auto h-3.5 w-3.5 shrink-0 text-slate-400', collapsed && 'lg:hidden')} aria-hidden="true" />}
                     </>
                   ); }}
                 </NavLink>
@@ -568,7 +577,7 @@ export function AppShell() {
               </div>
             }
           >
-            {permitted?<><LinkedComplianceRecord />{(location.pathname!=='/settings/security'||hasPermission(activeTenant?.role,'settings:read'))&&<ComplianceOperationsPanel key={'operations:'+location.pathname+location.search}/>}<AssessmentStepBar /><Outlet key={'page:'+user?.id+':'+activeTenant?.id+':'+location.pathname+(location.pathname==='/frameworks'?':'+(new URLSearchParams(location.search).get('framework')??''):location.search)}/></>:<div role="alert" className="m-6 rounded-xl border bg-white p-6"><h1 className="text-xl font-semibold">This page needs additional access</h1><p className="mt-3 text-sm">Ask your organisation administrator if you need this permission. Your current role has not been changed.</p></div>}
+            {permitted?<><LinkedComplianceRecord />{(location.pathname!=='/settings/security'||hasPermission(activeTenant?.role,'settings:read'))&&<ComplianceOperationsPanel key={'operations:'+location.pathname+location.search}/>}<AssessmentStepBar />{lockedModule?<LockedModulePage key={'locked:'+lockedModule+':'+activeTenant?.id} module={lockedModule}><Outlet key={'page:'+user?.id+':'+activeTenant?.id+':'+location.pathname+location.search}/></LockedModulePage>:<Outlet key={'page:'+user?.id+':'+activeTenant?.id+':'+location.pathname+(location.pathname==='/frameworks'?':'+(new URLSearchParams(location.search).get('framework')??''):location.search)}/>}</>:<div role="alert" className="m-6 rounded-xl border bg-white p-6"><h1 className="text-xl font-semibold">This page needs additional access</h1><p className="mt-3 text-sm">Ask your organisation administrator if you need this permission. Your current role has not been changed.</p></div>}
           </Suspense>
         </main>
       </div>

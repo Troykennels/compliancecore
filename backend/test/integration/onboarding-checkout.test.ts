@@ -25,6 +25,10 @@ describe.skipIf(!DB)('commercial onboarding and recurring subscription settlemen
     ({prisma}=await import('../../src/config/database'));
     service=await import('../../src/modules/payments/payments.service');({checkoutQuote:quote}=await import('../../src/modules/payments/checkout-quote'));
     plans=Object.fromEntries((await c.query('SELECT slug,id FROM global.subscription_plans')).rows.map(r=>[r.slug,r.id]));
+    // These tests cover the onboarding mechanics on the earlier five tiers, which catalogue 2026.2 withdrew
+    // from new sales; put them back on sale in this disposable database only. The sales rule itself is
+    // tested in plan-gating.test.ts.
+    await c.query(`UPDATE global.subscription_plans SET is_public=true WHERE catalog_version IS NULL`);
   },120000);
   afterAll(async()=>{await prisma?.$disconnect();await c?.end();});
   beforeEach(()=>{mocks.initialize.mockReset();mocks.verify.mockReset();mocks.email.mockReset();mocks.email.mockResolvedValue(undefined);mocks.initialize.mockImplementation(async(input:any)=>({authorization_url:`https://checkout.paystack.com/${input.reference}`}));});
@@ -37,7 +41,8 @@ describe.skipIf(!DB)('commercial onboarding and recurring subscription settlemen
   function verified(reference:string,amount:number,email:string){return {reference,status:'success',amount:Math.round(amount*100),currency:'NGN',paid_at:new Date().toISOString(),customer:{email},authorization:{authorization_code:'test-reusable-card',reusable:true,channel:'card',last4:'1234',brand:'visa'}};}
 
   it('prices all five tiers independently and gives exactly two subscription months free',async()=>{
-    const rows=(await c.query(`SELECT slug,price_monthly,price_yearly,onboarding_fee FROM global.subscription_plans ORDER BY sort_order`)).rows;
+    // The earlier catalogue (catalogue 2026.2 is checked in plan-gating.test.ts).
+    const rows=(await c.query(`SELECT slug,price_monthly,price_yearly,onboarding_fee FROM global.subscription_plans WHERE catalog_version IS NULL ORDER BY sort_order`)).rows;
     expect(rows.map(r=>[r.slug,Number(r.price_monthly),Number(r.price_yearly),Number(r.onboarding_fee)])).toEqual([
       ['starter',40000,400000,1500000],['professional',85000,850000,2000000],['business',180000,1800000,3500000],['enterprise',480000,4800000,5000000],['msp',800000,8000000,8000000],
     ]);

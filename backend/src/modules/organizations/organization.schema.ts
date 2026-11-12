@@ -37,7 +37,10 @@ export const updateOrganizationSchema = z.object({
   address: z.string().max(500).optional().nullable(),
   postalCode: z.string().max(20).optional().nullable(),
   size: z.enum(ORG_SIZES).optional().nullable(),
-  logoUrl: z.string().url('Must be a valid URL').max(2048).optional().nullable(),
+  // https only and never SVG (an SVG can carry script): prompt section 11.
+  logoUrl: z.string().url('Must be a valid URL').max(2048)
+    .refine((v) => /^https:\/\//i.test(v) && !/\.svg(\?|#|$)/i.test(v) && !/^data:/i.test(v), 'Use an https link to a PNG or JPEG image (not SVG)')
+    .optional().nullable(),
   timezone: z
     .string()
     .refine((tz) => {

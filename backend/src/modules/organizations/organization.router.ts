@@ -17,6 +17,17 @@ router.use(authenticate());
 // No tenant permission is required: the user does not belong to a tenant yet.
 router.post('/', validate(createOrganizationSchema), organizationController.create);
 
+// Branding for every plan (legal name, logo, footer, letterhead). Always the
+// caller's own organisation (from the sign-in token), never a client id.
+router.get('/branding', requirePermission('org:read'), asyncHandler(async (req, res) => {
+  const { getBranding } = await import('../../lib/branding');
+  res.json({ data: req.user.tenantId ? await getBranding(req.user.tenantId) : null, error: null });
+}));
+router.put('/branding', requirePermission('org:write'), enforceEntitlement(), asyncHandler(async (req, res) => {
+  const { saveBranding } = await import('../../lib/branding');
+  if (!req.user.tenantId) { res.status(400).json({ data: null, error: { code: 'NO_TENANT', message: 'Choose an organisation first.' } }); return; }
+  res.json({ data: await saveBranding(req.user.tenantId, (req.body ?? {}) as Record<string, unknown>), error: null });
+}));
 // GET /api/organizations/profile
 router.get('/profile', organizationController.getProfile);
 
